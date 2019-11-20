@@ -1,0 +1,556 @@
+;----------------------------------------------------------------------------------------------
+;
+;           d8888b.                     dP                              
+;               `88                     88                              
+;  .d8888b.  aaad8' 88d888b. .d8888b. d8888P dP    dP 88d888b. .d8888b. 
+;  88'  `88     `88 88'  `88 88'  `88   88   88    88 88'  `88 88ooood8 
+;  88.  .88     .88 88    88 88.  .88   88   88.  .88 88.  .88 88.  ... 
+;  `8888P88 d88888P dP    dP `88888P'   dP   `8888P88 88Y888P' `88888P' 
+;       .88                                       .88 88                
+;   d8888P                                    d8888P  dP                
+; 
+; © 2019 K N Crouse
+;----------------------------------------------------------------------------------------------
+; 
+; This extension contains all functions that allow anima1s to make decisions from their 
+; genotypes.
+;
+; List of all genotype cod0ns:
+; 
+; CODE  MAINTENANCE  DESCRIPTION                
+;
+; TRU   2019-09-XX   true
+; FAL   2019-09-XX   false 
+; XXX   2019-09-XX   ""
+; AXX   2019-09-XX   "a" 
+; ABX   2019-09-XX   "ab" 
+; ABC   2019-09-XX   "acb" 
+; XBX   2019-09-XX   "b" 
+; XBC   2019-09-XX   "bc" 
+; XXC   2019-09-XX   "c" 
+; AXC   2019-09-XX   "ac" 
+; FEM   2019-09-XX   female 
+; MAL   2019-09-XX   male 
+; GES   2019-09-XX   "gestatee" 
+; INF   2019-09-XX   "infant" 
+; JUV   2019-09-XX   "juvenile" 
+; ADT   2019-09-XX   "adult" 
+; SEN   2019-09-XX   "senescent"
+; OVU   not done     "ovulating"
+; CYC   2019-09-XX   "cycling"
+; PRG   2019-09-XX   "pregnant" 
+; LAC   2019-09-XX   "lactating" 
+; RNM   2019-09-XX   random floating number from 0 to 1
+; RNB   2019-09-XX   random boolean (true or false)
+; DAY   not done     is day?
+; NGT   not done     is night?
+;
+; NOT   not done     logical NOT ___
+; AND   not done     ___ logical AND ___
+; ORR   not done     ___ logical OR ___
+; EQL   2019-09-XX   ___ is equal to ___
+; NQL   2019-09-XX   ___ is not equal to ___
+; GRT   2019-09-XX   ___ is greater than ___
+; LST   2019-09-XX   ___ is less than ___
+; SDO   2019-09-XX   ___ is same color shade as ___
+; UUU   2019-09-XX   ___ set union ___
+; NNN   2019-09-XX   ___ set intersection ___
+; ANY   2019-09-XX   any targets with ___
+; ONE   2019-09-XX   one-of targets with ___
+; MEE   2019-09-XX   I am one of targets with ___
+; ALL   2019-09-XX   all targets
+;
+; MID   2019-09-XX   target's meta-id   
+; SIZ   2019-09-XX   target's size
+; COL   2019-09-XX   target's color
+; SEX   2019-09-XX   target's sex
+; SHD   2019-09-XX   target's body.shade
+; LFH   2019-09-XX   target's life.history
+; FER   2019-09-XX   target's fertility
+; GRP   2019-09-XX   target's group.identity
+; AON   2019-09-XX   target's _a_signal_on
+; BON   2019-09-XX   target's _b_signal_on
+; CON   2019-09-XX   target's _c_signal_on
+; SIG   2019-09-XX   target's current signal state ( i.e. "abc" or "a" or "bc" )
+; EGO   2019-09-XX   target is ego?
+; DSE   2019-09-XX   target's distance to myself
+; ISA   2019-09-XX   target is an anima1?
+; ISP   2019-09-XX   target is a plant?
+; DED   2019-09-XX   target is dead?
+; CRD   2019-09-XX   target is one of my carried.items?
+; MYO   2019-09-XX   target is one of my-offspring? (female only)
+; MOM   2019-09-XX   target is my mother? 
+;
+; EMI   2019-09-XX   ego's meta-id
+; EAG   not done     ego's age
+; ESZ   2019-09-XX   ego's size
+; ECL   2019-09-XX   ego's color
+; ESX   2019-09-XX   ego's sex
+; ESD   2019-09-XX   ego's body.shade
+; ELH   2019-09-XX   ego's life.history
+; EFR   2019-09-XX   ego's fertility
+; EGP   2019-09-XX   ego's group.identity
+; EXM   2019-09-XX   ego's x.magnitude
+; EYM   2019-09-XX   ego's y.magnitude
+; ENG   2019-09-XX   ego's energy.supply
+; EBS   2019-09-XX   ego's body.size
+; ESR   2019-09-XX   ego's sex.ratio
+; ELS   2019-09-XX   ego's litter.size
+; ECC   2019-09-XX   ego's conception.chance
+; EMC   2019-09-XX   ego's mutation.chance
+; EPC   2019-09-XX   ego's day.perception.range
+; ENP   2019-09-XX   ego's night.perception.range
+; EAP   2019-09-XX   ego's audio.perception.range
+; EDA   2019-09-XX   ego's day.perception.angle
+; ENA   2019-09-XX   ego's night.perception.angle
+; EAA   2019-09-XX   ego's audio.perception.angle
+; EVR   2019-09-XX   ego's vocal.range
+; EBC   2019-09-XX   ego's birthing.chance
+; EWC   2019-09-XX   ego's weaning.chance
+; EIC   2019-09-XX   ego's infancy.chance
+; EJC   2019-09-XX   ego's juvenility.chance
+; EAC   2019-09-XX   ego's adulthood.chance
+; ESC   2019-09-XX   ego's senescency.chance
+; EMC   2019-09-XX   ego's living.chance
+; ASC   2019-09-XX   ego's alpha.chance
+; BSC   2019-09-XX   ego's beta.chance
+; CSC   2019-09-XX   ego's gamma.chance
+;
+; THN   2019-09-XX   if [TRUE] --> 
+; TNT   2019-09-XX   if [FALSE] -->
+;
+; DEC   2019-08-26   --> make-decisions            
+; MNT   2019-08-26   --> maintain-body
+; GRW   2019-08-26   --> body-size                 
+; BSD   2019-08-26   --> body-shade              
+; IPR   2019-08-26   --> day-perception            
+; NPR   2019-08-26   --> night-perception          
+; APR   2019-08-26   --> audio-perception          
+; DPA   2019-08-26   --> day-perception-angle
+; NPA   2019-08-26   --> night-perception-angle
+; APA   2019-08-26   --> audio-perception-angle 
+; VCR   2019-08-26   --> vocal-range
+; ICC   2019-08-26   --> conception-chance        
+; MTR   2019-08-26   --> mutation-rate            
+; SXR   2019-08-26   --> sex-ratio               
+; LTS   2019-08-26   --> litter-size               
+; LEV   2019-08-26   --> leave-group  
+; HED   2019-08-26   --> set-heading   
+; TRT   2019-08-26   --> turn-right               
+; TLF   2019-08-26   --> turn-left                 
+; GFD   2019-08-26   --> go-forward               
+; SAO   2019-08-26   --> signal-a-on               
+; SBO   2019-08-26   --> signal-b-on               
+; SCO   2019-08-26   --> signal-c-on               
+; CKI   2019-08-26   --> check-infancy             
+; CKB   2019-08-26   --> check-birth               
+; CKJ   2019-08-26   --> check-juvenility         
+; CKW   2019-08-26   --> check-weaning              
+; CKA   2019-08-26   --> check-adulthood           
+; CKS   2019-08-26   --> check-senescence         
+; DSC   2019-08-26   --> digest-stomach           
+; GFT   2019-10-16   --> supply-to 
+; RFT   2019-10-16   --> demand-from
+; EAT   2019-10-16   --> eat
+; PKU   2019-09-XX   --> pick-up
+; SQM   not done     --> squirm-from
+; PDN   2019-10-16   --> put-down
+; CLG   not done     --> cling-to
+; ATK   2019-09-XX   --> attack 
+; HLP   2019-09-XX   --> help
+; JNG   2019-09-XX   --> join-group-of
+; MAT   2019-10-16   --> mate-with
+; 
+;----------------------------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------------------------
+; GET-MUTATION
+;
+; Returns a randomly selected codon to occasionally introduce novel mutations into a population.
+;
+; CALLER: anima1
+;----------------------------------------------------------------------------------------------
+
+to-report get-mutation-1
+  report one-of (sentence gate-code-list action-code-list operation-code-list reporter-code-list )
+end
+
+to-report gate-code-list 
+  report [ 
+    "ANY" "UUU" "NNN" "ONE" "MEE" 
+    "ALL" "THN" "TNT" ] ; "AND" "ORR" "NOT" 
+end
+
+to-report action-code-list-2 
+  report [ 
+    "DEC" "MNT" "GRW" "BSD" "IPR" 
+    "NPR" "APR" "ICC" "MTR" "SXR" 
+    "LTS" "LEV" "TRT" "TLF" "GFD" 
+    "HED" "SAC" "SBC" "SCC" "SAO" 
+    "SBO" "SCO" "INC" "CKI" "GVB" 
+    "CKB" "JVC" "CKJ" "WEN" "CKW"
+    "ADC" "CKA" "SNC" "CKS" "DSC" 
+    "FAT" "BRN" "GFT" "RFT" "EAT" 
+    "PKU" "PDN" "ATK" "HLP" "JNG"
+    "MAT" "DPA" "NPA" "APA" "VCR" ]
+end
+
+to-report operation-code-list
+  report [ "EQL" "NQL" "GRT" "LST" "SDO" ]
+end
+
+to-report reporter-code-list
+  report [
+    "MID" "SIZ" "COL" "SEX" "SHD"
+    "LFH" "FER" "GRP" "AON" "BON"
+    "CON" "SIG" "EGO" "DSE" "ISA"
+    "ISP" "CRD" "REL" "EMI" "ESZ"
+    "ECL" "ESX" "ESD" "ELH" "EFR" 
+    "EGP" "EXM" "EYM" "ENG"
+    "EBS" "ESR" "ELS" "ECC"
+    "EMC" "EPC" "EBC" "EWC" "EIC"
+    "EJC" "EAC" "ESC" "EMC" "ASC"
+    "BSC" "CSC" "TRU" "FAL" "XXX"
+    "AXX" "ABX" "ABC" "XBX" "XBC"
+    "XXC" "AXC" "FEM" "MAL" "GES"
+    "INF" "JUV" "ADT" "SEN" "DED"
+    "CYC" "PRG" "LAC" "CRD" "MOM"
+    "MYO" "AON" "BON" "CON" "EAP" 
+    "ENP" "RNM" "RNB" "EDA" "ENA"
+    "EAA" "EVR"
+  ]
+end
+
+;----------------------------------------------------------------------------------------------
+; GENERATE-DECISIONS
+;
+; Reporter that returns a list of decision vectors generated from genotype.
+;
+; Caller: anima1
+; ENVIRONMENT: list of turtles (both plants and anima1s) observed by the caller.
+;----------------------------------------------------------------------------------------------
+
+to genotype-generate-decisions [ environment ]
+  set decision.vectors []
+  get-iterative-decisions self environment [] true ( sentence chromosome.I chromosome.II ) no-turtles []
+  
+end
+
+;---------------------------------------------------------------------------------------------- 
+; INTERATIVE 'HELPER' FUNCTION
+;----------------------------------------------------------------------------------------------
+
+to get-iterative-decisions [ me old-environment old-gates old-boolean old-feed old-targets old-vectors ]
+  
+  ;if ( self = subject ) [ print (word "GID: environment - " old-environment "  gates - " old-gates "  boolean - " old-boolean "  feed - "  length old-feed "  targets - " old-targets " vectors - " old-vectors )]
+  
+  if ( length old-feed > 0 ) [
+    
+    let allele first old-feed
+    
+    ;---------------------------------------------------------------------------------------------- 
+    ; ALLELE CODE IS EMPTY ---> CREATE DECISION VECTORS 
+    ;----------------------------------------------------------------------------------------------
+    
+    ifelse ( length allele = 0 ) [
+      
+      ask old-targets [
+        let new-target self
+        
+        foreach old-vectors [ v ->
+          let new-action item 0 v
+          let new-weight item 1 v
+          
+          let vector-doesnt-exist true
+          ;          foreach [decisions] of myself [ d ->
+          ;            let decision-target item 0 d
+          ;            let decision-action item 1 d
+          ;            
+          ;            if ( decision-target = new-target ) and ( decision-action = new-action ) [
+          ;              set vector-doesnt-exist false ; could make this more effient by doing it all at the same time at the end
+          ;              set d replace-item 2 d ( item 2 d + new-weight)]]
+          
+          if vector-doesnt-exist [ ask myself [ set decision.vectors lput (list random 9999999 self myself ( get-action new-action ) new-weight ) decision.vectors ]]
+    ]]]
+    
+    ;---------------------------------------------------------------------------------------------- 
+    ; ALLELE CODE IS NOT EMPTY ---> (READ CODE)
+    ;----------------------------------------------------------------------------------------------
+    
+    [ ; READ THE NEXT CHUNK OF CODE of AN ALLELE
+      
+      ; get new chunk:
+      let remaining-allele []
+      let section-of-code []
+      let part-of-chunk true
+      
+      foreach allele [ c ->
+        ifelse ( not part-of-chunk ) [
+          set remaining-allele lput c remaining-allele
+        ][
+          ifelse ( member? c gate-code-list ) [
+            
+            ifelse ( length section-of-code > 0 ) [
+              set remaining-allele lput c []
+            ][
+              set section-of-code lput c []
+            ]
+            set part-of-chunk false 
+          ][
+            set section-of-code lput c section-of-code  
+      ]]]
+      
+      ; settings for continuing iteration 
+      let new-feed replace-item 0 old-feed remaining-allele
+      let new-gates []
+      let new-boolean old-boolean
+      let new-targets old-targets
+      let new-vectors old-vectors
+      
+      ;---------------------------------------------------------------------------------------------- 
+      ; (READ CODE) ---> CODE is a "LOGIC GATE" ---> SAVE LOGIC GATE and MOVE ON
+      ;----------------------------------------------------------------------------------------------
+      
+      ifelse ( member? first section-of-code gate-code-list ) [
+        
+        let gate first section-of-code
+        
+        (ifelse 
+          
+          ( gate = "THN" ) [
+            set new-boolean old-boolean ]
+          
+          ( gate = "TNT" ) [
+            set new-boolean not old-boolean ]
+          
+          [ set new-gates (lput first section-of-code old-gates) ])
+        
+      ][
+        
+        ;---------------------------------------------------------------------------------------------- 
+        ; (READ CODE) ---> CODE is a "DECISION" ---> SAVE DECISION and MOVE ON
+        ;----------------------------------------------------------------------------------------------
+        
+        ifelse ( member? first section-of-code action-code-list ) [
+          
+          if ( old-boolean ) [
+            ask old-targets [
+              let new-action item 0 section-of-code
+              let new-weight item 1 section-of-code
+              set new-targets old-targets
+              
+              get-iterative-decisions me old-environment [] new-boolean (list first new-feed ) new-targets (lput (list new-action new-weight ) old-vectors)
+          ]]
+          
+          ; settings for continuing iteration 
+          set new-boolean true ; really?
+          set new-feed ( but-first new-feed )
+          set new-targets no-turtles
+          set new-vectors []
+        ]
+        
+        ;---------------------------------------------------------------------------------------------- 
+        ;  (READ CODE) ---> CODE is an "ENVIRONMENT FILTER" ---> FILTER ANIMA1S and MOVE ON
+        ;----------------------------------------------------------------------------------------------
+        
+        [
+          
+          set new-targets old-environment with [ read-section section-of-code ]
+          
+          foreach old-gates [ gate ->
+            
+            if ( gate = "ANY" ) [ set new-targets new-targets ]
+            
+            if ( gate = "NNN" ) [ set new-targets new-targets with [ member? self old-targets ] ]
+            
+            if ( gate = "UUU" ) [ set new-targets old-environment with [ member? self new-targets and member? self old-targets ] ]
+            
+            if ( gate = "ONE" ) [ set new-targets n-of 1 new-targets ]
+            
+            if ( gate = "MEE" ) [ set new-targets n-of 1 new-targets with [ self = myself ] ]
+            
+            if ( gate = "ALL" ) [ set new-targets old-environment ]
+            
+            set new-boolean any? new-targets ]
+          
+      ]]
+      
+      get-iterative-decisions me old-environment new-gates new-boolean new-feed new-targets new-vectors
+      
+  ]]
+  
+end
+
+to-report read-section [ section ]
+  let operator ifelse-value ( length section = 3 ) [ item 1 section ] [ "" ]
+  let left-value ifelse-value ( length section = 3 ) [ item 0 section ] [ "" ]
+  let right-value ifelse-value ( length section = 3 ) [ item 2 section ] [ "" ]
+  
+  report (ifelse-value
+    ( operator = "EQL" ) [ read-code left-value = read-code right-value ]
+    ( operator = "NQL" ) [ read-code left-value != read-code right-value ]
+    ( operator = "GRT" ) [ (ifelse-value ( is-number? read-code left-value ) [ read-code left-value ] [ 0 ]) > (ifelse-value ( is-number? read-code right-value ) [ read-code right-value ] [0]) ]
+    ( operator = "LST" ) [ (ifelse-value ( is-number? read-code left-value ) [ read-code left-value ] [ 0 ]) < (ifelse-value ( is-number? read-code right-value ) [ read-code right-value ] [0]) ]
+    ( operator = "SDO" ) [ shade-of? read-code left-value read-code right-value ]
+    [ false ])
+end
+
+to-report read-code [ code ]
+  report (ifelse-value
+    
+    ( is-number? code ) [ code ]
+    
+    ; what EGO can see about ANYONE
+    ( code = "MID" ) [ meta-id ]
+    ( code = "SIZ" ) [ size ]
+    ( code = "COL" ) [ color ]
+    ( code = "SEX" and is-anima1? self ) [ biological.sex ]
+    ( code = "SHD" and is-anima1? self ) [ body.shade ]
+    ( code = "LFH" and is-anima1? self ) [ life.history ] 
+    ( code = "FER" and is-anima1? self ) [ female.fertility ]  
+    ( code = "GRP" and is-anima1? self ) [ group.identity ]  
+    ( code = "AON" and is-anima1? self ) [ alpha.signal ]
+    ( code = "BON" and is-anima1? self ) [ beta.signal ]
+    ( code = "CON" and is-anima1? self ) [ gamma.signal ]
+    ( code = "SIG" and is-anima1? self ) [ (word ifelse-value ( alpha.signal ) [ "a" ] [ "" ] ifelse-value ( beta.signal ) [ "b" ] [ "" ] ifelse-value ( alpha.signal ) [ "c" ] [ "" ]) ]
+
+    ; what EGO can see about OTHERS
+    ( code = "EGO" ) [ self = myself ] ; does this work?
+    ( code = "DSE" ) [ distance myself ]
+    ( code = "ISA" ) [ is-anima1? self ]
+    ( code = "ISP" ) [ is-plant? self ]
+    ( code = "DED" and is-anima1? self ) [ is.dead ]
+    ( code = "CRD" and is-anima1? self ) [ member? self [carried.items] of myself ]
+    ( code = "MYO" and is-anima1? self and biological.sex = "female" ) [ member? self [my-offspring] of myself ]
+    ( code = "MOM" and is-anima1? self ) [ [mother] of myself = self ]
+    ;( code = "REL" and is-anima1? self ) [ get-degree-relatedness-with myself ]
+    
+    ; what only EGO can see about ITSELF ( can't access information unless self = myself )
+    ; currently carried by someone else?
+    ( code = "EMI" and self = myself ) [ [meta-id] of myself ]
+    ( code = "ESZ" and self = myself ) [ [size] of myself ]
+    ( code = "ECL" and self = myself ) [ [color] of myself ]
+    ( code = "ESX" and self = myself ) [ [biological.sex] of myself ]
+    ( code = "ESD" and self = myself ) [ [body.shade] of myself ]
+    ( code = "ELH" and self = myself ) [ [life.history] of myself ] 
+    ( code = "EFR" and self = myself ) [ [female.fertility] of myself ]
+    ( code = "EGP" and self = myself ) [ [group.identity] of myself ]  
+    ( code = "EXM" and self = myself ) [ [x.magnitude] of myself ]
+    ( code = "EYM" and self = myself ) [ [y.magnitude] of myself ]
+    ( code = "ENG" and self = myself ) [ [energy.supply] of myself ]
+    ( code = "EBS" and self = myself ) [ [body.size] of myself ]
+    ( code = "ESR" and self = myself ) [ [sex.ratio ] of myself ]
+    ( code = "ELS" and self = myself ) [ [litter.size] of myself ]
+    ( code = "ECC" and self = myself ) [ [conception.chance] of myself ]
+    ( code = "EMC" and self = myself ) [ [mutation.chance] of myself ]
+    ( code = "EPC" and self = myself ) [ [day.perception.range] of myself ]
+    ( code = "ENP" and self = myself ) [ [night.perception.range] of myself ]
+    ( code = "EAP" and self = myself ) [ [audio.perception.range] of myself ]
+    ( code = "EDA" and self = myself ) [ [day.perception.angle] of myself ]
+    ( code = "ENA" and self = myself ) [ [night.perception.angle] of myself ]
+    ( code = "EAA" and self = myself ) [ [audio.perception.angle] of myself ]
+    ( code = "EVR" and self = myself ) [ [vocal.range] of myself ]
+    ( code = "EBC" and self = myself ) [ [birthing.chance] of myself ]
+    ( code = "EWC" and self = myself ) [ [weaning.chance] of myself ]
+    ( code = "EIC" and self = myself ) [ [infancy.chance] of myself ]
+    ( code = "EJC" and self = myself ) [ [juvenility.chance] of myself ]
+    ( code = "EAC" and self = myself ) [ [adulthood.chance] of myself ]
+    ( code = "ESC" and self = myself ) [ [senescency.chance] of myself ]
+    ( code = "EMC" and self = myself ) [ [living.chance] of myself ]
+    ( code = "ESA" and self = myself ) [ [alpha.chance] of myself ]
+    ( code = "ESB" and self = myself ) [ [beta.chance] of myself ]
+    ( code = "ESC" and self = myself ) [ [gamma.chance] of myself ]
+
+    ; PRIMITIVES
+    ( code = "TRU" ) [ true ]
+    ( code = "FAL" ) [ false ]
+    ( code = "XXX" ) [ "" ]
+    ( code = "AXX" ) [ "a" ]
+    ( code = "ABX" ) [ "ab" ]
+    ( code = "ABC" ) [ "abc" ]
+    ( code = "XBX" ) [ "b" ]
+    ( code = "XBC" ) [ "bc" ]
+    ( code = "XXC" ) [ "c" ]
+    ( code = "AXC" ) [ "ac" ]
+    ( code = "FEM" ) [ "female" ]
+    ( code = "MAL" ) [ "male" ]
+    ( code = "GES" ) [ "gestatee" ]
+    ( code = "INF" ) [ "infant" ]
+    ( code = "JUV" ) [ "juvenile" ]
+    ( code = "ADT" ) [ "adult" ]
+    ( code = "SEN" ) [ "senescent" ]
+    ( code = "CYC" ) [ "cycling" ]
+    ( code = "PRG" ) [ "pregnant" ]
+    ( code = "LAC" ) [ "lactating" ]
+    ( code = "RNM" ) [ random-float 1.0 ]
+    ( code = "RNB" ) [ one-of [ true false ] ]
+    
+    [ false ])
+end
+
+;--------------------------------------------------------------------------------------------------------------------
+; GET-ACTION
+;--------------------------------------------------------------------------------------------------------------------
+
+to-report get-action [ action-code ]
+
+  report
+  (ifelse-value
+    ( action-code = "DEC" ) [ "make-decisions" ]
+    ( action-code = "MNT" ) [ "maintain-body" ]
+    ( action-code = "GRW" ) [ "body-size" ]
+    ( action-code = "BSD" ) [ "body-shade" ]
+    ( action-code = "IPR" ) [ "day-perception" ]
+    ( action-code = "NPR" ) [ "night-perception" ]
+    ( action-code = "APR" ) [ "audio-perception" ]
+    ( action-code = "DPA" ) [ "day-perception-angle" ]
+    ( action-code = "NPA" ) [ "night-perception-angle" ]
+    ( action-code = "APA" ) [ "audio-perception-angle" ]
+    ( action-code = "VCR" ) [ "vocal-range" ]
+    ( action-code = "ICC" ) [ "conception-chance" ]
+    ( action-code = "MTR" ) [ "mutation-rate" ]
+    ( action-code = "SXR" ) [ "sex-ratio" ]
+    ( action-code = "LTS" ) [ "litter-size" ]
+    ( action-code = "LEV" ) [ "leave-group" ]
+    ( action-code = "TRT" ) [ "turn-right" ]
+    ( action-code = "TLF" ) [ "turn-left" ]
+    ( action-code = "GFD" ) [ "go-forward" ]
+    ( action-code = "MOV" ) [ "move-toward" ]
+    ( action-code = "HED" ) [ "set-heading" ]
+    ( action-code = "SAC" ) [ "signal-a-chance" ]
+    ( action-code = "SAO" ) [ "signal-a-on" ]
+    ( action-code = "SBC" ) [ "signal-b-chance" ]
+    ( action-code = "SBO" ) [ "signal-b-on" ]
+    ( action-code = "SCC" ) [ "signal-c-chance" ]
+    ( action-code = "SCO" ) [ "signal-c-on" ]
+    ( action-code = "INC" ) [ "infancy-chance" ]
+    ( action-code = "CKI" ) [ "check-infancy" ]
+    ( action-code = "GVB" ) [ "birthing-chance" ]
+    ( action-code = "CKB" ) [ "check-birth" ]
+    ( action-code = "JVC" ) [ "juvenile-chance" ]
+    ( action-code = "CKJ" ) [ "check-juvenility" ]
+    ( action-code = "WEN" ) [ "weaning-chance" ]
+    ( action-code = "CKW" ) [ "check-weaning" ]
+    ( action-code = "ADC" ) [ "adult-chance" ]
+    ( action-code = "CKA" ) [ "check-adulthood" ]
+    ( action-code = "SNC" ) [ "senescent-chance" ]
+    ( action-code = "CKS" ) [ "check-senescence" ]
+    ( action-code = "DSC" ) [ "digest-stomach" ]
+    ( action-code = "FAT" ) [ "reserve-energy" ]
+    ( action-code = "BRN" ) [ "burn-reserves" ]
+    ( action-code = "GFT" ) [ "supply-to" ]
+    ( action-code = "RFT" ) [ "demand-from" ]
+    ( action-code = "EAT" ) [ "eat" ]
+    ( action-code = "PKU" ) [ "pick-up" ]
+    ( action-code = "SQM" ) [ "squirm-from" ]
+    ( action-code = "PDN" ) [ "put-down" ]
+    ( action-code = "CLG" ) [ "cling-to" ]
+    ( action-code = "ATK" ) [ "attack" ]
+    ( action-code = "HLP" ) [ "help" ]
+    ( action-code = "JNG" ) [ "join-group-of" ]
+    ( action-code = "MAT" ) [ "mate-with" ]
+    [ "" ])
+  
+end
+
+

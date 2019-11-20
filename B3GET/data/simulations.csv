@@ -1,0 +1,2 @@
+date-and-time,model-version,simulation-id,population,genotype,plant-annual-cycle,plant-seasonality,plant-minimum-neighbors,plant-maximum-neighbors,plant-daily-cycle,plant-quality,world-width,world-height,documentation-notes,ticks,deterioration-rate,selection-rate,collect-data?,selection-on?,path-to-experiment,useful-commands,command-input
+11:44:17.341 AM 19-Nov-2019,1.0.2,s54BQO,population,,1000,25,2.5,8,10,1,100,100,,1,-0.01,1.0E-4,true,false,../data/,help-me,"[ true ""am"" ""cf"" ""MAT"" 0.009 ]"

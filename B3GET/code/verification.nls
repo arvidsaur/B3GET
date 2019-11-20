@@ -1,0 +1,762 @@
+;---------------------------------------------------------------------------------------------------------------------------------
+; 
+;                             oo .8888b oo                     dP   oo                   
+;                                88   "                        88                        
+;  dP   .dP .d8888b. 88d888b. dP 88aaa  dP .d8888b. .d8888b. d8888P dP .d8888b. 88d888b. 
+;  88   d8' 88ooood8 88'  `88 88 88     88 88'  `"" 88'  `88   88   88 88'  `88 88'  `88 
+;  88 .88'  88.  ... 88       88 88     88 88.  ... 88.  .88   88   88 88.  .88 88    88 
+;  8888P'   `88888P' dP       dP dP     dP `88888P' `88888P8   dP   dP `88888P' dP    dP 
+; 
+; © 2019 K N Crouse
+;--------------------------------------------------------------------------------------------------------------------------------- 
+;
+; This 'verification' extension contains all functions related to verifying B3GET's code.
+;
+;--------------------------------------------------------------------------------------------------------------------------------- 
+
+;-------------------------------------------------------------------------------------------------
+; SPOT CHECK FUNCTIONS
+;-------------------------------------------------------------------------------------------------
+
+to reset-chromosomes
+  if ( mother != nobody and father != nobody ) [
+    ask mother [ 
+      set chromosome.I [ [ "A" "B" "C" ] [ "D" "E" "F" ] [ "G" "H" "I" ] [ "X" "Y" "Z" ] [ "E" 0.1 0.2 0.3 ]] 
+      set chromosome.II [ [ "A2" "B2" "C2" ] [ "D2" "E2" "F2" ] [ "G2" "H2" "I2" ] ] 
+    ]
+    ask father [ 
+      set chromosome.I [ [ "J" "K" "L" ] [ "M" "N" "O" ] [ "P" "Q" "R" ] ] 
+      set chromosome.II [ [ "J2" "K2" "L2" ] [ "M2" "N2" "O2" ] [ "P2" "Q2" "R2" ]  ] 
+    ]
+    setup-chromosomes-from mother father
+  ]
+end
+
+
+;--------------------------------------------------------------------------------------------------------------------------------------------------
+; VERIFICATION TAPE:
+;
+; Generates a "tape" of all verification measurements that looks something like this:
+;
+; DATE-AND-TIME  MODEL-VERSION  SIMULATION-ID  TICKS  VERIFICATION_1  VERIFICATION_2  VERIFICATION_3  VERIFICATION_4   ....
+;  - - - - -      - - - - - -    - - - - - -    - -     function_1      function_2      function_3      function_4     ....
+;  - - - - -      - - - - - -    - - - - - -    - -      runtime          dynamic         static           visual      ....
+; date-and-time  model-version  simulation-id  ticks   true / false    true / false    true / false    true / false    ....
+;
+;--------------------------------------------------------------------------------------------------------------------------------------------------
+
+;---------------------------------------------------------------------------------------------------------------------------------
+; GUI OUPUT FUNCTIONS 
+;---------------------------------------------------------------------------------------------------------------------------------
+
+to-report go-runtime
+  profiler:reset
+  profiler:start
+  repeat 1 [ go ]
+  report profiler:inclusive-time "go"
+end
+
+
+;--------------------------------------------------------------------------------------------------------------------------------------------------
+; SAVE to FILE FUNCTIONS
+;--------------------------------------------------------------------------------------------------------------------------------------------------
+
+to save-verification-to [ file-name ]
+  
+  let new-tape generate-verification-tape
+  
+  let existing-file []
+  ifelse ( file-exists? (word path-to-experiment "/" file-name ) )
+  [ file-open (word path-to-experiment "/" file-name ) set existing-file csv:from-file (word path-to-experiment "/" file-name ) ]
+  [ set existing-file (sentence but-last new-tape ) ]
+  let updated-file lput ( last new-tape ) existing-file
+  csv:to-file (word path-to-experiment "/" file-name ) updated-file
+  file-close
+  
+end
+
+;--------------------------------------------------------------------------------------------------------------------------------------------------
+; GENERATE TAPE
+;--------------------------------------------------------------------------------------------------------------------------------------------------
+
+to-report generate-verification-tape
+  
+  profiler:reset
+  profiler:start
+  
+  repeat how-many-ticks? [ go ]
+  
+  let header (list "date-and-time" "model-version" "simulation-id" "ticks" )
+  let verification (list "" "" "" "" )
+  let function (list "" "" "" "" )
+  let boolean (list date-and-time model-version simulation-id ticks ) 
+  
+  carefully [
+    
+    ;--------------------------------------------------------------------------------------------------------------------
+    ; SETUP-SIMULATION
+    ;--------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Clicking 'setup' creates new plants and virtual agents as expected? 1.0.2 " header 
+    set verification lput "visual" verification 
+    set function lput "setup-simulation" function
+    set boolean lput ( true ) boolean 
+    
+    
+    ;--------------------------------------------------------------------------------------------------------------------
+    ; GO
+    ;--------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Clicking 'go' begins plant and virtual agent behaviors as expected? 1.0.2 " header 
+    set verification lput "visual" verification 
+    set function lput "go" function
+    set boolean lput ( true ) boolean 
+    
+    ;--------------------------------------------------------------------------------------------------------------------
+    ; UPDATE-PLANTS
+    ;--------------------------------------------------------------------------------------------------------------------
+    
+    
+    
+    ;--------------------------------------------------------------------------------------------------------------------
+    ; DETERIORATE
+    ;--------------------------------------------------------------------------------------------------------------------
+    
+    
+    ;--------------------------------------------------------------------------------------------------------------------
+    ; CHECK-MORTALITY
+    ;--------------------------------------------------------------------------------------------------------------------
+    
+    
+    ;--------------------------------------------------------------------------------------------------------------------
+    ; UPDATE-APPEARANCE
+    ;--------------------------------------------------------------------------------------------------------------------
+    
+    
+    ;--------------------------------------------------------------------------------------------------------------------
+    ; GET-SHAPE
+    ;--------------------------------------------------------------------------------------------------------------------
+    
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; MAKE-DECISIONS
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to MAKE-DECISIONS? " header 
+    set verification lput "runtime" verification 
+    set function lput "make-decisions" function
+    set boolean lput ( profiler:calls "make-decisions" > 1 ) boolean
+    
+    set header lput "Every agent has decision-vectors?" header
+    set verification lput "dyanmic" verification 
+    set function lput "make-decisions" function
+    set boolean lput ( not any? anima1s with [ decision.vectors = [] or decision.vectors = 0 ] ) boolean 
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; ACT
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to ACT in population?" header 
+    set verification lput "runtime" verification 
+    set function lput "act" function
+    set boolean lput ( profiler:calls "act" > 0 ) boolean
+    
+    set header lput "Gestatees only interact with their mother or themselves? " header 
+    set verification lput "dynamic" verification 
+    set function lput "act" function
+    set boolean lput ( false ) boolean
+    
+    set header lput "Only mothers can interact with their gestatees? " header 
+    set verification lput "dynamic" verification 
+    set function lput "act" function
+    set boolean lput ( false ) boolean
+    
+    set header lput "Infants cannot perform other target-directed actions besides 'demand'? " header 
+    set verification lput "dynamic" verification 
+    set function lput "act" function
+    set boolean lput ( false ) boolean
+    
+    set header lput "Juveniles cannot perform any specialized actions? " header 
+    set verification lput "dynamic" verification 
+    set function lput "act" function
+    set boolean lput ( false ) boolean ; like give-to and receive-from
+    
+    set header lput "Only cycling adult females and adult males can 'conceive'? " header 
+    set verification lput "dynamic" verification 
+    set function lput "do-action" function
+    set boolean lput ( false ) boolean
+    
+    set header lput "Only pregnant and lactating adult females can 'supply'? " header 
+    set verification lput "dynamic" verification 
+    set function lput "do-action" function
+    set boolean lput ( false ) boolean
+    
+    set header lput "Siblings are about half genetically related to each other? " header 
+    set verification lput "dynamic" verification 
+    set function lput "get-degree-relatedness-with" function
+    set boolean lput ( false ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; UPDATE-ENERGY
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; MAINTAIN-boolean
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to MAINTAIN-boolean? " header 
+    set verification lput "runtime" verification 
+    set function lput "maintain-boolean" function
+    set boolean lput ( profiler:calls "maintain-boolean" > 1 ) boolean
+    
+    set header lput "All anima1s have a living.chance between zero and one? " header 
+    set verification lput "dynamic" verification 
+    set function lput "maintain-boolean" function
+    set boolean lput ( not any? anima1s with [ living.chance < 0 or living.chance > 1 ] ) boolean
+    
+    set header lput "All anima1s have a living.chance approaching one? " header 
+    set verification lput "dynamic" verification 
+    set function lput "maintain-boolean" function
+    set boolean lput ( not any? anima1s with [ not is.dead and living.chance < 0.95 or living.chance > 1 ] ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; boolean-SIZE
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to boolean-SIZE? " header 
+    set verification lput "runtime" verification 
+    set function lput "boolean-size" function
+    set boolean lput ( profiler:calls "boolean-size" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; boolean-SHADE
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to boolean-SHADE? " header 
+    set verification lput "runtime" verification 
+    set function lput "boolean-shade" function
+    set boolean lput ( profiler:calls "boolean-shade" > 1 ) boolean
+    
+    set header lput "All anima1s have a body.shade between zero and one? " header 
+    set verification lput "dynamic" verification 
+    set function lput "boolean-shade" function
+    set boolean lput ( not any? anima1s with [ body.shade < 0 or body.shade > 1 ] ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; DAY-PERCEPTION
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to DAY-PERCEPTION? " header 
+    set verification lput "runtime" verification 
+    set function lput "day-perception" function
+    set boolean lput ( profiler:calls "day-perception" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; NIGHT-PERCEPTION
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to NIGHT-PERCEPTION? " header 
+    set verification lput "runtime" verification 
+    set function lput "night-perception" function
+    set boolean lput ( profiler:calls "night-perception" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; AUDIO-PERCEPTION
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to AUDIO-PERCEPTION? " header 
+    set verification lput "runtime" verification 
+    set function lput "audio-perception" function
+    set boolean lput ( profiler:calls "audio-perception" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; DAY-PERCEPTION-ANGLE
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to DAY-PERCEPTION-ANGLE? " header 
+    set verification lput "runtime" verification 
+    set function lput "day-perception-angle" function
+    set boolean lput ( profiler:calls "day-perception-angle" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; NIGHT-PERCEPTION-ANGLE
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to NIGHT-PERCEPTION-ANGLE? " header 
+    set verification lput "runtime" verification 
+    set function lput "night-perception-angle" function
+    set boolean lput ( profiler:calls "night-perception-angle" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; AUDIO-PERCEPTION-ANGLE
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to AUDIO-PERCEPTION-ANGLE? " header 
+    set verification lput "runtime" verification 
+    set function lput "audio-perception-angle" function
+    set boolean lput ( profiler:calls "audio-perception-angle" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; VOCAL-RANGE
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to VOCAL-RANGE? " header 
+    set verification lput "runtime" verification 
+    set function lput "vocal-range" function
+    set boolean lput ( profiler:calls "vocal-range" > 1 ) boolean        
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; CONCEPTION-CHANCE
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to CONCEPTION-CHANCE? " header 
+    set verification lput "runtime" verification 
+    set function lput "conception-chance" function
+    set boolean lput ( profiler:calls "conception-chance" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; MUTATION-RATE
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to MUTATION-RATE? " header 
+    set verification lput "runtime" verification 
+    set function lput "mutation-rate" function
+    set boolean lput ( profiler:calls "mutation-rate" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; SEX-RATIO
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to SEX-RATIO? " header 
+    set verification lput "runtime" verification 
+    set function lput "sex-ratio" function
+    set boolean lput ( profiler:calls "sex-ratio" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; LITTER-SIZE
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to LITTER-SIZE?" header 
+    set verification lput "runtime" verification 
+    set function lput "litter-size" function
+    set boolean lput ( profiler:calls "litter-size" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; LEAVE-GROUP
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to LEAVE-GROUP?" header 
+    set verification lput "runtime" verification 
+    set function lput "leave-group" function
+    set boolean lput ( profiler:calls "leave-group" > 1 ) boolean
+    
+    set header lput "Not any groups with no group members?" header 
+    set verification lput "dynamic" verification 
+    set function lput "leave-group" function
+    set boolean lput ( not any? groups with [ count group-members = 0 ] ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; INITIALIZE-GROUP
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; SET-HEADING
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to SET-HEADING?" header 
+    set verification lput "runtime" verification 
+    set function lput "set-heading" function
+    set boolean lput ( profiler:calls "set-heading" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; TURN-LEFT
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to TURN-LEFT?" header 
+    set verification lput "runtime" verification 
+    set function lput "turn-left" function
+    set boolean lput ( profiler:calls "turn-left" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; TURN-RIGHT
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to TURN-RIGHT?" header 
+    set verification lput "runtime" verification 
+    set function lput "turn-right" function
+    set boolean lput ( profiler:calls "turn-right" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; GO-FORWARD
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to GO-FORWARD?" header 
+    set verification lput "runtime" verification 
+    set function lput "go-forward" function
+    set boolean lput ( profiler:calls "go-forward" > 1 ) boolean
+    
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; SIGNALING
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to SIGNAL-A-CHANCE?" header 
+    set verification lput "runtime" verification 
+    set function lput "signal-a-chance" function
+    set boolean lput ( profiler:calls "signal-a-chance" > 1 ) boolean
+    
+    set header lput "Nonzero calls to SIGNAL-A-ON?" header 
+    set verification lput "runtime" verification 
+    set function lput "signal-a-on" function
+    set boolean lput ( profiler:calls "signal-a-on" > 1 ) boolean
+    
+    set header lput "Nonzero calls to SIGNAL-B-CHANCE?" header 
+    set verification lput "runtime" verification 
+    set function lput "signal-b-chance" function
+    set boolean lput ( profiler:calls "signal-b-chance" > 1 ) boolean
+    
+    set header lput "Nonzero calls to SIGNAL-B-ON?" header 
+    set verification lput "runtime" verification 
+    set function lput "signal-b-on" function
+    set boolean lput ( profiler:calls "signal-b-on" > 1 ) boolean
+    
+    set header lput "Nonzero calls to SIGNAL-C-CHANCE?" header 
+    set verification lput "runtime" verification 
+    set function lput "signal-c-chance" function
+    set boolean lput ( profiler:calls "signal-c-chance" > 1 ) boolean
+    
+    set header lput "Nonzero calls to SIGNAL-C-ON?" header 
+    set verification lput "runtime" verification 
+    set function lput "signal-c-on" function
+    set boolean lput ( profiler:calls "signal-c-on" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; CHECK-INFANCY
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to CHECK-INFANCY?" header 
+    set verification lput "runtime" verification 
+    set function lput "check-infancy" function
+    set boolean lput ( profiler:calls "check-infancy" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; CHECK-BIRTH
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to CHECK-BIRTH?" header 
+    set verification lput "runtime" verification 
+    set function lput "check-birth" function
+    set boolean lput ( profiler:calls "check-birth" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; UPDATE-TO-INFANT
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; CHECK-JUVENILITY
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to CHECK-JUVENILITY?" header 
+    set verification lput "runtime" verification 
+    set function lput "check-juvenility" function
+    set boolean lput ( profiler:calls "check-juvenility" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; CHECK-WEANING
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to CHECK-WEANING?" header 
+    set verification lput "runtime" verification 
+    set function lput "check-weaning" function
+    set boolean lput ( profiler:calls "check-weaning" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; UPDATE-TO-JUVENILE
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; CHECK-ADULTHODD
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to CHECK-ADULTHOOD?" header 
+    set verification lput "runtime" verification 
+    set function lput "check-adulthood" function
+    set boolean lput ( profiler:calls "check-adulthood" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; UPDATE-TO-ADULT
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; CHECK-SENESCENCE
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to CHECK-SENESCENCE?" header 
+    set verification lput "runtime" verification 
+    set function lput "check-senescence" function
+    set boolean lput ( profiler:calls "check-senescence" > 1 ) boolean
+    
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; UPDATE-TO-SENESCENT
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "There are some 'senescent' agents?" header 
+    set verification lput "dynamic" verification 
+    set function lput "update-to-senescent" function
+    set boolean lput ( count anima1s with [ life.history = "senescent" ] > 0 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; SUPPLY-TO
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to SUPPLY-TO?" header 
+    set verification lput "runtime" verification 
+    set function lput "supply-to" function
+    set boolean lput ( profiler:calls "supply-to" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; DEMAND-FROM
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to DEMAND-FROM?" header 
+    set verification lput "runtime" verification 
+    set function lput "demand-from" function
+    set boolean lput ( profiler:calls "demand-from" > 1 ) boolean
+    
+    set header lput "Nonzero calls to RECEIVE-FROM?" header 
+    set verification lput "runtime" verification 
+    set function lput "receive-from" function
+    set boolean lput ( profiler:calls "receive-from" > 1 ) boolean
+    
+    set header lput "Calls to RECEIVE-FROM less than or equal to DEMAND-FROM?" header 
+    set verification lput "runtime" verification 
+    set function lput "receive-from" function
+    set boolean lput ( profiler:calls "receive-from" <= profiler:calls "demand-from" ) boolean
+    
+    set header lput "Gestatees and infants have a positive non-zero energy supply?" header 
+    set verification lput "dynamic" verification 
+    set function lput "demand" function
+    set boolean lput false boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; EAT
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to EAT?" header 
+    set verification lput "runtime" verification 
+    set function lput "eat" function
+    set boolean lput ( profiler:calls "eat" > 1 ) boolean
+    
+    set header lput "All agents have positive non-zero energy supply?" header 
+    set verification lput "dynamic" verification 
+    set function lput "eat" function
+    set boolean lput ( false ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; PICK-UP
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to PICK-UP?" header 
+    set verification lput "runtime" verification 
+    set function lput "pick-up" function
+    set boolean lput ( profiler:calls "pick-up" > 1 ) boolean
+    
+    set header lput "Pregnant females carry their offspring?" header 
+    set verification lput "dynamic" verification 
+    set function lput "pickup" function
+    set boolean lput false boolean
+    
+    set header lput "Lactating females carry their offspring?" header 
+    set verification lput "dynamic" verification 
+    set function lput "pickup" function
+    set boolean lput false boolean
+    
+    set header lput "Infants and gestatees are carried?" header 
+    set verification lput "dynamic" verification 
+    set function lput "pickup" function
+    set boolean lput false boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; PUT-DOWN
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to PUT-DOWN?" header 
+    set verification lput "runtime" verification 
+    set function lput "put-down" function
+    set boolean lput ( profiler:calls "put-down" > 1 ) boolean
+    
+    set header lput "Juveniles are generally not still being carried?" header 
+    set verification lput "dynamic" verification 
+    set function lput "putdown" function
+    set boolean lput false boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; CLING-TO
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to CLING-TO?" header 
+    set verification lput "runtime" verification 
+    set function lput "cling-to" function
+    set boolean lput ( profiler:calls "cling-to" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; SQUIRM-FROM
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to SQUIRM-FROM?" header 
+    set verification lput "runtime" verification 
+    set function lput "squirm-from" function
+    set boolean lput ( profiler:calls "squirm-from" > 1 ) boolean
+    
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; ATTACK
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to ATTACK?" header 
+    set verification lput "runtime" verification 
+    set function lput "attack" function
+    set boolean lput ( profiler:calls "attack" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; HELP
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to HELP?" header 
+    set verification lput "runtime" verification 
+    set function lput "help" function
+    set boolean lput ( profiler:calls "help" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; JOIN-GROUP-OF
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to JOIN-GROUP-OF?" header 
+    set verification lput "runtime" verification 
+    set function lput "join-group-of" function
+    set boolean lput ( profiler:calls "join-group-of" > 1 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; MATE-WITH
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to MATE-WITH?" header 
+    set verification lput "runtime" verification 
+    set function lput "mate-with" function
+    set boolean lput ( profiler:calls "mate-with" > 1 ) boolean
+    
+    set header lput "Only adult males and cycling females mate?" header 
+    set verification lput "dynamic" verification 
+    set function lput "mate-with" function
+    set boolean lput ( false ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; CONCEIVE-WITH
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+    set header lput "Nonzero calls to CONCEIVE-WITH?" header 
+    set verification lput "runtime" verification 
+    set function lput "conceive-with" function
+    set boolean lput ( profiler:calls "conceive-with" > 1 ) boolean
+    
+    set header lput "No gestatees, infants, or juveniles have offspring? " header 
+    set verification lput "dynamic" verification 
+    set function lput "conceive-with" function
+    set boolean lput ( not any? anima1s with [ ( life.history = "gestatee" or life.history = "infant" or life.history = "juvenile" ) and any? my-offspring ]) boolean
+    
+    set header lput "There are a nonzero number of agents?" header 
+    set verification lput "dynamic" verification 
+    set function lput "conceive-with" function
+    set boolean lput ( count anima1s > 0 ) boolean
+    
+    set header lput "There are a nonzero number of gestatees?" header 
+    set verification lput "dynamic" verification 
+    set function lput "conceive-with" function
+    set boolean lput ( count anima1s with [ life.history = "gestatee" ] > 0 ) boolean
+    
+    ; --------------------------------------------------------------------------------------------------------------------
+    ; INITIALIZATION
+    ; --------------------------------------------------------------------------------------------------------------------
+    
+;    set header lput "All agents have an identity?" header 
+;    set verification lput "dynamic" verification 
+;    set function lput "initialization" function
+;    set boolean lput ( not any? anima1s with [ not is-number? meta-id or meta-id = 0 ] ) boolean
+;    
+;    set header lput "All gestatees are hidden?" header 
+;    set verification lput "dynamic" verification 
+;    set function lput "initialization" function
+;    set boolean lput ( not any? anima1s with [ life.history = "gestatee" and hidden? = false ] ) boolean
+;    
+;    set header lput "New gestatees are not dead?" header 
+;    set verification lput "dynamic" verification 
+;    set function lput "initialization" function
+;    set boolean lput ( not any? anima1s with [ age = 0 and is.dead = true ] ) boolean
+;    
+;    set header lput "All gestatees are carried by their mother?" header 
+;    set verification lput "dynamic" verification 
+;    set function lput "initialization" function
+;    set boolean lput ( not any? anima1s with [ life.history = "gestatee" and mother != nobody and member? self [carried.items] of mother ] ) boolean
+;    
+;    set header lput "All agents are either male or female?" header 
+;    set verification lput "dynamic" verification 
+;    set function lput "initialization" function
+;    set boolean lput ( not any? anima1s with [ biological.sex != "male" and biological.sex != "female" ] ) boolean
+;    
+;    set header lput "The sex ratio is roughly 50:50?" header 
+;    set verification lput "dynamic" verification 
+;    set function lput "initialization" function
+;    set boolean lput ( (count anima1s with [ biological.sex = "male" ] / count anima1s) > 0.3 and (count anima1s with [ biological.sex = "male" ] / count anima1s) < 0.7 ) boolean
+;    
+;    set header lput "Males have a triangle shape?" header 
+;    set verification lput "dynamic" verification 
+;    set function lput "initialization" function
+;    set boolean lput ( not any? anima1s with [ biological.sex = "male" and shape != "triangle" ] ) boolean 
+;    
+;    set header lput "Females have a circle shape? " header
+;    set verification lput "dynamic" verification 
+;    set function lput "initialization" function
+;    set boolean lput ( not any? anima1s with [ biological.sex = "female" and shape != "circle" ] ) boolean
+;    
+;    set header lput "Agents have a non-negative generation number?" header 
+;    set verification lput "dynamic" verification 
+;    set function lput "initialization" function
+;    set boolean lput ( not any? anima1s with [ generation-number < 0 ] ) boolean
+;    
+;    set header lput "Agents have a generation number one more than their mother?" header 
+;    set verification lput "dynamic" verification 
+;    set function lput "initialization" function
+;    set boolean lput ( not any? anima1s with [ mother != nobody and generation-number != [generation-number] of mother - 1 ] ) boolean
+;
+;    set header lput "Agents generally gain more from foraging as they get older?" header 
+;    set verification lput "dynamic" verification 
+;    set function lput "initialization" function
+;    set boolean lput ( mean [foraging-gains] of anima1s with [ life.history = "gestatee" ] <= mean [foraging-gains] of anima1s with [ life.history = "infant" ] and mean [foraging-gains] of anima1s with [ life.history = "infant" ] <= mean [foraging-gains] of anima1s with [ life.history = "juvenile" ] and mean [foraging-gains] of anima1s with [ life.history = "juvenile" ] <= mean [foraging-gains] of anima1s with [ life.history = "adult" ] ) boolean
+;    
+;    set header lput "Agents generally exert more in foraging as they get older?" header 
+;    set verification lput "dynamic" verification 
+;    set function lput "initialization" function
+;    set boolean lput ( mean [foraging-losses] of anima1s with [ life.history = "gestatee" ] >= mean [foraging-losses] of anima1s with [ life.history = "infant" ] and mean [foraging-losses] of anima1s with [ life.history = "infant" ] >= mean [foraging-losses] of anima1s with [ life.history = "juvenile" ] and mean [foraging-losses] of anima1s with [ life.history = "juvenile" ] >= mean [foraging-losses] of anima1s with [ life.history = "adult" ] ) boolean
+;    
+;    set header lput "Chromosomes are roughly half from mother? " header 
+;    set verification lput "dynamic" verification 
+;    set function lput "recombine-chromosomes" function
+;    set boolean lput ( mean [relatedness-with mother] of anima1s with [ mother != nobody ] <= 0.55 and mean [relatedness-with mother] of anima1s with [ mother != nobody ] >= 0.45 ) boolean
+;    
+;    set header lput "Chromosomes are roughly half from father? " header 
+;    set verification lput "dynamic" verification 
+;    set function lput "recombine-chromosomes" function
+;    set boolean lput ( mean [relatedness-with father] of anima1s with [ father != nobody ]<= 0.55 and mean [relatedness-with father] of anima1s with [ father != nobody ] >= 0.45 ) boolean
+    
+  ][ ]
+  
+  report (list header verification function boolean )
+  profiler:stop 
+  
+end
+
+
