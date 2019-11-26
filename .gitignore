@@ -1,8 +1,7 @@
 *~
 .DS_Store
 codemeta.json
-/output/*.csv
-/output/*.txt
-/data/*.csv
-/data/*.txt
+/code/.B3GET.tmp.nlogo
+/output/*
+/data/*
 /docs/*
