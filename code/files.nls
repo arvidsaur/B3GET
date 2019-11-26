@@ -178,6 +178,8 @@ to import-population [ path ]
       set infanticide-list []
       set decision.vectors []
       
+      if ( stomach.capacity = 0 or not is-number? stomach.capacity ) [ set stomach.capacity 1 ]
+      
     ]
     
     ask groups [
@@ -226,7 +228,7 @@ to save-population [ path ]
       "biological.sex" "life.history" "female.fertility" "energy.supply" 
       "group.identity" "is.dead" "alpha.signal" "beta.signal" "gamma.signal"
       "chromosome.I" "chromosome.II" "identity.I" "identity.II"
-      "living.chance" "body.size" "body.shade" "mutation.chance"
+      "living.chance" "body.size" "body.shade" "stomach.capacity" "mutation.chance"
       "sex.ratio" "litter.size" "conception.chance"
       "day.perception.angle" "night.perception.angle" "audio.perception.angle"
       "day.perception.range" "night.perception.range" "audio.perception.range"

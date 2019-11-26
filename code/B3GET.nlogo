@@ -49,7 +49,7 @@ anima1s-own [
   carried.items
 
   ; hidden
-  stomach.contents
+  stomach.capacity
   mutation.chance
   sex.ratio
   litter.size
