@@ -622,20 +622,22 @@ to turn-left [ value ]
   [ right ( 360 * value ) ]
 end
 
-to go-forward [ value ] ;;
-  let sum-weight size
-  foreach carried.items [ object ->
-    set sum-weight sum-weight + [size] of object ]
-  set heading ( atan y.magnitude x.magnitude )
-  set x.magnitude one-of [ 0.001 -0.001 ]
-  set y.magnitude one-of [ 0.001 -0.001 ]
-  let travel-distance (size * (sqrt (( 2 * abs value ) / sum-weight )) )
-  forward travel-distance
-  foreach carried.items [ object ->
-    if (object != nobody) [ ask object [ move-to myself ] ]]
-  if collect-data? [
-    set distance-traveled distance-traveled + travel-distance
-    if not member? patch-here cells-occupied [ set cells-occupied lput patch-here cells-occupied ]]
+to go-forward [ value ]
+  if ( value > 0 ) [
+    let sum-weight size
+    foreach carried.items [ object ->
+      set sum-weight sum-weight + [size] of object ]
+    set heading ( atan y.magnitude x.magnitude )
+    set x.magnitude one-of [ 0.001 -0.001 ]
+    set y.magnitude one-of [ 0.001 -0.001 ]
+    let travel-distance ( size * (sqrt (( 2 * abs value ) / sum-weight )) )
+    forward travel-distance
+    foreach carried.items [ object ->
+      if (object != nobody) [ ask object [ move-to myself ] ]]
+    if collect-data? [
+      set distance-traveled distance-traveled + travel-distance
+      if not member? patch-here cells-occupied [ set cells-occupied lput patch-here cells-occupied ]]
+  ]
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
