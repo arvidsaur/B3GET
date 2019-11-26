@@ -544,10 +544,10 @@ to do-action [ action-code target value ]
     if action-code = "supply-to" [ supply-to target value ]
     if action-code = "demand-from" [ demand-from target value ]
     if action-code = "eat" [ eat target value ]
-;    if action-code = "pick-up" [ pick-up target value ]
-;    if action-code = "squirm-from" [ squirm-from target value ]
+    if action-code = "pick-up" [ pick-up target value ]
+    if action-code = "squirm-from" [ squirm-from target value ]
     if action-code = "put-down" [ put-down target value ]
-;    if action-code = "cling-to" [ cling-to target value ]
+    if action-code = "cling-to" [ cling-to target value ]
     if action-code = "attack" [ attack target value ]
     if action-code = "help" [ help target value ]
     if action-code = "join-group-of" [ join-group-of target value ]
@@ -878,42 +878,42 @@ end
 
 to pick-up [ target value ] ;;
 
-  if ( target != self and is-anima1? target ) [
-
-    let squirm-decisions get-decisions target self "squirm-from"
-    let squirm-cost get-decisions-cost squirm-decisions
-
-    let pickup-decisions get-decisions self target "pick-up"
-    let pickup-cost get-decisions-cost pickup-decisions
-
-    ifelse ( squirm-cost > pickup-cost )
-    [ if ( member? target carried.items) [set carried.items remove target carried.items ]]
-    [ if ( not member? target carried.items) [set carried.items lput target carried.items ]]
-
-    ask target [ decisions-done squirm-decisions ]
-    decisions-done pickup-decisions
-
-  ]
+;  if ( target != self and is-anima1? target ) [
+;
+;    let squirm-decisions get-decisions target self "squirm-from"
+;    let squirm-cost get-decisions-cost squirm-decisions
+;
+;    let pickup-decisions get-decisions self target "pick-up"
+;    let pickup-cost get-decisions-cost pickup-decisions
+;
+;    ifelse ( squirm-cost > pickup-cost )
+;    [ if ( member? target carried.items) [set carried.items remove target carried.items ]]
+;    [ if ( not member? target carried.items) [set carried.items lput target carried.items ]]
+;
+;    ask target [ decisions-done squirm-decisions ]
+;    decisions-done pickup-decisions
+;
+;  ]
 end
 
 to squirm-from [ target value ] ;;
 
-  if ( target != self and is-anima1? target ) [
-
-    let pickup-decisions get-decisions target self "pick-up"
-    let pickup-cost get-decisions-cost pickup-decisions
-
-    let squirm-decisions get-decisions self target "squirm-from"
-    let squirm-cost get-decisions-cost squirm-decisions
-
-    ifelse ( squirm-cost > pickup-cost )
-    [ ask target [ set carried.items remove myself carried.items ]]
-    [ ask target [ set carried.items lput target carried.items ]]
-
-    decisions-done squirm-decisions
-    ask target [ decisions-done pickup-decisions ]
-
-  ]
+;  if ( target != self and is-anima1? target ) [
+;
+;    let pickup-decisions get-decisions target self "pick-up"
+;    let pickup-cost get-decisions-cost pickup-decisions
+;
+;    let squirm-decisions get-decisions self target "squirm-from"
+;    let squirm-cost get-decisions-cost squirm-decisions
+;
+;    ifelse ( squirm-cost > pickup-cost )
+;    [ ask target [ set carried.items remove myself carried.items ]]
+;    [ ask target [ set carried.items lput target carried.items ]]
+;
+;    decisions-done squirm-decisions
+;    ask target [ decisions-done pickup-decisions ]
+;
+;  ]
 end
 
 to put-down [ target value ] ;;
@@ -937,22 +937,22 @@ end
 
 to cling-to [ target value ] ;; squirm from
 
-  if ( target != self and is-anima1? target ) [
-
-    let putdown-decisions get-decisions target self "put-down"
-    let putdown-cost get-decisions-cost putdown-decisions
-
-    let cling-decisions get-decisions self target "cling-to"
-    let cling-cost get-decisions-cost cling-decisions
-
-    ifelse ( putdown-cost > cling-cost )
-    [ ask target [ set carried.items remove myself carried.items ]]
-    [ ask target [ set carried.items lput target carried.items ]]
-
-    decisions-done cling-decisions
-    ask target [ decisions-done putdown-decisions ]
-
-  ]
+;  if ( target != self and is-anima1? target ) [
+;
+;    let putdown-decisions get-decisions target self "put-down"
+;    let putdown-cost get-decisions-cost putdown-decisions
+;
+;    let cling-decisions get-decisions self target "cling-to"
+;    let cling-cost get-decisions-cost cling-decisions
+;
+;    ifelse ( putdown-cost > cling-cost )
+;    [ ask target [ set carried.items remove myself carried.items ]]
+;    [ ask target [ set carried.items lput target carried.items ]]
+;
+;    decisions-done cling-decisions
+;    ask target [ decisions-done putdown-decisions ]
+;
+;  ]
 end
 
 to attack [ target value ] ;;
@@ -1581,7 +1581,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "--------" "lotka-volterra" "age-histogram" "metafile-report" "verify-code" "check-runtime" "simulation-report" "clear-plants" "setup-plants" "clear-population" "view-genotype" "view-decisions" "add-allele" "delete-allele" "population-report"
-0
+13
 
 BUTTON
 912
@@ -1694,7 +1694,7 @@ INPUTBOX
 967
 324
 command-input
-[ true \"am\" \"cf\" \"MAT\" 0.009 ]
+[ true \"e\" \"e\" \"STC\" 0.00001 ]
 1
 0
 String (commands)
