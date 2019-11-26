@@ -1,5 +1,6 @@
 *~
 .DS_Store
+codemeta.json
 /output/*.csv
 /output/*.txt
 /data/*.csv
