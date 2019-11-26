@@ -49,7 +49,6 @@ anima1s-own [
   carried.items
 
   ; hidden
-  stomach.capacity
   mutation.chance
   sex.ratio
   litter.size
@@ -171,7 +170,7 @@ globals [
 ;--------------------------------------------------------------------------------------------------------------------
 
 to setup-parameters
-  set model-version "1.0.2+"
+  set model-version "1.0.2"
   set done-decisions []
   set deterioration-rate -0.01
   set selection-rate 0.0001
@@ -1567,7 +1566,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "--------" "lotka-volterra" "age-histogram" "metafile-report" "verify-code" "check-runtime" "simulation-report" "clear-plants" "setup-plants" "clear-population" "view-genotype" "view-decisions" "add-allele" "delete-allele" "population-report"
-10
+0
 
 BUTTON
 912
@@ -1644,10 +1643,10 @@ SLIDER
 223
 plant-quality
 plant-quality
-.001
-1
-0.1
-.001
+.1
+10
+1.0
+.1
 1
 NIL
 HORIZONTAL
@@ -1686,7 +1685,7 @@ command-input
 String (commands)
 
 @#$#@#$#@
-# B3GET 1.0.2+ INFORMATION
+# B3GET 1.0.2 INFORMATION
 
 Compatible with NetLogo 6.1.1
 
