@@ -3,5 +3,5 @@
 codemeta.json
 /code/.B3GET.tmp.nlogo
 /output/*
-/data/*
+/data/*.csv
 /docs/*
