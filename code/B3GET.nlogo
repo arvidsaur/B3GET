@@ -49,6 +49,7 @@ anima1s-own [
   carried.items
 
   ; hidden
+  stomach.capacity
   mutation.chance
   sex.ratio
   litter.size
@@ -609,9 +610,17 @@ to move-toward [ target value ]
   ]
 end
 
-to turn-right [ value ] right ( 360 * value ) end ;;
+to turn-right [ value ]
+  ifelse ( value > 0 )
+  [ right ( 360 * value ) ]
+  [ left ( 360 * value ) ]
+end
 
-to turn-left [ value ] left ( 360 * value ) end ;;
+to turn-left [ value ]
+  ifelse ( value > 0 )
+  [ left ( 360 * value ) ]
+  [ right ( 360 * value ) ]
+end
 
 to go-forward [ value ] ;;
   let sum-weight size
@@ -807,11 +816,9 @@ to receive-from [ target value ] ;; value here should be lesser of supplier or d
   ask target [ set energy.supply ( energy.supply - energy-received ) ]
 end
 
-to eat [ target value ] ;;?
-  let energy-wanted 100 ^ value
-  let energy-eaten 0
-
-  set energy-eaten ifelse-value ( energy-wanted < [energy.supply] of target) [energy-eaten] [[energy.supply] of target]
+to eat [ target value ]
+  let energy-wanted get-updated-value stomach.capacity value
+  let energy-eaten ifelse-value ( energy-wanted < [energy.supply] of target) [energy-wanted] [[energy.supply] of target]
   update-energy energy-eaten
   ask target [ update-energy ( - energy-eaten ) ]
 
@@ -1643,10 +1650,10 @@ SLIDER
 223
 plant-quality
 plant-quality
-.1
-10
+.01
+1
 1.0
-.1
+.01
 1
 NIL
 HORIZONTAL
