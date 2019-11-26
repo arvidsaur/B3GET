@@ -97,6 +97,7 @@ anima1s-own [
   adult-mutation-chance
   adult-sex-ratio
   adult-litter-size
+  adult-stomach-capacity
   adult-conception-chance
   adult-day-perception-angle
   adult-night-perception-angle
@@ -523,6 +524,7 @@ to do-action [ action-code target value ]
     if action-code = "audio-perception-angle" [ audio-perception-angle value ]
     if action-code = "vocal-range" [ vocal-range value ]
     if action-code = "conception-chance" [ conception-chance value ]
+    if action-code = "stomach-capacity" [ stomach-capacity value ]
     if action-code = "mutation-rate" [ mutation-rate value ]
     if action-code = "sex-ratio" [ sex-ratio value ]
     if action-code = "litter-size" [ litter-size value ]
@@ -594,6 +596,8 @@ to mutation-rate [ value ] set mutation.chance get-updated-value mutation.chance
 to sex-ratio [ value ] set sex.ratio get-updated-value sex.ratio value end
 
 to litter-size [ value ] set litter.size get-updated-value litter.size value end
+
+to stomach-capacity [ value ] set stomach.capacity get-updated-value stomach.capacity value end
 
 ;--------------------------------------------------------------------------------------------------------------------
 ; MOVEMENT
@@ -853,7 +857,7 @@ end
 ; INTERACTIONS
 ;--------------------------------------------------------------------------------------------------------------------
 
-to join-group-of [ target value ]
+to join-group-of [ target value ] ;;
   if ( is-anima1? target and random-float 1.0 < value ) [
     set previous-group-id group.identity
     set group.identity [group.identity] of target
@@ -861,7 +865,7 @@ to join-group-of [ target value ]
   ]
 end
 
-to leave-group-of [ target value ]
+to leave-group-of [ target value ] ;;
   if ( random-float 1.0 < abs value ) [
     set previous-group-id group.identity
     hatch-groups 1 [
@@ -1077,6 +1081,7 @@ to initialize-from-parents [ m f ]
   set mutation.chance 0
   set sex.ratio 0.5
   set litter.size 0
+  set stomach.capacity 0
   set conception.chance 0
   set birthing.chance 0
   set weaning.chance 0
@@ -1110,6 +1115,7 @@ to initialize-from-parents [ m f ]
   set adult-mutation-chance 0
   set adult-sex-ratio 0
   set adult-litter-size 0
+  set adult-stomach-capacity 0
   set adult-conception-chance 0
   set adult-day-perception-angle 0
   set adult-night-perception-angle 0
