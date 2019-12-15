@@ -9,6 +9,52 @@
 ; © 2019 K N Crouse
 ;-----------------------------------------------------------------------------                                                                          
 
+
+to-report how-many-ticks? report 10 end
+
+
+to reset-simulation
+  set simulation-id 0
+  update-simulation
+end
+
+to setup-plants
+  ask plants [ die ]
+  ask patches [
+    set pcolor 36
+    sprout-plants 1 [ initialize-plant ]]
+  repeat 100 [ update-plants ]
+end
+
+to save
+  update-simulation
+end
+
+to reset-population
+  set population generate-population-id
+end
+
+to export-population
+  save-population ( word "../data/" path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] population ".csv")
+end
+
+to seed-population
+  import-population (word "../data/" path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] population ".csv")
+end
+
+to reset-genotype
+  set genotype generate-genotype-id
+end
+
+to export-genotype
+  ask anima1s with [ read-from-string but-first genotype = meta-id ] [ save-genotype ( word "../data/" path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ]  genotype ".txt") ]
+end
+
+to seed-genotype
+  import-genotype (word "../data/" path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] genotype ".txt")
+end
+
+
 to command
   
   clear-output
@@ -82,7 +128,7 @@ to command
     output-print " ---------------------------------------------------------------------------"
     output-print " METAFILE :  date-and-time    documentation-notes "
     output-print " ---------------------------------------------------------------------------"
-    foreach reverse but-first csv:from-file "../data/metafile.csv" [ x -> 
+    foreach reverse but-first csv:from-file "../output/metafile.csv" [ x -> 
       if ( i < 25 ) [ output-print (word " " item 0 x "  " item 7 x  ) ]
       set i i + 1
     ]

@@ -20,15 +20,15 @@
 ;----------------------------------------------------------------------------------------------
 
 to-report metafile-exists?
-  report file-exists? "../data/metafile.csv"
+  report file-exists? "../output/metafile.csv"
 end
 
 to setup-metafile
   
   if ( not metafile-exists? ) [
     
-    file-open "../data/metafile.csv"
-    csv:to-file "../data/metafile.csv" (list (list
+    file-open "../output/metafile.csv"
+    csv:to-file "../output/metafile.csv" (list (list
       "date-and-time"
       "path-to-experiment"
       "model-version"
@@ -37,13 +37,20 @@ to setup-metafile
       "file-type"
       "file-name"
       "documentation-notes"
-      "population-input" "genotype-input"
-      "plant-annual-cycle" "plant-seasonality" 
-      "plant-minimum-neighbors" "plant-maximum-neighbors" 
-      "plant-daily-cycle" "plant-quality"
-      "world-width" "world-height"
-      "deterioration-rate" "selection-rate"
-      "collect-data?" "selection-on?"
+      "population-input" 
+      "genotype-input"
+      "plant-annual-cycle" 
+      "plant-seasonality" 
+      "plant-minimum-neighbors" 
+      "plant-maximum-neighbors" 
+      "plant-daily-cycle" 
+      "plant-quality"
+      "world-width" 
+      "world-height"
+      "deterioration-rate" 
+      "selection-rate"
+      "collect-data?" 
+      "selection-on?"
       "useful-commands"
       "command-input"
     ))
@@ -55,14 +62,14 @@ to update-metafile [ type-of-file name-of-file ]
   
   ; Save whatever is currently in the METAFILE or create new
   if ( not metafile-exists? ) [ setup-metafile ]
-  let old-metafile csv:from-file "../data/metafile.csv"
+  let old-metafile csv:from-file "../output/metafile.csv"
   ;let current-runtime go-runtime
   
   if documentation-notes = "" [ set documentation-notes "Metafile updated." ]
   
   ; Update METAFILE with a new row of FILE information
-  file-open "../data/metafile.csv"
-  csv:to-file "../data/metafile.csv"
+  file-open "../output/metafile.csv"
+  csv:to-file "../output/metafile.csv"
   (lput
     (list 
       date-and-time
@@ -101,9 +108,11 @@ end
 ;----------------------------------------------------------------------------------------------
 
 to save-world
-  export-world (word path-to-experiment "/w" but-first simulation-id "-" ticks ".csv") 
-  set documentation-notes (word "Simulation " simulation-id " save to w" but-first simulation-id "-" ticks ". " documentation-notes )
-  update-metafile "world" (word "w" but-first simulation-id "-" ticks )
+;  if ( simulation-id != 0 ) [
+;    export-world (word path-to-experiment "/w" but-first simulation-id "-" ticks ".csv") 
+;    set documentation-notes (word "Simulation " simulation-id " save to w" but-first simulation-id "-" ticks ". " documentation-notes )
+;    update-metafile "world" (word "w" but-first simulation-id "-" ticks )
+;  ]
 end
 
 
@@ -151,7 +160,7 @@ to-report generate-population-id
 end
 
 to-report population-file-exists?
-  report file-exists? ( word path-to-experiment "/" population ".csv" )
+  report file-exists? ( word "../data/" path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] population ".csv" )
 end
 
 to import-population [ path ]
@@ -208,7 +217,7 @@ to save-population [ path ]
   ifelse ( file-exists? path )
   [ 
     let answer user-yes-or-no? 
-    (word "The population " remove ".csv" remove ( word path-to-experiment "/") path " already exists. "
+    (word "The population " remove ".csv" remove ( word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ]) path " already exists. "
       "Would you like to: [ YES ] overwrite the existing file with current population, "
       "[ NO ] save current population to a different randomly generated file name, "
       "or [ HALT ] forget the whole darn thing?" )
@@ -255,8 +264,8 @@ to save-population [ path ]
       ask one-of groups with [ meta-id = g ] [ export-turtle-to path group-list ]
     ]
     
-    set documentation-notes (word "New population " (remove ".csv" remove ( word path-to-experiment "/") path ) " saved. " documentation-notes )
-    update-metafile "population" remove ".csv" remove ( word path-to-experiment "/") path
+    set documentation-notes (word "New population " (remove ".csv" remove ( word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ]) path ) " saved. " documentation-notes )
+    update-metafile "population" remove ".csv" remove ( word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ]) path
     output-print " Population successfully saved."
   ]
 end

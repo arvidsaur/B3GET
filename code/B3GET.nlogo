@@ -172,68 +172,24 @@ globals [
 ;--------------------------------------------------------------------------------------------------------------------
 
 to setup-parameters
-  set model-version "1.0.2"
+  set model-version "1.0.2+"
   set done-decisions []
   set deterioration-rate -0.01
   set selection-rate 0.0001
 end
 
-to-report how-many-ticks? report 10 end
-
 to setup
-  if ( simulation-id != 0 ) [ save-world ]
+  ;if ( simulation-id != 0 ) [ save-world ]
   clear-all
   reset-ticks
   setup-parameters
   setup-plants
   set simulation-id 0
   update-simulation
-  import-population (word path-to-experiment "/" population ".csv")
-  import-genotype (word path-to-experiment "/" genotype ".txt")
+  import-population (word "../data/" path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] population ".csv")
+  import-genotype (word "../data/" path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] genotype ".txt")
   clear-output
 end
-
-to reset-simulation
-  set simulation-id 0
-  update-simulation
-end
-
-to setup-plants
-  ask plants [ die ]
-  ask patches [
-    set pcolor 36
-    sprout-plants 1 [ initialize-plant ]]
-  repeat 100 [ update-plants ]
-end
-
-to save
-  update-simulation
-end
-
-to reset-population
-  set population generate-population-id
-end
-
-to export-population
-  save-population ( word path-to-experiment "/" population ".csv")
-end
-
-to seed-population
-  import-population (word path-to-experiment "/" population ".csv")
-end
-
-to reset-genotype
-  set genotype generate-genotype-id
-end
-
-to export-genotype
-  ask anima1s with [ read-from-string but-first genotype = meta-id ] [ save-genotype ( word path-to-experiment "/" genotype ".txt") ]
-end
-
-to seed-genotype
-  import-genotype (word path-to-experiment "/" genotype ".txt")
-end
-
 
 ;--------------------------------------------------------------------------------------------------------------------
 ;
@@ -1315,7 +1271,7 @@ INPUTBOX
 263
 79
 path-to-experiment
-../data/
+../output/
 1
 0
 String
@@ -1338,10 +1294,10 @@ NIL
 1
 
 PLOT
-720
-106
-967
-260
+719
+133
+966
+309
 plot
 NIL
 NIL
@@ -1358,10 +1314,10 @@ PENS
 "organisms" 1.0 0 -6459832 true "" "if (useful-commands != \"age-histogram\") [ plot ( count anima1s ) ]"
 
 INPUTBOX
-720
+719
 10
-967
-102
+966
+127
 documentation-notes
 NIL
 1
@@ -1397,37 +1353,37 @@ NIL
 1
 
 OUTPUT
-720
-383
-1222
-791
+719
+432
+1221
+790
 11
 
 SLIDER
-974
-82
-1217
-115
+973
+204
+1216
+237
 plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-2.5
+7.1
 .1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-974
-118
-1217
-151
+973
+240
+1216
+273
 plant-maximum-neighbors
 plant-maximum-neighbors
 0
 8
-8.0
+2.8
 .1
 1
 NIL
@@ -1445,10 +1401,10 @@ season
 11
 
 SLIDER
-974
-46
-1217
-79
+973
+131
+1216
+164
 plant-seasonality
 plant-seasonality
 0
@@ -1460,10 +1416,10 @@ plant-seasonality
 HORIZONTAL
 
 SLIDER
-974
-10
-1217
-43
+973
+59
+1216
+92
 plant-annual-cycle
 plant-annual-cycle
 10
@@ -1475,10 +1431,10 @@ ticks
 HORIZONTAL
 
 SLIDER
-974
-154
-1217
-187
+973
+95
+1216
+128
 plant-daily-cycle
 plant-daily-cycle
 1
@@ -1501,10 +1457,10 @@ sun-status
 11
 
 INPUTBOX
-974
-230
-1097
-299
+973
+279
+1096
+348
 population
 population
 1
@@ -1512,10 +1468,10 @@ population
 String
 
 INPUTBOX
-974
-304
-1097
-373
+973
+353
+1096
+422
 genotype
 NIL
 1
@@ -1523,10 +1479,10 @@ NIL
 String
 
 BUTTON
-1102
-230
-1157
-299
+1101
+279
+1156
+348
 ⟳
 reset-population
 NIL
@@ -1540,10 +1496,10 @@ NIL
 1
 
 BUTTON
-1162
-230
-1217
-263
+1161
+279
+1216
+312
 ⤒
 export-population
 NIL
@@ -1557,10 +1513,10 @@ NIL
 1
 
 BUTTON
-1162
-266
-1217
-299
+1161
+315
+1216
+348
 ⤓
 seed-population
 NIL
@@ -1574,20 +1530,20 @@ NIL
 1
 
 CHOOSER
-720
-328
-908
-373
+719
+377
+907
+422
 useful-commands
 useful-commands
 "help-me" "--------" "lotka-volterra" "age-histogram" "metafile-report" "verify-code" "check-runtime" "simulation-report" "clear-plants" "setup-plants" "clear-population" "view-genotype" "view-decisions" "add-allele" "delete-allele" "population-report"
-13
+8
 
 BUTTON
-912
-328
-967
-373
+911
+377
+966
+422
 ▷
 command
 NIL
@@ -1601,10 +1557,10 @@ NIL
 1
 
 BUTTON
-1102
-304
-1157
-373
+1101
+353
+1156
+422
 ⟳
 reset-genotype
 NIL
@@ -1618,10 +1574,10 @@ NIL
 1
 
 BUTTON
-1162
-340
-1217
-373
+1161
+389
+1216
+422
 ⤓
 seed-genotype
 NIL
@@ -1635,10 +1591,10 @@ NIL
 1
 
 BUTTON
-1162
-304
-1217
-337
+1161
+353
+1216
+386
 ⤒
 export-genotype
 NIL
@@ -1652,10 +1608,10 @@ NIL
 1
 
 SLIDER
-974
-190
-1217
-223
+973
+168
+1216
+201
 plant-quality
 plant-quality
 .01
@@ -1684,20 +1640,30 @@ SWITCH
 79
 selection-on?
 selection-on?
-1
+0
 1
 -1000
 
 INPUTBOX
-720
-264
-967
-324
+719
+313
+966
+373
 command-input
-[ true \"e\" \"e\" \"STC\" 0.00001 ]
+9295044
 1
 0
 String (commands)
+
+CHOOSER
+973
+10
+1216
+55
+model-structure
+model-structure
+"original" "aspatial" "reaper" "sower" "freelunch" "idealform" "noevolution" "nomutation"
+0
 
 @#$#@#$#@
 # B3GET 1.0.2 INFORMATION
@@ -2057,17 +2023,12 @@ repeat 75 [ go ]
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="thesis_experiment" repetitions="1" runMetricsEveryStep="true">
-    <setup>setup-simulation</setup>
+  <experiment name="EcologySpace" repetitions="2" runMetricsEveryStep="true">
+    <setup>setup</setup>
     <go>go</go>
-    <exitCondition>not any? anima1s or median [generation] of anima1s &gt; 100</exitCondition>
+    <exitCondition>plant-minimum-neighbors &gt;= plant-maximum-neighbors or not any? anima1s or median [generation-number] of anima1s &gt; 100</exitCondition>
     <enumeratedValueSet variable="path-to-experiment">
-      <value value="&quot;experiments/thesis/&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="global-deterioration-rate">
-      <value value="-1.0E-4"/>
-      <value value="-0.001"/>
-      <value value="-0.01"/>
+      <value value="&quot;../output/original/&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="collect-data?">
       <value value="true"/>
@@ -2075,65 +2036,50 @@ repeat 75 [ go ]
     <enumeratedValueSet variable="selection-on?">
       <value value="false"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-annual-cycle">
-      <value value="1000"/>
+    <enumeratedValueSet variable="model-structure">
+      <value value="&quot;original&quot;"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-seasonality">
-      <value value="0"/>
-      <value value="50"/>
-      <value value="100"/>
-    </enumeratedValueSet>
-    <steppedValueSet variable="plant-minimum-neighbors" first="0" step="0.5" last="8"/>
-    <steppedValueSet variable="plant-maximum-neighbors" first="0" step="0.5" last="8"/>
-    <enumeratedValueSet variable="population">
-      <value value="&quot;popula7ion&quot;"/>
-      <value value="&quot;c0mmunity&quot;"/>
-      <value value="&quot;s33d&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="genotype">
-      <value value="&quot;g3notype&quot;"/>
-      <value value="&quot;sta7us&quot;"/>
-    </enumeratedValueSet>
-  </experiment>
-  <experiment name="chimps" repetitions="1" runMetricsEveryStep="true">
-    <setup>setup-simulation</setup>
-    <go>go</go>
-    <exitCondition>not any? anima1s or median [generation-number] of anima1s &gt; 10</exitCondition>
-    <enumeratedValueSet variable="collect-data?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-quality">
-      <value value="1"/>
-      <value value="1.5"/>
-      <value value="2"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-seasonality">
-      <value value="0"/>
-      <value value="50"/>
-      <value value="100"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="population">
-      <value value="&quot;chimps&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="selection-on?">
-      <value value="true"/>
+    <enumeratedValueSet variable="deterioration-rate">
+      <value value="-0.1"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="plant-annual-cycle">
       <value value="1000"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-minimum-neighbors">
-      <value value="0"/>
-      <value value="3"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="plant-daily-cycle">
       <value value="10"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-maximum-neighbors">
+    <enumeratedValueSet variable="plant-seasonality">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-quality">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
       <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
       <value value="8"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="genotype">
-      <value value="&quot;gCHIMP&quot;"/>
+    <enumeratedValueSet variable="plant-maximum-neighbors">
+      <value value="0"/>
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="population">
+      <value value="&quot;population&quot;"/>
+      <value value="&quot;population&quot;"/>
+      <value value="&quot;population&quot;"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>
