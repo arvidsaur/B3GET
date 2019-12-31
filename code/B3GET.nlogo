@@ -583,21 +583,22 @@ to turn-left [ value ]
 end
 
 to go-forward [ value ]
-  if ( value > 0 ) [
-    let sum-weight size
-    foreach carried.items [ object ->
-      set sum-weight sum-weight + [size] of object ]
-    set heading ( atan y.magnitude x.magnitude )
-    set x.magnitude one-of [ 0.001 -0.001 ]
-    set y.magnitude one-of [ 0.001 -0.001 ]
-    let travel-distance ( size * (sqrt (( 2 * abs value ) / sum-weight )) )
-    forward travel-distance
-    foreach carried.items [ object ->
-      if (object != nobody) [ ask object [ move-to myself ] ]]
-    if collect-data? [
-      set distance-traveled distance-traveled + travel-distance
-      if not member? patch-here cells-occupied [ set cells-occupied lput patch-here cells-occupied ]]
-  ]
+
+  if ( value < 0 ) [ right 180 ]
+
+  let sum-weight size
+  foreach carried.items [ object ->
+    set sum-weight sum-weight + [size] of object ]
+  set heading ( atan y.magnitude x.magnitude )
+  set x.magnitude one-of [ 0.001 -0.001 ]
+  set y.magnitude one-of [ 0.001 -0.001 ]
+  let travel-distance ( size * (sqrt (( 2 * abs value ) / sum-weight )) )
+  forward travel-distance
+  foreach carried.items [ object ->
+    if (object != nobody) [ ask object [ move-to myself ] ]]
+  if collect-data? [
+    set distance-traveled distance-traveled + travel-distance
+    if not member? patch-here cells-occupied [ set cells-occupied lput patch-here cells-occupied ]]
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -832,6 +833,14 @@ to leave-group-of [ target value ] ;;
   ]
 end
 
+to initialize-group
+  set hidden? true
+  set age 0
+  set color one-of base-colors
+  set meta-id random 99999999
+  move-to one-of patches
+end
+
 to pick-up [ target value ] ;;
 
 ;  if ( target != self and is-anima1? target ) [
@@ -967,15 +976,6 @@ to help [ target value ]  ;; attack
     ]
   ]
 
-end
-
-
-to initialize-group
-  set hidden? true
-  set age 0
-  set color one-of base-colors
-  set meta-id random 99999999
-  move-to one-of patches
 end
 
 to mate-with [ target value ] ;;
@@ -1271,7 +1271,7 @@ INPUTBOX
 263
 79
 path-to-experiment
-../output/
+NIL
 1
 0
 String
@@ -1368,7 +1368,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-7.1
+1.0
 .1
 1
 NIL
@@ -1383,7 +1383,7 @@ plant-maximum-neighbors
 plant-maximum-neighbors
 0
 8
-2.8
+8.0
 .1
 1
 NIL
@@ -1409,7 +1409,7 @@ plant-seasonality
 plant-seasonality
 0
 100
-25.0
+50.0
 5
 1
 %
@@ -1662,7 +1662,7 @@ CHOOSER
 55
 model-structure
 model-structure
-"original" "aspatial" "reaper" "sower" "freelunch" "idealform" "noevolution" "nomutation"
+"baseline" "aspatial" "reaper" "sower" "freelunch" "idealform" "noevolution" "nomutation"
 0
 
 @#$#@#$#@
@@ -1845,6 +1845,8 @@ When agents perform actions, for the most part this results in changes in the st
 
 ### VISIBLE 'ORGANS'
 
+These organs are visible to others.
+
 SIZE: the overall body size or mass of an individual.
 COLOR: color represents group identity and shade correlates with age.
 SEX: either "male" or "female".
@@ -1872,6 +1874,8 @@ LACTATING: females enter this state upon weaning, and are able to nurse
 SENESCENT: unable to conceive or nurse
 
 ### HIDDEN 'ORGANS'
+
+These organs are hidden from others.
 
 REPRODUCTION: determines the ability to conceive and create offspring.
 PERCEPTION: determines the ability to perceive the enivornment.
@@ -2063,10 +2067,8 @@ repeat 75 [ go ]
       <value value="5"/>
       <value value="6"/>
       <value value="7"/>
-      <value value="8"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="plant-maximum-neighbors">
-      <value value="0"/>
       <value value="1"/>
       <value value="2"/>
       <value value="3"/>
@@ -2077,6 +2079,7 @@ repeat 75 [ go ]
       <value value="8"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="population">
+      <value value="&quot;population&quot;"/>
       <value value="&quot;population&quot;"/>
       <value value="&quot;population&quot;"/>
       <value value="&quot;population&quot;"/>
