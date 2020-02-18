@@ -49,7 +49,6 @@ anima1s-own [
   carried.items
 
   ; hidden
-  stomach.capacity
   mutation.chance
   sex.ratio
   litter.size
@@ -97,7 +96,6 @@ anima1s-own [
   adult-mutation-chance
   adult-sex-ratio
   adult-litter-size
-  adult-stomach-capacity
   adult-conception-chance
   adult-day-perception-angle
   adult-night-perception-angle
@@ -172,24 +170,68 @@ globals [
 ;--------------------------------------------------------------------------------------------------------------------
 
 to setup-parameters
-  set model-version "1.0.2+"
+  set model-version "1.0.2"
   set done-decisions []
   set deterioration-rate -0.01
   set selection-rate 0.0001
 end
 
+to-report how-many-ticks? report 10 end
+
 to setup
-  ;if ( simulation-id != 0 ) [ save-world ]
+  if ( simulation-id != 0 ) [ save-world ]
   clear-all
   reset-ticks
   setup-parameters
   setup-plants
   set simulation-id 0
   update-simulation
-  import-population (word "../data/" path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] population ".csv")
-  import-genotype (word "../data/" path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] genotype ".txt")
+  import-population (word path-to-experiment "/" population ".csv")
+  import-genotype (word path-to-experiment "/" genotype ".txt")
   clear-output
 end
+
+to reset-simulation
+  set simulation-id 0
+  update-simulation
+end
+
+to setup-plants
+  ask plants [ die ]
+  ask patches [
+    set pcolor 36
+    sprout-plants 1 [ initialize-plant ]]
+  repeat 100 [ update-plants ]
+end
+
+to save
+  update-simulation
+end
+
+to reset-population
+  set population generate-population-id
+end
+
+to export-population
+  save-population ( word path-to-experiment "/" population ".csv")
+end
+
+to seed-population
+  import-population (word path-to-experiment "/" population ".csv")
+end
+
+to reset-genotype
+  set genotype generate-genotype-id
+end
+
+to export-genotype
+  ask anima1s with [ read-from-string but-first genotype = meta-id ] [ save-genotype ( word path-to-experiment "/" genotype ".txt") ]
+end
+
+to seed-genotype
+  import-genotype (word path-to-experiment "/" genotype ".txt")
+end
+
 
 ;--------------------------------------------------------------------------------------------------------------------
 ;
@@ -480,7 +522,6 @@ to do-action [ action-code target value ]
     if action-code = "audio-perception-angle" [ audio-perception-angle value ]
     if action-code = "vocal-range" [ vocal-range value ]
     if action-code = "conception-chance" [ conception-chance value ]
-    if action-code = "stomach-capacity" [ stomach-capacity value ]
     if action-code = "mutation-rate" [ mutation-rate value ]
     if action-code = "sex-ratio" [ sex-ratio value ]
     if action-code = "litter-size" [ litter-size value ]
@@ -500,10 +541,10 @@ to do-action [ action-code target value ]
     if action-code = "supply-to" [ supply-to target value ]
     if action-code = "demand-from" [ demand-from target value ]
     if action-code = "eat" [ eat target value ]
-    if action-code = "pick-up" [ pick-up target value ]
-    if action-code = "squirm-from" [ squirm-from target value ]
+;    if action-code = "pick-up" [ pick-up target value ]
+;    if action-code = "squirm-from" [ squirm-from target value ]
     if action-code = "put-down" [ put-down target value ]
-    if action-code = "cling-to" [ cling-to target value ]
+;    if action-code = "cling-to" [ cling-to target value ]
     if action-code = "attack" [ attack target value ]
     if action-code = "help" [ help target value ]
     if action-code = "join-group-of" [ join-group-of target value ]
@@ -553,8 +594,6 @@ to sex-ratio [ value ] set sex.ratio get-updated-value sex.ratio value end
 
 to litter-size [ value ] set litter.size get-updated-value litter.size value end
 
-to stomach-capacity [ value ] set stomach.capacity get-updated-value stomach.capacity value end
-
 ;--------------------------------------------------------------------------------------------------------------------
 ; MOVEMENT
 ;--------------------------------------------------------------------------------------------------------------------
@@ -570,29 +609,18 @@ to move-toward [ target value ]
   ]
 end
 
-to turn-right [ value ]
-  ifelse ( value > 0 )
-  [ right ( 360 * value ) ]
-  [ left ( 360 * value ) ]
-end
+to turn-right [ value ] right ( 360 * value ) end ;;
 
-to turn-left [ value ]
-  ifelse ( value > 0 )
-  [ left ( 360 * value ) ]
-  [ right ( 360 * value ) ]
-end
+to turn-left [ value ] left ( 360 * value ) end ;;
 
-to go-forward [ value ]
-
-  if ( value < 0 ) [ right 180 ]
-
+to go-forward [ value ] ;;
   let sum-weight size
   foreach carried.items [ object ->
     set sum-weight sum-weight + [size] of object ]
   set heading ( atan y.magnitude x.magnitude )
   set x.magnitude one-of [ 0.001 -0.001 ]
   set y.magnitude one-of [ 0.001 -0.001 ]
-  let travel-distance ( size * (sqrt (( 2 * abs value ) / sum-weight )) )
+  let travel-distance (size * (sqrt (( 2 * abs value ) / sum-weight )) )
   forward travel-distance
   foreach carried.items [ object ->
     if (object != nobody) [ ask object [ move-to myself ] ]]
@@ -779,9 +807,11 @@ to receive-from [ target value ] ;; value here should be lesser of supplier or d
   ask target [ set energy.supply ( energy.supply - energy-received ) ]
 end
 
-to eat [ target value ]
-  let energy-wanted get-updated-value stomach.capacity value
-  let energy-eaten ifelse-value ( energy-wanted < [energy.supply] of target) [energy-wanted] [[energy.supply] of target]
+to eat [ target value ] ;;?
+  let energy-wanted 100 ^ value
+  let energy-eaten 0
+
+  set energy-eaten ifelse-value ( energy-wanted < [energy.supply] of target) [energy-eaten] [[energy.supply] of target]
   update-energy energy-eaten
   ask target [ update-energy ( - energy-eaten ) ]
 
@@ -814,7 +844,7 @@ end
 ; INTERACTIONS
 ;--------------------------------------------------------------------------------------------------------------------
 
-to join-group-of [ target value ] ;;
+to join-group-of [ target value ]
   if ( is-anima1? target and random-float 1.0 < value ) [
     set previous-group-id group.identity
     set group.identity [group.identity] of target
@@ -822,7 +852,7 @@ to join-group-of [ target value ] ;;
   ]
 end
 
-to leave-group-of [ target value ] ;;
+to leave-group-of [ target value ]
   if ( random-float 1.0 < abs value ) [
     set previous-group-id group.identity
     hatch-groups 1 [
@@ -833,52 +863,44 @@ to leave-group-of [ target value ] ;;
   ]
 end
 
-to initialize-group
-  set hidden? true
-  set age 0
-  set color one-of base-colors
-  set meta-id random 99999999
-  move-to one-of patches
-end
-
 to pick-up [ target value ] ;;
 
-;  if ( target != self and is-anima1? target ) [
-;
-;    let squirm-decisions get-decisions target self "squirm-from"
-;    let squirm-cost get-decisions-cost squirm-decisions
-;
-;    let pickup-decisions get-decisions self target "pick-up"
-;    let pickup-cost get-decisions-cost pickup-decisions
-;
-;    ifelse ( squirm-cost > pickup-cost )
-;    [ if ( member? target carried.items) [set carried.items remove target carried.items ]]
-;    [ if ( not member? target carried.items) [set carried.items lput target carried.items ]]
-;
-;    ask target [ decisions-done squirm-decisions ]
-;    decisions-done pickup-decisions
-;
-;  ]
+  if ( target != self and is-anima1? target ) [
+
+    let squirm-decisions get-decisions target self "squirm-from"
+    let squirm-cost get-decisions-cost squirm-decisions
+
+    let pickup-decisions get-decisions self target "pick-up"
+    let pickup-cost get-decisions-cost pickup-decisions
+
+    ifelse ( squirm-cost > pickup-cost )
+    [ if ( member? target carried.items) [set carried.items remove target carried.items ]]
+    [ if ( not member? target carried.items) [set carried.items lput target carried.items ]]
+
+    ask target [ decisions-done squirm-decisions ]
+    decisions-done pickup-decisions
+
+  ]
 end
 
 to squirm-from [ target value ] ;;
 
-;  if ( target != self and is-anima1? target ) [
-;
-;    let pickup-decisions get-decisions target self "pick-up"
-;    let pickup-cost get-decisions-cost pickup-decisions
-;
-;    let squirm-decisions get-decisions self target "squirm-from"
-;    let squirm-cost get-decisions-cost squirm-decisions
-;
-;    ifelse ( squirm-cost > pickup-cost )
-;    [ ask target [ set carried.items remove myself carried.items ]]
-;    [ ask target [ set carried.items lput target carried.items ]]
-;
-;    decisions-done squirm-decisions
-;    ask target [ decisions-done pickup-decisions ]
-;
-;  ]
+  if ( target != self and is-anima1? target ) [
+
+    let pickup-decisions get-decisions target self "pick-up"
+    let pickup-cost get-decisions-cost pickup-decisions
+
+    let squirm-decisions get-decisions self target "squirm-from"
+    let squirm-cost get-decisions-cost squirm-decisions
+
+    ifelse ( squirm-cost > pickup-cost )
+    [ ask target [ set carried.items remove myself carried.items ]]
+    [ ask target [ set carried.items lput target carried.items ]]
+
+    decisions-done squirm-decisions
+    ask target [ decisions-done pickup-decisions ]
+
+  ]
 end
 
 to put-down [ target value ] ;;
@@ -902,22 +924,22 @@ end
 
 to cling-to [ target value ] ;; squirm from
 
-;  if ( target != self and is-anima1? target ) [
-;
-;    let putdown-decisions get-decisions target self "put-down"
-;    let putdown-cost get-decisions-cost putdown-decisions
-;
-;    let cling-decisions get-decisions self target "cling-to"
-;    let cling-cost get-decisions-cost cling-decisions
-;
-;    ifelse ( putdown-cost > cling-cost )
-;    [ ask target [ set carried.items remove myself carried.items ]]
-;    [ ask target [ set carried.items lput target carried.items ]]
-;
-;    decisions-done cling-decisions
-;    ask target [ decisions-done putdown-decisions ]
-;
-;  ]
+  if ( target != self and is-anima1? target ) [
+
+    let putdown-decisions get-decisions target self "put-down"
+    let putdown-cost get-decisions-cost putdown-decisions
+
+    let cling-decisions get-decisions self target "cling-to"
+    let cling-cost get-decisions-cost cling-decisions
+
+    ifelse ( putdown-cost > cling-cost )
+    [ ask target [ set carried.items remove myself carried.items ]]
+    [ ask target [ set carried.items lput target carried.items ]]
+
+    decisions-done cling-decisions
+    ask target [ decisions-done putdown-decisions ]
+
+  ]
 end
 
 to attack [ target value ] ;;
@@ -976,6 +998,15 @@ to help [ target value ]  ;; attack
     ]
   ]
 
+end
+
+
+to initialize-group
+  set hidden? true
+  set age 0
+  set color one-of base-colors
+  set meta-id random 99999999
+  move-to one-of patches
 end
 
 to mate-with [ target value ] ;;
@@ -1037,7 +1068,6 @@ to initialize-from-parents [ m f ]
   set mutation.chance 0
   set sex.ratio 0.5
   set litter.size 0
-  set stomach.capacity 0
   set conception.chance 0
   set birthing.chance 0
   set weaning.chance 0
@@ -1071,7 +1101,6 @@ to initialize-from-parents [ m f ]
   set adult-mutation-chance 0
   set adult-sex-ratio 0
   set adult-litter-size 0
-  set adult-stomach-capacity 0
   set adult-conception-chance 0
   set adult-day-perception-angle 0
   set adult-night-perception-angle 0
@@ -1271,7 +1300,7 @@ INPUTBOX
 263
 79
 path-to-experiment
-NIL
+../data/
 1
 0
 String
@@ -1294,10 +1323,10 @@ NIL
 1
 
 PLOT
-719
-133
-966
-309
+720
+106
+967
+260
 plot
 NIL
 NIL
@@ -1314,10 +1343,10 @@ PENS
 "organisms" 1.0 0 -6459832 true "" "if (useful-commands != \"age-histogram\") [ plot ( count anima1s ) ]"
 
 INPUTBOX
-719
+720
 10
-966
-127
+967
+102
 documentation-notes
 NIL
 1
@@ -1353,32 +1382,32 @@ NIL
 1
 
 OUTPUT
-719
-432
-1221
-790
+720
+383
+1222
+791
 11
 
 SLIDER
-973
-204
-1216
-237
+974
+82
+1217
+115
 plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-1.0
+2.5
 .1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-973
-240
-1216
-273
+974
+118
+1217
+151
 plant-maximum-neighbors
 plant-maximum-neighbors
 0
@@ -1401,25 +1430,25 @@ season
 11
 
 SLIDER
-973
-131
-1216
-164
+974
+46
+1217
+79
 plant-seasonality
 plant-seasonality
 0
 100
-50.0
+25.0
 5
 1
 %
 HORIZONTAL
 
 SLIDER
-973
-59
-1216
-92
+974
+10
+1217
+43
 plant-annual-cycle
 plant-annual-cycle
 10
@@ -1431,10 +1460,10 @@ ticks
 HORIZONTAL
 
 SLIDER
-973
-95
-1216
-128
+974
+154
+1217
+187
 plant-daily-cycle
 plant-daily-cycle
 1
@@ -1457,10 +1486,10 @@ sun-status
 11
 
 INPUTBOX
-973
-279
-1096
-348
+974
+230
+1097
+299
 population
 population
 1
@@ -1468,10 +1497,10 @@ population
 String
 
 INPUTBOX
-973
-353
-1096
-422
+974
+304
+1097
+373
 genotype
 NIL
 1
@@ -1479,10 +1508,10 @@ NIL
 String
 
 BUTTON
-1101
-279
-1156
-348
+1102
+230
+1157
+299
 ⟳
 reset-population
 NIL
@@ -1496,10 +1525,10 @@ NIL
 1
 
 BUTTON
-1161
-279
-1216
-312
+1162
+230
+1217
+263
 ⤒
 export-population
 NIL
@@ -1513,10 +1542,10 @@ NIL
 1
 
 BUTTON
-1161
-315
-1216
-348
+1162
+266
+1217
+299
 ⤓
 seed-population
 NIL
@@ -1530,20 +1559,20 @@ NIL
 1
 
 CHOOSER
-719
-377
-907
-422
+720
+328
+908
+373
 useful-commands
 useful-commands
 "help-me" "--------" "lotka-volterra" "age-histogram" "metafile-report" "verify-code" "check-runtime" "simulation-report" "clear-plants" "setup-plants" "clear-population" "view-genotype" "view-decisions" "add-allele" "delete-allele" "population-report"
-8
+0
 
 BUTTON
-911
-377
-966
-422
+912
+328
+967
+373
 ▷
 command
 NIL
@@ -1557,10 +1586,10 @@ NIL
 1
 
 BUTTON
-1101
-353
-1156
-422
+1102
+304
+1157
+373
 ⟳
 reset-genotype
 NIL
@@ -1574,10 +1603,10 @@ NIL
 1
 
 BUTTON
-1161
-389
-1216
-422
+1162
+340
+1217
+373
 ⤓
 seed-genotype
 NIL
@@ -1591,10 +1620,10 @@ NIL
 1
 
 BUTTON
-1161
-353
-1216
-386
+1162
+304
+1217
+337
 ⤒
 export-genotype
 NIL
@@ -1608,16 +1637,16 @@ NIL
 1
 
 SLIDER
-973
-168
-1216
-201
+974
+190
+1217
+223
 plant-quality
 plant-quality
-.01
-1
+.1
+10
 1.0
-.01
+.1
 1
 NIL
 HORIZONTAL
@@ -1640,30 +1669,20 @@ SWITCH
 79
 selection-on?
 selection-on?
-0
+1
 1
 -1000
 
 INPUTBOX
-719
-313
-966
-373
+720
+264
+967
+324
 command-input
-9295044
+[ true \"am\" \"cf\" \"MAT\" 0.009 ]
 1
 0
 String (commands)
-
-CHOOSER
-973
-10
-1216
-55
-model-structure
-model-structure
-"baseline" "aspatial" "reaper" "sower" "freelunch" "idealform" "noevolution" "nomutation"
-0
 
 @#$#@#$#@
 # B3GET 1.0.2 INFORMATION
@@ -1845,8 +1864,6 @@ When agents perform actions, for the most part this results in changes in the st
 
 ### VISIBLE 'ORGANS'
 
-These organs are visible to others.
-
 SIZE: the overall body size or mass of an individual.
 COLOR: color represents group identity and shade correlates with age.
 SEX: either "male" or "female".
@@ -1874,8 +1891,6 @@ LACTATING: females enter this state upon weaning, and are able to nurse
 SENESCENT: unable to conceive or nurse
 
 ### HIDDEN 'ORGANS'
-
-These organs are hidden from others.
 
 REPRODUCTION: determines the ability to conceive and create offspring.
 PERCEPTION: determines the ability to perceive the enivornment.
@@ -2027,12 +2042,17 @@ repeat 75 [ go ]
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="EcologySpace" repetitions="2" runMetricsEveryStep="true">
-    <setup>setup</setup>
+  <experiment name="thesis_experiment" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup-simulation</setup>
     <go>go</go>
-    <exitCondition>plant-minimum-neighbors &gt;= plant-maximum-neighbors or not any? anima1s or median [generation-number] of anima1s &gt; 100</exitCondition>
+    <exitCondition>not any? anima1s or median [generation] of anima1s &gt; 100</exitCondition>
     <enumeratedValueSet variable="path-to-experiment">
-      <value value="&quot;../output/original/&quot;"/>
+      <value value="&quot;experiments/thesis/&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="global-deterioration-rate">
+      <value value="-1.0E-4"/>
+      <value value="-0.001"/>
+      <value value="-0.01"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="collect-data?">
       <value value="true"/>
@@ -2040,49 +2060,65 @@ repeat 75 [ go ]
     <enumeratedValueSet variable="selection-on?">
       <value value="false"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="model-structure">
-      <value value="&quot;original&quot;"/>
+    <enumeratedValueSet variable="plant-annual-cycle">
+      <value value="1000"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="deterioration-rate">
-      <value value="-0.1"/>
+    <enumeratedValueSet variable="plant-seasonality">
+      <value value="0"/>
+      <value value="50"/>
+      <value value="100"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="plant-minimum-neighbors" first="0" step="0.5" last="8"/>
+    <steppedValueSet variable="plant-maximum-neighbors" first="0" step="0.5" last="8"/>
+    <enumeratedValueSet variable="population">
+      <value value="&quot;popula7ion&quot;"/>
+      <value value="&quot;c0mmunity&quot;"/>
+      <value value="&quot;s33d&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype">
+      <value value="&quot;g3notype&quot;"/>
+      <value value="&quot;sta7us&quot;"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="chimps" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup-simulation</setup>
+    <go>go</go>
+    <exitCondition>not any? anima1s or median [generation-number] of anima1s &gt; 10</exitCondition>
+    <enumeratedValueSet variable="collect-data?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-quality">
+      <value value="1"/>
+      <value value="1.5"/>
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-seasonality">
+      <value value="0"/>
+      <value value="50"/>
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="population">
+      <value value="&quot;chimps&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="selection-on?">
+      <value value="true"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="plant-annual-cycle">
       <value value="1000"/>
     </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+      <value value="3"/>
+    </enumeratedValueSet>
     <enumeratedValueSet variable="plant-daily-cycle">
       <value value="10"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-seasonality">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-quality">
-      <value value="1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-minimum-neighbors">
-      <value value="0"/>
-      <value value="1"/>
-      <value value="2"/>
-      <value value="3"/>
-      <value value="4"/>
-      <value value="5"/>
-      <value value="6"/>
-      <value value="7"/>
-    </enumeratedValueSet>
     <enumeratedValueSet variable="plant-maximum-neighbors">
-      <value value="1"/>
-      <value value="2"/>
-      <value value="3"/>
       <value value="4"/>
-      <value value="5"/>
-      <value value="6"/>
-      <value value="7"/>
       <value value="8"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="population">
-      <value value="&quot;population&quot;"/>
-      <value value="&quot;population&quot;"/>
-      <value value="&quot;population&quot;"/>
-      <value value="&quot;population&quot;"/>
+    <enumeratedValueSet variable="genotype">
+      <value value="&quot;gCHIMP&quot;"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>

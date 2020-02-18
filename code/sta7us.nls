@@ -198,7 +198,6 @@ to sta7us-do-action [ action-code target value ]
     if action-code = "NPA" [ night-perception-angle value ]
     if action-code = "APA" [ audio-perception-angle value ]
     if action-code = "VCR" [ vocal-range value ]
-    if action-code = "STC" [ stomach-capacity value ]
     if action-code = "ICC" [ conception-chance value ]
     if action-code = "MTR" [ mutation-rate value ]
     if action-code = "SXR" [ sex-ratio value ]
@@ -273,7 +272,7 @@ to-report action-code-list
     "LTS" "LEV" "TRT" "TLF" "GFD" 
     "HED" "SAC" "SBC" "SCC" "SAO" 
     "SBO" "SCO" "INC" "CKI" "GVB" 
-    "MOV" "AWY" "STC"
+    "MOV" "AWY"
     "CKB" "CKJ" "CKW"
     "CKA" "CKS" "DSC" 
     "GFT" "RFT" "EAT" "SQM" "CLG"

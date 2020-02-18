@@ -177,12 +177,10 @@ end
 ; OPERATORS
 ;--------------------------------------------------------------------------------------------------------------------
 
-; behaviorspace ; identity 
-
-to record-simulation ; max population size, min population size, average pop size, average plant abundance, min, max, how many generations evolved 
+to record-simulation
   export-turtle-to 
-  ( word "../" path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "simulations.csv" )
-  ( list "date-and-time" "model-version" "simulation-id" 
+  (word path-to-experiment "/simulations.csv" )
+  (list "date-and-time" "model-version" "simulation-id" 
     "population" "genotype"
     "plant-annual-cycle" "plant-seasonality" 
     "plant-minimum-neighbors" "plant-maximum-neighbors" 
@@ -198,71 +196,33 @@ end
 
 to scan-simulation
   export-turtle-to 
-  (word "../output/" path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] simulation-id ".csv" )
-  (list 
-    "date-and-time" 
-    "model-version" 
-    "simulation-id" 
-    "population" 
-    "genotype"
-    "plant-annual-cycle" 
-    "plant-seasonality" 
-    "plant-minimum-neighbors" 
-    "plant-maximum-neighbors" 
-    "plant-daily-cycle" 
-    "plant-quality"       
-    "world-width" 
-    "world-height"
-    "documentation-notes" 
-    "ticks"
-    "deterioration-rate" 
-    "selection-rate"
-    "collect-data?" 
-    "selection-on?"
+  (word path-to-experiment "/" simulation-id ".csv" )
+  (list "date-and-time" "model-version" "simulation-id" 
+    "population" "genotype"
+    "plant-annual-cycle" "plant-seasonality" 
+    "plant-minimum-neighbors" "plant-maximum-neighbors" 
+    "plant-daily-cycle" "plant-quality"       
+    "world-width" "world-height"
+    "documentation-notes" "ticks"
+    "deterioration-rate" "selection-rate"
+    "collect-data?" "selection-on?"
     "path-to-experiment"
-    "useful-commands" 
-    "command-input" 
-    "world-population-density" 
-    "world-plant-abundance"
-    "world-population-size" 
-    "mean-generation-number" 
-    "number-of-females" 
-    "number-of-males"
-    "number-of-gestatees" 
-    "number-of-infants"
-    "number-of-juveniles" 
-    "number-of-adults" 
-    "number-of-senescents"
-    "number-of-cycling-females" 
-    "number-of-pregnant-females" 
-    "number-of-lactating-females"
-    "number-of-groups" 
-    "number-of-living-organisms" 
-    "number-of-dead-organisms"
-    "median-living-chance" 
-    "median-natal-group-size"
-    "median-age-at-birth" 
-    "median-age-at-weaning" 
-    "median-age-at-sexial-maturity"
-    "median-age-at-senescence" 
-    "median-age-at-death" 
-    "median-adult-living-chance"
-    "median-adult-body-size" 
-    "median-adult-body-shade" 
-    "median-adult-mutation-chance" 
-    "median-adult-sex-ratio"
-    "median-adult-litter-size" 
-    "median-adult-conception-chance" 
-    "median-adult-day-perception-angle"
-    "median-adult-night-perception-angle" 
-    "median-adult-audio-perception-angle" 
-    "median-adult-day-perception-range"
-    "median-adult-night-perception-range" 
-    "median-adult-audio-perception-range" 
-    "median-adult-vocal-range"
-    "median-adult-alpha-chance" 
-    "median-adult-beta-chance" 
-    "median-adult-gamma-chance"
+    "useful-commands" "command-input" 
+    "world-population-density" "world-plant-abundance"
+    "world-population-size" "mean-generation-number" 
+    "number-of-females" "number-of-males"
+    "number-of-gestatees" "number-of-infants"
+    "number-of-juveniles" "number-of-adults" "number-of-senescents"
+    "number-of-cycling-females" "number-of-pregnant-females" "number-of-lactating-females"
+    "number-of-groups" "number-of-living-organisms" "number-of-dead-organisms"
+    "median-living-chance" "median-natal-group-size"
+    "median-age-at-birth" "median-age-at-weaning" "median-age-at-sexial-maturity"
+    "median-age-at-senescence" "median-age-at-death" "median-adult-living-chance"
+    "median-adult-body-size" "median-adult-body-shade" "median-adult-mutation-chance" "median-adult-sex-ratio"
+    "median-adult-litter-size" "median-adult-conception-chance" "median-adult-day-perception-angle"
+    "median-adult-night-perception-angle" "median-adult-audio-perception-angle" "median-adult-day-perception-range"
+    "median-adult-night-perception-range" "median-adult-audio-perception-range" "median-adult-vocal-range"
+    "median-adult-alpha-chance" "median-adult-beta-chance" "median-adult-gamma-chance"
 ;    "percent-mother-initiated-birth" "percent-mother-initiated-weaning"
 ;    "median-distance-traveled" "median-foraging-gains" "median-foraging-losses"
 ;    "median-helping-benefit" "median-helping-cost" "median-male-unique-mates"  "median-female-unique-mates"
@@ -273,240 +233,85 @@ end
 
 to record-group
   export-turtle-to 
-  (word "../output/" path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "group_census.csv" ) 
-  (list 
-    "date-and-time" 
-    "model-version" 
-    "simulation-id" 
-    "ticks" 
-    "meta-id" 
-    "color" 
-    "xcor" 
-    "ycor" 
-    "my-creator" )
+  (word path-to-experiment "/groups.csv" ) 
+  (list "date-and-time" "model-version" "simulation-id" "ticks" "meta-id" "color" "xcor" "ycor" "my-creator" )
 end
 
 to record-anima1
   export-turtle-to
-  (word "../output/" path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "agent_census.csv" )
-  (list 
-    "date-and-time" 
-    "model-version" 
-    "simulation-id" 
-    "plant-annual-cycle" 
-    "plant-seasonality" 
-    "plant-minimum-neighbors"
-    "plant-maximum-neighbors" 
-    "plant-daily-cycle" 
-    "plant-quality"
-    "ticks" 
-    "focal-subject" 
-    "meta-id" 
-    "generation-number" 
-    "mother-identity" 
-    "father-identity"  
-    "natal-group-id" 
-    "natal-group-size" 
-    "biological.sex" 
-    "chromosome.I" 
-    "chromosome.II"
-    "cause-of-death" 
-    "age-at-death-in-years" 
-    "life-history-at-death" 
-    "fertility-at-death" 
-    "energy-at-death" 
-    "living-chance-at-death"
-    "ticks-at-conception" 
-    "ticks-at-birth" 
-    "ticks-at-weaning" 
-    "ticks-at-sexual-maturity"
-    "ticks-at-senescence" 
-    "ticks-at-death"
-    "adult-living-chance" 
-    "adult-body-size" 
-    "adult-body-shade"
-    "adult-mutation-chance" 
-    "adult-sex-ratio" 
-    "adult-litter-size"
-    "adult-conception-chance" 
-    "adult-day-perception-angle" 
-    "adult-night-perception-angle"
-    "adult-audio-perception-angle" 
-    "adult-day-perception-range" 
-    "adult-night-perception-range"
-    "adult-audio-perception-range" 
-    "adult-vocal-range" 
-    "adult-alpha-chance"
-    "adult-beta-chance" 
-    "adult-gamma-chance" 
-    "adult-body-size" 
-    "adult-body-shade" 
-    "adult-perception-range"
-    "adult-mutation-chance" 
-    "adult-sex-ratio" 
-    "adult-litter-size" 
-    "adult-conception-chance" 
-    "mother-initiated-birth" 
-    "mother-initiated-weaning"
-    "lifetime-foraging-gains" 
-    "lifetime-foraging-losses" 
-    "lifetime-helping-benefit" 
-    "lifetime-helping-cost"
-    "female-female-ingroup-helping" 
-    "male-male-ingroup-helping" 
-    "female-male-ingroup-helping"
-    "lifetime-matings-count" 
-    "lifetime-mates-count" 
-    "lifetime-matings" 
-    "lifetime-conceptions-count" 
-    "lifetime-infanticide-count"
-    "lifetime-group-transfers" 
-    "lifetime-distance-traveled" 
-    "lifetime-cells-occupied" 
+  (word path-to-experiment "/census.csv" )
+  (list "date-and-time" "model-version" "simulation-id" 
+    "plant-annual-cycle" "plant-seasonality" "plant-minimum-neighbors"
+    "plant-maximum-neighbors" "plant-daily-cycle" "plant-quality"
+    "ticks" "focal-subject" "meta-id" "generation-number" 
+    "mother-identity" "father-identity"  "natal-group-id" "natal-group-size" 
+    "biological.sex" "chromosome.I" "chromosome.II"
+    "cause-of-death" "age-at-death-in-years" "life-history-at-death" 
+    "fertility-at-death" "energy-at-death" "living-chance-at-death"
+    "ticks-at-conception" "ticks-at-birth" "ticks-at-weaning" "ticks-at-sexual-maturity"
+    "ticks-at-senescence" "ticks-at-death"
+    "adult-living-chance" "adult-body-size" "adult-body-shade"
+    "adult-mutation-chance" "adult-sex-ratio" "adult-litter-size"
+    "adult-conception-chance" "adult-day-perception-angle" "adult-night-perception-angle"
+    "adult-audio-perception-angle" "adult-day-perception-range" "adult-night-perception-range"
+    "adult-audio-perception-range" "adult-vocal-range" "adult-alpha-chance"
+    "adult-beta-chance" "adult-gamma-chance" "adult-body-size" "adult-body-shade" "adult-perception-range"
+    "adult-mutation-chance" "adult-sex-ratio" "adult-litter-size" "adult-conception-chance" 
+    "mother-initiated-birth" "mother-initiated-weaning"
+    "lifetime-foraging-gains" "lifetime-foraging-losses" 
+    "lifetime-helping-benefit" "lifetime-helping-cost"
+    "female-female-ingroup-helping" "male-male-ingroup-helping" "female-male-ingroup-helping"
+    "lifetime-matings-count" "lifetime-mates-count" "lifetime-matings" 
+    "lifetime-conceptions-count" "lifetime-infanticide-count"
+    "lifetime-group-transfers" "lifetime-distance-traveled" "lifetime-cells-occupied" 
   )
 end 
 
 to scan-group
   export-turtle-to 
-  (word "../output/" path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "group_scan.csv" )  
-  (list 
-    "date-and-time" 
-    "model-version" 
-    "simulation-id" 
-    "ticks" 
-    "meta-id" 
-    "total-birth-count" 
-    "current-group-size" 
-    "adult-female-group-size" 
-    "world-population-density" 
-    "total-energy-gained" 
-    "gestatee-female-energy-gained" 
-    "gestatee-male-energy-gained" 
-    "infant-female-energy-gained" 
-    "infant-male-energy-gained" 
-    "juvenile-female-energy-gained" 
-    "juvenile-male-energy-gained" 
-    "adult-cycling-energy-gained" 
-    "adult-pregnant-energy-gained" 
-    "adult-lactating-energy-gained" 
-    "adult-male-energy-gained" 
-    "senescent-female-energy-gained" 
-    "senescent-male-energy-gained" 
+  (word path-to-experiment "/group_scan.csv" )  
+  (list "date-and-time" "model-version" "simulation-id" "ticks" "meta-id" 
+    "total-birth-count" "current-group-size" "adult-female-group-size" "world-population-density" "total-energy-gained" 
+    "gestatee-female-energy-gained" "gestatee-male-energy-gained" "infant-female-energy-gained" "infant-male-energy-gained" 
+    "juvenile-female-energy-gained" "juvenile-male-energy-gained" "adult-cycling-energy-gained" "adult-pregnant-energy-gained" 
+    "adult-lactating-energy-gained" "adult-male-energy-gained" "senescent-female-energy-gained" "senescent-male-energy-gained" 
     "distance-traveled" )
 end
 
 to scan-anima1
   export-turtle-to 
-  (word "../output/" path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "agent_scan.csv" ) 
-  (list 
-    "date-and-time" 
-    "model-version" 
-    "simulation-id" 
-    "ticks" 
-    "meta-id" 
-    "color" 
-    "heading" 
-    "xcor" 
-    "ycor" 
-    "age" 
-    "generation-number"
-    "biological.sex" 
-    "life.history" 
-    "female.fertility" 
-    "energy.supply"
-    "group.identity" 
-    "is.dead" 
-    "alpha.signal" 
-    "beta.signal" 
-    "gamma.signal"
-    "living.chance" 
-    "body.size" 
-    "body.shade" 
-    "stomach.capacity"
-    "mutation.chance"
-    "sex.ratio" 
-    "litter.size" 
-    "conception.chance"
-    "day.perception.angle" 
-    "night.perception.angle" 
-    "audio.perception.angle"
-    "day.perception.range" 
-    "night.perception.range" 
-    "audio.perception.range" 
-    "vocal.range"
-    "alpha.chance" 
-    "beta.chance" 
-    "gamma.chance"
-    "birthing.chance" 
-    "weaning.chance" 
-    "infancy.chance"
-    "juvenility.chance" 
-    "adulthood.chance" 
-    "senescency.chance"
-    "x.magnitude" 
-    "y.magnitude"
-    "distance-traveled" 
-    "foraging-gains" 
-    "foraging-losses" 
-    "helping-benefit" 
-    "helping-cost" )
+  (word path-to-experiment "/animal_scan.csv" ) 
+  (list "date-and-time" "model-version" "simulation-id" "ticks" "meta-id" 
+    "color" "heading" "xcor" "ycor" "age" "generation-number"
+    "biological.sex" "life.history" "female.fertility" "energy.supply"
+    "group.identity" "is.dead" "alpha.signal" "beta.signal" "gamma.signal"
+    "living.chance" "body.size" "body.shade" "mutation.chance"
+    "sex.ratio" "litter.size" "conception.chance"
+    "day.perception.angle" "night.perception.angle" "audio.perception.angle"
+    "day.perception.range" "night.perception.range" "audio.perception.range" "vocal.range"
+    "alpha.chance" "beta.chance" "gamma.chance"
+    "birthing.chance" "weaning.chance" "infancy.chance"
+    "juvenility.chance" "adulthood.chance" "senescency.chance"
+    "x.magnitude" "y.magnitude"
+    "distance-traveled" "foraging-gains" "foraging-losses" "helping-benefit" "helping-cost" )
 end
  
 to scan-focal
   export-turtle-to 
-  (word "../output/" path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "focal_scan.csv" ) 
-  (list 
-    "date-and-time" 
-    "model-version" 
-    "simulation-id" 
-    "ticks" 
-    "meta-id" 
-    "color" 
-    "heading" 
-    "xcor" 
-    "ycor" 
-    "age" 
-    "generation-number"
-    "biological.sex" 
-    "life.history" 
-    "female.fertility" 
-    "energy.supply"
-    "group.identity" 
-    "is.dead" 
-    "alpha.signal" 
-    "beta.signal" 
-    "gamma.signal"
-    "living.chance" 
-    "body.size" 
-    "body.shade" 
-    "stomach.capacity" 
-    "mutation.chance"
-    "sex.ratio" 
-    "litter.size" 
-    "conception.chance"
-    "day.perception.angle" 
-    "night.perception.angle" 
-    "audio.perception.angle"
-    "day.perception.range" 
-    "night.perception.range" 
-    "audio.perception.range" 
-    "vocal.range"
-    "alpha.chance" 
-    "beta.chance" 
-    "gamma.chance"
-    "birthing.chance" 
-    "weaning.chance" 
-    "infancy.chance"
-    "juvenility.chance" 
-    "adulthood.chance" 
-    "senescency.chance"
-    "x.magnitude" 
-    "y.magnitude"
-    "distance-traveled" 
-    "foraging-gains" 
-    "foraging-losses" 
-    "helping-benefit" 
-    "helping-cost" )
+  (word path-to-experiment "/focal_scan.csv" ) 
+  (list "date-and-time" "model-version" "simulation-id" "ticks" "meta-id" 
+    "color" "heading" "xcor" "ycor" "age" "generation-number"
+    "biological.sex" "life.history" "female.fertility" "energy.supply"
+    "group.identity" "is.dead" "alpha.signal" "beta.signal" "gamma.signal"
+    "living.chance" "body.size" "body.shade" "mutation.chance"
+    "sex.ratio" "litter.size" "conception.chance"
+    "day.perception.angle" "night.perception.angle" "audio.perception.angle"
+    "day.perception.range" "night.perception.range" "audio.perception.range" "vocal.range"
+    "alpha.chance" "beta.chance" "gamma.chance"
+    "birthing.chance" "weaning.chance" "infancy.chance"
+    "juvenility.chance" "adulthood.chance" "senescency.chance"
+    "x.magnitude" "y.magnitude"
+    "distance-traveled" "foraging-gains" "foraging-losses" "helping-benefit" "helping-cost" )
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -534,11 +339,11 @@ to-report number-of-living-organisms report count anima1s with [ is.dead = false
 to-report number-of-dead-organisms report count anima1s with [ is.dead = true ] end
 to-report median-living-chance report median [living.chance] of anima1s end
 to-report median-natal-group-size report median [natal-group-size] of anima1s end
-to-report median-age-at-birth report median [ticks-at-birth - ticks-at-conception] of anima1s with [ ticks-at-birth > 0 ] end
-to-report median-age-at-weaning report median [ticks-at-weaning - ticks-at-conception] of anima1s with [ ticks-at-weaning > 0 ]  end
-to-report median-age-at-sexial-maturity report median [ticks-at-sexual-maturity - ticks-at-conception] of anima1s with [ ticks-at-sexual-maturity > 0 ] end
-to-report median-age-at-senescence report median [ticks-at-senescence - ticks-at-conception] of anima1s with [ ticks-at-senescence > 0 ] end
-to-report median-age-at-death report median [ticks-at-death - ticks-at-conception] of anima1s with [ ticks-at-death > 0 ] end
+to-report median-age-at-birth report median [ticks-at-birth - ticks-at-conception] of anima1s end
+to-report median-age-at-weaning report median [ticks-at-birth - ticks-at-conception] of anima1s end
+to-report median-age-at-sexial-maturity report median [ticks-at-birth - ticks-at-conception] of anima1s end
+to-report median-age-at-senescence report median [ticks-at-senescence - ticks-at-conception] of anima1s end
+to-report median-age-at-death report median [ticks-at-death - ticks-at-conception] of anima1s end
 to-report median-adult-living-chance report median [living.chance] of anima1s with [ life.history = "adult" ] end
 to-report median-adult-body-size report median [body.size] of anima1s with [ life.history = "adult" ] end
 to-report median-adult-body-shade report median [body.shade] of anima1s with [ life.history = "adult" ] end
@@ -574,7 +379,7 @@ to-report current-group-size report group-size end
 to-report group-members report anima1s with [ group.identity = [meta-id] of myself ] end
 to-report adult-female-group-size report count anima1s with [ group.identity = [meta-id] of myself and biological.sex = "female" and life.history = "adult" ] end
   
-;:::: individuals ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+;:::: anima1s :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
   
 to-report age-at-death-in-years report precision ( age / plant-annual-cycle ) 3 end
 to-report life-history-at-death report life.history end
