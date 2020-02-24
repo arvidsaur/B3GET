@@ -14,7 +14,7 @@ extensions [ csv profiler table ]
 __includes [
   "commands.nls"
   "data.nls"
-  "files.nls"
+  "results.nls"
   "g3notype.nls"
   "import-export.nls"
   "selection.nls"
@@ -178,24 +178,16 @@ to setup-parameters
   set selection-rate 0.0001
 end
 
-to-report how-many-ticks? report 10 end
-
 to setup
-  if ( simulation-id != 0 ) [ save-world ]
+  if ( simulation-id != 0 ) [ record-world ]
   clear-all
   reset-ticks
   setup-parameters
   setup-plants
-  set simulation-id 0
-  update-simulation
-  import-population (word path-to-experiment "/" population ".csv")
-  import-genotype (word path-to-experiment "/" genotype ".txt")
+  set simulation-id generate-simulation-id
+  import-population
+  import-genotype
   clear-output
-end
-
-to reset-simulation
-  set simulation-id 0
-  update-simulation
 end
 
 to setup-plants
@@ -207,7 +199,10 @@ to setup-plants
 end
 
 to save
-  update-simulation
+  ifelse ( simulation-id = 0 )
+  [ set simulation-id generate-simulation-id ]
+  [ set documentation-notes (word "Simulation " simulation-id " saved. " documentation-notes )
+    update-metafile "simulation" simulation-id ]
 end
 
 to reset-population
@@ -215,11 +210,11 @@ to reset-population
 end
 
 to export-population
-  save-population ( word path-to-experiment "/" population ".csv")
+  save-population
 end
 
 to seed-population
-  import-population (word path-to-experiment "/" population ".csv")
+  import-population
 end
 
 to reset-genotype
@@ -227,13 +222,17 @@ to reset-genotype
 end
 
 to export-genotype
-  ask anima1s with [ read-from-string but-first genotype = meta-id ] [ save-genotype ( word path-to-experiment "/" genotype ".txt") ]
+  ask anima1s with [ read-from-string but-first genotype = meta-id ] [ save-genotype ]
 end
 
 to seed-genotype
-  import-genotype (word path-to-experiment "/" genotype ".txt")
+  import-genotype
 end
 
+to-report generate-simulation-id
+  let alphabet [ "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z" ]
+  report ( word "s" random 99 one-of alphabet one-of alphabet one-of alphabet )
+end
 
 ;--------------------------------------------------------------------------------------------------------------------
 ;
@@ -273,7 +272,7 @@ to go
       precision mean [generation-number] of anima1s 3 " generations, and contains "
       count anima1s with [ not is.dead ] " living organisms.") ]
 
-  if collect-data? [ collect-data ]
+  if output-results? [ output-results ]
   if selection-on? [ artificial-selection ]
 
   tick
@@ -347,7 +346,8 @@ to deteriorate
   set body.shade get-updated-value body.shade deterioration-rate
 end
 
-to check-mortality
+to check-mortality ; REAPER
+
   if ( random-float 1.0 > living.chance ) [
     (ifelse
 
@@ -375,6 +375,8 @@ end
 ;--------------------------------------------------------------------------------------------------------------------
 
 ; GLOBAL REPORTERS
+
+to-report how-many-ticks? report 10 end
 
 to-report get-time
   report ifelse-value ( ( cos (( 360 / plant-daily-cycle ) * ticks)) > 0 ) [ "DAY" ] [ "NIGHT" ]
@@ -626,7 +628,7 @@ to go-forward [ value ] ;;
   forward travel-distance
   foreach carried.items [ object ->
     if (object != nobody) [ ask object [ move-to myself ] ]]
-  if collect-data? [
+  if output-results? [
     set distance-traveled distance-traveled + travel-distance
     if not member? patch-here cells-occupied [ set cells-occupied lput patch-here cells-occupied ]]
 end
@@ -696,7 +698,7 @@ to update-to-infant
   set female.fertility " "
   set hidden? false
   set ticks-at-birth ticks
-  if (collect-data?) [ ask current-group [ set total-birth-count total-birth-count + 1 ]]
+  if (output-results?) [ ask current-group [ set total-birth-count total-birth-count + 1 ]]
 end
 
 to check-juvenility [ value ]
@@ -817,7 +819,7 @@ to eat [ target value ] ;;?
   update-energy energy-eaten
   ask target [ update-energy ( - energy-eaten ) ]
 
-  if (collect-data?) [
+  if (output-results?) [
 
     set foraging-gains foraging-gains + energy-eaten
     set foraging-losses foraging-losses + value
@@ -850,7 +852,7 @@ to join-group-of [ target value ]
   if ( is-anima1? target and random-float 1.0 < value ) [
     set previous-group-id group.identity
     set group.identity [group.identity] of target
-    if collect-data? [ set group-transfers-list lput [meta-id] of current-group group-transfers-list ]
+    if output-results? [ set group-transfers-list lput [meta-id] of current-group group-transfers-list ]
   ]
 end
 
@@ -977,7 +979,7 @@ to help [ target value ]  ;; attack
 
     if ( is-anima1? target ) [
 
-      if (collect-data? and target != self ) [ ; Hamilton's Rule
+      if (output-results? and target != self ) [ ; Hamilton's Rule
         let r relatedness-with target
         ;print (word " me: " self " living.chance: " living.chance "  target: " target "   relatedness " relatedness-with target " ([living.chance] of target) " ([living.chance] of target)  "   value:"  value " update  " (get-updated-value [living.chance] of target ( value )) "  total: " (( get-updated-value [living.chance] of target ( value ) ) - [living.chance] of target ))
         let B ( get-updated-value [living.chance] of target ( value ) ) - [living.chance] of target ; how much target benefitted
@@ -1021,7 +1023,7 @@ to mate-with [ target value ] ;;
     ask target [ decisions-done (list one-mate) ]
 
     ; DATA
-    if collect-data? [
+    if output-results? [
       set matings-list lput [meta-id] of target matings-list
       ask target [ set matings-list lput [meta-id] of myself matings-list ]]]
 end
@@ -1038,7 +1040,7 @@ to conceive-with [ target ] ; FEMALE PROCEDURE
       set female.fertility "pregnant"
 
       ; DATA
-      if collect-data? [
+      if output-results? [
         set conceptions-list lput [meta-id] of target conceptions-list
         ask target [ set conceptions-list lput [meta-id] of myself conceptions-list ]]]]
 end
@@ -1302,7 +1304,7 @@ INPUTBOX
 263
 79
 path-to-experiment
-../data/
+../results/
 1
 0
 String
@@ -1350,7 +1352,7 @@ INPUTBOX
 967
 102
 documentation-notes
-Simulation s44UUR created. Simulation sAGA23 save to wAGA23-1. Population Geladas imported. Simulation s91VTI created. Simulation sAGB02 save to wAGB02-1. Population Geladas imported. Simulation s88KVP created. Simulation sACA17 save to wACA17-1. Population Chimpanzees imported. Simulation s98UNM created. Simulation sACA15 save to wACA15-1. Population Chimpanzees imported. Simulation s95HPQ created. Simulation sAGA13 save to wAGA13-1. Population Geladas imported. Simulation s19VPM created. Simulation sAHB01 save to wAHB01-1. Population Hamadryas imported. Simulation s69WWY created. Simulation sACA08 save to wACA08-1. Population Chimpanzees imported. Simulation s76YMW created. Simulation sACA06 save to wACA06-1. Population Chimpanzees imported. Simulation s22EVH created. Simulation sAHA04 save to wAHA04-1. Population Hamadryas imported. Simulation s94AXD created. Simulation sACA01 save to wACA01-1. Population Chimpanzees imported. Simulation s70ODQ created. Simulation sACB11 save to wACB11-45. Population Chimpanzees imported. Simulation s40MST created. Simulation sACA08 save to wACA08-100. Population Chimpanzees imported. Simulation s6DUQ created. Simulation sACA07 save to wACA07-100. Population Chimpanzees imported. Simulation s35GCK created. Simulation sACA06 save to wACA06-100. Population Chimpanzees imported. Simulation s82TAB created. Simulation sACA05 save to wACA05-100. Population Chimpanzees imported. Simulation s10UDH created. Simulation sACA04 save to wACA04-100. Population Chimpanzees imported. Simulation s92TWA created. Simulation sACA03 save to wACA03-100. Population Chimpanzees imported. Simulation s33KTT created. Simulation sACA02 save to wACA02-100. Population Chimpanzees imported. Simulation s88EMW created. Simulation sACA01 save to wACA01-100. Population Chimpanzees imported. Simulation s22HYJ created. Simulation s38WRF save to w38WRF-0. Simulation s38WRF created. Simulation sAHA02 save to wAHA02-100. Population Hamadryas imported. Simulation s62OIB created. Simulation sACA01 save to wACA01-100. Population Chimpanzees imported. Simulation s95VWG created. Simulation s83PXA save to w83PXA-76. Population Hamadryas imported. Simulation s83PXA created. Simulation s63VBU save to w63VBU-100. Population Hamadryas imported. Simulation s63VBU created. Simulation s31JUZ save to w31JUZ-100. Population Hamadryas imported. Simulation s31JUZ created. Simulation s97TVV save to w97TVV-100. Population Chimpanzees imported. Simulation s97TVV created. Simulation s72CEO save to w72CEO-72. 
+NIL
 1
 0
 String
@@ -1399,7 +1401,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-2.0
+1.0
 .1
 1
 NIL
@@ -1414,7 +1416,7 @@ plant-maximum-neighbors
 plant-maximum-neighbors
 0
 8
-4.0
+5.0
 .1
 1
 NIL
@@ -1440,7 +1442,7 @@ plant-seasonality
 plant-seasonality
 0
 100
-25.0
+50.0
 5
 1
 %
@@ -1493,7 +1495,7 @@ INPUTBOX
 1097
 299
 population
-Geladas
+Olives
 1
 0
 String
@@ -1568,7 +1570,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "--------" "lotka-volterra" "age-histogram" "metafile-report" "verify-code" "check-runtime" "simulation-report" "clear-plants" "setup-plants" "clear-population" "view-genotype" "view-decisions" "add-allele" "delete-allele" "population-report"
-0
+5
 
 BUTTON
 912
@@ -1647,7 +1649,7 @@ plant-quality
 plant-quality
 .1
 10
-1.0
+0.5
 .1
 1
 NIL
@@ -1658,8 +1660,8 @@ SWITCH
 10
 631
 43
-collect-data?
-collect-data?
+output-results?
+output-results?
 0
 1
 -1000
@@ -2058,12 +2060,21 @@ ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
   set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "B" plant-minimum-neighbors plant-maximum-neighbors )
 ]</setup>
     <go>go</go>
-    <final>print simulation-id</final>
+    <timeLimit steps="101"/>
     <exitCondition>not any? anima1s or median [generation-number] of anima1s &gt; 100</exitCondition>
     <enumeratedValueSet variable="path-to-experiment">
-      <value value="&quot;../data/&quot;"/>
+      <value value="&quot;../results/&quot;"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="collect-data?">
+    <enumeratedValueSet variable="model-structure">
+      <value value="&quot;baseline&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-reader">
+      <value value="&quot;status&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="deterioration-rate">
+      <value value="-0.01"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="output-results?">
       <value value="true"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="selection-on?">
@@ -2076,10 +2087,10 @@ ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
       <value value="10"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="plant-seasonality">
-      <value value="25"/>
+      <value value="50"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="plant-quality">
-      <value value="1"/>
+      <value value="0.5"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="plant-minimum-neighbors">
       <value value="0"/>

@@ -7,397 +7,279 @@
 ;  88.  .88 88.  .88   88   88.  .88 
 ;  `88888P8 `88888P8   dP   `88888P8 
 ;
-; © 2019 K N Crouse
+; © 2020 K N Crouse
 ;----------------------------------------------------------------------------------------------     
 ; 
-; This B3GET extension contains all functions related to data collection. Data collection can 
-; be turned ON or OFF with the COLLECT-DATA? switch on the user interface. When ON is selected, 
-; the COLLECT-DATA function is applied once every timestep. The following list contains all
-; agent state variables, accessible during data collection to record complete agent histories.
-; 
-;  List of state variables:
-;
-;  PHENOTYPE VARIABLES
-;  -------------------
-;  visible
-;  -------
-;  biological.sex
-;  life.history
-;  female.fertility
-;  energy.supply
-;  group.identity
-;  is.dead
-;  alpha.signal
-;  beta.signal
-;  gamma.signal
-;  living.chance
-;  body.size
-;  body.shade
-;
-;  identity.I
-;  identity.II
-;  carried.items
-;
-;  hidden
-;  ------
-;  mutation.chance
-;  sex.ratio
-;  litter.size
-;  conception.chance
-;  day.perception.angle
-;  night.perception.angle
-;  audio.perception.angle
-;  day.perception.range
-;  night.perception.range
-;  audio.perception.range
-;  vocal.range
-;  alpha.chance
-;  beta.chance
-;  gamma.chance
-;  birthing.chance
-;  weaning.chance
-;  infancy.chance
-;  juvenility.chance
-;  adulthood.chance
-;  senescency.chance
-;  x.magnitude
-;  y.magnitude
-;
-;  chromosome.I
-;  chromosome.II
-;  decision.vectors
-;  memory.storage
-;
-;  TRACKING VARIABLES
-;  -----------------
-;  hidden
-;  ------
-;  age
-;  mother-identity
-;  father-identity
-;  generation-number
-;  previous-group-id
-;  natal-group-id
-;  natal-group-size
-;  ticks-at-conception
-;  ticks-at-birth
-;  ticks-at-weaning
-;  ticks-at-sexual-maturity
-;  ticks-at-senescence
-;  ticks-at-death
-;  adult-living-chance
-;  adult-body-size
-;  adult-body-shade
-;  adult-mutation-chance
-;  adult-sex-ratio
-;  adult-litter-size
-;  adult-conception-chance
-;  adult-day-perception-angle
-;  adult-night-perception-angle
-;  adult-audio-perception-angle
-;  adult-day-perception-range
-;  adult-night-perception-range
-;  adult-audio-perception-range
-;  adult-vocal-range
-;  adult-alpha-chance
-;  adult-beta-chance
-;  adult-gamma-chance
-;  mother-initiated-birth
-;  mother-initiated-weaning
-;  distance-traveled
-;  foraging-gains
-;  foraging-losses
-;  helping-benefit
-;  helping-cost
-;  female-female-ingroup-helping
-;  male-male-ingroup-helping
-;  female-male-ingroup-helping
-;  matings-list
-;  conceptions-list
-;  group-transfers-list
-;  cells-occupied
-;  infanticide-list              
-;  cause-of-death
+; This extension contains all functions that allow users to create population and genotypes 
+; files and store metadata from a simulation. These files are stored in the data folder.
 ;
 ;----------------------------------------------------------------------------------------------
 
-to collect-data
+;----------------------------------------------------------------------------------------------
+; METAFILE FILES
+;----------------------------------------------------------------------------------------------
+
+to-report metafile-exists?
+  report file-exists? "../data/metafile.csv"
+end
+
+to setup-metafile
   
-  let verification? false   ; TRUE = runs periodic code verification checks
-  let conduct-census? true  ; TRUE = records every animal upon its death into a census
-  let record-group? false   ; TRUE = records every group upon its creation into a census
-  let sim-scans? true       ; TRUE = scans the world and population level phenomena
-  let animal-scans? false   ; TRUE = scans all animals every 100 timesteps
-  let group-scans? false    ; TRUE = scans all groups every 100 timesteps
-  let focal-follows? false  ; TRUE = small chance to record an individual's entire life
+  if ( not metafile-exists? ) [
+    
+    file-open "../data/metafile.csv"
+    csv:to-file "../data/metafile.csv" (list (list
+      "date-and-time"
+      "path-to-experiment"
+      "model-version"
+      "model-structure"
+      "genotype-reader"
+      "simulation-id"
+      "sun-status"
+      "ticks"
+      "file-type"
+      "file-name"
+      "documentation-notes"
+      "population-input" 
+      "genotype-input"
+      "plant-annual-cycle" 
+      "plant-seasonality" 
+      "plant-minimum-neighbors" 
+      "plant-maximum-neighbors" 
+      "plant-daily-cycle" 
+      "plant-quality"
+      "world-width" 
+      "world-height"
+      "deterioration-rate" 
+      "selection-rate"
+      "output-results?" 
+      "selection-on?"
+      "useful-commands"
+      "command-input"
+    ))
+    
+    file-close ]
+end
+
+to update-metafile [ type-of-file name-of-file ]
   
-  ;----------------------------------------------------------------------------------------------     
-  ; SIMULATIONS
-  ;----------------------------------------------------------------------------------------------
+  ; Save whatever is currently in the METAFILE or create new
+  if ( not metafile-exists? ) [ setup-metafile ]
+  let old-metafile csv:from-file "../data/metafile.csv"
   
-  if ( ticks = 1 ) [ crt 1 [ record-simulation die ]]
+  if documentation-notes = "" [ set documentation-notes "Metafile updated." ]
   
-  ;----------------------------------------------------------------------------------------------     
-  ; VERIFICATION
-  ;----------------------------------------------------------------------------------------------
+  ; Update METAFILE with a new row of FILE information
+  file-open "../data/metafile.csv"
+  csv:to-file "../data/metafile.csv"
+  (lput
+    (list 
+      date-and-time
+      path-to-experiment
+      model-version
+      model-structure
+      genotype-reader
+      simulation-id
+      sun-status
+      ticks
+      type-of-file
+      name-of-file
+      documentation-notes
+      population 
+      genotype
+      plant-annual-cycle 
+      plant-seasonality
+      plant-minimum-neighbors 
+      plant-maximum-neighbors
+      plant-daily-cycle 
+      plant-quality
+      world-width 
+      world-height
+      deterioration-rate
+      selection-rate
+      output-results?
+      selection-on?
+      useful-commands
+      command-input 
+    )
+    
+    old-metafile )
   
-  if ( verification? = true and random-float 1.0 < 0.0001 ) [ save-verification-to "verification.csv" ]
+  set documentation-notes ""
+  file-close
+end
+
+;----------------------------------------------------------------------------------------------
+; POPULATION FILES
+;----------------------------------------------------------------------------------------------
+
+to-report generate-population-id
+  let alphabet [ "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z" ]
+  report ( word "p" random 99 one-of alphabet one-of alphabet one-of alphabet )
+end
+
+to-report population-file-exists?
+  report file-exists? ( word "../data/" population ".csv" )
+end
+
+to import-population
+  clear-output
+  output-print " ---------------------------------------------------------------------------"
+  output-print (word " IMPORT POPULATION : " population )
+  output-print " ---------------------------------------------------------------------------"
   
-  ;----------------------------------------------------------------------------------------------     
-  ; SCANS
-  ;----------------------------------------------------------------------------------------------
+  ifelse population-file-exists? [
+    
+    import-turtles-from (word "../data/" population ".csv")
+    
+    ask anima1s [
+      
+      if (life.history = "gestatee" or life.history = "infant" ) [ die ]
+      ask anima1s with [ biological.sex = "female" and life.history = "adult" ] [ set female.fertility "cycling" ]
+      
+      set meta-id random 9999999
+      set carried.items []
+      set group-transfers-list []
+      set matings-list []
+      set conceptions-list []
+      set cells-occupied []
+      set infanticide-list []
+      set decision.vectors []
+      
+    ]
+    
+    ask groups [
+      
+      let current-group-members group-members
+      set meta-id random 9999999
+      ask current-group-members [ set group.identity [meta-id] of myself ]
+      
+    ]
+    
+    set documentation-notes (word "Population file " population " imported. " documentation-notes )
+    update-metafile "population" population
+    output-print " Population import successful."
+    
+  ][ set population "" ]
   
-  if ( ticks > 0 and ceiling (ticks / 100) = (ticks / 100) ) 
+end
+
+to save-population
+  clear-output
+  output-print " ---------------------------------------------------------------------------"
+  output-print (word " SAVE POPULATION : " population )
+  output-print " ---------------------------------------------------------------------------"
+  
+  ifelse ( file-exists? (word "../data/" population ".csv") )
   [ 
-    if ( sim-scans? ) [ scan-simulation ]
-    if ( group-scans? and any? groups ) [ ask groups [ scan-group ]]
-    if ( animal-scans? and any? anima1s ) [ ask anima1s with [ generation-number > 0 ] [ scan-anima1 ]]
+    let answer user-yes-or-no? 
+    (word "The population " population " already exists! "
+      "Would you like to: [ YES ] overwrite the existing file with current population, "
+      "[ NO ] save current population to a different randomly generated file name, "
+      "or [ HALT ] forget the whole darn thing?" )
+    ifelse ( answer ) [ file-delete (word "../data/" population ".csv") save-population ] [ set population generate-population-id save-population ]
+    
+  ][
+    
+    let selected-groups []
+    
+    let group-list ( list "breed" "meta-id"
+      "color" "heading" "xcor" "ycor"
+      "shape" "label" "label-color" "hidden?" "size" 
+      "pen-size" "pen-mode" )
+    
+    let turtle-list (list "breed" "meta-id" "age"
+      "color" "heading" "xcor" "ycor" "label" "label-color"
+      "shape" "hidden?" "size" "pen-size" "pen-mode"
+      "biological.sex" "life.history" "female.fertility" "energy.supply" 
+      "group.identity" "is.dead" "alpha.signal" "beta.signal" "gamma.signal"
+      "chromosome.I" "chromosome.II" "identity.I" "identity.II"
+      "living.chance" "body.size" "body.shade" "mutation.chance"
+      "sex.ratio" "litter.size" "conception.chance"
+      "day.perception.angle" "night.perception.angle" "audio.perception.angle"
+      "day.perception.range" "night.perception.range" "audio.perception.range"
+      "vocal.range" "alpha.chance" "beta.chance" "gamma.chance"
+      "birthing.chance" "weaning.chance" "infancy.chance"
+      "juvenility.chance" "adulthood.chance" "senescency.chance"
+      "x.magnitude" "y.magnitude" )
+    
+    ask anima1s [
+      
+      if ( not member? group.identity selected-groups ) [ set selected-groups lput group.identity selected-groups ]
+      
+      ; turtle variables can only be saved in string format
+      set chromosome.I csv:to-string chromosome.I
+      set chromosome.II csv:to-string chromosome.II
+      export-turtle-to (word "../data/" population ".csv") turtle-list 
+      set chromosome.I csv:from-string chromosome.I
+      set chromosome.II csv:from-string chromosome.II 
+      
+    ]
+    
+    foreach selected-groups [ g ->
+      ask one-of groups with [ meta-id = g ] [ export-turtle-to (word "../data/" population ".csv") group-list ]
+    ]
+    
+    set documentation-notes (word "New population " population " saved. " documentation-notes )
+    update-metafile "population" population
+    output-print " Population successfully saved."
   ]
+end
+
+;----------------------------------------------------------------------------------------------
+; GENOTYPE FILES
+;----------------------------------------------------------------------------------------------
+
+to-report generate-genotype-id
+  report ( word "g" [meta-id] of one-of anima1s  )
+end
+
+to-report genotype-file-exists?
+  report file-exists? ( word "../data/" genotype ".txt" )
+end
+
+to import-genotype
+  clear-output
+  output-print " ---------------------------------------------------------------------------"
+  output-print (word " IMPORT GENOTYPE : " genotype )
+  output-print " ---------------------------------------------------------------------------"
   
-  ;----------------------------------------------------------------------------------------------     
-  ; CENSUS
-  ;----------------------------------------------------------------------------------------------
-  
-  if ( conduct-census? ) [ ask anima1s with [ ticks-at-death > 0 and ticks = ( ticks-at-death + 1 ) and generation-number > 0 ] [ record-anima1 ] ]
-  if ( record-group? ) [ ask groups with [ age = 0 ] [ record-group ]]
-  
-  ;----------------------------------------------------------------------------------------------     
-  ; FOCAL FOLLOWS
-  ;----------------------------------------------------------------------------------------------
-  
-  ; There is a small chance to starting "following" an agent if they were born this timestep 
-  if ( focal-follows? = true and subject = nobody ) [ if ( any? anima1s with [ age = 0 and generation-number > 0 ] ) [ follow one-of anima1s with [ age = 0 and generation-number > 0 ] ]]
-  
-  ; If currently "following" an agent, take records of this subject
-  if ( focal-follows? = true and subject != nobody ) [ ask subject [ scan-focal ] ]
+  ifelse genotype-file-exists? [  
+    
+    ask anima1s [
+      
+      set chromosome.I []
+      set chromosome.II []
+      
+      file-open ( word "../data/" genotype ".txt" )
+      let first-chromosome? true 
+      while [ not file-at-end? ] [
+        let row (csv:from-row file-read-line " ")
+        (ifelse 
+          ( row = [""] ) 
+          [ set first-chromosome? false ]
+          ( first-chromosome? ) 
+          [ set chromosome.I lput row chromosome.I ]
+          [ set chromosome.II lput row chromosome.II ])
+      ]
+      file-close
+    ]
+    
+    set documentation-notes (word "Genotype " genotype " imported. " documentation-notes )
+    update-metafile "genotype" genotype
+    output-print " Genotype import successful."
+    
+  ] [ set genotype "" ]
   
 end
 
-;--------------------------------------------------------------------------------------------------------------------
-; OPERATORS
-;--------------------------------------------------------------------------------------------------------------------
-
-to record-simulation
-  export-turtle-to 
-  (word path-to-experiment "/simulations.csv" )
-  (list "date-and-time" "model-version" "simulation-id" 
-    "population" "genotype"
-    "plant-annual-cycle" "plant-seasonality" 
-    "plant-minimum-neighbors" "plant-maximum-neighbors" 
-    "plant-daily-cycle" "plant-quality"
-    "world-width" "world-height"
-    "documentation-notes" "ticks"
-    "deterioration-rate" "selection-rate"
-    "collect-data?" "selection-on?"
-    "path-to-experiment"
-    "useful-commands"
-    "command-input" )
+to save-genotype
+  clear-output
+  output-print " ---------------------------------------------------------------------------"
+  output-print (word " SAVE GENOTYPE : organism " meta-id )
+  output-print " ---------------------------------------------------------------------------"
+  (csv:to-file ( word "../data/" genotype ".txt" ) (sentence chromosome.I [[]] chromosome.II ) " ")
+  set documentation-notes (word "New genotype " genotype " saved. " documentation-notes )
+  update-metafile "genotype" genotype
+  output-print " Genotype successfully saved."
 end
-
-to scan-simulation
-  export-turtle-to 
-  (word path-to-experiment "/" simulation-id ".csv" )
-  (list "date-and-time" "model-version" "simulation-id" 
-    "population" "genotype"
-    "plant-annual-cycle" "plant-seasonality" 
-    "plant-minimum-neighbors" "plant-maximum-neighbors" 
-    "plant-daily-cycle" "plant-quality"       
-    "world-width" "world-height"
-    "documentation-notes" "ticks"
-    "deterioration-rate" "selection-rate"
-    "collect-data?" "selection-on?"
-    "path-to-experiment"
-    "useful-commands" "command-input" 
-    "world-population-density" "world-plant-abundance"
-    "world-population-size" "mean-generation-number" 
-    "number-of-females" "number-of-males"
-    "number-of-gestatees" "number-of-infants"
-    "number-of-juveniles" "number-of-adults" "number-of-senescents"
-    "number-of-cycling-females" "number-of-pregnant-females" "number-of-lactating-females"
-    "number-of-groups" "number-of-living-organisms" "number-of-dead-organisms"
-    "median-living-chance" "median-natal-group-size"
-    "median-age-at-birth" "median-age-at-weaning" "median-age-at-sexial-maturity"
-    "median-age-at-senescence" "median-age-at-death" "median-adult-living-chance"
-    "median-adult-body-size" "median-adult-body-shade" "median-adult-mutation-chance" "median-adult-sex-ratio"
-    "median-adult-litter-size" "median-adult-conception-chance" "median-adult-day-perception-angle"
-    "median-adult-night-perception-angle" "median-adult-audio-perception-angle" "median-adult-day-perception-range"
-    "median-adult-night-perception-range" "median-adult-audio-perception-range" "median-adult-vocal-range"
-    "median-adult-alpha-chance" "median-adult-beta-chance" "median-adult-gamma-chance"
-;    "percent-mother-initiated-birth" "percent-mother-initiated-weaning"
-;    "median-distance-traveled" "median-foraging-gains" "median-foraging-losses"
-;    "median-helping-benefit" "median-helping-cost" "median-male-unique-mates"  "median-female-unique-mates"
-;    "median-male-group-transfers" "median-female-group-transfers"
-  )
-end
-
-
-to record-group
-  export-turtle-to 
-  (word path-to-experiment "/groups.csv" ) 
-  (list "date-and-time" "model-version" "simulation-id" "ticks" "meta-id" "color" "xcor" "ycor" "my-creator" )
-end
-
-to record-anima1
-  export-turtle-to
-  (word path-to-experiment "/census.csv" )
-  (list "date-and-time" "model-version" "simulation-id" 
-    "plant-annual-cycle" "plant-seasonality" "plant-minimum-neighbors"
-    "plant-maximum-neighbors" "plant-daily-cycle" "plant-quality"
-    "ticks" "focal-subject" "meta-id" "generation-number" 
-    "mother-identity" "father-identity"  "natal-group-id" "natal-group-size" 
-    "biological.sex" "chromosome.I" "chromosome.II"
-    "cause-of-death" "age-at-death-in-years" "life-history-at-death" 
-    "fertility-at-death" "energy-at-death" "living-chance-at-death"
-    "ticks-at-conception" "ticks-at-birth" "ticks-at-weaning" "ticks-at-sexual-maturity"
-    "ticks-at-senescence" "ticks-at-death"
-    "adult-living-chance" "adult-body-size" "adult-body-shade"
-    "adult-mutation-chance" "adult-sex-ratio" "adult-litter-size"
-    "adult-conception-chance" "adult-day-perception-angle" "adult-night-perception-angle"
-    "adult-audio-perception-angle" "adult-day-perception-range" "adult-night-perception-range"
-    "adult-audio-perception-range" "adult-vocal-range" "adult-alpha-chance"
-    "adult-beta-chance" "adult-gamma-chance" "adult-body-size" "adult-body-shade" "adult-perception-range"
-    "adult-mutation-chance" "adult-sex-ratio" "adult-litter-size" "adult-conception-chance" 
-    "mother-initiated-birth" "mother-initiated-weaning"
-    "lifetime-foraging-gains" "lifetime-foraging-losses" 
-    "lifetime-helping-benefit" "lifetime-helping-cost"
-    "female-female-ingroup-helping" "male-male-ingroup-helping" "female-male-ingroup-helping"
-    "lifetime-matings-count" "lifetime-mates-count" "lifetime-matings" 
-    "lifetime-conceptions-count" "lifetime-infanticide-count"
-    "lifetime-group-transfers" "lifetime-distance-traveled" "lifetime-cells-occupied" 
-  )
-end 
-
-to scan-group
-  export-turtle-to 
-  (word path-to-experiment "/group_scan.csv" )  
-  (list "date-and-time" "model-version" "simulation-id" "ticks" "meta-id" 
-    "total-birth-count" "current-group-size" "adult-female-group-size" "world-population-density" "total-energy-gained" 
-    "gestatee-female-energy-gained" "gestatee-male-energy-gained" "infant-female-energy-gained" "infant-male-energy-gained" 
-    "juvenile-female-energy-gained" "juvenile-male-energy-gained" "adult-cycling-energy-gained" "adult-pregnant-energy-gained" 
-    "adult-lactating-energy-gained" "adult-male-energy-gained" "senescent-female-energy-gained" "senescent-male-energy-gained" 
-    "distance-traveled" )
-end
-
-to scan-anima1
-  export-turtle-to 
-  (word path-to-experiment "/animal_scan.csv" ) 
-  (list "date-and-time" "model-version" "simulation-id" "ticks" "meta-id" 
-    "color" "heading" "xcor" "ycor" "age" "generation-number"
-    "biological.sex" "life.history" "female.fertility" "energy.supply"
-    "group.identity" "is.dead" "alpha.signal" "beta.signal" "gamma.signal"
-    "living.chance" "body.size" "body.shade" "mutation.chance"
-    "sex.ratio" "litter.size" "conception.chance"
-    "day.perception.angle" "night.perception.angle" "audio.perception.angle"
-    "day.perception.range" "night.perception.range" "audio.perception.range" "vocal.range"
-    "alpha.chance" "beta.chance" "gamma.chance"
-    "birthing.chance" "weaning.chance" "infancy.chance"
-    "juvenility.chance" "adulthood.chance" "senescency.chance"
-    "x.magnitude" "y.magnitude"
-    "distance-traveled" "foraging-gains" "foraging-losses" "helping-benefit" "helping-cost" )
-end
- 
-to scan-focal
-  export-turtle-to 
-  (word path-to-experiment "/focal_scan.csv" ) 
-  (list "date-and-time" "model-version" "simulation-id" "ticks" "meta-id" 
-    "color" "heading" "xcor" "ycor" "age" "generation-number"
-    "biological.sex" "life.history" "female.fertility" "energy.supply"
-    "group.identity" "is.dead" "alpha.signal" "beta.signal" "gamma.signal"
-    "living.chance" "body.size" "body.shade" "mutation.chance"
-    "sex.ratio" "litter.size" "conception.chance"
-    "day.perception.angle" "night.perception.angle" "audio.perception.angle"
-    "day.perception.range" "night.perception.range" "audio.perception.range" "vocal.range"
-    "alpha.chance" "beta.chance" "gamma.chance"
-    "birthing.chance" "weaning.chance" "infancy.chance"
-    "juvenility.chance" "adulthood.chance" "senescency.chance"
-    "x.magnitude" "y.magnitude"
-    "distance-traveled" "foraging-gains" "foraging-losses" "helping-benefit" "helping-cost" )
-end
-
-;--------------------------------------------------------------------------------------------------------------------
-; REPORTERS
-;--------------------------------------------------------------------------------------------------------------------
-
-;:::: global :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-to-report world-population-density report count turtles / ( world-width * world-height ) end
-to-report world-plant-abundance report precision ( plant-quality * sum [ energy.supply ] of plants ) 3 end
-to-report world-population-size report count anima1s with [ not is.dead ] end
-to-report mean-generation-number report ifelse-value (any? anima1s ) [ precision ( mean [ generation-number ] of anima1s ) 3 ] [ 0 ] end
-to-report number-of-females report count anima1s with [ biological.sex = "female" ] end
-to-report number-of-males report count anima1s with [ biological.sex = "male" ] end
-to-report number-of-gestatees report count anima1s with [ life.history = "gestatee" ] end
-to-report number-of-infants report count anima1s with [ life.history = "infant" ] end
-to-report number-of-juveniles report count anima1s with [ life.history = "juvenile" ] end
-to-report number-of-adults report count anima1s with [ life.history = "adult" ] end
-to-report number-of-senescents report count anima1s with [ life.history = "senescent" ] end
-to-report number-of-cycling-females report count anima1s with [ female.fertility = "cycling" ] end
-to-report number-of-pregnant-females report count anima1s with [ female.fertility = "pregnant" ] end
-to-report number-of-lactating-females report count anima1s with [ female.fertility = "lactating" ] end
-to-report number-of-groups report count groups end
-to-report number-of-living-organisms report count anima1s with [ is.dead = false ] end
-to-report number-of-dead-organisms report count anima1s with [ is.dead = true ] end
-to-report median-living-chance report median [living.chance] of anima1s end
-to-report median-natal-group-size report median [natal-group-size] of anima1s end
-to-report median-age-at-birth report median [ticks-at-birth - ticks-at-conception] of anima1s end
-to-report median-age-at-weaning report median [ticks-at-birth - ticks-at-conception] of anima1s end
-to-report median-age-at-sexial-maturity report median [ticks-at-birth - ticks-at-conception] of anima1s end
-to-report median-age-at-senescence report median [ticks-at-senescence - ticks-at-conception] of anima1s end
-to-report median-age-at-death report median [ticks-at-death - ticks-at-conception] of anima1s end
-to-report median-adult-living-chance report median [living.chance] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-body-size report median [body.size] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-body-shade report median [body.shade] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-mutation-chance report median [mutation.chance] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-sex-ratio report median [sex.ratio] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-litter-size report median [litter.size] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-conception-chance report median [conception.chance] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-day-perception-angle report median [day.perception.angle] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-night-perception-angle report median [night.perception.angle] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-audio-perception-angle report median [audio.perception.angle] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-day-perception-range report median [day.perception.range] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-night-perception-range report median [night.perception.range] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-audio-perception-range report median [audio.perception.range] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-vocal-range report median [vocal.range] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-alpha-chance report median [alpha.chance] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-beta-chance report median [beta.chance] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-gamma-chance report median [gamma.chance] of anima1s with [ life.history = "adult" ] end
-to-report percent-mother-initiated-birth report count anima1s with [ mother-initiated-birth ] / ( count anima1s ) end
-to-report percent-mother-initiated-weaning report count anima1s with [ mother-initiated-weaning ] / ( count anima1s ) end
-to-report median-adult-distance-traveled report median [distance-traveled] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-foraging-gains report median [foraging-gains] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-foraging-losses report median [foraging-losses] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-helping-benefit report median [helping-benefit] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-helping-cost report median [helping-cost] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-male-unique-mates report median [length remove-duplicates matings-list] of anima1s with [ biological.sex = "male" ] end
-to-report median-adult-female-unique-mates report median [length remove-duplicates matings-list] of anima1s with [ biological.sex = "female" ]  end
-to-report median-adult-male-group-transfers report median [length group-transfers-list] of anima1s with [ biological.sex = "male" ] end
-to-report median-adult-female-group-transfers report median [length group-transfers-list] of anima1s with [ biological.sex = "female" ] end
-  
-;:::: groups :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-to-report current-group-size report group-size end  
-to-report group-members report anima1s with [ group.identity = [meta-id] of myself ] end
-to-report adult-female-group-size report count anima1s with [ group.identity = [meta-id] of myself and biological.sex = "female" and life.history = "adult" ] end
-  
-;:::: anima1s :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-  
-to-report age-at-death-in-years report precision ( age / plant-annual-cycle ) 3 end
-to-report life-history-at-death report life.history end
-to-report fertility-at-death report female.fertility end
-to-report energy-at-death report energy.supply end
-to-report living-chance-at-death report living.chance end
-to-report focal-subject report self = subject end
-to-report lifetime-foraging-gains report foraging-gains end
-to-report lifetime-foraging-losses report foraging-losses end
-to-report lifetime-helping-benefit report helping-benefit end
-to-report lifetime-helping-cost report helping-cost end
-to-report lifetime-matings-count report length matings-list end
-to-report lifetime-mates-count report length remove-duplicates matings-list end
-to-report lifetime-matings report matings-list end
-to-report lifetime-conceptions-count report length conceptions-list end
-to-report lifetime-infanticide-count report length infanticide-list end
-to-report lifetime-group-transfers report length group-transfers-list end
-to-report lifetime-distance-traveled report distance-traveled end
-to-report lifetime-cells-occupied report length cells-occupied end
-  
-
