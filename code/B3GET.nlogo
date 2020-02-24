@@ -1348,7 +1348,7 @@ INPUTBOX
 967
 102
 documentation-notes
-NIL
+Population Hamadryas imported. Simulation s83PXA created. Simulation s63VBU save to w63VBU-100. Population Hamadryas imported. Simulation s63VBU created. Simulation s31JUZ save to w31JUZ-100. Population Hamadryas imported. Simulation s31JUZ created. Simulation s97TVV save to w97TVV-100. Population Chimpanzees imported. Simulation s97TVV created. Simulation s72CEO save to w72CEO-72. 
 1
 0
 String
@@ -1384,20 +1384,20 @@ NIL
 OUTPUT
 720
 383
-1222
+1217
 791
 11
 
 SLIDER
 974
-82
+155
 1217
-115
+188
 plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-2.5
+0.0
 .1
 1
 NIL
@@ -1405,14 +1405,14 @@ HORIZONTAL
 
 SLIDER
 974
-118
+191
 1217
-151
+224
 plant-maximum-neighbors
 plant-maximum-neighbors
 0
 8
-8.0
+4.0
 .1
 1
 NIL
@@ -1431,9 +1431,9 @@ season
 
 SLIDER
 974
-46
+82
 1217
-79
+115
 plant-seasonality
 plant-seasonality
 0
@@ -1461,9 +1461,9 @@ HORIZONTAL
 
 SLIDER
 974
-154
+46
 1217
-187
+79
 plant-daily-cycle
 plant-daily-cycle
 1
@@ -1491,7 +1491,7 @@ INPUTBOX
 1097
 299
 population
-population
+Hamadryas
 1
 0
 String
@@ -1638,9 +1638,9 @@ NIL
 
 SLIDER
 974
-190
+118
 1217
-223
+151
 plant-quality
 plant-quality
 .1
@@ -2042,17 +2042,13 @@ repeat 75 [ go ]
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="thesis_experiment" repetitions="1" runMetricsEveryStep="true">
-    <setup>setup-simulation</setup>
+  <experiment name="WORLD-A" repetitions="2" runMetricsEveryStep="true">
+    <setup>setup</setup>
     <go>go</go>
-    <exitCondition>not any? anima1s or median [generation] of anima1s &gt; 100</exitCondition>
+    <timeLimit steps="100"/>
+    <exitCondition>plant-minimum-neighbors &gt;= plant-maximum-neighbors or not any? anima1s or median [generation-number] of anima1s &gt; 100</exitCondition>
     <enumeratedValueSet variable="path-to-experiment">
-      <value value="&quot;experiments/thesis/&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="global-deterioration-rate">
-      <value value="-1.0E-4"/>
-      <value value="-0.001"/>
-      <value value="-0.01"/>
+      <value value="&quot;../data/&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="collect-data?">
       <value value="true"/>
@@ -2063,62 +2059,40 @@ repeat 75 [ go ]
     <enumeratedValueSet variable="plant-annual-cycle">
       <value value="1000"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-seasonality">
-      <value value="0"/>
-      <value value="50"/>
-      <value value="100"/>
-    </enumeratedValueSet>
-    <steppedValueSet variable="plant-minimum-neighbors" first="0" step="0.5" last="8"/>
-    <steppedValueSet variable="plant-maximum-neighbors" first="0" step="0.5" last="8"/>
-    <enumeratedValueSet variable="population">
-      <value value="&quot;popula7ion&quot;"/>
-      <value value="&quot;c0mmunity&quot;"/>
-      <value value="&quot;s33d&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="genotype">
-      <value value="&quot;g3notype&quot;"/>
-      <value value="&quot;sta7us&quot;"/>
-    </enumeratedValueSet>
-  </experiment>
-  <experiment name="chimps" repetitions="1" runMetricsEveryStep="true">
-    <setup>setup-simulation</setup>
-    <go>go</go>
-    <exitCondition>not any? anima1s or median [generation-number] of anima1s &gt; 10</exitCondition>
-    <enumeratedValueSet variable="collect-data?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-quality">
-      <value value="1"/>
-      <value value="1.5"/>
-      <value value="2"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-seasonality">
-      <value value="0"/>
-      <value value="50"/>
-      <value value="100"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="population">
-      <value value="&quot;chimps&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="selection-on?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-annual-cycle">
-      <value value="1000"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-minimum-neighbors">
-      <value value="0"/>
-      <value value="3"/>
-    </enumeratedValueSet>
     <enumeratedValueSet variable="plant-daily-cycle">
       <value value="10"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-maximum-neighbors">
+    <enumeratedValueSet variable="plant-seasonality">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-quality">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
       <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-maximum-neighbors">
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
       <value value="8"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="genotype">
-      <value value="&quot;gCHIMP&quot;"/>
+    <enumeratedValueSet variable="population">
+      <value value="&quot;Chimpanzees&quot;"/>
+      <value value="&quot;Geladas&quot;"/>
+      <value value="&quot;Olives&quot;"/>
+      <value value="&quot;Hamadryas&quot;"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>

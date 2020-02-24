@@ -77,17 +77,17 @@ to command
   ; SIMULATION
   ;--------------------------------------------------------------------------------------------------------------------
   
-  if ( useful-commands = "metafile-report" ) [
-    let i 0
-    output-print " ---------------------------------------------------------------------------"
-    output-print " METAFILE :  date-and-time    documentation-notes "
-    output-print " ---------------------------------------------------------------------------"
-    foreach reverse but-first csv:from-file "../data/metafile.csv" [ x -> 
-      if ( i < 25 ) [ output-print (word " " item 0 x "  " item 7 x  ) ]
-      set i i + 1
-    ]
-    set documentation-notes (word "Printout metafile report. " documentation-notes )
-  ]
+;  if ( useful-commands = "metafile-report" ) [
+;    let i 0
+;    output-print " ---------------------------------------------------------------------------"
+;    output-print " METAFILE :  date-and-time    documentation-notes "
+;    output-print " ---------------------------------------------------------------------------"
+;    foreach reverse but-first csv:from-file "../data/metafile.csv" [ x -> 
+;      if ( i < 25 ) [ output-print (word " " item 0 x "  " item 7 x  ) ]
+;      set i i + 1
+;    ]
+;    set documentation-notes (word "Printout metafile report. " documentation-notes )
+;  ]
   
   if (useful-commands = "verify-code" and not is-boolean? read-from-string command-input ) [
     output-print " ---------------------------------------------------------------------------"
@@ -322,6 +322,6 @@ to command
     set documentation-notes (word "View population report. " documentation-notes ) 
   ]
   
-  update-metafile "metafile" ""
+  ;update-metafile "metafile" ""
   
 end
