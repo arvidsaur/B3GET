@@ -150,11 +150,13 @@ groups-own [
 
 globals [
   model-version
+  model-structure
+  genotype-reader
   simulation-id
   sun-status
   deterioration-rate
-  done-decisions
   selection-rate
+  done-decisions ; fix and delete eventually?
 ]
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -170,7 +172,7 @@ globals [
 ;--------------------------------------------------------------------------------------------------------------------
 
 to setup-parameters
-  set model-version "1.0.2"
+  set model-version "1.1.0~"
   set done-decisions []
   set deterioration-rate -0.01
   set selection-rate 0.0001
@@ -1348,7 +1350,7 @@ INPUTBOX
 967
 102
 documentation-notes
-Population Hamadryas imported. Simulation s83PXA created. Simulation s63VBU save to w63VBU-100. Population Hamadryas imported. Simulation s63VBU created. Simulation s31JUZ save to w31JUZ-100. Population Hamadryas imported. Simulation s31JUZ created. Simulation s97TVV save to w97TVV-100. Population Chimpanzees imported. Simulation s97TVV created. Simulation s72CEO save to w72CEO-72. 
+Simulation s44UUR created. Simulation sAGA23 save to wAGA23-1. Population Geladas imported. Simulation s91VTI created. Simulation sAGB02 save to wAGB02-1. Population Geladas imported. Simulation s88KVP created. Simulation sACA17 save to wACA17-1. Population Chimpanzees imported. Simulation s98UNM created. Simulation sACA15 save to wACA15-1. Population Chimpanzees imported. Simulation s95HPQ created. Simulation sAGA13 save to wAGA13-1. Population Geladas imported. Simulation s19VPM created. Simulation sAHB01 save to wAHB01-1. Population Hamadryas imported. Simulation s69WWY created. Simulation sACA08 save to wACA08-1. Population Chimpanzees imported. Simulation s76YMW created. Simulation sACA06 save to wACA06-1. Population Chimpanzees imported. Simulation s22EVH created. Simulation sAHA04 save to wAHA04-1. Population Hamadryas imported. Simulation s94AXD created. Simulation sACA01 save to wACA01-1. Population Chimpanzees imported. Simulation s70ODQ created. Simulation sACB11 save to wACB11-45. Population Chimpanzees imported. Simulation s40MST created. Simulation sACA08 save to wACA08-100. Population Chimpanzees imported. Simulation s6DUQ created. Simulation sACA07 save to wACA07-100. Population Chimpanzees imported. Simulation s35GCK created. Simulation sACA06 save to wACA06-100. Population Chimpanzees imported. Simulation s82TAB created. Simulation sACA05 save to wACA05-100. Population Chimpanzees imported. Simulation s10UDH created. Simulation sACA04 save to wACA04-100. Population Chimpanzees imported. Simulation s92TWA created. Simulation sACA03 save to wACA03-100. Population Chimpanzees imported. Simulation s33KTT created. Simulation sACA02 save to wACA02-100. Population Chimpanzees imported. Simulation s88EMW created. Simulation sACA01 save to wACA01-100. Population Chimpanzees imported. Simulation s22HYJ created. Simulation s38WRF save to w38WRF-0. Simulation s38WRF created. Simulation sAHA02 save to wAHA02-100. Population Hamadryas imported. Simulation s62OIB created. Simulation sACA01 save to wACA01-100. Population Chimpanzees imported. Simulation s95VWG created. Simulation s83PXA save to w83PXA-76. Population Hamadryas imported. Simulation s83PXA created. Simulation s63VBU save to w63VBU-100. Population Hamadryas imported. Simulation s63VBU created. Simulation s31JUZ save to w31JUZ-100. Population Hamadryas imported. Simulation s31JUZ created. Simulation s97TVV save to w97TVV-100. Population Chimpanzees imported. Simulation s97TVV created. Simulation s72CEO save to w72CEO-72. 
 1
 0
 String
@@ -1397,7 +1399,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-0.0
+2.0
 .1
 1
 NIL
@@ -1491,7 +1493,7 @@ INPUTBOX
 1097
 299
 population
-Hamadryas
+Geladas
 1
 0
 String
@@ -2042,11 +2044,22 @@ repeat 75 [ go ]
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="WORLD-A" repetitions="2" runMetricsEveryStep="true">
-    <setup>setup</setup>
+  <experiment name="WORLD-A" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup
+
+; give simulation-id specific configuration: sDOB17 means simulation of WORLD-D, Baboons seed population, run B (instead of A), plant-minimum-neighbors = 1 and plant-maximum-neighbors = 7
+ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
+  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "A" plant-minimum-neighbors plant-maximum-neighbors )
+][
+  let min-holder plant-minimum-neighbors
+  let max-holder plant-maximum-neighbors
+  set plant-minimum-neighbors max-holder - 1
+  set plant-maximum-neighbors min-holder
+  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "B" plant-minimum-neighbors plant-maximum-neighbors )
+]</setup>
     <go>go</go>
-    <timeLimit steps="100"/>
-    <exitCondition>plant-minimum-neighbors &gt;= plant-maximum-neighbors or not any? anima1s or median [generation-number] of anima1s &gt; 100</exitCondition>
+    <final>print simulation-id</final>
+    <exitCondition>not any? anima1s or median [generation-number] of anima1s &gt; 100</exitCondition>
     <enumeratedValueSet variable="path-to-experiment">
       <value value="&quot;../data/&quot;"/>
     </enumeratedValueSet>
@@ -2077,6 +2090,7 @@ repeat 75 [ go ]
       <value value="5"/>
       <value value="6"/>
       <value value="7"/>
+      <value value="8"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="plant-maximum-neighbors">
       <value value="1"/>
