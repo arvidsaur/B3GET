@@ -178,13 +178,13 @@ to setup-parameters
   set selection-rate 0.0001
 end
 
-to setup
-  if ( simulation-id != 0 ) [ record-world ]
+to setup [ sim-id ]
+  ;if ( simulation-id != 0 ) [ record-world ]
   clear-all
   reset-ticks
   setup-parameters
   setup-plants
-  set simulation-id generate-simulation-id
+  set simulation-id sim-id
   import-population
   import-genotype
   clear-output
@@ -378,6 +378,29 @@ end
 
 to-report how-many-ticks? report 10 end
 
+to-report patchiness [ input-diameter ]
+  let patch-list []
+
+  let i 0
+  let j 0
+  let i-next input-diameter
+  let j-next input-diameter
+
+  while [ j < world-height ] [
+    while [ i < world-width ] [
+
+      set patch-list lput count plants with [ xcor > i and xcor <= i-next and ycor > j and ycor <= j-next ] patch-list
+      set i i-next
+      set i-next ifelse-value (( i + input-diameter ) > world-width ) [ world-width ] [ i + input-diameter ] ]
+
+    set i 0
+    set i-next input-diameter
+    set j j-next
+    set j-next ifelse-value (( j + input-diameter ) > world-height ) [ world-height ] [ j + input-diameter ] ]
+
+  report ( variance patch-list / mean patch-list )
+end
+
 to-report get-time
   report ifelse-value ( ( cos (( 360 / plant-daily-cycle ) * ticks)) > 0 ) [ "DAY" ] [ "NIGHT" ]
 end
@@ -542,6 +565,7 @@ to do-action [ action-code target value ]
     if action-code = "check-weaning" [ check-weaning value ]
     if action-code = "check-adulthood" [ check-adulthood value ]
     if action-code = "check-senescence" [ check-senescence value ]
+
     if action-code = "supply-to" [ supply-to target value ]
     if action-code = "demand-from" [ demand-from target value ]
     if action-code = "eat" [ eat target value ]
@@ -613,11 +637,22 @@ to move-toward [ target value ]
   ]
 end
 
-to turn-right [ value ] right ( 360 * value ) end ;;
+to turn-right [ value ]
+  ifelse ( value > 0 )
+  [ right ( 360 * value ) ]
+  [ left ( 360 * value ) ]
+end
 
-to turn-left [ value ] left ( 360 * value ) end ;;
+to turn-left [ value ]
+  ifelse ( value > 0 )
+  [ left ( 360 * value ) ]
+  [ right ( 360 * value ) ]
+end
 
-to go-forward [ value ] ;;
+to go-forward [ value ]
+
+  if ( value < 0 ) [ right 180 ]
+
   let sum-weight size
   foreach carried.items [ object ->
     set sum-weight sum-weight + [size] of object ]
@@ -1270,7 +1305,7 @@ BUTTON
 336
 79
 setup
-setup
+setup generate-simulation-id
 NIL
 1
 T
@@ -1352,7 +1387,7 @@ INPUTBOX
 967
 102
 documentation-notes
-NIL
+Printout code verification. Genotype genotype imported. Population file Chimpanzees imported. 
 1
 0
 String
@@ -1401,7 +1436,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-1.0
+4.2
 .1
 1
 NIL
@@ -1416,7 +1451,7 @@ plant-maximum-neighbors
 plant-maximum-neighbors
 0
 8
-5.0
+8.0
 .1
 1
 NIL
@@ -1495,7 +1530,7 @@ INPUTBOX
 1097
 299
 population
-Olives
+Chimpanzees
 1
 0
 String
@@ -1506,7 +1541,7 @@ INPUTBOX
 1097
 373
 genotype
-NIL
+genotype
 1
 0
 String
@@ -2118,6 +2153,140 @@ ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
       <value value="&quot;Geladas&quot;"/>
       <value value="&quot;Olives&quot;"/>
       <value value="&quot;Hamadryas&quot;"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="WORLD-TEST" repetitions="1" runMetricsEveryStep="true">
+    <setup>clear-all
+
+; give simulation-id specific configuration: sDOB17 means simulation of WORLD-D, Baboons seed population, run B (instead of A), plant-minimum-neighbors = 1 and plant-maximum-neighbors = 7
+ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
+  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "A" plant-minimum-neighbors plant-maximum-neighbors )
+][
+  let min-holder plant-minimum-neighbors
+  let max-holder plant-maximum-neighbors
+  set plant-minimum-neighbors max-holder - 1
+  set plant-maximum-neighbors min-holder
+  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "B" plant-minimum-neighbors plant-maximum-neighbors )
+]
+
+setup simulation-id</setup>
+    <go>go</go>
+    <timeLimit steps="1001"/>
+    <exitCondition>not any? anima1s</exitCondition>
+    <enumeratedValueSet variable="path-to-experiment">
+      <value value="&quot;../results/&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="model-structure">
+      <value value="&quot;baseline&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-reader">
+      <value value="&quot;status&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="deterioration-rate">
+      <value value="-0.01"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="output-results?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="selection-on?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-annual-cycle">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-daily-cycle">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-seasonality">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-quality">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-maximum-neighbors">
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="population">
+      <value value="&quot;Chimpanzees&quot;"/>
+      <value value="&quot;Geladas&quot;"/>
+      <value value="&quot;Olives&quot;"/>
+      <value value="&quot;Hamadryas&quot;"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="WORLD-TEST1" repetitions="1" runMetricsEveryStep="true">
+    <setup>clear-all
+
+; give simulation-id specific configuration: sDOB17 means simulation of WORLD-D, Baboons seed population, run B (instead of A), plant-minimum-neighbors = 1 and plant-maximum-neighbors = 7
+ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
+  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "A" plant-minimum-neighbors plant-maximum-neighbors )
+][
+  let min-holder plant-minimum-neighbors
+  let max-holder plant-maximum-neighbors
+  set plant-minimum-neighbors max-holder - 1
+  set plant-maximum-neighbors min-holder
+  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "B" plant-minimum-neighbors plant-maximum-neighbors )
+]
+
+setup simulation-id</setup>
+    <go>go</go>
+    <timeLimit steps="1001"/>
+    <exitCondition>not any? anima1s</exitCondition>
+    <enumeratedValueSet variable="path-to-experiment">
+      <value value="&quot;../results/&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="model-structure">
+      <value value="&quot;baseline&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-reader">
+      <value value="&quot;status&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="deterioration-rate">
+      <value value="-0.01"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="output-results?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="selection-on?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-annual-cycle">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-daily-cycle">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-seasonality">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-quality">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-maximum-neighbors">
+      <value value="4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="population">
+      <value value="&quot;Chimpanzees&quot;"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>

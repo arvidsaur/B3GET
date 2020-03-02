@@ -63,50 +63,50 @@ end
 
 to update-metafile [ type-of-file name-of-file ]
   
-  ; Save whatever is currently in the METAFILE or create new
-  if ( not metafile-exists? ) [ setup-metafile ]
-  let old-metafile csv:from-file "../data/metafile.csv"
-  
-  if documentation-notes = "" [ set documentation-notes "Metafile updated." ]
-  
-  ; Update METAFILE with a new row of FILE information
-  file-open "../data/metafile.csv"
-  csv:to-file "../data/metafile.csv"
-  (lput
-    (list 
-      date-and-time
-      path-to-experiment
-      model-version
-      model-structure
-      genotype-reader
-      simulation-id
-      sun-status
-      ticks
-      type-of-file
-      name-of-file
-      documentation-notes
-      population 
-      genotype
-      plant-annual-cycle 
-      plant-seasonality
-      plant-minimum-neighbors 
-      plant-maximum-neighbors
-      plant-daily-cycle 
-      plant-quality
-      world-width 
-      world-height
-      deterioration-rate
-      selection-rate
-      output-results?
-      selection-on?
-      useful-commands
-      command-input 
-    )
-    
-    old-metafile )
-  
-  set documentation-notes ""
-  file-close
+;  ; Save whatever is currently in the METAFILE or create new
+;  if ( not metafile-exists? ) [ setup-metafile ]
+;  file-open "../data/metafile.csv"
+;  let old-metafile csv:from-file "../data/metafile.csv"
+;  
+;  if documentation-notes = "" [ set documentation-notes "Metafile updated." ]
+;  
+;  ; Update METAFILE with a new row of FILE information
+;  csv:to-file "../data/metafile.csv"
+;  (lput
+;    (list 
+;      date-and-time
+;      path-to-experiment
+;      model-version
+;      model-structure
+;      genotype-reader
+;      simulation-id
+;      sun-status
+;      ticks
+;      type-of-file
+;      name-of-file
+;      documentation-notes
+;      population 
+;      genotype
+;      plant-annual-cycle 
+;      plant-seasonality
+;      plant-minimum-neighbors 
+;      plant-maximum-neighbors
+;      plant-daily-cycle 
+;      plant-quality
+;      world-width 
+;      world-height
+;      deterioration-rate
+;      selection-rate
+;      output-results?
+;      selection-on?
+;      useful-commands
+;      command-input 
+;    )
+;    
+;    old-metafile )
+;  
+;  set documentation-notes ""
+;  file-close
 end
 
 ;----------------------------------------------------------------------------------------------

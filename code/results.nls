@@ -24,16 +24,16 @@ to output-results
   
   ; USER SETTINGS:
   ; -------------
-  let verification? true        ; TRUE = runs periodic code verification checks set by the VERIFICATION-RATE
-  let verification-rate 0.0001 
-  let record-simulation? true   ; TRUE = records the simulation
-  let record-group? false        ; TRUE = records every group upon its creation
-  let record-agent? false        ; TRUE = records every agent upon its death
+  let verification? true         ; TRUE = runs periodic code verification checks set by the VERIFICATION-RATE
+  let verification-rate 0.01 
+  let record-simulation? true    ; TRUE = records the simulation ;
+  let record-group? true         ; TRUE = records every group upon its creation ;
+  let record-agent? true        ; TRUE = records every agent upon its death
   let scan-interval 100        
-  let simulation-scans? true    ; TRUE = scans the simulation every SCAN-INTERVAL and records population-level phenomena
-  let group-scans? true         ; TRUE = scans all groups every SCAN-INTERVAL and records group-level phenomena
+  let simulation-scans? true     ; TRUE = scans the simulation every SCAN-INTERVAL and records population-level phenomena ;
+  let group-scans? true          ; TRUE = scans all groups every SCAN-INTERVAL and records group-level phenomena
   let agent-scans? true         ; TRUE = scans all agents every SCAN-INTERVAL and records individual-level phenomena
-  let focal-follows? false      ; TRUE = small chance to record an individual's entire life
+  let focal-follows? true       ; TRUE = small chance to record an individual's entire life
    
   ;----------------------------------------------------------------------------------------------     
   ; VERIFICATION : collect data on periodic code verification checks
@@ -85,9 +85,13 @@ end
 to record-simulation ; max population size, min population size, average pop size, average plant abundance, min, max, how many generations evolved 
   export-turtle-to 
   ( word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "simulation_records.csv" )
-  ( list "date-and-time" 
+  ( list     
+    "date-and-time" 
     "model-version" 
+    "model-structure"
+    "genotype-reader"
     "simulation-id" 
+    "sun-status"
     "population" 
     "genotype"
     "plant-annual-cycle" 
@@ -102,7 +106,7 @@ to record-simulation ; max population size, min population size, average pop siz
     "ticks"
     "deterioration-rate" 
     "selection-rate"
-    "collect-data?" 
+    "output-results?" 
     "selection-on?"
     "path-to-experiment"
     "useful-commands"
@@ -130,7 +134,10 @@ to record-agent
   (list 
     "date-and-time" 
     "model-version" 
+    "model-structure"
+    "genotype-reader"
     "simulation-id" 
+    "sun-status"
     "plant-annual-cycle" 
     "plant-seasonality" 
     "plant-minimum-neighbors"
@@ -210,7 +217,10 @@ to scan-simulation
   (list 
     "date-and-time" 
     "model-version" 
+    "model-structure"
+    "genotype-reader"
     "simulation-id" 
+    "sun-status"
     "population" 
     "genotype"
     "plant-annual-cycle" 
@@ -225,7 +235,7 @@ to scan-simulation
     "ticks"
     "deterioration-rate" 
     "selection-rate"
-    "collect-data?" 
+    "output-results?" 
     "selection-on?"
     "path-to-experiment"
     "useful-commands" 
@@ -284,7 +294,10 @@ to scan-group
   (list 
     "date-and-time" 
     "model-version" 
+    "model-structure"
+    "genotype-reader"
     "simulation-id" 
+    "sun-status"
     "ticks" 
     "meta-id" 
     "total-birth-count" 
@@ -313,7 +326,10 @@ to scan-agent
   (list 
     "date-and-time" 
     "model-version" 
+    "model-structure"
+    "genotype-reader"
     "simulation-id" 
+    "sun-status"
     "ticks" 
     "meta-id" 
     "color" 
@@ -370,7 +386,10 @@ to scan-focal
   (list 
     "date-and-time" 
     "model-version" 
+    "model-structure"
+    "genotype-reader"
     "simulation-id" 
+    "sun-status"
     "ticks" 
     "meta-id" 
     "color" 
