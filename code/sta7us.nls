@@ -7,7 +7,7 @@
 ;        88   88   88.  .88  d8'    88.  .88       88 
 ;  `88888P'   dP   `88888P8 d8'     `88888P' `88888P' 
 ; 
-; © 2019 K N Crouse                                        
+; © 2020 K N Crouse                                        
 ;----------------------------------------------------------------------------------------------
 ; 
 ; This extension contains all functions that allow anima1s to make decisions from their 
@@ -17,41 +17,41 @@
 ; 
 ; CODE  MAINTENANCE  DESCRIPTION                
 ;
-;  a    2019-09-XX   target is an adult
-;  b    2019-09-XX   target is bigger than myself
-;  c    2019-09-XX   target is cycling
-;  d    2019-09-XX   target is a plant (not an anima1)
-;  e    2019-09-XX   target is myself
-;  f    2019-09-XX   target is female
-;  g    2019-09-XX   target is a gestatee
-;  h    2019-09-XX   target is healthier than myself
-;  i    2019-09-XX   target is an infant
-;  j    2019-09-XX   target is a juvenile
-;  k    2019-09-XX   target is kin (relatedness > 0.2)
-;  l    2019-09-XX   target is lactating
-;  m    2019-09-XX   target is a male
-;  n    2019-09-XX   target is a group member
-;  o    2019-09-XX   target is another (not myself)
-;  p    2019-09-XX   target is pregnant
-;  q    2019-09-XX   target is not kin (relatedness <= 0.2)
-;  r    2019-09-XX   target is smaller than myself
-;  s    2019-09-XX   target is senescent
-;  t    2019-09-XX   target is neither carrying or carried by myself
-;  u    2019-09-XX   target is a stranger (none-group member)
-;  v    2019-09-XX   target is alive
-;  w    2019-09-XX   target is dead
-;  x    2019-09-XX   target is sicker than myself
-;  y    2019-09-XX   target is carried by myself
-;  z    2019-09-XX   target is an anima1 (not a plant)
-;  +    2019-09-XX   target is carrying myself
-;  α    2019-09-XX   target has alpha signal on
-;  β    2019-09-XX   target has beta signal on
-;  ɣ    2019-09-XX   target has gamma signal on
-;  *    2019-09-XX   target is observed during the day
-;  -    2019-09-XX   target is observed during the night
-;  #    2019-09-XX   target's color shade between # = 0 [dark] and # = 9 [light]
-;  $    2019-09-XX   target has more energy than myself
-;  ~    2019-09-XX   target has less energy than myself
+;  a    2019-09-XX   is an adult
+;  b    2019-09-XX   is bigger than myself
+;  c    2019-09-XX   is cycling
+;  d    2019-09-XX   is a plant (not an anima1)
+;  e    2019-09-XX   is myself
+;  f    2019-09-XX   is female
+;  g    2019-09-XX   is a gestatee
+;  h    2019-09-XX   is healthier than myself
+;  i    2019-09-XX   is an infant
+;  j    2019-09-XX   is a juvenile
+;  k    2019-09-XX   is kin (relatedness > 0.2)
+;  l    2019-09-XX   is lactating
+;  m    2019-09-XX   is a male
+;  n    2019-09-XX   is a group member
+;  o    2019-09-XX   is another (not myself)
+;  p    2019-09-XX   is pregnant
+;  q    2019-09-XX   is not kin (relatedness <= 0.2)
+;  r    2019-09-XX   is smaller than myself
+;  s    2019-09-XX   is senescent
+;  t    2019-09-XX   is neither carrying or carried by myself
+;  u    2019-09-XX   is a stranger (none-group member)
+;  v    2019-09-XX   is alive
+;  w    2019-09-XX   is dead
+;  x    2019-09-XX   is sicker than myself
+;  y    2019-09-XX   is carried by myself
+;  z    2019-09-XX   is an anima1 (not a plant)
+;  +    2019-09-XX   is carrying myself
+;  α    2019-09-XX   has alpha signal on
+;  β    2019-09-XX   has beta signal on
+;  ɣ    2019-09-XX   has gamma signal on
+;  *    2019-09-XX   is observed during the day
+;  -    2019-09-XX   is observed during the night
+;  #    2019-09-XX   has color shade between # = 0 [dark] and # = 9 [light]
+;  $    2019-09-XX   has more energy than myself
+;  ~    2019-09-XX   has less energy than myself
 ;         
 ; MNT   2019-08-26   --> maintain-body
 ; GRW   2019-08-26   --> body-size                 
@@ -63,7 +63,8 @@
 ; NPA   2019-08-26   --> night-perception-angle
 ; APA   2019-08-26   --> audio-perception-angle 
 ; VCR   2019-08-26   --> vocal-range
-; ICC   2019-08-26   --> conception-chance        
+; ICC   2019-08-26   --> conception-chance    
+; STM   not done     --> stomach-size
 ; MTR   2019-08-26   --> mutation-rate            
 ; SXR   2019-08-26   --> sex-ratio               
 ; LTS   2019-08-26   --> litter-size               
@@ -95,21 +96,150 @@
 ; 
 ;----------------------------------------------------------------------------------------------
 
+;----------------------------------------------------------------------------------------------
+; MAKE DECISIONS
+;
+; Reporter that returns a list of decision vectors generated from genotype.
+;
+; Caller: anima1
+; ENVIRONMENT: list of turtles (both plants and anima1s) observed by the caller.
+;----------------------------------------------------------------------------------------------
+
+to-report sta7us-make-decisions [ local-turtles ]
+  
+  let meself self
+  let current-energy energy.supply
+  let ego-status status-of meself
+  let decision-vectors []
+  let conspecifics-list []
+  let status-list []
+
+  let status-table table:make
+  ask local-turtles [
+    table:put status-table [meta-id] of self [ status-of myself ] of myself ]
+  
+  foreach (sentence chromosome.I chromosome.II) [ g ->
+    if ( length g = 5 and is-boolean? first g and is-string? item 1 g and is-string? item 2 g and is-string? item 3 g and is-number? item 4 g ) [ ; checks that allele correctly organized
+      let gene-ego item 1 g
+      let gene-other item 2 g
+      let gene-action item 3 g
+      let gene-weight item 4 g
+      
+      ; Check that first CODON matches self
+      if first-string-is-part-of-last? ( gene-ego ) ( ego-status ) [
+        
+        ; Consider status-of others in the environment
+        ask local-turtles [
+          let other-guy self
+          let other-status table:get status-table [meta-id] of self
+          
+          ; Check that second CODON matches other
+          if first-string-is-part-of-last? ( gene-other ) ( other-status ) [
+            
+            ask myself [
+              let distance-to-target ifelse-value ( distance other-guy > 1 ) [ distance other-guy ] [ 1 ]
+              let vector-doesnt-exist true
+              foreach decision-vectors [ v ->
+                
+                if ( item 2 v = other-guy ) and ( item 3 v = ( get-action gene-action ) ) [
+                  set vector-doesnt-exist false
+                  set decision-vectors remove-item position v decision-vectors decision-vectors
+                  let new-vector replace-item 4 v ( item 4 v + precision ( gene-weight / ( distance-to-target ^ 2 )) 5 )
+                  set decision-vectors lput new-vector decision-vectors ]]
+              
+              if vector-doesnt-exist [
+                set decision-vectors lput (list random 9999999 meself other-guy ( get-action gene-action ) precision ( gene-weight / ( distance-to-target ^ 2 )) 5 ) decision-vectors ]
+        ]]]
+      ]
+    ]
+  ]
+  
+  report decision-vectors
+end
+
+;----------------------------------------------------------------------------------------------
+; GET MUTATION
+;
+; Returns a randomly selected codon to occasionally introduce novel mutations into a population.
+;
+; CALLER: anima1
+;----------------------------------------------------------------------------------------------
+
+to-report sta7us-get-mutation [ original-codon ]
+  report ( ifelse-value 
+    ( member? original-codon action-code-list ) [ one-of action-code-list ] 
+    [ generate-status ] ) ; expand to include add, delete, duplicate, mutate
+end
+
+;--------------------------------------------------------------------------------------------------------------------
+; REPORTERS
+;--------------------------------------------------------------------------------------------------------------------
+
+to-report get-action [ action-code ] ; called by sta7us, fix
+
+  report
+  (ifelse-value
+    ( action-code = "DEC" or action-code = "make-decisions" ) [ "make-decisions" ]
+    ( action-code = "MNT" or action-code = "maintain-body" ) [ "maintain-body" ]
+    ( action-code = "GRW" or action-code = "body-size" ) [ "body-size" ]
+    ( action-code = "BSD" or action-code = "body-shade" ) [ "body-shade" ]
+    ( action-code = "IPR" or action-code = "day-perception") [ "day-perception" ]
+    ( action-code = "NPR" or action-code = "night-perception" ) [ "night-perception" ]
+    ( action-code = "APR" or action-code = "audio-perception" ) [ "audio-perception" ]
+    ( action-code = "DPA" or action-code = "day-perception-angle" ) [ "day-perception-angle" ]
+    ( action-code = "NPA" or action-code = "night-perception-angle" ) [ "night-perception-angle" ]
+    ( action-code = "APA" or action-code = "audio-perception-angle") [ "audio-perception-angle" ]
+    ( action-code = "VCR" or action-code = "vocal-range" ) [ "vocal-range" ]
+    ( action-code = "ICC" or action-code = "conception-chance" ) [ "conception-chance" ]
+    ( action-code = "STM" or action-code = "stomach-size" ) [ "stomach-size" ]   
+    ( action-code = "MTR" or action-code = "mutation-rate" ) [ "mutation-rate" ]
+    ( action-code = "SXR" or action-code = "sex-ratio" ) [ "sex-ratio" ]
+    ( action-code = "LTS" or action-code = "litter-size" ) [ "litter-size" ]
+    ( action-code = "LEV" or action-code = "leave-group" ) [ "leave-group" ]
+    ( action-code = "TRT" or action-code = "turn-right" ) [ "turn-right" ]
+    ( action-code = "TLF" or action-code = "turn-left" ) [ "turn-left" ]
+    ( action-code = "GFD" or action-code = "go-forward" ) [ "go-forward" ]
+    ( action-code = "MOV" or action-code = "move-toward" ) [ "move-toward" ]
+    ( action-code = "HED" or action-code = "set-heading" ) [ "set-heading" ]
+    ( action-code = "SAC" or action-code = "signal-a-chance" ) [ "signal-a-chance" ]
+    ( action-code = "SAO" or action-code = "signal-a-on" ) [ "signal-a-on" ]
+    ( action-code = "SBC" or action-code = "signal-b-chance" ) [ "signal-b-chance" ]
+    ( action-code = "SBO" or action-code = "signal-b-on" ) [ "signal-b-on" ]
+    ( action-code = "SCC" or action-code = "signal-c-chance" ) [ "signal-c-chance" ]
+    ( action-code = "SCO" or action-code = "signal-c-on" ) [ "signal-c-on" ]
+    ( action-code = "INC" or action-code = "infancy-chance" ) [ "infancy-chance" ]
+    ( action-code = "CKI" or action-code = "check-infancy" ) [ "check-infancy" ]
+    ( action-code = "GVB" or action-code = "birthing-chance" ) [ "birthing-chance" ]
+    ( action-code = "CKB" or action-code = "check-birth" ) [ "check-birth" ]
+    ( action-code = "JVC" or action-code = "juvenile-chance" ) [ "juvenile-chance" ]
+    ( action-code = "CKJ" or action-code = "check-juvenility" ) [ "check-juvenility" ]
+    ( action-code = "WEN" or action-code = "weaning-chance" ) [ "weaning-chance" ]
+    ( action-code = "CKW" or action-code = "check-weaning" ) [ "check-weaning" ]
+    ( action-code = "ADC" or action-code = "adult-chance" ) [ "adult-chance" ]
+    ( action-code = "CKA" or action-code = "check-adulthood" ) [ "check-adulthood" ]
+    ( action-code = "SNC" or action-code = "senescent-chance" ) [ "senescent-chance" ]
+    ( action-code = "CKS" or action-code = "check-senescence" ) [ "check-senescence" ]
+    ( action-code = "DSC" or action-code = "digest-stomach" ) [ "digest-stomach" ]
+    ( action-code = "FAT" or action-code = "reserve-energy" ) [ "reserve-energy" ]
+    ( action-code = "BRN" or action-code = "burn-reserves" ) [ "burn-reserves" ]
+    ( action-code = "GFT" or action-code = "supply-to" ) [ "supply-to" ]
+    ( action-code = "RFT" or action-code = "demand-from" ) [ "demand-from" ]
+    ( action-code = "EAT" or action-code = "eat") [ "eat" ]
+    ( action-code = "PKU" or action-code = "pick-up" ) [ "pick-up" ]
+    ( action-code = "SQM" or action-code = "squirm-from" ) [ "squirm-from" ]
+    ( action-code = "PDN" or action-code = "put-down" ) [ "put-down" ]
+    ( action-code = "CLG" or action-code = "cling-to" ) [ "cling-to" ]
+    ( action-code = "ATK" or action-code = "attack" ) [ "attack" ]
+    ( action-code = "HLP" or action-code = "help") [ "help" ]
+    ( action-code = "JNG" or action-code = "join-group-of" ) [ "join-group-of" ]
+    ( action-code = "MAT" or action-code = "mate-with") [ "mate-with" ]
+    [ "" ])
+  
+end
+
 to-report status-of [ target ]
   let status-report ""
-  
-  ;  if ( subject = self and is-anima1? target ) [
-  ;    print (word "anima1: " [meta-id] of target )
-  ;    print (word "     biological.sex: " [biological.sex] of target )
-  ;    print (word "     life.history: " [life.history] of target )
-  ;    print (word "     female.fertility: " [female.fertility] of target )
-  ;    print (word "     body.size: " [body.size] of target )
-  ;    print (word "     relatedness-with: " relatedness-with target )
-  ;    print (word "     living.chance: " [living.chance] of target )
-  ;    print (word "     energy.supply: " [energy.supply] of target )
-  ;    print (word "     is.dead: " [is.dead] of target )
-  ;  ]
-  
+
   ifelse (is-anima1? target) 
   [ ; ANIMALS
     let target-kind "z"
@@ -127,131 +257,28 @@ to-report status-of [ target ]
     let target-energy ifelse-value ( [energy.supply] of target > energy.supply ) [ "$" ] [ "~" ]
     set status-report (word target-self target-alive target-kind target-sex target-life-history target-fertility target-size target-health target-kin target-group target-carry target-signal )
     
-  ][ ; PLANTS
+  ][ 
+    ; PLANTS
     let target-kind "d" 
-    set status-report ( word target-kind ) ]
+    set status-report ( word target-kind ) 
+  ]
   
   ; BOTH
   set status-report (word status-report ifelse-value ( sun-status = "DAY" ) [ "*" ][ "-" ] )
   set status-report (word status-report ceiling [color] of target )
-    
+  
   report status-report
 end
 
-to sta7us-act
-  
-  foreach decision.vectors [ vector ->
-    
-    let energy-cost abs item 5 vector
-    let not-done item 6 vector
-    
-    if ( not-done and energy.supply > energy-cost ) [
-      ;let ego item 1 vector
-      let target item 2 vector
-      let code item 3 vector
-      ;let operation item 4 vector
-      let raw-weight item 5 vector
-      update-energy ( - energy-cost )
-      ;decisions-done (list vector)
-      
-      ifelse ifelse-value ( target = nobody ) [ false ] [ distance target < ( size / 2 + [size] of target / 2 ) ] [
-        do-action code target raw-weight
-        
-      ][
-        if (target != nobody ) [
-          
-          let polarity ( raw-weight > 0 )
-          let ycor-difference ([ycor] of target - [ycor] of self )
-          let xcor-difference ([xcor] of target - [xcor] of self )
-          let angle ifelse-value ( ycor-difference = 0 or xcor-difference = 0 ) [ random 360 ] [ atan ycor-difference xcor-difference ]
-          if ( polarity = false ) [ set angle angle - 180 ] ; could possibly simplify by taking out polarity and ...
-          set x.magnitude x.magnitude + (energy-cost * sin angle) ; ... putting raw-weight here instead of energy-cost
-          set y.magnitude y.magnitude + (energy-cost * cos angle) ; ... would that be mathematically equivalent?
-        ]
-      ]
-    ]
+to-report first-string-is-part-of-last? [ string1 string2 ]
+  let first-is-part-of-last true
+  let index 0
+  if ( is-string? string1 and is-string? string2 ) [
+    while [index < length string1] [
+      if ( not member? item index string1 string2 ) and ( item index string1 != " " ) [ set first-is-part-of-last false ]
+      set index index + 1 ]
   ]
-  
-end
-
-;----------------------------------------------------------------------------------------------
-; DO-ACTION
-;
-; Operation to do a given ACTION directed to a given TARGET with a given VALUE.
-;
-; CALLER: anima1
-; ACTION: the action code representing the action to perform.
-; TARGET: the receiver of an inter-action.
-; VALUE: the amount of energy allotted to the action.
-;----------------------------------------------------------------------------------------------
-
-to sta7us-do-action [ action-code target value ]
-  
-  carefully [
-    if action-code = "MNT" [ maintain-body value ]
-    if action-code = "GRW" [ body-size value ]
-    if action-code = "BSD" [ body-shade value ]
-    if action-code = "IPR" [ day-perception value ]
-    if action-code = "NPR" [ night-perception value ]
-    if action-code = "APR" [ audio-perception value ]
-    if action-code = "DPA" [ day-perception-angle value ]
-    if action-code = "NPA" [ night-perception-angle value ]
-    if action-code = "APA" [ audio-perception-angle value ]
-    if action-code = "VCR" [ vocal-range value ]
-    if action-code = "ICC" [ conception-chance value ]
-    if action-code = "MTR" [ mutation-rate value ]
-    if action-code = "SXR" [ sex-ratio value ]
-    if action-code = "LTS" [ litter-size value ]
-    if action-code = "LEV" [ leave-group-of target value ]
-    if action-code = "MOV" [ move-toward target value ]
-    if action-code = "TRT" [ turn-right value ]
-    if action-code = "TLF" [ turn-left value ]
-    if action-code = "GFD" [ go-forward value ]
-    ;if action-code = "HED" [ set-heading value ]
-    if action-code = "SAO" [ signal-a-on value ]
-    if action-code = "SBO" [ signal-b-on value ]
-    if action-code = "SCO" [ signal-c-on value ]
-    if action-code = "CKI" [ check-infancy value ]
-    if action-code = "CKB" [ check-birth value ]
-    if action-code = "CKJ" [ check-juvenility value ]
-    if action-code = "CKW" [ check-weaning value ]
-    if action-code = "CKA" [ check-adulthood value ]
-    if action-code = "CKS" [ check-senescence value ]
-    if action-code = "GFT" [ supply-to target value ]
-    if action-code = "RFT" [ demand-from target value ]
-    if action-code = "EAT" [ eat target value ]
-;    if action-code = "PKU" [ pick-up target value ]
-;    if action-code = "SQM" [ squirm-from target value ]
-    if action-code = "PDN" [ put-down target value ]
-;    if action-code = "CLG" [ cling-to target value ]
-    if action-code = "ATK" [ attack target value ]
-    if action-code = "HLP" [ help target value ]
-    if action-code = "JNG" [ join-group-of target value ]
-    if action-code = "MAT" [ mate-with target value ]
-    
-  ][  ]
-  
-end
-
-;----------------------------------------------------------------------------------------------
-; GET-MUTATION
-;
-; Returns a randomly selected codon to occasionally introduce novel mutations into a population.
-;
-; CALLER: anima1
-;----------------------------------------------------------------------------------------------
-
-to-report get-mutation
-  let index random 5
-  let new-mutation ""
-  
-  if ( index = 0 ) [ set new-mutation one-of [ true false ] ]
-  if ( index = 1 ) [ set new-mutation generate-status ]
-  if ( index = 2 ) [ set new-mutation generate-status ]
-  if ( index = 3 ) [ set new-mutation one-of action-code-list ]
-  if ( index = 4 ) [ set new-mutation precision ( random-float 1.0 * ( ifelse-value (random-float 1.0 < 0.5 ) [ 1 ] [ -1 ] ) ) 5 ]
-  
-  report new-mutation
+  report first-is-part-of-last
 end
 
 to-report status-code-list
@@ -286,92 +313,3 @@ to-report generate-status
   report new-status
 end
 
-;----------------------------------------------------------------------------------------------
-; GENERATE-DECISIONS
-;
-; Reporter that returns a list of decision vectors generated from genotype.
-;
-; Caller: anima1
-; ENVIRONMENT: list of turtles (both plants and anima1s) observed by the caller.
-;----------------------------------------------------------------------------------------------
-
-to generate-decisions [ local-turtles ] ; check actually working
-  let meself self
-  let current-energy energy.supply
-  let self-phenotype status-of meself
-  let decision-vectors []
-  let conspecifics-list []
-  let status-list []
-
-  let status-table table:make
-  ask local-turtles [
-    table:put status-table [meta-id] of self [ status-of myself ] of myself ]
-  
-  foreach (sentence chromosome.I chromosome.II) [ g ->
-    let gene-ego item 1 g
-    let gene-other item 2 g
-    let gene-action item 3 g
-    let gene-weight item 4 g
-    
-    ; Check that first CODON matches self
-    if first-string-is-part-of-last? ( gene-ego ) ( self-phenotype ) [
-      
-      ; Consider status-of others in the environment
-      ask local-turtles [
-        let other-guy self
-        let other-status table:get status-table [meta-id] of self
-        
-        ; Check that second CODON matches other
-        if first-string-is-part-of-last? ( gene-other ) ( other-status ) [
-          
-          ask myself [
-            let distance-to-target ifelse-value ( distance other-guy > 1 ) [ distance other-guy ] [ 1 ]
-            let vector-doesnt-exist true
-            foreach decision-vectors [ v ->
-              
-              if ( item 2 v = other-guy ) and ( item 3 v = ( get-action gene-action ) ) [
-                set vector-doesnt-exist false
-                set decision-vectors remove-item position v decision-vectors decision-vectors
-                let new-vector replace-item 4 v ( item 4 v + precision ( gene-weight / ( distance-to-target ^ 2 )) 5 )
-                set decision-vectors lput new-vector decision-vectors ]]
-            
-            if vector-doesnt-exist [
-              set decision-vectors lput (list random 9999999 meself other-guy ( get-action gene-action ) precision ( gene-weight / ( distance-to-target ^ 2 )) 5 ) decision-vectors ]
-      ]]]
-  ]]
-  
-  set decision.vectors ( sentence decision.vectors decision-vectors )
-end
-
-;--------------------------------------------------------------------------------------------------------------------
-; OTHER FUNCTIONS
-;--------------------------------------------------------------------------------------------------------------------
-
-to-report first-string-is-part-of-last? [ string1 string2 ]
-  let first-is-part-of-last true
-  let index 0
-  if ( is-string? string1 and is-string? string2 ) [
-    while [index < length string1] [
-      if ( not member? item index string1 string2 ) and ( item index string1 != " " ) [ set first-is-part-of-last false ]
-      set index index + 1 ]
-  ]
-  report first-is-part-of-last
-end
-
-to-report get-decisions [ target target-target action-name ]
-  report filter [ vector -> item 2 vector = target-target and item 3 vector = action-name ] [ decision.vectors ] of target 
-end
-
-to-report get-decisions-cost [ vector-list ]
-  report sum map [ vector -> item 4 vector ] vector-list
-end
-
-to decisions-done [ vector-list ]
-  if ( not empty? vector-list ) [
-    let vector-ids map [ vector -> item 0 vector ] vector-list
-    set done-decisions sentence vector-ids done-decisions
-;    foreach decision.vectors [ vector ->
-;      if ( member? item 0 vector vector-ids ) [ set decision.vectors replace-item (position vector decision.vectors) decision.vectors replace-item 6 vector false ]
-;    ]
-  ]
-end

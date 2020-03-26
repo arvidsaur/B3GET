@@ -18,6 +18,8 @@
 ; extension to run code verification checks. Modify the USER SETTINGS below for specific data
 ; collection preferences.
 ;
+; L-V, max population size, min population size, hamilton's rule, OFT, parent-offspring birth and wean, patchiness
+;
 ;----------------------------------------------------------------------------------------------
 
 to output-results
@@ -26,14 +28,14 @@ to output-results
   ; -------------
   let verification? true         ; TRUE = runs periodic code verification checks set by the VERIFICATION-RATE
   let verification-rate 0.01 
-  let record-simulation? true    ; TRUE = records the simulation ;
+  let record-simulation? false   ; TRUE = records the simulation ;
   let record-group? true         ; TRUE = records every group upon its creation ;
-  let record-agent? true        ; TRUE = records every agent upon its death
+  let record-agent? true         ; TRUE = records every agent upon its death
   let scan-interval 100        
   let simulation-scans? true     ; TRUE = scans the simulation every SCAN-INTERVAL and records population-level phenomena ;
   let group-scans? true          ; TRUE = scans all groups every SCAN-INTERVAL and records group-level phenomena
-  let agent-scans? true         ; TRUE = scans all agents every SCAN-INTERVAL and records individual-level phenomena
-  let focal-follows? true       ; TRUE = small chance to record an individual's entire life
+  let agent-scans? true          ; TRUE = scans all agents every SCAN-INTERVAL and records individual-level phenomena
+  let focal-follows? true        ; TRUE = small chance to record an individual's entire life
    
   ;----------------------------------------------------------------------------------------------     
   ; VERIFICATION : collect data on periodic code verification checks
@@ -45,7 +47,7 @@ to output-results
   ; RECORD : collect summary data of a simulation, group, or individual
   ;----------------------------------------------------------------------------------------------
   
-  if ( ticks = 1 ) [ crt 1 [ record-simulation die ]]
+  if ( record-simulation? and ticks = 1 ) [ crt 1 [ record-simulation die ]]
   if ( record-group? ) [ ask groups with [ age = 0 ] [ record-group ]]
   if ( record-agent? ) [ ask anima1s with [ ticks-at-death > 0 and ticks = ( ticks-at-death + 1 ) and generation-number > 0 ] [ record-agent ] ]
 
@@ -82,7 +84,7 @@ to record-world
   update-metafile "world" (word "w" but-first simulation-id "-" ticks )
 end
 
-to record-simulation ; max population size, min population size, average pop size, average plant abundance, min, max, how many generations evolved 
+to record-simulation ; max population size, min population size, average pop size, average plant abundance, min, max
   export-turtle-to 
   ( word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "simulation_records.csv" )
   ( list     
@@ -91,15 +93,16 @@ to record-simulation ; max population size, min population size, average pop siz
     "model-structure"
     "genotype-reader"
     "simulation-id" 
+    "behaviorspace-experiment-name"
     "sun-status"
     "population" 
     "genotype"
     "plant-annual-cycle" 
+    "plant-daily-cycle" 
     "plant-seasonality" 
+    "plant-quality"
     "plant-minimum-neighbors" 
     "plant-maximum-neighbors" 
-    "plant-daily-cycle" 
-    "plant-quality"
     "world-width" 
     "world-height"
     "documentation-notes" 
@@ -110,7 +113,15 @@ to record-simulation ; max population size, min population size, average pop siz
     "selection-on?"
     "path-to-experiment"
     "useful-commands"
-    "command-input" )
+    "command-input" 
+    "mean-plant-patchiness"
+    "maximum-generation-number"
+    "lotka-volterra-cycles-present"
+    "percent-mothers-initiated-birth"
+    "percent-mothers-initiated-weaning"
+    "percent-of-optimal-foragers"
+    "percent-of-kin-selectors"
+  )
 end
 
 to record-group
@@ -213,7 +224,7 @@ end
 
 to scan-simulation
   export-turtle-to 
-  (word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] simulation-id ".csv" )
+  ( word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] simulation-id ".csv" )
   (list 
     "date-and-time" 
     "model-version" 
@@ -498,6 +509,15 @@ to-report median-adult-male-unique-mates report median [length remove-duplicates
 to-report median-adult-female-unique-mates report median [length remove-duplicates matings-list] of anima1s with [ biological.sex = "female" ]  end
 to-report median-adult-male-group-transfers report median [length group-transfers-list] of anima1s with [ biological.sex = "male" ] end
 to-report median-adult-female-group-transfers report median [length group-transfers-list] of anima1s with [ biological.sex = "female" ] end
+  
+;to-report instantanious-plant-patchiness report "" end
+;to-report mean-plant-patchiness report ifelse-value ( file-exists? word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] simulation-id ".csv" ) [ "" ] [ 0 ] end
+;to-report maximum-generation-number report max [generation-number] of anima1s end
+;to-report lotka-volterra-cycles-present report "" end
+;to-report percent-mothers-initiated-birth report "" end 
+;to-report percent-mothers-initiated-weaning report "" end 
+;to-report percent-of-optimal-foragers report "" end 
+;to-report percent-of-kin-selectors report "" end 
   
 ;:::: groups :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 

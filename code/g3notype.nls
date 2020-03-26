@@ -164,65 +164,7 @@
 ;----------------------------------------------------------------------------------------------
 
 ;----------------------------------------------------------------------------------------------
-; GET-MUTATION
-;
-; Returns a randomly selected codon to occasionally introduce novel mutations into a population.
-;
-; CALLER: anima1
-;----------------------------------------------------------------------------------------------
-
-to-report get-mutation-1
-  report one-of (sentence gate-code-list action-code-list operation-code-list reporter-code-list )
-end
-
-to-report gate-code-list 
-  report [ 
-    "ANY" "UUU" "NNN" "ONE" "MEE" 
-    "ALL" "THN" "TNT" ] ; "AND" "ORR" "NOT" 
-end
-
-to-report action-code-list-2 
-  report [ 
-    "DEC" "MNT" "GRW" "BSD" "IPR" 
-    "NPR" "APR" "ICC" "MTR" "SXR" 
-    "LTS" "LEV" "TRT" "TLF" "GFD" 
-    "HED" "SAC" "SBC" "SCC" "SAO" 
-    "SBO" "SCO" "INC" "CKI" "GVB" 
-    "CKB" "JVC" "CKJ" "WEN" "CKW"
-    "ADC" "CKA" "SNC" "CKS" "DSC" 
-    "FAT" "BRN" "GFT" "RFT" "EAT" 
-    "PKU" "PDN" "ATK" "HLP" "JNG"
-    "MAT" "DPA" "NPA" "APA" "VCR" ]
-end
-
-to-report operation-code-list
-  report [ "EQL" "NQL" "GRT" "LST" "SDO" ]
-end
-
-to-report reporter-code-list
-  report [
-    "MID" "SIZ" "COL" "SEX" "SHD"
-    "LFH" "FER" "GRP" "AON" "BON"
-    "CON" "SIG" "EGO" "DSE" "ISA"
-    "ISP" "CRD" "REL" "EMI" "ESZ"
-    "ECL" "ESX" "ESD" "ELH" "EFR" 
-    "EGP" "EXM" "EYM" "ENG"
-    "EBS" "ESR" "ELS" "ECC"
-    "EMC" "EPC" "EBC" "EWC" "EIC"
-    "EJC" "EAC" "ESC" "EMC" "ASC"
-    "BSC" "CSC" "TRU" "FAL" "XXX"
-    "AXX" "ABX" "ABC" "XBX" "XBC"
-    "XXC" "AXC" "FEM" "MAL" "GES"
-    "INF" "JUV" "ADT" "SEN" "DED"
-    "CYC" "PRG" "LAC" "CRD" "MOM"
-    "MYO" "AON" "BON" "CON" "EAP" 
-    "ENP" "RNM" "RNB" "EDA" "ENA"
-    "EAA" "EVR"
-  ]
-end
-
-;----------------------------------------------------------------------------------------------
-; GENERATE-DECISIONS
+; GET-DECISIONS
 ;
 ; Reporter that returns a list of decision vectors generated from genotype.
 ;
@@ -230,10 +172,10 @@ end
 ; ENVIRONMENT: list of turtles (both plants and anima1s) observed by the caller.
 ;----------------------------------------------------------------------------------------------
 
-to genotype-generate-decisions [ environment ]
+to-report g3notype-make-decisions [ environment ]
   set decision.vectors []
   get-iterative-decisions self environment [] true ( sentence chromosome.I chromosome.II ) no-turtles []
-  
+  report decision.vectors
 end
 
 ;---------------------------------------------------------------------------------------------- 
@@ -492,7 +434,7 @@ end
 ; GET-ACTION
 ;--------------------------------------------------------------------------------------------------------------------
 
-to-report get-action [ action-code ]
+to-report get-action [ action-code ] ; called by sta7us, fix
 
   report
   (ifelse-value
@@ -508,6 +450,7 @@ to-report get-action [ action-code ]
     ( action-code = "APA" ) [ "audio-perception-angle" ]
     ( action-code = "VCR" ) [ "vocal-range" ]
     ( action-code = "ICC" ) [ "conception-chance" ]
+    ( action-code = "STM" ) [ "stomach-size" ]   
     ( action-code = "MTR" ) [ "mutation-rate" ]
     ( action-code = "SXR" ) [ "sex-ratio" ]
     ( action-code = "LTS" ) [ "litter-size" ]
@@ -552,5 +495,79 @@ to-report get-action [ action-code ]
     [ "" ])
   
 end
+
+
+;----------------------------------------------------------------------------------------------
+; GET-MUTATION
+;
+; Returns a randomly selected codon to occasionally introduce novel mutations into a population.
+;
+; CALLER: anima1
+;----------------------------------------------------------------------------------------------
+
+to-report g3notype-get-mutation [ original-codon ]
+  report one-of (sentence gate-code-list action-code-list operation-code-list reporter-code-list )
+end
+
+to-report gate-code-list 
+  report [ 
+    "ANY" "UUU" "NNN" "ONE" "MEE" 
+    "ALL" "THN" "TNT" ] ; "AND" "ORR" "NOT" 
+end
+
+to-report action-code-list-2 
+  report [ 
+    "DEC" "MNT" "GRW" "BSD" "IPR" 
+    "NPR" "APR" "ICC" "MTR" "SXR" 
+    "LTS" "LEV" "TRT" "TLF" "GFD" 
+    "HED" "SAC" "SBC" "SCC" "SAO" 
+    "SBO" "SCO" "INC" "CKI" "GVB" 
+    "CKB" "JVC" "CKJ" "WEN" "CKW"
+    "ADC" "CKA" "SNC" "CKS" "DSC" 
+    "FAT" "BRN" "GFT" "RFT" "EAT" 
+    "PKU" "PDN" "ATK" "HLP" "JNG"
+    "MAT" "DPA" "NPA" "APA" "VCR" ]
+end
+
+to-report operation-code-list
+  report [ "EQL" "NQL" "GRT" "LST" "SDO" ]
+end
+
+to-report reporter-code-list
+  report [
+    "MID" "SIZ" "COL" "SEX" "SHD"
+    "LFH" "FER" "GRP" "AON" "BON"
+    "CON" "SIG" "EGO" "DSE" "ISA"
+    "ISP" "CRD" "REL" "EMI" "ESZ"
+    "ECL" "ESX" "ESD" "ELH" "EFR" 
+    "EGP" "EXM" "EYM" "ENG"
+    "EBS" "ESR" "ELS" "ECC"
+    "EMC" "EPC" "EBC" "EWC" "EIC"
+    "EJC" "EAC" "ESC" "EMC" "ASC"
+    "BSC" "CSC" "TRU" "FAL" "XXX"
+    "AXX" "ABX" "ABC" "XBX" "XBC"
+    "XXC" "AXC" "FEM" "MAL" "GES"
+    "INF" "JUV" "ADT" "SEN" "DED"
+    "CYC" "PRG" "LAC" "CRD" "MOM"
+    "MYO" "AON" "BON" "CON" "EAP" 
+    "ENP" "RNM" "RNB" "EDA" "ENA"
+    "EAA" "EVR"
+  ]
+end
+
+;to-report get-decisions-of [ target target-of-target action-name ] ; does NOT included completed actions
+;  report filter [ vector -> item 2 vector = target-of-target and item 3 vector = action-name and not member? (item 0 vector) completed.actions ] [ decision.vectors ] of target
+;end
+;
+;to-report get-decisions-cost [ vector-list ]
+;  report sum map [ vector -> item 4 vector ] vector-list
+;end
+;
+;to acted-on-decisions [ vector-list ]
+;  if ( not empty? vector-list ) [
+;    let vector-ids map [ vector -> item 0 vector ] vector-list
+;    set completed.actions sentence vector-ids completed.actions
+;  ]
+;end
 
 

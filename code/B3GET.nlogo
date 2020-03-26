@@ -49,6 +49,7 @@ anima1s-own [
   carried.items
 
   ; hidden
+  stomach.size
   mutation.chance
   sex.ratio
   litter.size
@@ -75,6 +76,7 @@ anima1s-own [
   chromosome.I
   chromosome.II
   decision.vectors
+  completed.actions
   memory.storage
 
   ; TRACKING VARIABLES
@@ -93,6 +95,7 @@ anima1s-own [
   adult-living-chance
   adult-body-size
   adult-body-shade
+  adult-stomach-size
   adult-mutation-chance
   adult-sex-ratio
   adult-litter-size
@@ -123,6 +126,7 @@ anima1s-own [
   cells-occupied
   infanticide-list
   cause-of-death
+  completed-actions
 
 ]
 
@@ -156,7 +160,6 @@ globals [
   sun-status
   deterioration-rate
   selection-rate
-  done-decisions ; fix and delete eventually?
 ]
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -173,18 +176,17 @@ globals [
 
 to setup-parameters
   set model-version "1.1.0~"
-  set done-decisions []
-  set deterioration-rate -0.01
+  set deterioration-rate -0.001
   set selection-rate 0.0001
 end
 
-to setup [ sim-id ]
-  ;if ( simulation-id != 0 ) [ record-world ]
+to setup [ new-simulation-id ]
+  ;if ( simulation-id != 0 and output-results? = true ) [ record-world ]
   clear-all
   reset-ticks
   setup-parameters
   setup-plants
-  set simulation-id sim-id
+  set simulation-id new-simulation-id
   import-population
   import-genotype
   clear-output
@@ -234,6 +236,22 @@ to-report generate-simulation-id
   report ( word "s" random 99 one-of alphabet one-of alphabet one-of alphabet )
 end
 
+to-report get-decisions-from-genoreader [ my-environment ]
+  report ( ifelse-value
+    ( genotype-reader = "sta7us" ) [ sta7us-make-decisions my-environment ]
+    ( genotype-reader = "g3notype" ) [ g3notype-make-decisions my-environment ]
+    [ sta7us-make-decisions my-environment ] )
+end
+
+to-report get-mutation-from-genoreader [ unmutated-codon ]
+  report (ifelse-value
+    ( is-number? unmutated-codon ) [ get-updated-value unmutated-codon ( one-of [ 1 -1 ] ) ]
+    [( ifelse-value
+      ( genotype-reader = "sta7us" ) [ sta7us-get-mutation unmutated-codon ]
+      ( genotype-reader = "g3notype" ) [ g3notype-get-mutation unmutated-codon ]
+      [ sta7us-get-mutation unmutated-codon ] ) ])
+end
+
 ;--------------------------------------------------------------------------------------------------------------------
 ;
 ;  .d8888b. .d8888b.
@@ -247,51 +265,62 @@ end
 
 to go
 
-  ; ENVIRONMENT CONTRAINTS
+  ; code to be deleted
+  ask anima1s with [ length carried.items > 0 ] [ set carried.items remove nobody carried.items ]
+  ask groups with [ count group-members = 0 ] [ die ]
+
+  ; ENVIRONMENTAL CONTRAINTS
   update-plants
   ask turtles [ set age age + 1 ]
-  ask anima1s with [ life.history = "gestatee" and mother = nobody ] [ set is.dead true ]
-  ask groups with [ count group-members = 0 ] [ die ]
-  ask anima1s with [ length carried.items > 0 ] [ set carried.items remove nobody carried.items ]
-  set done-decisions []
-  ask anima1s [
-    check-mortality
-    deteriorate
-    update-appearance ]
+  if selection-on? [ artificial-selection ]
+  ifelse ( model-structure = "reaper" )
+  [ if (( count anima1s - 100 ) > 0 ) [ ask n-of ( count anima1s - 100 ) anima1s [ set ticks-at-death ticks die ]]]
+  [ ask anima1s [check-mortality] ]
+  ask anima1s [ deteriorate update-appearance ]
+  if ( model-structure = "sower" and count anima1s with [ biological.sex = "male" and life.history = "adult" ] > 0 and count anima1s with [ biological.sex = "female" and life.history = "adult" ] > 0 and (count anima1s < 100) ) [ repeat ( 100 - count anima1s ) [ ask one-of anima1s with [ biological.sex = "female" and life.history = "adult" ] [ conceive-with one-of anima1s with [ biological.sex = "male" and life.history = "adult" ] ] ] ] ; random mating
 
-  ; AGENT ACTION
+  ; AGENT AGENCY
   ask anima1s [
     if ( not is.dead )
     [ make-decisions
       act ]]
 
-  ; META-ANALYSIS
+  ; SIMULATION OUTPUT
+  if output-results? [ output-results ]
+
+  ; prints out current status of the simulation every 100 timesteps
   if ( ticks > 0 and ceiling (ticks / 100) = (ticks / 100) and any? anima1s ) [
-    print (word "Simulation " simulation-id " is now at " precision (ticks / plant-annual-cycle) 3 " years, "
+    let print-text (word "Simulation " simulation-id " is now at " precision (ticks / plant-annual-cycle) 3 " years, "
       precision sum [energy.supply] of plants 3 " plant units, "
       precision mean [generation-number] of anima1s 3 " generations, and contains "
-      count anima1s with [ not is.dead ] " living organisms.") ]
-
-  if output-results? [ output-results ]
-  if selection-on? [ artificial-selection ]
+      count anima1s with [ not is.dead ] " living organisms.")
+    print print-text
+    if ( behaviorspace-run-number > 0 ) [ output-print print-text ] ]
 
   tick
 end
 
 to make-decisions
-  set decision.vectors []
-  let environment no-turtles
+  let my-environment no-turtles
 
-  if ( sun-status = "DAY" or sun-status = "NIGHT" ) [
-    set environment turtles with [ not is-group? self and not hidden? ] in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle )
-    if (female.fertility = "pregnant") [ set environment turtles with [ not is-group? self and (not hidden? or member? self [my-offspring] of myself ) ] in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) ] ] ; mothers can see gestatees
+  ; ASPATIAL WORLD
+  ifelse ( model-structure = "aspatial" ) [
+    set my-environment up-to-n-of 100 turtles
 
-;  if ( sun-status = "NIGHT" ) [
-;    set environment turtles with [ not is-group? self and not hidden? ] in-cone ( 5 * day.perception.range ) ( 300 * night.perception.angle )
-;    if (female.fertility = "pregnant") [ set environment turtles with [ not is-group? self and (not hidden? or member? self [my-offspring] of myself ) ] in-cone ( 5 * day.perception.range ) ( 300 * night.perception.angle ) ] ] ; mothers can see gestatees
+  ][ ; SPATIAL WORLD
+    if ( sun-status = "DAY" ) [
+      set my-environment turtles with [ not is-group? self and not hidden? ] in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle )
+      if (female.fertility = "pregnant") [ set my-environment turtles with [ not is-group? self and (not hidden? or member? self [my-offspring] of myself ) ] in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) ] ] ; mothers can see gestatees
 
-  if (life.history = "gestatee" ) [ set environment turtles with [ [meta-id] of self = [meta-id] of myself or meta-id = [mother-identity] of myself ]] ; gestatees can only see themselves, and their mothers
-  generate-decisions environment
+    if ( sun-status = "NIGHT" ) [
+      set my-environment turtles with [ not is-group? self and not hidden? ] in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) ; set to night.perception.angle once genotype includes this
+      if (female.fertility = "pregnant") [ set my-environment turtles with [ not is-group? self and (not hidden? or member? self [my-offspring] of myself ) ] in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) ] ] ; mothers can see gestatees
+
+    if (life.history = "gestatee" ) [ set my-environment turtles with [ [meta-id] of self = [meta-id] of myself or meta-id = [mother-identity] of myself ]] ; gestatees can only see themselves, and their mothers
+  ]
+
+  ; GENOTYPE READER
+  set decision.vectors get-decisions-from-genoreader my-environment
 end
 
 to update-plants
@@ -346,8 +375,7 @@ to deteriorate
   set body.shade get-updated-value body.shade deterioration-rate
 end
 
-to check-mortality ; REAPER
-
+to check-mortality
   if ( random-float 1.0 > living.chance ) [
     (ifelse
 
@@ -378,25 +406,26 @@ end
 
 to-report how-many-ticks? report 10 end
 
-to-report patchiness [ input-diameter ]
+to-report world-patchiness
+  let patch-diameter 5
   let patch-list []
 
   let i 0
   let j 0
-  let i-next input-diameter
-  let j-next input-diameter
+  let i-next patch-diameter
+  let j-next patch-diameter
 
   while [ j < world-height ] [
     while [ i < world-width ] [
 
       set patch-list lput count plants with [ xcor > i and xcor <= i-next and ycor > j and ycor <= j-next ] patch-list
       set i i-next
-      set i-next ifelse-value (( i + input-diameter ) > world-width ) [ world-width ] [ i + input-diameter ] ]
+      set i-next ifelse-value (( i + patch-diameter ) > world-width ) [ world-width ] [ i + patch-diameter ] ]
 
     set i 0
-    set i-next input-diameter
+    set i-next patch-diameter
     set j j-next
-    set j-next ifelse-value (( j + input-diameter ) > world-height ) [ world-height ] [ j + input-diameter ] ]
+    set j-next ifelse-value (( j + patch-diameter ) > world-height ) [ world-height ] [ j + patch-diameter ] ]
 
   report ( variance patch-list / mean patch-list )
 end
@@ -436,6 +465,39 @@ to-report get-shape
   report ( word base_shape a_on b_on c_on )
 end
 
+
+; --------------------------------------------------------------------------- ;
+;
+; DETERMINE GENETIC RELATEDNESS BETWEEN TWO INDIVIDUALS
+;
+; This routine determines the genetic relatedness between the caller and a
+; specified individual in the population. For example, consider these four
+; chromosomes.
+;
+; Locus         0 1 2 3 4 5 6 7 8 9
+;
+; Caller:   I:  y h m u n f q a x r
+;          II:  c j s w v i l f a p
+;
+; Target:   I:  j l h y m d u t v c
+;          II:  y u l x i s f p w a
+;
+; The first locus has one match, Caller I and Target II, and three non-matches,
+; Caller I and Target I (y and J), Caller II and Target I (c and j), and
+; Caller II to Target II (c y). This is considered a relatedness of
+; <m>1/(1+3) = 0.25</m>, at the first locus. This is repeated across all loci
+; and the average is returned.
+;
+; ENTRY:  'target' defines an individual to be compared the calling individual.
+;         'identity.I' and 'identity.II' carry the genetic information to be
+;          compared between caller and target.
+;         'identity.I' and 'identity.II' both contain exactly 10 loci.
+;
+; EXIT:   'relatedness-with' returns an estimate of the degree of relatedness, as
+;          fraction between 0 and 1.
+;
+; --------------------------------------------------------------------------- ;
+
 to-report relatedness-with [ target ]
   let matching 0
   let not-matching 0
@@ -470,18 +532,6 @@ to-report current-group
   [ nobody ]
 end
 
-to-report previous-group
-  report ifelse-value (any? groups with [ meta-id = [previous-group-id] of myself ])
-  [ one-of groups with [ meta-id = [previous-group-id] of myself ]]
-  [ nobody ]
-end
-
-to-report natal-group
-  report ifelse-value (any? groups with [ meta-id = [natal-group-id] of myself ])
-  [ one-of groups with [ meta-id = [natal-group-id] of myself ]]
-  [ nobody ]
-end
-
 to-report mother
   report ifelse-value (any? turtles with [ meta-id = [mother-identity] of myself ])
   [ one-of turtles with [ meta-id = [mother-identity] of myself ]]
@@ -507,13 +557,17 @@ end
 
 to act
 
+  set completed.actions []
   foreach decision.vectors [ vector ->
 
     let decision-id item 0 vector
     let raw-value item 4 vector
     let energy-cost abs raw-value
 
-    if ( not member? decision-id done-decisions and energy.supply > energy-cost ) [
+    let energy-check ifelse-value ( model-structure = "freelunch" ) [ true ] [ energy.supply > energy-cost ] ; FREE LUNCH always passes energy check
+
+    if ( not member? decision-id completed.actions and energy-check ) [
+      set completed.actions lput decision-id completed.actions
       let target item 2 vector
       let action item 3 vector
       update-energy ( - energy-cost )
@@ -522,6 +576,14 @@ to act
       [ do-action action target raw-value ]
       [ if (target != nobody ) [ move-toward target raw-value ]]]]
 
+end
+
+to-report get-cost-and-process-decisions [ target action-name ]
+  let decisions filter [ vector -> item 2 vector = target and item 3 vector = action-name and not member? (item 0 vector) completed.actions ] decision.vectors ; list of decisions filtered by target and action and not completed
+  let ids map [ vector -> item 0 vector ] decisions ; list of ids from decisions
+  set completed.actions sentence ids completed.actions ; add ids to list of completed actions
+  let cost sum map [ vector -> item 4 vector ] decisions ; summation of costs for all decisions in the list
+  report cost ; return this cost summation
 end
 
 ;----------------------------------------------------------------------------------------------
@@ -535,49 +597,49 @@ end
 ; VALUE: the amount of energy allotted to the action.
 ;----------------------------------------------------------------------------------------------
 
-to do-action [ action-code target value ]
+to do-action [ action-code target cost ]
 
   carefully [
-    if action-code = "maintain-body" [ maintain-body value ]
-    if action-code = "body-size" [ body-size value ]
-    if action-code = "body-shade" [ body-shade value ]
-    if action-code = "day-perception" [ day-perception value ]
-    if action-code = "night-perception" [ night-perception value ]
-    if action-code = "audio-perception" [ audio-perception value ]
-    if action-code = "day-perception-angle" [ day-perception-angle value ]
-    if action-code = "night-perception-angle" [ night-perception-angle value ]
-    if action-code = "audio-perception-angle" [ audio-perception-angle value ]
-    if action-code = "vocal-range" [ vocal-range value ]
-    if action-code = "conception-chance" [ conception-chance value ]
-    if action-code = "mutation-rate" [ mutation-rate value ]
-    if action-code = "sex-ratio" [ sex-ratio value ]
-    if action-code = "litter-size" [ litter-size value ]
-    if action-code = "move-toward" [ move-toward target value ]
-    if action-code = "turn-right" [ turn-right value ]
-    if action-code = "turn-left" [ turn-left value ]
-    if action-code = "go-forward" [ go-forward value ]
-    if action-code = "signal-a-on" [ signal-a-on value ]
-    if action-code = "signal-b-on" [ signal-b-on value ]
-    if action-code = "signal-b-on" [ signal-c-on value ]
-    if action-code = "check-infancy" [ check-infancy value ]
-    if action-code = "check-birth" [ check-birth value ]
-    if action-code = "check-juvenility" [ check-juvenility value ]
-    if action-code = "check-weaning" [ check-weaning value ]
-    if action-code = "check-adulthood" [ check-adulthood value ]
-    if action-code = "check-senescence" [ check-senescence value ]
-
-    if action-code = "supply-to" [ supply-to target value ]
-    if action-code = "demand-from" [ demand-from target value ]
-    if action-code = "eat" [ eat target value ]
-;    if action-code = "pick-up" [ pick-up target value ]
-;    if action-code = "squirm-from" [ squirm-from target value ]
-    if action-code = "put-down" [ put-down target value ]
-;    if action-code = "cling-to" [ cling-to target value ]
-    if action-code = "attack" [ attack target value ]
-    if action-code = "help" [ help target value ]
-    if action-code = "join-group-of" [ join-group-of target value ]
-    if action-code = "leave-group" [ leave-group-of target value ]
-    if action-code = "mate-with" [ mate-with target value ]
+    if action-code = "maintain-body" [ maintain-body cost ]
+    if action-code = "body-size" [ body-size cost ]
+    if action-code = "body-shade" [ body-shade cost ]
+    if action-code = "day-perception" [ day-perception cost ]
+    if action-code = "night-perception" [ night-perception cost ]
+    if action-code = "audio-perception" [ audio-perception cost ]
+    if action-code = "day-perception-angle" [ day-perception-angle cost ]
+    if action-code = "night-perception-angle" [ night-perception-angle cost ]
+    if action-code = "audio-perception-angle" [ audio-perception-angle cost ]
+    if action-code = "vocal-range" [ vocal-range cost ]
+    if action-code = "conception-chance" [ conception-chance cost ]
+    if action-code = "stomach-size" [ stomach-size cost ]
+    if action-code = "mutation-rate" [ mutation-rate cost ]
+    if action-code = "sex-ratio" [ sex-ratio cost ]
+    if action-code = "litter-size" [ litter-size cost ]
+    if action-code = "move-toward" [ move-toward target cost ]
+    if action-code = "turn-right" [ turn-right cost ]
+    if action-code = "turn-left" [ turn-right ( - cost ) ]
+    if action-code = "go-forward" [ go-forward cost ]
+    if action-code = "signal-a-on" [ signal-a-on cost ]
+    if action-code = "signal-b-on" [ signal-b-on cost ]
+    if action-code = "signal-b-on" [ signal-c-on cost ]
+    if action-code = "check-infancy" [ check-infancy cost ]
+    if action-code = "check-birth" [ check-birth cost ]
+    if action-code = "check-juvenility" [ check-juvenility cost ]
+    if action-code = "check-weaning" [ check-weaning cost ]
+    if action-code = "check-adulthood" [ check-adulthood cost ]
+    if action-code = "check-senescence" [ check-senescence cost ]
+    if action-code = "supply-to" [ supply-to target cost ]
+    if action-code = "demand-from" [ demand-from target cost ]
+    if action-code = "eat" [ eat target cost ]
+    if action-code = "join-group-of" [ join-group-of target cost ]
+    if action-code = "leave-group" [ join-group-of target ( - cost ) ]
+    if action-code = "pick-up" [ pick-up target cost ]
+    if action-code = "put-down" [ pick-up target ( - cost ) ]
+    if action-code = "cling-to" [ cling-to target cost ]
+    if action-code = "squirm-from" [ cling-to target ( - cost ) ]
+    if action-code = "help" [ help target cost ]
+    if action-code = "attack" [ help target ( - cost ) ]
+    if action-code = "mate-with" [ mate-with target cost ]
 
   ][  ]
 
@@ -587,71 +649,67 @@ end
 ; ACTIONS
 ;
 ; CALLER: the anima1 doing the action
-; VALUE: the energy to be used to do the action
+; COST: the energy to be used to do the action, can be negative
 ; TARGET: the receiver of the action ( INTER-ACTIONS have a target and INTRA-ACTIONS do not )
 ;
 ; The 'Info' tab contains a summary of possible actions.
 ;
 ;--------------------------------------------------------------------------------------------------------------------
 
-to maintain-body [ value ] set living.chance get-updated-value living.chance value end
+to maintain-body [ cost ] set living.chance get-updated-value living.chance cost end
 
-to body-size [ value ] set body.size get-updated-value body.size value end
+to body-size [ cost ] set body.size get-updated-value body.size cost end
 
-to body-shade [ value ] set body.shade get-updated-value body.shade value end
+to body-shade [ cost ] set body.shade get-updated-value body.shade cost end
 
-to day-perception [ value ] set day.perception.range get-updated-value day.perception.range value end
+to day-perception [ cost ] set day.perception.range get-updated-value day.perception.range cost end
 
-to night-perception [ value ] set night.perception.range get-updated-value night.perception.range value end
+to night-perception [ cost ] set night.perception.range get-updated-value night.perception.range cost end
 
-to audio-perception [ value ] set audio.perception.range get-updated-value audio.perception.range value end
+to audio-perception [ cost ] set audio.perception.range get-updated-value audio.perception.range cost end
 
-to day-perception-angle [ value ] set day.perception.angle get-updated-value day.perception.angle value end
+to day-perception-angle [ cost ] set day.perception.angle get-updated-value day.perception.angle cost end
 
-to night-perception-angle [ value ] set night.perception.angle get-updated-value night.perception.angle value end
+to night-perception-angle [ cost ] set night.perception.angle get-updated-value night.perception.angle cost end
 
-to audio-perception-angle [ value ] set audio.perception.angle get-updated-value audio.perception.angle value end
+to audio-perception-angle [ cost ] set audio.perception.angle get-updated-value audio.perception.angle cost end
 
-to vocal-range [ value ] set vocal.range get-updated-value vocal.range value end
+to vocal-range [ cost ] set vocal.range get-updated-value vocal.range cost end
 
-to conception-chance [ value ] set conception.chance get-updated-value conception.chance value end
+to conception-chance [ cost ] set conception.chance get-updated-value conception.chance cost end
 
-to mutation-rate [ value ] set mutation.chance get-updated-value mutation.chance value end
+to stomach-size [ cost ] set stomach.size get-updated-value stomach.size cost end
 
-to sex-ratio [ value ] set sex.ratio get-updated-value sex.ratio value end
+to mutation-rate [ cost ] set mutation.chance get-updated-value mutation.chance cost end
 
-to litter-size [ value ] set litter.size get-updated-value litter.size value end
+to sex-ratio [ cost ] set sex.ratio get-updated-value sex.ratio cost end
 
-;--------------------------------------------------------------------------------------------------------------------
-; MOVEMENT
-;--------------------------------------------------------------------------------------------------------------------
+to litter-size [ cost ] set litter.size get-updated-value litter.size cost end
 
-to move-toward [ target value ]
+  ;--------------------------------------------------------------------------------------------------------------------
+  ; MOVEMENT
+  ;--------------------------------------------------------------------------------------------------------------------
+
+to move-toward [ target cost ]
   if (target != nobody ) [
     let ycor-difference ([ycor] of target - [ycor] of self )
     let xcor-difference ([xcor] of target - [xcor] of self )
     let angle ifelse-value ( ycor-difference = 0 or xcor-difference = 0 ) [ random 360 ] [ atan ycor-difference xcor-difference ]
-    if ( value < 0 ) [ set angle angle - 180 ]
-    set x.magnitude x.magnitude + (abs value * sin angle)
-    set y.magnitude y.magnitude + (abs value * cos angle)
+    if ( cost < 0 ) [ set angle angle - 180 ]
+    set x.magnitude x.magnitude + (abs cost * sin angle)
+    set y.magnitude y.magnitude + (abs cost * cos angle)
   ]
 end
 
-to turn-right [ value ]
-  ifelse ( value > 0 )
-  [ right ( 360 * value ) ]
-  [ left ( 360 * value ) ]
+to turn-right [ cost ]
+  ifelse ( cost > 0 )
+  [ right ( 360 * cost ) ]
+  [ left ( 360 * abs cost ) ]
 end
 
-to turn-left [ value ]
-  ifelse ( value > 0 )
-  [ left ( 360 * value ) ]
-  [ right ( 360 * value ) ]
-end
+to go-forward [ cost ]
 
-to go-forward [ value ]
-
-  if ( value < 0 ) [ right 180 ]
+  if ( cost < 0 ) [ right 180 ]
 
   let sum-weight size
   foreach carried.items [ object ->
@@ -659,7 +717,7 @@ to go-forward [ value ]
   set heading ( atan y.magnitude x.magnitude )
   set x.magnitude one-of [ 0.001 -0.001 ]
   set y.magnitude one-of [ 0.001 -0.001 ]
-  let travel-distance (size * (sqrt (( 2 * abs value ) / sum-weight )) )
+  let travel-distance (size * (sqrt (( 2 * abs cost ) / sum-weight )) )
   forward travel-distance
   foreach carried.items [ object ->
     if (object != nobody) [ ask object [ move-to myself ] ]]
@@ -672,8 +730,8 @@ end
 ; SIGNALING
 ;--------------------------------------------------------------------------------------------------------------------
 
-to signal-a-on [ value ]
-  set alpha.chance get-updated-value alpha.chance value
+to signal-a-on [ cost ]
+  set alpha.chance get-updated-value alpha.chance cost
   ifelse ( random-float 1.0 < alpha.chance ) [
     set alpha.signal true
   ][
@@ -681,8 +739,8 @@ to signal-a-on [ value ]
   ]
 end
 
-to signal-b-on [ value ]
-  set beta.chance get-updated-value beta.chance value
+to signal-b-on [ cost ]
+  set beta.chance get-updated-value beta.chance cost
   ifelse ( random-float 1.0 < beta.chance ) [
     set beta.signal true
   ][
@@ -690,8 +748,8 @@ to signal-b-on [ value ]
   ]
 end
 
-to signal-c-on [ value ]
-  set gamma.chance get-updated-value gamma.chance value
+to signal-c-on [ cost ]
+  set gamma.chance get-updated-value gamma.chance cost
   ifelse ( random-float 1.0 < gamma.chance ) [
     set gamma.signal true
   ][
@@ -703,8 +761,8 @@ end
 ; LIFE HISTORY
 ;--------------------------------------------------------------------------------------------------------------------
 
-to check-infancy [ value ]
-  set infancy.chance get-updated-value infancy.chance value
+to check-infancy [ cost ]
+  set infancy.chance get-updated-value infancy.chance cost
   if ( life.history = "gestatee" and random-float 1.0 < infancy.chance ) [
     set mother-initiated-birth false
     ifelse ( mother = nobody )
@@ -713,8 +771,8 @@ to check-infancy [ value ]
   ]
 end
 
-to check-birth [ value ]
-  set birthing.chance get-updated-value birthing.chance value
+to check-birth [ cost ]
+  set birthing.chance get-updated-value birthing.chance cost
   if ( female.fertility = "pregnant" and random-float 1.0 < birthing.chance ) [
     give-birth
   ]
@@ -736,8 +794,8 @@ to update-to-infant
   if (output-results?) [ ask current-group [ set total-birth-count total-birth-count + 1 ]]
 end
 
-to check-juvenility [ value ]
-  set juvenility.chance get-updated-value juvenility.chance value
+to check-juvenility [ cost ]
+  set juvenility.chance get-updated-value juvenility.chance cost
   if ( life.history = "infant" and random-float 1.0 < juvenility.chance ) [
     set mother-initiated-weaning false
     ifelse ( mother = nobody )
@@ -746,8 +804,8 @@ to check-juvenility [ value ]
   ]
 end
 
-to check-weaning [ value ]
-  set weaning.chance get-updated-value weaning.chance value
+to check-weaning [ cost ]
+  set weaning.chance get-updated-value weaning.chance cost
   if ( female.fertility = "lactating" and random-float 1.0 < weaning.chance ) [
     wean-offspring
   ]
@@ -767,8 +825,8 @@ to update-to-juvenile
   set ticks-at-weaning ticks
 end
 
-to check-adulthood [ value ]
-  set adulthood.chance get-updated-value adulthood.chance value
+to check-adulthood [ cost ]
+  set adulthood.chance get-updated-value adulthood.chance cost
   if ( life.history = "juvenile" and random-float 1.0 < adulthood.chance ) [
     update-to-adult
   ]
@@ -781,6 +839,7 @@ to update-to-adult
   set adult-living-chance living.chance
   set adult-body-size body.size
   set adult-body-shade body.shade
+  set adult-stomach-size stomach.size
   set adult-mutation-chance mutation.chance
   set adult-sex-ratio sex.ratio
   set adult-litter-size litter.size
@@ -797,8 +856,8 @@ to update-to-adult
   set adult-gamma-chance gamma.chance
 end
 
-to check-senescence [ value ]
-  set senescency.chance get-updated-value senescency.chance value
+to check-senescence [ cost ]
+  set senescency.chance get-updated-value senescency.chance cost
   if ( life.history = "adult" and random-float 1.0 < senescency.chance ) [
     update-to-senescent
   ]
@@ -816,50 +875,52 @@ end
 ; ENERGY
 ;--------------------------------------------------------------------------------------------------------------------
 
-to supply-to [ target value ] ;;
+to supply-to [ target cost ]
   if ( target != self and is-anima1? target and female.fertility = "lactating" or female.fertility = "pregnant" ) [
-    let demand-decisions get-decisions target self "demand-from"
-    if ( not empty? demand-decisions ) [
-      let one-demand one-of demand-decisions
-      ask target [
-        receive-from myself value
-        decisions-done (list one-demand)
-      ]
-    ]
+    let other-supply-cost get-cost-and-process-decisions target "supply-to"
+    let target-demand-cost [ get-cost-and-process-decisions myself "demand-from" ] of target
+    let net-cost ( cost + other-supply-cost + target-demand-cost )
+    if ( net-cost > 0 ) [ ask target [ receive-from myself net-cost ] ]
   ]
 end
 
-to demand-from [ target value ] ;;
+to demand-from [ target cost ]
   if ( target != self and is-anima1? target ) [
-    let supply-decisions get-decisions target self "supply-to"
-    if ( not empty? supply-decisions ) [
-      let one-supply one-of supply-decisions
-      receive-from myself value
-      ask target [ decisions-done (list one-supply) ]
-  ]]
+    let other-demand-cost get-cost-and-process-decisions target "demand-from"
+    let target-supply-cost [ get-cost-and-process-decisions myself "supply-to" ] of target
+    let net-cost ( cost + other-demand-cost + target-supply-cost )
+    if ( net-cost > 0 ) [ receive-from target net-cost ]
+  ]
 end
 
-to receive-from [ target value ] ;; value here should be lesser of supplier or demander value
-  let energy-wanted 10 ^ value
-  let energy-received ifelse-value ( energy-wanted < [ energy.supply ] of target ) [ energy-wanted ] [ [ energy.supply ] of target ]
-  update-energy energy-received
-  ask target [ set energy.supply ( energy.supply - energy-received ) ]
+to receive-from [ target cost ]
+  if ( cost > 0 ) [ ;; assumed always true
+    let energy-wanted 10 ^ cost ; stomach.capacity get-updated-value cost
+    let energy-received ifelse-value ( energy-wanted < [ energy.supply ] of target ) [ energy-wanted ] [ [ energy.supply ] of target ]
+    update-energy energy-received
+    ask target [ set energy.supply ( energy.supply - energy-received ) ]
+  ]
 end
 
-to eat [ target value ] ;;?
-  let energy-wanted 100 ^ value
+to eat [ target cost ] ;;?
+  let energy-wanted 100 ^ cost
   let energy-eaten 0
 
   set energy-eaten ifelse-value ( energy-wanted < [energy.supply] of target) [energy-eaten] [[energy.supply] of target]
   update-energy energy-eaten
   ask target [ update-energy ( - energy-eaten ) ]
 
+  collect-eating-data energy-eaten cost
+
+end
+
+to collect-eating-data [ energy-eaten cost-of-eating ]
   if (output-results?) [
 
     set foraging-gains foraging-gains + energy-eaten
-    set foraging-losses foraging-losses + value
+    set foraging-losses foraging-losses + cost-of-eating
 
-    ; group is tracking member foraging performance
+    ; group is tracking foraging performance of its members
     ask current-group [
       set total-energy-gained total-energy-gained + energy-eaten
       if ( [life.history] of myself = "gestatee" and [biological.sex] of myself = "female" ) [ set gestatee-female-energy-gained gestatee-female-energy-gained + energy-eaten ]
@@ -876,23 +937,33 @@ to eat [ target value ] ;;?
       if ( [life.history] of myself = "senescent" and [biological.sex] of myself = "male" ) [ set senescent-male-energy-gained senescent-male-energy-gained + energy-eaten ]
     ]
   ]
-
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
 ; INTERACTIONS
 ;--------------------------------------------------------------------------------------------------------------------
 
-to join-group-of [ target value ]
-  if ( is-anima1? target and random-float 1.0 < value ) [
+to join-group-of [ target cost ]
+  if ( is-anima1? target ) [
+    let other-join-cost get-cost-and-process-decisions target "join-group-of"
+    let target-join-cost [ get-cost-and-process-decisions myself "join-group-of" ] of target
+    let net-cost ( cost + other-join-cost + target-join-cost )
+    ifelse ( net-cost > 0 )
+    [ join-group ([group.identity] of target) net-cost ]
+    [ leave-group ([group.identity] of target) abs net-cost ]
+  ]
+end
+
+to join-group [ group-id cost ]
+  if ( random-float 1.0 < cost and group.identity != group-id ) [
     set previous-group-id group.identity
-    set group.identity [group.identity] of target
+    set group.identity group-id
     if output-results? [ set group-transfers-list lput [meta-id] of current-group group-transfers-list ]
   ]
 end
 
-to leave-group-of [ target value ]
-  if ( random-float 1.0 < abs value ) [
+to leave-group [ group-id cost ]
+  if ( random-float 1.0 < cost and group.identity != group-id ) [
     set previous-group-id group.identity
     hatch-groups 1 [
       initialize-group
@@ -902,143 +973,11 @@ to leave-group-of [ target value ]
   ]
 end
 
-to pick-up [ target value ] ;;
-
-  if ( target != self and is-anima1? target ) [
-
-    let squirm-decisions get-decisions target self "squirm-from"
-    let squirm-cost get-decisions-cost squirm-decisions
-
-    let pickup-decisions get-decisions self target "pick-up"
-    let pickup-cost get-decisions-cost pickup-decisions
-
-    ifelse ( squirm-cost > pickup-cost )
-    [ if ( member? target carried.items) [set carried.items remove target carried.items ]]
-    [ if ( not member? target carried.items) [set carried.items lput target carried.items ]]
-
-    ask target [ decisions-done squirm-decisions ]
-    decisions-done pickup-decisions
-
-  ]
+to-report previous-group
+  report ifelse-value (any? groups with [ meta-id = [previous-group-id] of myself ])
+  [ one-of groups with [ meta-id = [previous-group-id] of myself ]]
+  [ nobody ]
 end
-
-to squirm-from [ target value ] ;;
-
-  if ( target != self and is-anima1? target ) [
-
-    let pickup-decisions get-decisions target self "pick-up"
-    let pickup-cost get-decisions-cost pickup-decisions
-
-    let squirm-decisions get-decisions self target "squirm-from"
-    let squirm-cost get-decisions-cost squirm-decisions
-
-    ifelse ( squirm-cost > pickup-cost )
-    [ ask target [ set carried.items remove myself carried.items ]]
-    [ ask target [ set carried.items lput target carried.items ]]
-
-    decisions-done squirm-decisions
-    ask target [ decisions-done pickup-decisions ]
-
-  ]
-end
-
-to put-down [ target value ] ;;
-
-  if ( target != self and is-anima1? target ) [
-
-    let cling-decisions get-decisions target self "cling-to"
-    let cling-cost get-decisions-cost cling-decisions
-    let putdown-decisions get-decisions self target "put-down"
-    let putdown-cost get-decisions-cost putdown-decisions
-
-    ifelse ( putdown-cost >= cling-cost )
-    [ if ( member? target carried.items) [ set carried.items remove target carried.items ]]
-    [ if ( not member? target carried.items ) [ set carried.items lput target carried.items ]]
-
-    decisions-done putdown-decisions
-    ask target [ decisions-done cling-decisions ]
-
-  ]
-end
-
-to cling-to [ target value ] ;; squirm from
-
-  if ( target != self and is-anima1? target ) [
-
-    let putdown-decisions get-decisions target self "put-down"
-    let putdown-cost get-decisions-cost putdown-decisions
-
-    let cling-decisions get-decisions self target "cling-to"
-    let cling-cost get-decisions-cost cling-decisions
-
-    ifelse ( putdown-cost > cling-cost )
-    [ ask target [ set carried.items remove myself carried.items ]]
-    [ ask target [ set carried.items lput target carried.items ]]
-
-    decisions-done cling-decisions
-    ask target [ decisions-done putdown-decisions ]
-
-  ]
-end
-
-to attack [ target value ] ;;
-
-  if ( is-anima1? target ) [
-    let attack-decisions get-decisions target self "attack"
-    ifelse ( not empty? attack-decisions ) [
-      let one-attack one-of attack-decisions
-      let target-attack-cost get-decisions-cost (list one-attack)
-
-      ifelse ( random-float 1.0 < winning-likelihood-with target )
-      [ ask target [ set living.chance get-updated-value living.chance ( - value ) ]]
-      [ set living.chance get-updated-value living.chance ( - value ) ]
-
-      ask target [ decisions-done (list one-attack) ]
-
-    ][
-      ask target [ set living.chance get-updated-value living.chance ( - value ) ]
-    ]
-  ]
-end
-
-to-report winning-likelihood-with [ target ]
-  ifelse target = nobody
-  [ report 1 ]
-  [ report ( size / ( size + [size] of target + 0.0000000001)) ]
-end
-
-to help [ target value ]  ;; attack
-  ifelse ( value < 0 ) [
-    attack target abs value
-  ] [
-
-    if ( is-anima1? target ) [
-
-      if (output-results? and target != self ) [ ; Hamilton's Rule
-        let r relatedness-with target
-        ;print (word " me: " self " living.chance: " living.chance "  target: " target "   relatedness " relatedness-with target " ([living.chance] of target) " ([living.chance] of target)  "   value:"  value " update  " (get-updated-value [living.chance] of target ( value )) "  total: " (( get-updated-value [living.chance] of target ( value ) ) - [living.chance] of target ))
-        let B ( get-updated-value [living.chance] of target ( value ) ) - [living.chance] of target ; how much target benefitted
-        let C living.chance - ( get-updated-value living.chance value ) ; how much you *could have* benefitted by investing in yourself
-        set helping-benefit helping-benefit + r * B ; benefit to yourself based on relatedness to target
-        set helping-cost helping-cost + C ; cost of not helping yourself
-
-        if ( biological.sex = "female" and [biological.sex] of target = "female" and group.identity = [group.identity] of target ) [
-          set female-female-ingroup-helping female-female-ingroup-helping + value
-        ]
-        if ( biological.sex = "male" and [biological.sex] of target = "male" and group.identity = [group.identity] of target ) [
-          set male-male-ingroup-helping male-male-ingroup-helping + value
-        ]
-        if ( (( biological.sex = "female" and [biological.sex] of target = "male" ) or ( biological.sex = "male" and [biological.sex] of target = "female" )) and group.identity = [group.identity] of target ) [
-          set female-male-ingroup-helping female-male-ingroup-helping + value
-        ]
-      ]
-
-      ask target [ set living.chance get-updated-value living.chance ( value ) ]
-    ]
-  ]
-
-end
-
 
 to initialize-group
   set hidden? true
@@ -1048,36 +987,115 @@ to initialize-group
   move-to one-of patches
 end
 
-to mate-with [ target value ] ;;
-  let mate-decisions get-decisions target self "mate-with"
-  if ( not empty? mate-decisions ) [
-    let one-mate one-of mate-decisions
-    ifelse ( biological.sex = "female" )
-    [ conceive-with target ]
-    [ ask target [ conceive-with myself ]]
-    ask target [ decisions-done (list one-mate) ]
+to pick-up [ target cost ]
+  if ( target != self and is-anima1? target ) [
+    let other-pickup-cost get-cost-and-process-decisions target "pick-up"
+    let target-clingto-cost [ get-cost-and-process-decisions myself "cling-to" ] of target
+    let net-cost ( cost + other-pickup-cost + target-clingto-cost )
+    ifelse ( net-cost > 0 )
+    [ if ( not member? target carried.items ) [ set carried.items lput target carried.items ] ]
+    [ if ( member? target carried.items ) [ set carried.items remove target carried.items ] ]
+  ]
+end
 
-    ; DATA
-    if output-results? [
-      set matings-list lput [meta-id] of target matings-list
-      ask target [ set matings-list lput [meta-id] of myself matings-list ]]]
+to cling-to [ target cost ]
+  if ( target != self and is-anima1? target ) [
+    let other-clingto-cost get-cost-and-process-decisions target "cling-to"
+    let target-pickup-cost [ get-cost-and-process-decisions myself "pick-up" ] of target
+    let net-cost ( cost + other-clingto-cost + target-pickup-cost )
+    ifelse ( net-cost > 0 )
+    [ ask target [ if ( not member? myself carried.items ) [ set carried.items lput myself carried.items ] ]]
+    [ ask target [ if ( member? myself carried.items ) [ set carried.items remove myself carried.items ] ]]
+  ]
+end
+
+to attack [ target cost ]
+  if ( is-anima1? target ) [
+    let other-attack-cost get-cost-and-process-decisions target "attack"
+    let my-attack-value size * ( cost + other-attack-cost )
+    let target-help-cost [ get-cost-and-process-decisions myself "help" ] of target
+    let target-help-value [size] of target * target-help-cost
+    ( ifelse
+      ( my-attack-value > 0 and target-help-value > 0 ) [ ask target [ maintain-body ( - my-attack-value ) ] ]
+      ( my-attack-value > 0 and target-help-value <= 0 ) [ ask target [ maintain-body ( - my-attack-value - target-help-value ) ]]
+      ( my-attack-value <= 0 and target-help-value > 0 ) [ maintain-body ( target-help-value + my-attack-value ) ]
+      [])
+  ]
+end
+
+to help [ target cost ]
+  if ( is-anima1? target ) [
+    let other-help-cost get-cost-and-process-decisions target "help"
+    let my-help-value size * ( cost + other-help-cost )
+    let target-attack-cost [ get-cost-and-process-decisions myself "attack" ] of target
+    let target-attack-value [size] of target * target-attack-cost
+    ( ifelse
+      ( my-help-value > 0 and target-attack-value > 0 ) [ maintain-body ( - target-attack-value ) ]
+      ( my-help-value > 0 and target-attack-value <= 0 ) [ ask target [ maintain-body ( my-help-value + target-attack-value ) ]]
+      ( my-help-value <= 0 and target-attack-value > 0 ) [ maintain-body ( - target-attack-value + my-help-value ) ]
+      [])
+  ]
+end
+
+to collect-helping-data [ target cost ]
+  ;  if ( output-results? and target != self ) [ ; Hamilton's Rule
+  ;    let r relatedness-with target
+  ;    ;print (word " me: " self " living.chance: " living.chance "  target: " target "   relatedness " relatedness-with target " ([living.chance] of target) " ([living.chance] of target)  "   value:"  value " update  " (get-updated-value [living.chance] of target ( value )) "  total: " (( get-updated-value [living.chance] of target ( value ) ) - [living.chance] of target ))
+  ;    let B ( get-updated-value [living.chance] of target ( cost ) ) - [living.chance] of target ; how much target benefitted
+  ;    let C living.chance - ( get-updated-value living.chance cost ) ; how much you *could have* benefitted by investing in yourself
+  ;    set helping-benefit helping-benefit + r * B ; benefit to yourself based on relatedness to target
+  ;    set helping-cost helping-cost + C ; cost of not helping yourself
+  ;
+  ;    if ( biological.sex = "female" and [biological.sex] of target = "female" and group.identity = [group.identity] of target ) [
+  ;      set female-female-ingroup-helping female-female-ingroup-helping + cost
+  ;    ]
+  ;    if ( biological.sex = "male" and [biological.sex] of target = "male" and group.identity = [group.identity] of target ) [
+  ;      set male-male-ingroup-helping male-male-ingroup-helping + cost
+  ;    ]
+  ;    if ( (( biological.sex = "female" and [biological.sex] of target = "male" ) or ( biological.sex = "male" and [biological.sex] of target = "female" )) and group.identity = [group.identity] of target ) [
+  ;      set female-male-ingroup-helping female-male-ingroup-helping + cost
+  ;    ]
+  ;  ]
+end
+
+to mate-with [ target cost ]
+  if ( is-anima1? target ) [
+    let other-mate-cost get-cost-and-process-decisions target "mate-with"
+    let target-mate-cost [ get-cost-and-process-decisions myself "mate-with" ] of target
+    let net-cost ( cost + other-mate-cost + target-mate-cost )
+    if ( net-cost > 0 and model-structure != "sower" ) [ ; SOWER calls conceive-with from an alternative source
+      ifelse ( biological.sex = "female" )
+      [ conceive-with target ]
+      [ ask target [ conceive-with myself ]]
+      collect-mating-data target
+    ]
+  ]
+end
+
+to collect-mating-data [ target ]
+  if output-results? [
+    set matings-list lput [meta-id] of target matings-list
+    ask target [ set matings-list lput [meta-id] of myself matings-list ]]
 end
 
 to conceive-with [ target ] ; FEMALE PROCEDURE
   if biological.sex = "female" and female.fertility = "cycling" and life.history = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "male" [
+    set label "!"
     if random-float 1.0 < (mean (list conception.chance [conception.chance] of target)) [
-      set label "!"
       let preferred-litter 10 ^ ( mean (list litter.size [litter.size] of target))
       let floor-litter floor preferred-litter
       let percent-litter preferred-litter - floor-litter
       let my-litter-size ifelse-value ( random-float 1.0 < percent-litter ) [ floor-litter + 1 ] [ floor-litter ]
       hatch-anima1s my-litter-size [ initialize-from-parents myself target ]
       set female.fertility "pregnant"
+      collect-conception-data target
+  ]]
+end
 
-      ; DATA
-      if output-results? [
-        set conceptions-list lput [meta-id] of target conceptions-list
-        ask target [ set conceptions-list lput [meta-id] of myself conceptions-list ]]]]
+to collect-conception-data [ target ]
+  if output-results? [
+    set conceptions-list lput [meta-id] of target conceptions-list
+    ask target [ set conceptions-list lput [meta-id] of myself conceptions-list ]]
 end
 
 to initialize-from-parents [ m f ]
@@ -1085,26 +1103,30 @@ to initialize-from-parents [ m f ]
   set hidden? true
   set is.dead false
   ask m [ pick-up myself 1.0 ]
-  set biological.sex ifelse-value ( random-float 1.0 < 0.5 ) ["male"] ["female"] ;mean (list [sex.ratio] of m [sex.ratio] of f) ) ["male"] ["female"]
+  set biological.sex ifelse-value ( random-float 1.0 < mean (list [sex.ratio] of m [sex.ratio] of f) ) ["male"] ["female"]
   set shape ifelse-value ( biological.sex = "female" ) ["circle"] ["triangle"]
   set generation-number [generation-number] of m + 1
-  setup-chromosomes-from m f
+  ifelse ( model-structure = "noevolution" )
+  [ set chromosome.I [chromosome.I] of m
+    set chromosome.II [chromosome.II] of m ]
+  [ setup-chromosomes-from m f ]
   set group.identity [group.identity] of m
   set natal-group-id group.identity
   set mother-identity [meta-id] of m
   set father-identity [meta-id] of f
-  set previous-group-id 0
-  set female.fertility " "
+  set energy.supply 1
+  receive-from mother 1.0 ; delete
   set life.history "gestatee"
+  set female.fertility " "
   set label-color black
   set age 0
-  set energy.supply 1
   set body.size 0.01
   set body.shade 0
   set day.perception.range 0
   set night.perception.range 0
   set audio.perception.range 0
-  set mutation.chance 0
+  set stomach.size 0.1
+  set mutation.chance 0.10
   set sex.ratio 0.5
   set litter.size 0
   set conception.chance 0
@@ -1128,6 +1150,11 @@ to initialize-from-parents [ m f ]
   set night.perception.angle 0
   set audio.perception.angle 0
   set vocal.range 0
+  set carried.items []
+  set decision.vectors []
+  set x.magnitude one-of [ 0.001 -0.001 ]
+  set y.magnitude one-of [ 0.001 -0.001 ]
+  set previous-group-id 0
   set ticks-at-conception ticks
   set ticks-at-birth 0
   set ticks-at-weaning 0
@@ -1158,17 +1185,44 @@ to initialize-from-parents [ m f ]
   set foraging-losses 0
   set helping-benefit 0
   set helping-cost 0
-  set carried.items []
+  set natal-group-size [group-size] of current-group
   set group-transfers-list []
   set matings-list []
   set conceptions-list []
   set cells-occupied []
   set infanticide-list []
-  set decision.vectors []
-  set x.magnitude one-of [ 0.001 -0.001 ]
-  set y.magnitude one-of [ 0.001 -0.001 ]
-  set natal-group-size [group-size] of current-group
-  receive-from mother 1.0 ; delete
+  set previous-group-id 0
+  if ( model-structure = "idealform" ) [ set-phenotype-to-ideal-form ]
+end
+
+to set-phenotype-to-ideal-form
+  set body.size mean [body.size] of anima1s
+  set body.shade mean [body.shade] of anima1s
+  set day.perception.range mean [day.perception.range] of anima1s
+  set night.perception.range mean [night.perception.range] of anima1s
+  set audio.perception.range mean [audio.perception.range] of anima1s
+  set stomach.size mean [stomach.size] of anima1s
+  set mutation.chance mean [mutation.chance] of anima1s
+  set sex.ratio mean [sex.ratio] of anima1s
+  set litter.size mean [litter.size] of anima1s
+  set conception.chance mean [conception.chance] of anima1s
+  set birthing.chance mean [birthing.chance] of anima1s
+  set weaning.chance mean [weaning.chance] of anima1s
+  set infancy.chance mean [infancy.chance] of anima1s
+  set juvenility.chance mean [juvenility.chance] of anima1s
+  set adulthood.chance mean [adulthood.chance] of anima1s
+  set senescency.chance mean [senescency.chance] of anima1s
+  set living.chance mean [living.chance] of anima1s
+  set alpha.chance mean [alpha.chance] of anima1s
+  set beta.chance mean [beta.chance] of anima1s
+  set gamma.chance mean [gamma.chance] of anima1s
+  set day.perception.range mean [day.perception.range] of anima1s
+  set night.perception.range mean [night.perception.range] of anima1s
+  set audio.perception.range mean [audio.perception.range] of anima1s
+  set day.perception.angle mean [day.perception.angle] of anima1s
+  set night.perception.angle mean [night.perception.angle] of anima1s
+  set audio.perception.angle mean [audio.perception.angle] of anima1s
+  set vocal.range mean [vocal.range] of anima1s
 end
 
 to setup-chromosomes-from [m f]
@@ -1209,8 +1263,8 @@ to setup-chromosomes-from [m f]
       set identity.II replace-item i identity.II itemIII ]
     set i i + 1 ]
 
-  let rate-of-mutation 0.15 ; mean (list [mutation.chance] of m [mutation.chance] of f)
-  mutate-chromosomes rate-of-mutation
+  let rate-of-mutation mean (list [mutation.chance] of m [mutation.chance] of f)
+  mutate-chromosomes 0.15 ; rate-of-mutation
 end
 
 to mutate-chromosomes [ rate-of-mutation ]
@@ -1218,68 +1272,74 @@ to mutate-chromosomes [ rate-of-mutation ]
   set chromosome.II mutate-chromosome chromosome.II rate-of-mutation
 end
 
-to-report mutate-chromosome [ chromosome-list _mutation.chance ]
-  let updated-chromosome []
+; --------------------------------------------------------------------------- ;
+;
+; MODIFY CHROMOSOME WITH NOVEL MUTATIONS AT RANDOM ALLELE LOCI
+;
+; This subroutine creates a copy of a given chromosome with a subset
+; of its alleles modified according to the probability of a mutation occuring at
+; each locus.
+;
+; ENTRY:  'input-chromosome' is the chromosome to be copied.
+;         'mutation-chance-per-locus' defines the chance that a mutation will
+;         occur at each allele loci.
+;
+; EXIT:   'mutate-chromosome' returns a copy of the chromosome with
+;         modifications to a subset of the alleles.
+;
+; --------------------------------------------------------------------------- ;
 
-  foreach chromosome-list [ allele ->
+to-report mutate-chromosome [ input-chromosome  mutation-chance-per-locus ]
+
+  let ouput-chromosome []
+  foreach input-chromosome [ allele ->
     let updated-alleles (list allele)
 
-    if ( random-float 1.0 < _mutation.chance ) [
+    if ( first allele = true and random-float 1.0 < mutation-chance-per-locus ) [
 
-      let choice random 6
+      let choice random 5
 
       (ifelse
 
-        ( first allele = true and choice = 0 ) [ ; delete allele
-          set updated-alleles [] ]
+        ; delete allele
+        ( choice = 0 ) [
+          set updated-alleles [] ] ; redundant but complete
 
-        ( first allele = true and choice = 1 ) [] ; delete codon
-
-        ( first allele = true and choice = 2 ) [ ; duplicate allele
+        ; duplicate allele
+        ( choice = 1 ) [
           set updated-alleles (list allele allele) ]
 
-        ( first allele = true and choice = 3 ) [] ; duplicate codon
+        ; mutate allele
+        ( choice >= 2 ) [
+          let new-allele []
+          let random-index random length allele
+          let index 0
+          foreach allele [ codon ->
+            ( ifelse
+              ( choice = 2 and random-index = index and model-structure != "uninvadable" ) [ set new-allele lput get-mutation-from-genoreader codon new-allele ] ; mutate codon
+              ( choice = 3 and random-index = index ) [ repeat 2 [ set new-allele lput codon new-allele ] ] ; duplicate codon
+              ( choice = 4 and random-index = index ) [  ] ; delete codon
+              [ set new-allele lput codon new-allele ])
+            set index index + 1 ]
+          set updated-alleles ( list new-allele ) ]
 
-        ( choice = 4 ) [ ; update number
-          foreach updated-alleles [ x ->
-            let allele-position position x updated-alleles
-            foreach x [ codon ->
-              if ( is-number? codon ) [
-                let codon-position position codon x
-                let updated-allele replace-item codon-position x ( precision (one-of [ -1 1 ] * get-updated-value codon ( 0.1 * one-of [ -1 1 ] )) 6 )
-                set updated-alleles replace-item allele-position updated-alleles updated-allele  ]]]]
+        [])]
 
-        ( first allele = true and choice = 5 ) [ ; update codon
-          foreach updated-alleles [ x ->
-            let allele-position position x updated-alleles
-            foreach x [ codon ->
-              if ( is-string? codon ) [
-                let codon-position position codon x
-                let updated-allele replace-item codon-position x get-mutation
-                set updated-alleles replace-item allele-position updated-alleles updated-allele  ]]]]
-
-        ( choice = 6 ) [ ; new allele
-          set updated-alleles (list (list get-mutation )) ]
-
-        [])
-    ]
 
     foreach updated-alleles [ allele-update ->
-      set updated-chromosome ifelse-value ( allele-update != [] ) [ lput allele-update updated-chromosome ] [ updated-chromosome ]]
-
+      set ouput-chromosome ifelse-value ( allele-update != [] ) [ lput allele-update ouput-chromosome ] [ ouput-chromosome ]]
   ]
-
-  report updated-chromosome
+  report ouput-chromosome
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
 6
 85
-710
-790
+711
+791
 -1
 -1
-6.96
+13.94
 1
 10
 1
@@ -1290,9 +1350,9 @@ GRAPHICS-WINDOW
 0
 1
 0
-99
+49
 0
-99
+49
 1
 1
 1
@@ -1387,7 +1447,7 @@ INPUTBOX
 967
 102
 documentation-notes
-Printout code verification. Genotype genotype imported. Population file Chimpanzees imported. 
+Population file p-20-03-25-01 imported. New population p-20-03-25-01 saved. New population p-20-03-25-01 saved. New population p-20-03-25-01 saved. New population p-2020-03-25-20 saved. Population file fastbreeders6 imported. Population file fastbreeders6 imported. Population file fastbreeders6 imported. 
 1
 0
 String
@@ -1436,7 +1496,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-4.2
+2.5
 .1
 1
 NIL
@@ -1477,7 +1537,7 @@ plant-seasonality
 plant-seasonality
 0
 100
-50.0
+0.0
 5
 1
 %
@@ -1530,7 +1590,7 @@ INPUTBOX
 1097
 299
 population
-Chimpanzees
+p-20-03-25-01
 1
 0
 String
@@ -1541,7 +1601,7 @@ INPUTBOX
 1097
 373
 genotype
-genotype
+NIL
 1
 0
 String
@@ -1605,7 +1665,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "--------" "lotka-volterra" "age-histogram" "metafile-report" "verify-code" "check-runtime" "simulation-report" "clear-plants" "setup-plants" "clear-population" "view-genotype" "view-decisions" "add-allele" "delete-allele" "population-report"
-5
+6
 
 BUTTON
 912
@@ -1682,10 +1742,10 @@ SLIDER
 151
 plant-quality
 plant-quality
-.1
-10
+.01
+1
 0.5
-.1
+.01
 1
 NIL
 HORIZONTAL
@@ -1697,7 +1757,7 @@ SWITCH
 43
 output-results?
 output-results?
-0
+1
 1
 -1000
 
@@ -1718,13 +1778,13 @@ INPUTBOX
 967
 324
 command-input
-[ true \"am\" \"cf\" \"MAT\" 0.009 ]
+5605583
 1
 0
 String (commands)
 
 @#$#@#$#@
-# B3GET 1.0.2 INFORMATION
+# B3GET 1.1.0 INFORMATION
 
 Compatible with NetLogo 6.1.1
 
@@ -1850,7 +1910,7 @@ The file system of B3GET allows the user to directly modify genotype and populat
 
 Cite this model:
 
-Crouse, Kristin (2019, November 18). “B3GET” (Version 1.0.2). CoMSES Computational Model Library. Retrieved from: https://www.comses.net/codebases/6b10f629-7958-4b31-b489-d51c17d0f5b8/releases/1.0.2/
+Crouse, Kristin (2020). “B3GET” (Version 1.1.0). CoMSES Computational Model Library. Retrieved from: https://www.comses.net/codebases/6b10f629-7958-4b31-b489-d51c17d0f5b8/releases/1.1.0/
 
 Peer-reviewed paper:
 
@@ -1858,7 +1918,7 @@ Crouse, K. N., Miller, C. M., & Wilson, M. L. (2019). New approaches to modeling
 
 ## COPYRIGHT AND LICENSE
 
-© 2019 K N Crouse
+© 2020 K N Crouse
 
 The model may be freely used, modified and redistributed provided this copyright is included and the resulting models are not used for profit.
 
@@ -2171,6 +2231,7 @@ ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
 
 setup simulation-id</setup>
     <go>go</go>
+    <final>crt 1 [ record-simulation die ]</final>
     <timeLimit steps="1001"/>
     <exitCondition>not any? anima1s</exitCondition>
     <enumeratedValueSet variable="path-to-experiment">
