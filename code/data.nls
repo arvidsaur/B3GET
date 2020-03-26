@@ -145,6 +145,7 @@ to import-population
       set cells-occupied []
       set infanticide-list []
       set decision.vectors []
+      if ( stomach.size = 0 ) [ set stomach.size 0.1 ]
       
     ]
     
@@ -194,7 +195,7 @@ to save-population
       "biological.sex" "life.history" "female.fertility" "energy.supply" 
       "group.identity" "is.dead" "alpha.signal" "beta.signal" "gamma.signal"
       "chromosome.I" "chromosome.II" "identity.I" "identity.II"
-      "living.chance" "body.size" "body.shade" "mutation.chance"
+      "living.chance" "body.size" "body.shade" "stomach.size" "mutation.chance"
       "sex.ratio" "litter.size" "conception.chance"
       "day.perception.angle" "night.perception.angle" "audio.perception.angle"
       "day.perception.range" "night.perception.range" "audio.perception.range"

@@ -175,7 +175,7 @@ globals [
 ;--------------------------------------------------------------------------------------------------------------------
 
 to setup-parameters
-  set model-version "1.1.0~"
+  set model-version "1.1.0"
   set deterioration-rate -0.001
   set selection-rate 0.0001
 end
@@ -630,7 +630,7 @@ to do-action [ action-code target cost ]
     if action-code = "check-senescence" [ check-senescence cost ]
     if action-code = "supply-to" [ supply-to target cost ]
     if action-code = "demand-from" [ demand-from target cost ]
-    if action-code = "eat" [ eat target cost ]
+    if action-code = "eat" [ receive-from target cost ]
     if action-code = "join-group-of" [ join-group-of target cost ]
     if action-code = "leave-group" [ join-group-of target ( - cost ) ]
     if action-code = "pick-up" [ pick-up target cost ]
@@ -894,24 +894,13 @@ to demand-from [ target cost ]
 end
 
 to receive-from [ target cost ]
-  if ( cost > 0 ) [ ;; assumed always true
-    let energy-wanted 10 ^ cost ; stomach.capacity get-updated-value cost
+  if ( cost > 0 and is-anima1? target or is-plant? target ) [
+    let energy-wanted get-updated-value stomach.size cost
     let energy-received ifelse-value ( energy-wanted < [ energy.supply ] of target ) [ energy-wanted ] [ [ energy.supply ] of target ]
     update-energy energy-received
-    ask target [ set energy.supply ( energy.supply - energy-received ) ]
+    ask target [ update-energy ( - energy-received ) ]
+    if ( is-plant? target ) [ collect-eating-data energy-received cost ]
   ]
-end
-
-to eat [ target cost ] ;;?
-  let energy-wanted 100 ^ cost
-  let energy-eaten 0
-
-  set energy-eaten ifelse-value ( energy-wanted < [energy.supply] of target) [energy-eaten] [[energy.supply] of target]
-  update-energy energy-eaten
-  ask target [ update-energy ( - energy-eaten ) ]
-
-  collect-eating-data energy-eaten cost
-
 end
 
 to collect-eating-data [ energy-eaten cost-of-eating ]
@@ -1447,7 +1436,7 @@ INPUTBOX
 967
 102
 documentation-notes
-Population file p-20-03-25-01 imported. New population p-20-03-25-01 saved. New population p-20-03-25-01 saved. New population p-20-03-25-01 saved. New population p-2020-03-25-20 saved. Population file fastbreeders6 imported. Population file fastbreeders6 imported. Population file fastbreeders6 imported. 
+Population file p-20-03-25-01 imported. Population file p-20-03-25-01 imported. New population p-20-03-25-01 saved. Population file p-20-03-25-01 imported. Population file p-20-03-25-01 imported. New population p-20-03-25-01 saved. New population p-20-03-25-01 saved. New population p-20-03-25-01 saved. New population p-2020-03-25-20 saved. Population file fastbreeders6 imported. Population file fastbreeders6 imported. Population file fastbreeders6 imported. 
 1
 0
 String
@@ -1496,7 +1485,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-2.5
+4.0
 .1
 1
 NIL
