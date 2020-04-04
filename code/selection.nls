@@ -32,52 +32,52 @@ to artificial-selection
       (any? anima1s with [ age > 10000 ]) 
       [ ask one-of anima1s with [ age > 10000 ] 
         [ set cause-of-death "age > 10000 timesteps"
-          set is.dead true ]]
+          set is.alive false ]]
       
       (any? anima1s with [ life.history = "adult" and ( mutation.chance < 0.05 or mutation.chance > 0.15 ) ]) 
       [ ask one-of anima1s with [ life.history = "adult" and ( mutation.chance < 0.05 or mutation.chance > 0.15 ) ] 
         [ set cause-of-death "mutation.chance < 0.05 or mutation.chance > 0.15"
-          set is.dead true ]]
+          set is.alive false ]]
       
       (any? anima1s with [ life.history = "adult" and ( sex.ratio < 0.35 or sex.ratio > 0.65 ) ]) 
       [ ask one-of anima1s with [ life.history = "adult" and ( sex.ratio < 0.35 or sex.ratio > 0.65 ) ] [ 
         set cause-of-death "sex.ratio < 0.35 or sex.ratio > 0.65"
-        set is.dead true ]]
+        set is.alive false ]]
       
       (any? anima1s with [ life.history = "adult" ] ) 
       [ ask min-one-of anima1s with [ life.history = "adult" ] [ night.perception.range ] [ 
         set cause-of-death "night.perception.range too low"
-        set is.dead true ]]
+        set is.alive false ]]
       
       (any? anima1s with [ life.history = "adult" ] ) 
       [ ask min-one-of anima1s with [ life.history = "adult" ] [ audio.perception.angle ] [ 
         set cause-of-death "audio.perception.angle too low"
-        set is.dead true ]]
+        set is.alive false ]]
       
       (any? anima1s with [ life.history = "adult" ] ) 
       [ ask min-one-of anima1s with [ life.history = "adult" ] [ audio.perception.range ] [ 
         set cause-of-death "audio.perception.range too low"
-        set is.dead true ]]
+        set is.alive false ]]
       
       (any? anima1s with [ life.history = "adult" ] ) 
       [ ask min-one-of anima1s with [ life.history = "adult" ] [ vocal.range ] [ 
         set cause-of-death "vocal.range too low"
-        set is.dead true ]]
+        set is.alive false ]]
       
       (any? anima1s with [ life.history = "adult" and ( body.shade < 0.35 or body.shade > 0.65 ) ]) 
       [ ask one-of anima1s with [ life.history = "adult" and ( body.shade < 0.35 or body.shade > 0.65 ) ] [ 
         set cause-of-death "body.shade < 0.35 or body.shade > 0.65"
-        set is.dead true ]]
+        set is.alive false ]]
       
       (any? anima1s with [ life.history = "adult" ]) 
       [ ask min-one-of anima1s with [ life.history = "adult" ] [ beta.chance ] [ 
         set cause-of-death "beta.chance too low"
-        set is.dead true ]]
+        set is.alive false ]]
       
       (any? anima1s with [ life.history = "adult" ]) 
       [ ask min-one-of anima1s with [ life.history = "adult" ] [ gamma.chance ] [ 
         set cause-of-death "gamma.chance too low"
-        set is.dead true ]]
+        set is.alive false ]]
       
       [])
 

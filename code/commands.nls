@@ -9,6 +9,8 @@
 ; © 2019 K N Crouse
 ;-----------------------------------------------------------------------------                                                                          
 
+to-report how-many-ticks? report 10 end
+
 to command
   
   clear-output

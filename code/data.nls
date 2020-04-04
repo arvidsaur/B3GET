@@ -35,7 +35,6 @@ to setup-metafile
       "model-structure"
       "genotype-reader"
       "simulation-id"
-      "sun-status"
       "ticks"
       "file-type"
       "file-name"
@@ -63,50 +62,49 @@ end
 
 to update-metafile [ type-of-file name-of-file ]
   
-;  ; Save whatever is currently in the METAFILE or create new
-;  if ( not metafile-exists? ) [ setup-metafile ]
-;  file-open "../data/metafile.csv"
-;  let old-metafile csv:from-file "../data/metafile.csv"
-;  
-;  if documentation-notes = "" [ set documentation-notes "Metafile updated." ]
-;  
-;  ; Update METAFILE with a new row of FILE information
-;  csv:to-file "../data/metafile.csv"
-;  (lput
-;    (list 
-;      date-and-time
-;      path-to-experiment
-;      model-version
-;      model-structure
-;      genotype-reader
-;      simulation-id
-;      sun-status
-;      ticks
-;      type-of-file
-;      name-of-file
-;      documentation-notes
-;      population 
-;      genotype
-;      plant-annual-cycle 
-;      plant-seasonality
-;      plant-minimum-neighbors 
-;      plant-maximum-neighbors
-;      plant-daily-cycle 
-;      plant-quality
-;      world-width 
-;      world-height
-;      deterioration-rate
-;      selection-rate
-;      output-results?
-;      selection-on?
-;      useful-commands
-;      command-input 
-;    )
-;    
-;    old-metafile )
-;  
-;  set documentation-notes ""
-;  file-close
+  ; Save whatever is currently in the METAFILE or create new
+  if ( not metafile-exists? ) [ setup-metafile ]
+  file-open "../data/metafile.csv"
+  let old-metafile csv:from-file "../data/metafile.csv"
+  
+  if documentation-notes = "" [ set documentation-notes "Metafile updated." ]
+  
+  ; Update METAFILE with a new row of FILE information
+  csv:to-file "../data/metafile.csv"
+  (lput
+    (list 
+      date-and-time
+      path-to-experiment
+      model-version
+      model-structure
+      genotype-reader
+      simulation-id
+      ticks
+      type-of-file
+      name-of-file
+      documentation-notes
+      population 
+      genotype
+      plant-annual-cycle 
+      plant-seasonality
+      plant-minimum-neighbors 
+      plant-maximum-neighbors
+      plant-daily-cycle 
+      plant-quality
+      world-width 
+      world-height
+      deterioration-rate
+      selection-rate
+      output-results?
+      selection-on?
+      useful-commands
+      command-input 
+    )
+    
+    old-metafile )
+  
+  set documentation-notes ""
+  file-close
 end
 
 ;----------------------------------------------------------------------------------------------
@@ -146,6 +144,7 @@ to import-population
       set infanticide-list []
       set decision.vectors []
       if ( stomach.size = 0 ) [ set stomach.size 0.1 ]
+      if ( is.alive = 0 ) [ set is.alive true ] ; note it will import both alive and dead as alive if population file has is. dead instead of is.alive
       
     ]
     
@@ -193,7 +192,7 @@ to save-population
       "color" "heading" "xcor" "ycor" "label" "label-color"
       "shape" "hidden?" "size" "pen-size" "pen-mode"
       "biological.sex" "life.history" "female.fertility" "energy.supply" 
-      "group.identity" "is.dead" "alpha.signal" "beta.signal" "gamma.signal"
+      "group.identity" "is.alive" "alpha.signal" "beta.signal" "gamma.signal"
       "chromosome.I" "chromosome.II" "identity.I" "identity.II"
       "living.chance" "body.size" "body.shade" "stomach.size" "mutation.chance"
       "sex.ratio" "litter.size" "conception.chance"

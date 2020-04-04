@@ -36,7 +36,7 @@ anima1s-own [
   life.history
   female.fertility
   group.identity
-  is.dead
+  is.alive
   alpha.signal
   beta.signal
   gamma.signal
@@ -80,6 +80,7 @@ anima1s-own [
   memory.storage
 
   ; TRACKING VARIABLES
+  my-environment
   mother-identity
   father-identity
   generation-number
@@ -114,20 +115,20 @@ anima1s-own [
   mother-initiated-weaning
   distance-traveled
   foraging-gains
-  foraging-losses
-  helping-benefit
-  helping-cost
-  female-female-ingroup-helping
-  male-male-ingroup-helping
-  female-male-ingroup-helping
+  foraging-cost
+  ingroup-female-female-help-cost
+  ingroup-male-male-help-cost
+  ingroup-male-female-help-cost
+  whole-related-help-cost
+  half-related-help-cost
+  fourth-related-help-cost
+  eighth-related-help-cost
   matings-list
   conceptions-list
   group-transfers-list
   cells-occupied
-  infanticide-list
+  infanticide-list ;; to do
   cause-of-death
-  completed-actions
-
 ]
 
 groups-own [
@@ -149,7 +150,6 @@ groups-own [
   adult-male-energy-gained
   senescent-female-energy-gained
   senescent-male-energy-gained
-
 ]
 
 globals [
@@ -157,7 +157,6 @@ globals [
   model-structure
   genotype-reader
   simulation-id
-  sun-status
   deterioration-rate
   selection-rate
 ]
@@ -181,12 +180,13 @@ to setup-parameters
 end
 
 to setup [ new-simulation-id ]
-  ;if ( simulation-id != 0 and output-results? = true ) [ record-world ]
+  ; save world file of old simulation before starting new simulation under following conditions
+  if ( simulation-id != 0 and behaviorspace-run-number = 0 and output-results? = true ) [ record-world ]
   clear-all
   reset-ticks
+  set simulation-id new-simulation-id
   setup-parameters
   setup-plants
-  set simulation-id new-simulation-id
   import-population
   import-genotype
   clear-output
@@ -196,7 +196,7 @@ to setup-plants
   ask plants [ die ]
   ask patches [
     set pcolor 36
-    sprout-plants 1 [ initialize-plant ]]
+    sprout-plants 1 [ initialize-plant set energy.supply 0.5 * plant-quality ]]
   repeat 100 [ update-plants ]
 end
 
@@ -236,7 +236,7 @@ to-report generate-simulation-id
   report ( word "s" random 99 one-of alphabet one-of alphabet one-of alphabet )
 end
 
-to-report get-decisions-from-genoreader [ my-environment ]
+to-report get-decisions-from-genoreader
   report ( ifelse-value
     ( genotype-reader = "sta7us" ) [ sta7us-make-decisions my-environment ]
     ( genotype-reader = "g3notype" ) [ g3notype-make-decisions my-environment ]
@@ -265,10 +265,6 @@ end
 
 to go
 
-  ; code to be deleted
-  ask anima1s with [ length carried.items > 0 ] [ set carried.items remove nobody carried.items ]
-  ask groups with [ count group-members = 0 ] [ die ]
-
   ; ENVIRONMENTAL CONTRAINTS
   update-plants
   ask turtles [ set age age + 1 ]
@@ -281,8 +277,8 @@ to go
 
   ; AGENT AGENCY
   ask anima1s [
-    if ( not is.dead )
-    [ make-decisions
+    if ( is.alive )
+    [ consider-environment
       act ]]
 
   ; SIMULATION OUTPUT
@@ -293,44 +289,25 @@ to go
     let print-text (word "Simulation " simulation-id " is now at " precision (ticks / plant-annual-cycle) 3 " years, "
       precision sum [energy.supply] of plants 3 " plant units, "
       precision mean [generation-number] of anima1s 3 " generations, and contains "
-      count anima1s with [ not is.dead ] " living organisms.")
+      count anima1s with [ is.alive ] " living organisms.")
     print print-text
     if ( behaviorspace-run-number > 0 ) [ output-print print-text ] ]
 
   tick
 end
 
-to make-decisions
-  let my-environment no-turtles
-
-  ; ASPATIAL WORLD
-  ifelse ( model-structure = "aspatial" ) [
-    set my-environment up-to-n-of 100 turtles
-
-  ][ ; SPATIAL WORLD
-    if ( sun-status = "DAY" ) [
-      set my-environment turtles with [ not is-group? self and not hidden? ] in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle )
-      if (female.fertility = "pregnant") [ set my-environment turtles with [ not is-group? self and (not hidden? or member? self [my-offspring] of myself ) ] in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) ] ] ; mothers can see gestatees
-
-    if ( sun-status = "NIGHT" ) [
-      set my-environment turtles with [ not is-group? self and not hidden? ] in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) ; set to night.perception.angle once genotype includes this
-      if (female.fertility = "pregnant") [ set my-environment turtles with [ not is-group? self and (not hidden? or member? self [my-offspring] of myself ) ] in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) ] ] ; mothers can see gestatees
-
-    if (life.history = "gestatee" ) [ set my-environment turtles with [ [meta-id] of self = [meta-id] of myself or meta-id = [mother-identity] of myself ]] ; gestatees can only see themselves, and their mothers
-  ]
-
-  ; GENOTYPE READER
-  set decision.vectors get-decisions-from-genoreader my-environment
-end
-
 to update-plants
   let season ( cos (( 360 / plant-annual-cycle ) * ticks))
   let daytime ( cos (( 360 / plant-daily-cycle ) * ticks))
-  set sun-status ifelse-value ( daytime > 0 ) [ "DAY" ] [ "NIGHT" ]
+  ;set sun-status ifelse-value ( daytime > 0 ) [ "DAY" ] [ "NIGHT" ]
 
   let energy-update get-updated-value ( plant-seasonality * ( 1 / 10000 ) * season ) ( 10 * daytime )
 
+  ;  if ( daytime > 0 ) [
+  ;  let terminal-threshold  0.5 * ( ( season * ( plant-seasonality / 100 ) ) + 1 ) * plant-quality
+
   ask plants [
+    ;    if any? other plants-here [ ask other plants-here [ die ]] ; why are multiple plants in one cell?
     set energy.supply ( get-updated-value energy.supply energy-update )
     update-plant-color ]
 
@@ -343,7 +320,7 @@ to update-plants
     let total-neighbor-penergy 0
     ask neighbors [
       if any? plants-here [
-        ask plants-here [ set total-neighbor-penergy total-neighbor-penergy + energy.supply ]]]
+        ask plants-here [ set total-neighbor-penergy total-neighbor-penergy + 1 ]]] ;energy.supply
 
     ; calculate a random value along a normal distribution of mean TOTAL-NEIGHBOR-PENERGY and standard deviation LIFE-SD
     let normal-value ( random-normal total-neighbor-penergy 1.0 )
@@ -380,10 +357,10 @@ to check-mortality
     (ifelse
 
       ; SECOND DEATH: remove agent from the simulation
-      ( is.dead = true ) [ die ]
+      ( is.alive = false ) [ die ]
 
       ; FIRST DEATH: set anima1 to is.dead true
-      [ set is.dead true set ticks-at-death ticks ])
+      [ set is.alive false set ticks-at-death ticks ])
   ]
 end
 
@@ -392,6 +369,15 @@ to update-appearance
   set label " "
   set color (( [color] of one-of groups with [ meta-id = [group.identity] of myself ] ) + 5 - ( 10 ^ body.shade ))
   set shape get-shape
+
+end
+
+to-report get-shape
+  let base_shape ifelse-value ( biological.sex = "male" ) [ "triangle" ] [ "circle" ]
+  let a_on ifelse-value alpha.signal [ "a" ] [ "" ]
+  let b_on ifelse-value beta.signal [ "b" ] [ "" ]
+  let c_on ifelse-value gamma.signal [ "c" ] [ "" ]
+  report ( word base_shape a_on b_on c_on )
 end
 
 to update-energy [ update ]
@@ -404,42 +390,7 @@ end
 
 ; GLOBAL REPORTERS
 
-to-report how-many-ticks? report 10 end
-
-to-report world-patchiness
-  let patch-diameter 5
-  let patch-list []
-
-  let i 0
-  let j 0
-  let i-next patch-diameter
-  let j-next patch-diameter
-
-  while [ j < world-height ] [
-    while [ i < world-width ] [
-
-      set patch-list lput count plants with [ xcor > i and xcor <= i-next and ycor > j and ycor <= j-next ] patch-list
-      set i i-next
-      set i-next ifelse-value (( i + patch-diameter ) > world-width ) [ world-width ] [ i + patch-diameter ] ]
-
-    set i 0
-    set i-next patch-diameter
-    set j j-next
-    set j-next ifelse-value (( j + patch-diameter ) > world-height ) [ world-height ] [ j + patch-diameter ] ]
-
-  report ( variance patch-list / mean patch-list )
-end
-
-to-report get-time
-  report ifelse-value ( ( cos (( 360 / plant-daily-cycle ) * ticks)) > 0 ) [ "DAY" ] [ "NIGHT" ]
-end
-
-to-report generate-alphabet-string [ number-length ]
-  let lower-character-list [ "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o" "p" "q" "r" "s" "t" "u" "v" "w" "x" "y" "z" ]
-  let output-string ""
-  repeat number-length [ set output-string insert-item length output-string output-string one-of lower-character-list ]
-  report output-string
-end
+to-report get-solar-status report ifelse-value ( ( cos (( 360 / plant-daily-cycle ) * ticks)) > 0 ) [ "DAY" ] [ "NIGHT" ] end
 
 to-report get-updated-value [ current-value update-value ]
   let report-value ifelse-value ( current-value < 0.00001 ) [ 0.00001 ] [ ifelse-value ( current-value > 0.99999 ) [ 0.99999 ] [ current-value ] ]
@@ -456,15 +407,6 @@ to-report group-size
 end
 
 ; ANIMA1 REPORTERS
-
-to-report get-shape
-  let base_shape ifelse-value ( biological.sex = "male" ) [ "triangle" ] [ "circle" ]
-  let a_on ifelse-value alpha.signal [ "a" ] [ "" ]
-  let b_on ifelse-value beta.signal [ "b" ] [ "" ]
-  let c_on ifelse-value gamma.signal [ "c" ] [ "" ]
-  report ( word base_shape a_on b_on c_on )
-end
-
 
 ; --------------------------------------------------------------------------- ;
 ;
@@ -555,6 +497,30 @@ end
 ;
 ;--------------------------------------------------------------------------------------------------------------------
 
+to consider-environment
+  set my-environment no-turtles
+  let sun-status get-solar-status
+
+  ; ASPATIAL WORLD
+  ifelse ( model-structure = "aspatial" ) [
+    set my-environment up-to-n-of 100 turtles
+
+  ][ ; SPATIAL WORLD
+    if ( sun-status = "DAY" ) [
+      set my-environment turtles with [ not is-group? self and not hidden? ] in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle )
+      if (female.fertility = "pregnant") [ set my-environment turtles with [ not is-group? self and (not hidden? or member? self [my-offspring] of myself ) ] in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) ] ] ; mothers can see gestatees
+
+    if ( sun-status = "NIGHT" ) [
+      set my-environment turtles with [ not is-group? self and not hidden? ] in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) ; set to night.perception.angle once genotype includes this
+      if (female.fertility = "pregnant") [ set my-environment turtles with [ not is-group? self and (not hidden? or member? self [my-offspring] of myself ) ] in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) ] ] ; mothers can see gestatees
+
+    if (life.history = "gestatee" ) [ set my-environment turtles with [ [meta-id] of self = [meta-id] of myself or meta-id = [mother-identity] of myself ]] ; gestatees can only see themselves, and their mothers
+  ]
+
+  ; GENOTYPE READER
+  set decision.vectors get-decisions-from-genoreader
+end
+
 to act
 
   set completed.actions []
@@ -564,9 +530,9 @@ to act
     let raw-value item 4 vector
     let energy-cost abs raw-value
 
-    let energy-check ifelse-value ( model-structure = "freelunch" ) [ true ] [ energy.supply > energy-cost ] ; FREE LUNCH always passes energy check
+    let passes-energy-check ifelse-value ( model-structure = "freelunch" ) [ true ] [ energy.supply > energy-cost ] ; FREE LUNCH always passes energy check
 
-    if ( not member? decision-id completed.actions and energy-check ) [
+    if ( not member? decision-id completed.actions and passes-energy-check ) [
       set completed.actions lput decision-id completed.actions
       let target item 2 vector
       let action item 3 vector
@@ -630,9 +596,9 @@ to do-action [ action-code target cost ]
     if action-code = "check-senescence" [ check-senescence cost ]
     if action-code = "supply-to" [ supply-to target cost ]
     if action-code = "demand-from" [ demand-from target cost ]
-    if action-code = "eat" [ receive-from target cost ]
+    if action-code = "eat" [ eat target cost ]
     if action-code = "join-group-of" [ join-group-of target cost ]
-    if action-code = "leave-group" [ join-group-of target ( - cost ) ]
+    if action-code = "leave-group-of" [ join-group-of target ( - cost ) ]
     if action-code = "pick-up" [ pick-up target cost ]
     if action-code = "put-down" [ pick-up target ( - cost ) ]
     if action-code = "cling-to" [ cling-to target cost ]
@@ -656,7 +622,19 @@ end
 ;
 ;--------------------------------------------------------------------------------------------------------------------
 
-to maintain-body [ cost ] set living.chance get-updated-value living.chance cost end
+to maintain-body [ cost ]
+  set living.chance get-updated-value living.chance cost
+  collect-maintenance-data cost
+end
+
+to collect-maintenance-data [ cost ]
+  (ifelse
+    ( relatedness-with myself = 1 ) [ ask myself [ set whole-related-help-cost whole-related-help-cost + cost ]]
+    ( relatedness-with myself = 0.5 ) [ ask myself [ set half-related-help-cost half-related-help-cost + cost ]]
+    ( relatedness-with myself = 0.25 ) [ ask myself [ set fourth-related-help-cost fourth-related-help-cost + cost ]]
+    ( relatedness-with myself = 0.125 ) [ ask myself [ set eighth-related-help-cost eighth-related-help-cost + cost ]]
+    [])
+end
 
 to body-size [ cost ] set body.size get-updated-value body.size cost end
 
@@ -761,12 +739,12 @@ end
 ; LIFE HISTORY
 ;--------------------------------------------------------------------------------------------------------------------
 
-to check-infancy [ cost ]
+to check-infancy [ cost ] ; fix so that die if mother dead right away
   set infancy.chance get-updated-value infancy.chance cost
   if ( life.history = "gestatee" and random-float 1.0 < infancy.chance ) [
     set mother-initiated-birth false
     ifelse ( mother = nobody )
-    [ set is.dead true ]
+    [ set is.alive false ]
     [ ask mother [ give-birth ]]
   ]
 end
@@ -866,6 +844,7 @@ end
 to update-to-senescent
   set life.history "senescent"
   set female.fertility " "
+  ; all dependent offspring are made independent by this process
   ask my-offspring with [ life.history = "gestatee" ] [ update-to-infant ]
   ask my-offspring with [ life.history = "infant" ] [ update-to-juvenile ]
   set ticks-at-senescence ticks
@@ -893,13 +872,19 @@ to demand-from [ target cost ]
   ]
 end
 
+to eat [ target cost ]
+  if ( life.history = "juvenile" or life.history = "adult" or life.history = "senescent" and ( is-plant? target or is-anima1? target )) [
+    receive-from target cost
+  ]
+end
+
 to receive-from [ target cost ]
   if ( cost > 0 and is-anima1? target or is-plant? target ) [
     let energy-wanted get-updated-value stomach.size cost
     let energy-received ifelse-value ( energy-wanted < [ energy.supply ] of target ) [ energy-wanted ] [ [ energy.supply ] of target ]
     update-energy energy-received
     ask target [ update-energy ( - energy-received ) ]
-    if ( is-plant? target ) [ collect-eating-data energy-received cost ]
+    if ( is-plant? target ) [ collect-eating-data energy-received cost ] ; what about dead anima1?
   ]
 end
 
@@ -907,7 +892,7 @@ to collect-eating-data [ energy-eaten cost-of-eating ]
   if (output-results?) [
 
     set foraging-gains foraging-gains + energy-eaten
-    set foraging-losses foraging-losses + cost-of-eating
+    set foraging-cost foraging-cost + cost-of-eating
 
     ; group is tracking foraging performance of its members
     ask current-group [
@@ -1036,13 +1021,13 @@ to collect-helping-data [ target cost ]
   ;    set helping-cost helping-cost + C ; cost of not helping yourself
   ;
   ;    if ( biological.sex = "female" and [biological.sex] of target = "female" and group.identity = [group.identity] of target ) [
-  ;      set female-female-ingroup-helping female-female-ingroup-helping + cost
+  ;      set ingroup-female-female-help-cost ingroup-female-female-help-cost + cost
   ;    ]
   ;    if ( biological.sex = "male" and [biological.sex] of target = "male" and group.identity = [group.identity] of target ) [
-  ;      set male-male-ingroup-helping male-male-ingroup-helping + cost
+  ;      set ingroup-male-male-help-cost ingroup-male-male-help-cost + cost
   ;    ]
   ;    if ( (( biological.sex = "female" and [biological.sex] of target = "male" ) or ( biological.sex = "male" and [biological.sex] of target = "female" )) and group.identity = [group.identity] of target ) [
-  ;      set female-male-ingroup-helping female-male-ingroup-helping + cost
+  ;      set feingroup-male-male-help-cost feingroup-male-male-help-cost + cost
   ;    ]
   ;  ]
 end
@@ -1090,8 +1075,8 @@ end
 to initialize-from-parents [ m f ]
   set meta-id random 9999999
   set hidden? true
-  set is.dead false
-  ask m [ pick-up myself 1.0 ]
+  set is.alive true
+  ask m [ set carried.items lput myself carried.items ]
   set biological.sex ifelse-value ( random-float 1.0 < mean (list [sex.ratio] of m [sex.ratio] of f) ) ["male"] ["female"]
   set shape ifelse-value ( biological.sex = "female" ) ["circle"] ["triangle"]
   set generation-number [generation-number] of m + 1
@@ -1104,7 +1089,6 @@ to initialize-from-parents [ m f ]
   set mother-identity [meta-id] of m
   set father-identity [meta-id] of f
   set energy.supply 1
-  receive-from mother 1.0 ; delete
   set life.history "gestatee"
   set female.fertility " "
   set label-color black
@@ -1171,9 +1155,7 @@ to initialize-from-parents [ m f ]
   set mother-initiated-weaning true
   set distance-traveled 0
   set foraging-gains 0
-  set foraging-losses 0
-  set helping-benefit 0
-  set helping-cost 0
+  set foraging-cost 0
   set natal-group-size [group-size] of current-group
   set group-transfers-list []
   set matings-list []
@@ -1314,7 +1296,6 @@ to-report mutate-chromosome [ input-chromosome  mutation-chance-per-locus ]
 
         [])]
 
-
     foreach updated-alleles [ allele-update ->
       set ouput-chromosome ifelse-value ( allele-update != [] ) [ lput allele-update ouput-chromosome ] [ ouput-chromosome ]]
   ]
@@ -1324,11 +1305,11 @@ end
 GRAPHICS-WINDOW
 6
 85
-711
-791
+709
+789
 -1
 -1
-13.94
+13.9
 1
 10
 1
@@ -1421,13 +1402,13 @@ NIL
 0.0
 10.0
 0.0
-100.0
+1.0
 true
 false
-"" "if any? anima1s [\n\nif (useful-commands = \"age-histogram\") [\n  clear-plot\n  set-plot-x-range 0 max [age] of anima1s with [ is.dead = false ] + 1000\n  set-plot-y-range 0 10 ]\n  \nif (useful-commands = \"lotka-volterra\") [\n  let plts ( plant-quality * count plants / 100 )\n  let anls count anima1s\n  let max-value max (list plts anls )\n  set-plot-x-range 0 10\n  set-plot-y-range 0 ( max-value + 10 ) ]\n ]\n  \n"
+"" "if any? anima1s [\n\nif (useful-commands = \"age-histogram\") [\n  clear-plot\n  set-plot-x-range 0 max [age] of anima1s with [ is.alive ] + 1000\n  set-plot-y-range 0 10 ]\n  \nif (useful-commands = \"lotka-volterra\") [\n  let plts ( plant-quality * count plants / 100 )\n  let anls count anima1s\n  let max-value max (list plts anls )\n  set-plot-x-range 0 10\n  set-plot-y-range 0 ( max-value + 10 ) ]\n ]\n  \n"
 PENS
-"age" 1000.0 1 -16777216 true "" "if (useful-commands = \"age-histogram\") [ histogram [age] of anima1s with [ is.dead = false] ]"
-"plants" 1.0 0 -13840069 true "" "if (useful-commands != \"age-histogram\") [ plot ((plant-quality * (sum [energy.supply] of plants ))/ 100 ) ]"
+"age" 1000.0 1 -16777216 true "" "if (useful-commands = \"age-histogram\") [ histogram [age] of anima1s with [ is.alive ] ]"
+"plants" 1.0 0 -13840069 true "" "if (useful-commands != \"age-histogram\") [ plot ( mean [energy.supply] of plants ) ]"
 "organisms" 1.0 0 -6459832 true "" "if (useful-commands != \"age-histogram\") [ plot ( count anima1s ) ]"
 
 INPUTBOX
@@ -1436,7 +1417,7 @@ INPUTBOX
 967
 102
 documentation-notes
-Population file p-20-03-25-01 imported. Population file p-20-03-25-01 imported. New population p-20-03-25-01 saved. Population file p-20-03-25-01 imported. Population file p-20-03-25-01 imported. New population p-20-03-25-01 saved. New population p-20-03-25-01 saved. New population p-20-03-25-01 saved. New population p-2020-03-25-20 saved. Population file fastbreeders6 imported. Population file fastbreeders6 imported. Population file fastbreeders6 imported. 
+Printout code verification. Printout code verification. Printout code verification. Printout code verification. Printout code verification. Printout code verification. Printout code verification. Printout runtime check.Printout runtime check.Printout runtime check.Printout runtime check.
 1
 0
 String
@@ -1485,7 +1466,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-4.0
+2.6
 .1
 1
 NIL
@@ -1526,7 +1507,7 @@ plant-seasonality
 plant-seasonality
 0
 100
-0.0
+50.0
 5
 1
 %
@@ -1568,7 +1549,7 @@ MONITOR
 698
 143
 time
-sun-status
+get-solar-status
 17
 1
 11
@@ -1579,7 +1560,7 @@ INPUTBOX
 1097
 299
 population
-p-20-03-25-01
+p-20-04-01-02
 1
 0
 String
@@ -1654,7 +1635,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "--------" "lotka-volterra" "age-histogram" "metafile-report" "verify-code" "check-runtime" "simulation-report" "clear-plants" "setup-plants" "clear-population" "view-genotype" "view-decisions" "add-allele" "delete-allele" "population-report"
-6
+5
 
 BUTTON
 912
@@ -1757,7 +1738,7 @@ SWITCH
 79
 selection-on?
 selection-on?
-1
+0
 1
 -1000
 
@@ -1767,7 +1748,7 @@ INPUTBOX
 967
 324
 command-input
-5605583
+7568853
 1
 0
 String (commands)

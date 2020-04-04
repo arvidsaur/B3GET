@@ -118,8 +118,7 @@
 ;
 ; THN   2019-09-XX   if [TRUE] --> 
 ; TNT   2019-09-XX   if [FALSE] -->
-;
-; DEC   2019-08-26   --> make-decisions            
+;        
 ; MNT   2019-08-26   --> maintain-body
 ; GRW   2019-08-26   --> body-size                 
 ; BSD   2019-08-26   --> body-shade              
@@ -361,7 +360,7 @@ to-report read-code [ code ]
     ( code = "DSE" ) [ distance myself ]
     ( code = "ISA" ) [ is-anima1? self ]
     ( code = "ISP" ) [ is-plant? self ]
-    ( code = "DED" and is-anima1? self ) [ is.dead ]
+    ( code = "DED" and is-anima1? self ) [ is.alive = false ]
     ( code = "CRD" and is-anima1? self ) [ member? self [carried.items] of myself ]
     ( code = "MYO" and is-anima1? self and biological.sex = "female" ) [ member? self [my-offspring] of myself ]
     ( code = "MOM" and is-anima1? self ) [ [mother] of myself = self ]
@@ -430,71 +429,7 @@ to-report read-code [ code ]
     [ false ])
 end
 
-;--------------------------------------------------------------------------------------------------------------------
-; GET-ACTION
-;--------------------------------------------------------------------------------------------------------------------
 
-to-report get-action [ action-code ] ; called by sta7us, fix
-
-  report
-  (ifelse-value
-    ( action-code = "DEC" ) [ "make-decisions" ]
-    ( action-code = "MNT" ) [ "maintain-body" ]
-    ( action-code = "GRW" ) [ "body-size" ]
-    ( action-code = "BSD" ) [ "body-shade" ]
-    ( action-code = "IPR" ) [ "day-perception" ]
-    ( action-code = "NPR" ) [ "night-perception" ]
-    ( action-code = "APR" ) [ "audio-perception" ]
-    ( action-code = "DPA" ) [ "day-perception-angle" ]
-    ( action-code = "NPA" ) [ "night-perception-angle" ]
-    ( action-code = "APA" ) [ "audio-perception-angle" ]
-    ( action-code = "VCR" ) [ "vocal-range" ]
-    ( action-code = "ICC" ) [ "conception-chance" ]
-    ( action-code = "STM" ) [ "stomach-size" ]   
-    ( action-code = "MTR" ) [ "mutation-rate" ]
-    ( action-code = "SXR" ) [ "sex-ratio" ]
-    ( action-code = "LTS" ) [ "litter-size" ]
-    ( action-code = "LEV" ) [ "leave-group" ]
-    ( action-code = "TRT" ) [ "turn-right" ]
-    ( action-code = "TLF" ) [ "turn-left" ]
-    ( action-code = "GFD" ) [ "go-forward" ]
-    ( action-code = "MOV" ) [ "move-toward" ]
-    ( action-code = "HED" ) [ "set-heading" ]
-    ( action-code = "SAC" ) [ "signal-a-chance" ]
-    ( action-code = "SAO" ) [ "signal-a-on" ]
-    ( action-code = "SBC" ) [ "signal-b-chance" ]
-    ( action-code = "SBO" ) [ "signal-b-on" ]
-    ( action-code = "SCC" ) [ "signal-c-chance" ]
-    ( action-code = "SCO" ) [ "signal-c-on" ]
-    ( action-code = "INC" ) [ "infancy-chance" ]
-    ( action-code = "CKI" ) [ "check-infancy" ]
-    ( action-code = "GVB" ) [ "birthing-chance" ]
-    ( action-code = "CKB" ) [ "check-birth" ]
-    ( action-code = "JVC" ) [ "juvenile-chance" ]
-    ( action-code = "CKJ" ) [ "check-juvenility" ]
-    ( action-code = "WEN" ) [ "weaning-chance" ]
-    ( action-code = "CKW" ) [ "check-weaning" ]
-    ( action-code = "ADC" ) [ "adult-chance" ]
-    ( action-code = "CKA" ) [ "check-adulthood" ]
-    ( action-code = "SNC" ) [ "senescent-chance" ]
-    ( action-code = "CKS" ) [ "check-senescence" ]
-    ( action-code = "DSC" ) [ "digest-stomach" ]
-    ( action-code = "FAT" ) [ "reserve-energy" ]
-    ( action-code = "BRN" ) [ "burn-reserves" ]
-    ( action-code = "GFT" ) [ "supply-to" ]
-    ( action-code = "RFT" ) [ "demand-from" ]
-    ( action-code = "EAT" ) [ "eat" ]
-    ( action-code = "PKU" ) [ "pick-up" ]
-    ( action-code = "SQM" ) [ "squirm-from" ]
-    ( action-code = "PDN" ) [ "put-down" ]
-    ( action-code = "CLG" ) [ "cling-to" ]
-    ( action-code = "ATK" ) [ "attack" ]
-    ( action-code = "HLP" ) [ "help" ]
-    ( action-code = "JNG" ) [ "join-group-of" ]
-    ( action-code = "MAT" ) [ "mate-with" ]
-    [ "" ])
-  
-end
 
 
 ;----------------------------------------------------------------------------------------------

@@ -18,24 +18,25 @@
 ; extension to run code verification checks. Modify the USER SETTINGS below for specific data
 ; collection preferences.
 ;
-; L-V, max population size, min population size, hamilton's rule, OFT, parent-offspring birth and wean, patchiness
-;
 ;----------------------------------------------------------------------------------------------
+
+to-report simulation-file-path report (word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] simulation-id ".csv" ) end
+to-report agent-records-file-path report (word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "agent_records.csv" ) end
 
 to output-results
   
   ; USER SETTINGS:
   ; -------------
   let verification? true         ; TRUE = runs periodic code verification checks set by the VERIFICATION-RATE
-  let verification-rate 0.01 
+  let verification-rate 0.001 
   let record-simulation? false   ; TRUE = records the simulation ;
   let record-group? true         ; TRUE = records every group upon its creation ;
   let record-agent? true         ; TRUE = records every agent upon its death
   let scan-interval 100        
   let simulation-scans? true     ; TRUE = scans the simulation every SCAN-INTERVAL and records population-level phenomena ;
-  let group-scans? true          ; TRUE = scans all groups every SCAN-INTERVAL and records group-level phenomena
-  let agent-scans? true          ; TRUE = scans all agents every SCAN-INTERVAL and records individual-level phenomena
-  let focal-follows? true        ; TRUE = small chance to record an individual's entire life
+  let group-scans? false          ; TRUE = scans all groups every SCAN-INTERVAL and records group-level phenomena
+  let agent-scans? false          ; TRUE = scans all agents every SCAN-INTERVAL and records individual-level phenomena
+  let focal-follows? false        ; TRUE = small chance to record an individual's entire life
    
   ;----------------------------------------------------------------------------------------------     
   ; VERIFICATION : collect data on periodic code verification checks
@@ -84,7 +85,7 @@ to record-world
   update-metafile "world" (word "w" but-first simulation-id "-" ticks )
 end
 
-to record-simulation ; max population size, min population size, average pop size, average plant abundance, min, max
+to record-simulation
   export-turtle-to 
   ( word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "simulation_records.csv" )
   ( list     
@@ -94,7 +95,6 @@ to record-simulation ; max population size, min population size, average pop siz
     "genotype-reader"
     "simulation-id" 
     "behaviorspace-experiment-name"
-    "sun-status"
     "population" 
     "genotype"
     "plant-annual-cycle" 
@@ -105,7 +105,6 @@ to record-simulation ; max population size, min population size, average pop siz
     "plant-maximum-neighbors" 
     "world-width" 
     "world-height"
-    "documentation-notes" 
     "ticks"
     "deterioration-rate" 
     "selection-rate"
@@ -114,13 +113,16 @@ to record-simulation ; max population size, min population size, average pop siz
     "path-to-experiment"
     "useful-commands"
     "command-input" 
-    "mean-plant-patchiness"
     "maximum-generation-number"
-    "lotka-volterra-cycles-present"
-    "percent-mothers-initiated-birth"
-    "percent-mothers-initiated-weaning"
-    "percent-of-optimal-foragers"
-    "percent-of-kin-selectors"
+    "minimum-population-size"
+    "maximum-population-size"
+    "mean-plant-patchiness"
+    "foraging-gains-to-cost"
+    "mothers-initiated-birth-percentage"
+    "mothers-initiated-weaning-percentage"
+
+    ; kin-selection
+    ; predator-prey
   )
 end
 
@@ -141,14 +143,13 @@ end
 
 to record-agent
   export-turtle-to
-  (word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "agent_records.csv" )
+  agent-records-file-path
   (list 
     "date-and-time" 
     "model-version" 
     "model-structure"
     "genotype-reader"
-    "simulation-id" 
-    "sun-status"
+    "simulation-id"
     "plant-annual-cycle" 
     "plant-seasonality" 
     "plant-minimum-neighbors"
@@ -198,33 +199,33 @@ to record-agent
     "adult-body-size" 
     "adult-body-shade" 
     "adult-perception-range"
+    "adult-stomach-size"
     "adult-mutation-chance" 
     "adult-sex-ratio" 
     "adult-litter-size" 
-    "adult-conception-chance" 
-    "mother-initiated-birth" 
+    "adult-conception-chance"
+    "mother-initiated-birth"
     "mother-initiated-weaning"
-    "lifetime-foraging-gains" 
-    "lifetime-foraging-losses" 
-    "lifetime-helping-benefit" 
-    "lifetime-helping-cost"
-    "female-female-ingroup-helping" 
-    "male-male-ingroup-helping" 
-    "female-male-ingroup-helping"
-    "lifetime-matings-count" 
-    "lifetime-mates-count" 
-    "lifetime-matings" 
-    "lifetime-conceptions-count" 
+    "lifetime-foraging-gains"
+    "lifetime-foraging-cost"
+    "lifetime-matings-count"
+    "lifetime-mates-count"
+    "lifetime-list-of-mates"
+    "lifetime-conceptions-count"
     "lifetime-infanticide-count"
-    "lifetime-group-transfers" 
-    "lifetime-distance-traveled" 
-    "lifetime-cells-occupied" 
+    "lifetime-group-transfers"
+    "lifetime-distance-traveled"
+    "lifetime-cells-occupied"
+    "lifetime-whole-related-help-cost"
+    "lifetime-half-related-help-cost"
+    "lifetime-fourth-related-help-cost"
+    "lifetime-eighth-related-help-cost"
   )
 end 
 
 to scan-simulation
   export-turtle-to 
-  ( word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] simulation-id ".csv" )
+  simulation-file-path
   (list 
     "date-and-time" 
     "model-version" 
@@ -251,9 +252,10 @@ to scan-simulation
     "path-to-experiment"
     "useful-commands" 
     "command-input" 
-    "world-population-density" 
-    "world-plant-abundance"
-    "world-population-size" 
+    "population-density" 
+    "plant-abundance"
+    "plant-patchiness"
+    "number-of-organisms" 
     "mean-generation-number" 
     "number-of-females" 
     "number-of-males"
@@ -314,7 +316,7 @@ to scan-group
     "total-birth-count" 
     "current-group-size" 
     "adult-female-group-size" 
-    "world-population-density" 
+    "population-density" 
     "total-energy-gained" 
     "gestatee-female-energy-gained" 
     "gestatee-male-energy-gained" 
@@ -457,10 +459,10 @@ end
 
 ;:::: global :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-to-report world-population-density report count turtles / ( world-width * world-height ) end
-to-report world-plant-abundance report precision ( plant-quality * sum [ energy.supply ] of plants ) 3 end
-to-report world-population-size report count anima1s with [ not is.dead ] end
+to-report population-density report count turtles / ( world-width * world-height ) end
+to-report plant-abundance report precision ( sum [ energy.supply ] of plants ) 3 end
 to-report mean-generation-number report ifelse-value (any? anima1s ) [ precision ( mean [ generation-number ] of anima1s ) 3 ] [ 0 ] end
+to-report number-of-organisms report count anima1s with [ is.alive ] end
 to-report number-of-females report count anima1s with [ biological.sex = "female" ] end
 to-report number-of-males report count anima1s with [ biological.sex = "male" ] end
 to-report number-of-gestatees report count anima1s with [ life.history = "gestatee" ] end
@@ -472,8 +474,7 @@ to-report number-of-cycling-females report count anima1s with [ female.fertility
 to-report number-of-pregnant-females report count anima1s with [ female.fertility = "pregnant" ] end
 to-report number-of-lactating-females report count anima1s with [ female.fertility = "lactating" ] end
 to-report number-of-groups report count groups end
-to-report number-of-living-organisms report count anima1s with [ is.dead = false ] end
-to-report number-of-dead-organisms report count anima1s with [ is.dead = true ] end
+to-report number-of-dead-organisms report count anima1s with [ is.alive = false ] end
 to-report median-living-chance report median [living.chance] of anima1s end
 to-report median-natal-group-size report median [natal-group-size] of anima1s end
 to-report median-age-at-birth report median [ticks-at-birth - ticks-at-conception] of anima1s with [ ticks-at-birth > 0 ] end
@@ -502,23 +503,86 @@ to-report percent-mother-initiated-birth report count anima1s with [ mother-init
 to-report percent-mother-initiated-weaning report count anima1s with [ mother-initiated-weaning ] / ( count anima1s ) end
 to-report median-adult-distance-traveled report median [distance-traveled] of anima1s with [ life.history = "adult" ] end
 to-report median-adult-foraging-gains report median [foraging-gains] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-foraging-losses report median [foraging-losses] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-helping-benefit report median [helping-benefit] of anima1s with [ life.history = "adult" ] end
-to-report median-adult-helping-cost report median [helping-cost] of anima1s with [ life.history = "adult" ] end
+to-report median-adult-foraging-losses report median [foraging-cost] of anima1s with [ life.history = "adult" ] end
 to-report median-adult-male-unique-mates report median [length remove-duplicates matings-list] of anima1s with [ biological.sex = "male" ] end
 to-report median-adult-female-unique-mates report median [length remove-duplicates matings-list] of anima1s with [ biological.sex = "female" ]  end
 to-report median-adult-male-group-transfers report median [length group-transfers-list] of anima1s with [ biological.sex = "male" ] end
 to-report median-adult-female-group-transfers report median [length group-transfers-list] of anima1s with [ biological.sex = "female" ] end
+to-report maximum-generation-number report max [generation-number] of anima1s end
   
-;to-report instantanious-plant-patchiness report "" end
-;to-report mean-plant-patchiness report ifelse-value ( file-exists? word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] simulation-id ".csv" ) [ "" ] [ 0 ] end
-;to-report maximum-generation-number report max [generation-number] of anima1s end
-;to-report lotka-volterra-cycles-present report "" end
-;to-report percent-mothers-initiated-birth report "" end 
-;to-report percent-mothers-initiated-weaning report "" end 
-;to-report percent-of-optimal-foragers report "" end 
-;to-report percent-of-kin-selectors report "" end 
+to-report mean-plant-patchiness report ifelse-value ( file-exists? simulation-file-path ) [ mean get-data simulation-file-path "plant-patchiness" ] [ "N/A" ] end
+to-report minimum-population-size report ifelse-value ( file-exists? simulation-file-path ) [ min get-data simulation-file-path "number-of-organisms"  ] [ "N/A" ] end
+to-report maximum-population-size report ifelse-value ( file-exists? simulation-file-path ) [ max get-data simulation-file-path "number-of-organisms"  ] [ "N/A" ] end
+ 
+to-report mothers-initiated-birth-percentage 
+  report ifelse-value ( file-exists? agent-records-file-path ) 
+  [ length filter [ i -> i = true ] ( get-data agent-records-file-path "mother-initiated-birth" ) / length get-data agent-records-file-path "mother-initiated-birth" ] 
+  [ "N/A" ]
+end
+
+to-report mothers-initiated-weaning-percentage 
+  report ifelse-value ( file-exists? agent-records-file-path ) 
+  [ length filter [ i -> i = true ] get-data agent-records-file-path "mother-initiated-weaning" / length get-data agent-records-file-path "mother-initiated-weaning" ] 
+  [ "N/A" ]
+end
+
+to-report foraging-gains-to-cost ; for each unit of foraging cost, how much energy is gained through foraging?
+  let total-foraging-gains sum ( get-data agent-records-file-path "lifetime-foraging-gains" )
+  let total-foraging-cost sum ( get-data agent-records-file-path "lifetime-foraging-cost" )  
+  report total-foraging-gains / total-foraging-cost
+end
+
+to-report excessive-help-cost
+  let population-level-half-help-cost ifelse-value ( file-exists? agent-records-file-path ) [ sum get-data agent-records-file-path "half-related-help-cost" ] [ 0 ]
+  let population-level-fourth-help-cost ifelse-value ( file-exists? agent-records-file-path ) [ sum get-data agent-records-file-path "fourth-related-help-cost" ] [ 0 ]
+  let population-level-eighth-help-cost ifelse-value ( file-exists? agent-records-file-path ) [ sum get-data agent-records-file-path "eigth-related-help-cost" ] [ 0 ]
   
+  report (( abs ( 2 * population-level-eighth-help-cost ) - population-level-fourth-help-cost ) + ( abs ( 2 * population-level-fourth-help-cost ) - population-level-half-help-cost ))
+end
+
+to-report predator-prey report false end
+   
+to-report plant-patchiness
+  let patch-diameter 5
+  let patch-list []
+  
+  let i 0
+  let j 0
+  let i-next patch-diameter
+  let j-next patch-diameter
+  
+  while [ j < world-height ] [
+    while [ i < world-width ] [
+      
+      set patch-list lput count plants with [ xcor > i and xcor <= i-next and ycor > j and ycor <= j-next ] patch-list
+      set i i-next
+      set i-next ifelse-value (( i + patch-diameter ) > world-width ) [ world-width ] [ i + patch-diameter ] ]
+
+    set i 0
+    set i-next patch-diameter
+    set j j-next
+    set j-next ifelse-value (( j + patch-diameter ) > world-height ) [ world-height ] [ j + patch-diameter ] ]
+
+  report ( variance patch-list / mean patch-list )
+end
+  
+to-report get-data [ filename column-name ]
+  let list-to-return []
+  if ( file-exists? filename )
+  [
+    file-open filename
+    let file-header first csv:from-file filename
+    let index position column-name file-header
+    let simulation-id-index position "simulation-id" file-header
+    foreach ( but-first csv:from-file filename ) [ row ->
+      if ( item simulation-id-index row = simulation-id ) [
+        set list-to-return lput item index row list-to-return
+    ]]
+  ]
+  file-close
+  report list-to-return
+end
+
 ;:::: groups :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 to-report current-group-size report group-size end  
@@ -534,15 +598,18 @@ to-report energy-at-death report energy.supply end
 to-report living-chance-at-death report living.chance end
 to-report focal-subject report self = subject end
 to-report lifetime-foraging-gains report foraging-gains end
-to-report lifetime-foraging-losses report foraging-losses end
-to-report lifetime-helping-benefit report helping-benefit end
-to-report lifetime-helping-cost report helping-cost end
+to-report lifetime-foraging-cost report foraging-cost end
 to-report lifetime-matings-count report length matings-list end
 to-report lifetime-mates-count report length remove-duplicates matings-list end
-to-report lifetime-matings report matings-list end
+to-report lifetime-list-of-mates report matings-list end
 to-report lifetime-conceptions-count report length conceptions-list end
 to-report lifetime-infanticide-count report length infanticide-list end
 to-report lifetime-group-transfers report length group-transfers-list end
 to-report lifetime-distance-traveled report distance-traveled end
 to-report lifetime-cells-occupied report length cells-occupied end
+to-report lifetime-whole-related-help-cost report whole-related-help-cost end
+to-report lifetime-half-related-help-cost report half-related-help-cost end
+to-report lifetime-fourth-related-help-cost report fourth-related-help-cost end
+to-report lifetime-eighth-related-help-cost report eighth-related-help-cost end
+ 
   

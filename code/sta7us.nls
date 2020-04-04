@@ -86,9 +86,11 @@
 ; RFT   2019-10-16   --> demand-from
 ; EAT   2019-10-16   --> eat
 ; PKU   2019-09-XX   --> pick-up
-; SQM   not done     --> squirm-from
+; SQM   2020-04-XX   --> squirm-from
 ; PDN   2019-10-16   --> put-down
-; CLG   not done     --> cling-to
+; CLG   2020-04-XX   --> cling-to
+;                    --> give-to
+;                    --> take-from ; other action to shift inventory?
 ; ATK   2019-09-XX   --> attack 
 ; HLP   2019-09-XX   --> help
 ; JNG   2019-09-XX   --> join-group-of
@@ -244,7 +246,7 @@ to-report status-of [ target ]
   [ ; ANIMALS
     let target-kind "z"
     let target-self ifelse-value ( target = self ) [ "e" ] [ "o" ]
-    let target-alive ifelse-value ( not is.dead ) [ "v" ] [ "w" ]
+    let target-alive ifelse-value ( is.alive ) [ "v" ] [ "w" ]
     let target-sex first [biological.sex] of target
     let target-life-history first [life.history] of target
     let target-fertility first [female.fertility] of target
@@ -264,7 +266,7 @@ to-report status-of [ target ]
   ]
   
   ; BOTH
-  set status-report (word status-report ifelse-value ( sun-status = "DAY" ) [ "*" ][ "-" ] )
+  set status-report (word status-report ifelse-value ( get-solar-status = "DAY" ) [ "*" ][ "-" ] )
   set status-report (word status-report ceiling [color] of target )
   
   report status-report
