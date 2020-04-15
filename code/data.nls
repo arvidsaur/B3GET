@@ -132,7 +132,6 @@ to import-population
     
     ask anima1s [
       
-      if (life.history = "gestatee" or life.history = "infant" ) [ die ]
       ask anima1s with [ biological.sex = "female" and life.history = "adult" ] [ set female.fertility "cycling" ]
       
       set meta-id random 9999999
@@ -143,10 +142,13 @@ to import-population
       set cells-occupied []
       set infanticide-list []
       set decision.vectors []
+      set my-environment no-turtles
       if ( stomach.size = 0 ) [ set stomach.size 0.1 ]
-      if ( is.alive = 0 ) [ set is.alive true ] ; note it will import both alive and dead as alive if population file has is. dead instead of is.alive
+      if ( is.alive = 0 ) [ set is.alive true ] ; note it will import both alive and dead as alive if population file has is.dead instead of is.alive
       
     ]
+    
+    ask anima1s [ if ((life.history = "gestatee" or life.history = "infant" ) and mother != nobody ) [ ask mother [ set carried.items lput myself carried.items ]] ]
     
     ask groups [
       

@@ -129,12 +129,11 @@
 ; NPA   2019-08-26   --> night-perception-angle
 ; APA   2019-08-26   --> audio-perception-angle 
 ; VCR   2019-08-26   --> vocal-range
-; ICC   2019-08-26   --> conception-chance        
+; ICC   2019-08-26   --> conception-chance
+; STM   2020-04-XX   --> stomach-size
 ; MTR   2019-08-26   --> mutation-rate            
 ; SXR   2019-08-26   --> sex-ratio               
 ; LTS   2019-08-26   --> litter-size               
-; LEV   2019-08-26   --> leave-group  
-; HED   2019-08-26   --> set-heading   
 ; TRT   2019-08-26   --> turn-right               
 ; TLF   2019-08-26   --> turn-left                 
 ; GFD   2019-08-26   --> go-forward               
@@ -147,17 +146,20 @@
 ; CKW   2019-08-26   --> check-weaning              
 ; CKA   2019-08-26   --> check-adulthood           
 ; CKS   2019-08-26   --> check-senescence         
-; DSC   2019-08-26   --> digest-stomach           
+;
+; MOV   2020-04-01   --> move-toward
+; MAF   2020-04-01   --> move-away-from
 ; GFT   2019-10-16   --> supply-to 
 ; RFT   2019-10-16   --> demand-from
 ; EAT   2019-10-16   --> eat
-; PKU   2019-09-XX   --> pick-up
-; SQM   not done     --> squirm-from
-; PDN   2019-10-16   --> put-down
-; CLG   not done     --> cling-to
-; ATK   2019-09-XX   --> attack 
-; HLP   2019-09-XX   --> help
 ; JNG   2019-09-XX   --> join-group-of
+; LEV   2019-08-26   --> leave-group-of  
+; PKU   2019-09-XX   --> pick-up
+; PDN   2019-10-16   --> put-down
+; CLG   2020-04-XX   --> cling-to
+; SQM   2020-04-XX   --> squirm-from
+; HLP   2019-09-XX   --> help
+; ATK   2019-09-XX   --> attack 
 ; MAT   2019-10-16   --> mate-with
 ; 
 ;----------------------------------------------------------------------------------------------

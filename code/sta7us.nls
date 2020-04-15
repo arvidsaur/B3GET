@@ -45,8 +45,11 @@
 ;  z    2019-09-XX   is an anima1 (not a plant)
 ;  +    2019-09-XX   is carrying myself
 ;  α    2019-09-XX   has alpha signal on
+;  å    2019-09-XX   has alpha signal off
 ;  β    2019-09-XX   has beta signal on
+;  ß    2019-09-XX   has beta signal off
 ;  ɣ    2019-09-XX   has gamma signal on
+;  œ    2019-09-XX   has gamma signal off
 ;  *    2019-09-XX   is observed during the day
 ;  -    2019-09-XX   is observed during the night
 ;  #    2019-09-XX   has color shade between # = 0 [dark] and # = 9 [light]
@@ -63,13 +66,11 @@
 ; NPA   2019-08-26   --> night-perception-angle
 ; APA   2019-08-26   --> audio-perception-angle 
 ; VCR   2019-08-26   --> vocal-range
-; ICC   2019-08-26   --> conception-chance    
-; STM   not done     --> stomach-size
-; MTR   2019-08-26   --> mutation-rate            
+; ICC   2019-08-26   --> conception-chance
+; STM   2020-04-XX   --> stomach-size
+; MTR   2019-08-26   --> mutation-chance            
 ; SXR   2019-08-26   --> sex-ratio               
 ; LTS   2019-08-26   --> litter-size               
-; LEV   2019-08-26   --> leave-group  
-; MOV   2019-08-26   --> move-toward
 ; TRT   2019-08-26   --> turn-right               
 ; TLF   2019-08-26   --> turn-left                 
 ; GFD   2019-08-26   --> go-forward               
@@ -81,19 +82,21 @@
 ; CKJ   2019-08-26   --> check-juvenility         
 ; CKW   2019-08-26   --> check-weaning              
 ; CKA   2019-08-26   --> check-adulthood           
-; CKS   2019-08-26   --> check-senescence            
+; CKS   2019-08-26   --> check-senescence         
+;
+; MOV   2020-04-01   --> move-toward
+; MAF   2020-04-01   --> move-away-from
 ; GFT   2019-10-16   --> supply-to 
 ; RFT   2019-10-16   --> demand-from
 ; EAT   2019-10-16   --> eat
+; JNG   2019-09-XX   --> join-group-of
+; LEV   2019-08-26   --> leave-group-of  
 ; PKU   2019-09-XX   --> pick-up
-; SQM   2020-04-XX   --> squirm-from
 ; PDN   2019-10-16   --> put-down
 ; CLG   2020-04-XX   --> cling-to
-;                    --> give-to
-;                    --> take-from ; other action to shift inventory?
-; ATK   2019-09-XX   --> attack 
+; SQM   2020-04-XX   --> squirm-from
 ; HLP   2019-09-XX   --> help
-; JNG   2019-09-XX   --> join-group-of
+; ATK   2019-09-XX   --> attack 
 ; MAT   2019-10-16   --> mate-with
 ; 
 ;----------------------------------------------------------------------------------------------
@@ -181,20 +184,19 @@ to-report get-action [ action-code ] ; called by sta7us, fix
 
   report
   (ifelse-value
-    ( action-code = "DEC" or action-code = "make-decisions" ) [ "make-decisions" ]
     ( action-code = "MNT" or action-code = "maintain-body" ) [ "maintain-body" ]
     ( action-code = "GRW" or action-code = "body-size" ) [ "body-size" ]
     ( action-code = "BSD" or action-code = "body-shade" ) [ "body-shade" ]
-    ( action-code = "IPR" or action-code = "day-perception") [ "day-perception" ]
-    ( action-code = "NPR" or action-code = "night-perception" ) [ "night-perception" ]
-    ( action-code = "APR" or action-code = "audio-perception" ) [ "audio-perception" ]
+    ( action-code = "DPR" or action-code = "IPR" or action-code = "day-perception" or action-code = "day-perception-range" ) [ "day-perception-range" ]
+    ( action-code = "NPR" or action-code = "night-perception" or action-code = "night-perception-range" ) [ "night-perception-range" ]
+    ( action-code = "APR" or action-code = "audio-perception" or action-code = "audio-perception-range" ) [ "audio-perception-range" ]
     ( action-code = "DPA" or action-code = "day-perception-angle" ) [ "day-perception-angle" ]
     ( action-code = "NPA" or action-code = "night-perception-angle" ) [ "night-perception-angle" ]
     ( action-code = "APA" or action-code = "audio-perception-angle") [ "audio-perception-angle" ]
     ( action-code = "VCR" or action-code = "vocal-range" ) [ "vocal-range" ]
     ( action-code = "ICC" or action-code = "conception-chance" ) [ "conception-chance" ]
     ( action-code = "STM" or action-code = "stomach-size" ) [ "stomach-size" ]   
-    ( action-code = "MTR" or action-code = "mutation-rate" ) [ "mutation-rate" ]
+    ( action-code = "MTR" or action-code = "mutation-rate" or  action-code = "MTC" or action-code = "mutation-chance") [ "mutation-chance" ]
     ( action-code = "SXR" or action-code = "sex-ratio" ) [ "sex-ratio" ]
     ( action-code = "LTS" or action-code = "litter-size" ) [ "litter-size" ]
     ( action-code = "LEV" or action-code = "leave-group" ) [ "leave-group" ]
@@ -203,12 +205,9 @@ to-report get-action [ action-code ] ; called by sta7us, fix
     ( action-code = "GFD" or action-code = "go-forward" ) [ "go-forward" ]
     ( action-code = "MOV" or action-code = "move-toward" ) [ "move-toward" ]
     ( action-code = "HED" or action-code = "set-heading" ) [ "set-heading" ]
-    ( action-code = "SAC" or action-code = "signal-a-chance" ) [ "signal-a-chance" ]
-    ( action-code = "SAO" or action-code = "signal-a-on" ) [ "signal-a-on" ]
-    ( action-code = "SBC" or action-code = "signal-b-chance" ) [ "signal-b-chance" ]
-    ( action-code = "SBO" or action-code = "signal-b-on" ) [ "signal-b-on" ]
-    ( action-code = "SCC" or action-code = "signal-c-chance" ) [ "signal-c-chance" ]
-    ( action-code = "SCO" or action-code = "signal-c-on" ) [ "signal-c-on" ]
+    ( action-code = "SAC" or action-code = "signal-a-chance" or action-code = "SAO" or action-code = "signal-a-on" or action-code = "signal-alpha-on" ) [ "signal-alpha-on" ]
+    ( action-code = "SBC" or action-code = "signal-b-chance" or action-code = "SBO" or action-code = "signal-b-on" or action-code = "signal-beta-on") [ "signal-beta-on" ]
+    ( action-code = "SCC" or action-code = "signal-c-chance" or action-code = "SCO" or action-code = "signal-c-on" or action-code = "signal-gamma-on" ) [ "signal-gamma-on" ]
     ( action-code = "INC" or action-code = "infancy-chance" ) [ "infancy-chance" ]
     ( action-code = "CKI" or action-code = "check-infancy" ) [ "check-infancy" ]
     ( action-code = "GVB" or action-code = "birthing-chance" ) [ "birthing-chance" ]
@@ -255,7 +254,7 @@ to-report status-of [ target ]
     let target-kin ifelse-value ( relatedness-with target > 0.2 ) [ "k" ] [ "q" ]
     let target-group ifelse-value ( [group.identity] of target = group.identity ) [ "n" ] [ "u" ] 
     let target-carry ifelse-value ( member? target carried.items ) [ "y" ] [ ifelse-value ( member? self [carried.items] of target ) [ "+" ] [ "t" ] ]
-    let target-signal (word ifelse-value alpha.signal [ "α" ][ "" ] ifelse-value beta.signal [ "β" ][ "" ] ifelse-value gamma.signal [ "ɣ" ][ "" ] )
+    let target-signal (word ifelse-value alpha.signal [ "α" ][ "å" ] ifelse-value beta.signal [ "β" ][ "ß" ] ifelse-value gamma.signal [ "ɣ" ][ "œ" ] )
     let target-energy ifelse-value ( [energy.supply] of target > energy.supply ) [ "$" ] [ "~" ]
     set status-report (word target-self target-alive target-kind target-sex target-life-history target-fertility target-size target-health target-kin target-group target-carry target-signal )
     

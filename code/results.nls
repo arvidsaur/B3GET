@@ -27,13 +27,13 @@ to output-results
   
   ; USER SETTINGS:
   ; -------------
-  let verification? true         ; TRUE = runs periodic code verification checks set by the VERIFICATION-RATE
+  let verification? false         ; TRUE = runs periodic code verification checks set by the VERIFICATION-RATE
   let verification-rate 0.001 
   let record-simulation? false   ; TRUE = records the simulation ;
-  let record-group? true         ; TRUE = records every group upon its creation ;
-  let record-agent? true         ; TRUE = records every agent upon its death
+  let record-group? false         ; TRUE = records every group upon its creation ;
+  let record-agent? false         ; TRUE = records every agent upon its death
   let scan-interval 100        
-  let simulation-scans? true     ; TRUE = scans the simulation every SCAN-INTERVAL and records population-level phenomena ;
+  let simulation-scans? false     ; TRUE = scans the simulation every SCAN-INTERVAL and records population-level phenomena ;
   let group-scans? false          ; TRUE = scans all groups every SCAN-INTERVAL and records group-level phenomena
   let agent-scans? false          ; TRUE = scans all agents every SCAN-INTERVAL and records individual-level phenomena
   let focal-follows? false        ; TRUE = small chance to record an individual's entire life
@@ -611,5 +611,166 @@ to-report lifetime-whole-related-help-cost report whole-related-help-cost end
 to-report lifetime-half-related-help-cost report half-related-help-cost end
 to-report lifetime-fourth-related-help-cost report fourth-related-help-cost end
 to-report lifetime-eighth-related-help-cost report eighth-related-help-cost end
- 
+  
+  ; GROUP REPORTERS
+
+to-report group-size
+  report count anima1s with [ group.identity = [meta-id] of myself ]
+end
+
+; ANIMA1 REPORTERS
+
+to-report my-offspring
+  report ifelse-value ( biological.sex = "female" )
+  [ anima1s with [ mother-identity = [meta-id] of myself ]]
+  [ anima1s with [ father-identity = [meta-id] of myself ]]
+end
+
+to-report current-group
+  report ifelse-value (any? groups with [ meta-id = [group.identity] of myself ] and group.identity != 0 )
+  [ one-of groups with [ meta-id = [group.identity] of myself ] ]
+  [ nobody ]
+end
+
+to-report mother
+  report ifelse-value (any? turtles with [ meta-id = [mother-identity] of myself ])
+  [ one-of turtles with [ meta-id = [mother-identity] of myself ]]
+  [ nobody ]
+end
+
+to-report father
+  report ifelse-value (any? turtles with [ meta-id = [father-identity] of myself ])
+  [ one-of turtles with [ meta-id = [father-identity] of myself ]]
+  [ nobody ]
+end
+
+; --------------------------------------------------------------------------- ;
+;
+; DETERMINE GENETIC RELATEDNESS BETWEEN TWO INDIVIDUALS
+;
+; This routine determines the genetic relatedness between the caller and a
+; specified individual in the population. For example, consider these four
+; chromosomes.
+;
+; Locus         0 1 2 3 4 5 6 7 8 9
+;
+; Caller:   I:  y h m u n f q a x r
+;          II:  c j s w v i l f a p
+;
+; Target:   I:  j l h y m d u t v c
+;          II:  y u l x i s f p w a
+;
+; The first locus has one match, Caller I and Target II, and three non-matches,
+; Caller I and Target I (y and J), Caller II and Target I (c and j), and
+; Caller II to Target II (c y). This is considered a relatedness of
+; <m>1/(1+3) = 0.25</m>, at the first locus. This is repeated across all loci
+; and the average is returned.
+;
+; ENTRY:  'target' defines an individual to be compared the calling individual.
+;         'identity.I' and 'identity.II' carry the genetic information to be
+;          compared between caller and target.
+;         'identity.I' and 'identity.II' both contain exactly 10 loci.
+;
+; EXIT:   'relatedness-with' returns an estimate of the degree of relatedness, as
+;          fraction between 0 and 1.
+;
+; --------------------------------------------------------------------------- ;
+
+to-report relatedness-with [ target ]
+  let matching 0
+  let not-matching 0
+  let i 0
+  while [i < 10] [
+
+    let allele-here-I item i identity.I
+    let allele-here-II item i identity.II
+    let target-allele-I item i [identity.I] of target
+    let target-allele-II item i [identity.II] of target
+
+    ifelse (( allele-here-I = target-allele-I ) or ( allele-here-I = target-allele-II ))
+    [ set matching matching + 1 ] [ set not-matching not-matching + 1 ]
+
+    ifelse (( allele-here-II = target-allele-I ) or ( allele-here-II = target-allele-II ))
+    [ set matching matching + 1 ] [ set not-matching not-matching + 1 ]
+
+    set i i + 1 ]
+
+  report matching / ( matching + not-matching )
+end
+
+
+to simulation-rsn
+  let r1 1
+  let r2 1
+  let s11 -1 ; throw out?
+  let s12 -.5
+  let s21 1
+  let s22 -1 ; throw out?
+  
+  let N1 0.4
+  let N2 0.1
+  let dt 1 / 365
+  
+  let t 0
+  
+  while [ t < ( 14 + dt / 2 ) ] [
+    print ( word t " " N1 " " N2 )
+    let dN1 ( r1 + s11 * N1 + s12 * N2 ) * N1 * dt
+    let dN2 ( r2 + s22 * N2 + s21 * N1 ) * N2 * dt
+    set N1 N1 + dN1
+    set N2 N2 + dN2 
+    set t t + dt 
+  
+    plotxy t N1
+    plotxy t N2
+  
+  ] 
+end
+
+; printout goodness of fit btween 1  and - inf 
+
+;TRIAL FITTING OF KNOWN DATA
+;
+;This routine accepts a set of data containing observations and predictions, and
+;computes how well the predictions match the observations. Various measures of
+;how well they match can be calculated in this routine, such as with
+;least-squares, least absolute value, or other measures. The goodness of fit is
+;presented in the form of
+;<m>R^2</m>.<https://en.wikipedia.org/wiki/Coefficient_of_determination/> That
+;is, it is presented as <m>1-F/E</m>, where <m>F</m> is the summed deviations of
+;the observations from the predictions, and <m>E</m> is summed deviations of the
+;observations from the expected value (mean) of the observations if there were no
+;functional relationship.
+;
+;ENTRY: The actual and predicted observations appear on the standard input file.
+;       The first two columns are the actual moose and wolf observed populations,
+;         the last two columns are the predicted moose and wolf populations.
+;
+;EXIT:  The standard output file contains a record of the input and the
+;         calculated goodness of fit.
+;
+;|Calculate goodness of fit
+;|
+;| Advancing y from 1 until end of file,       |Read the actual data and the
+;|   Accept  MA[y], WA[y], MS[y], and WS[y]    |simulated data.
+;|   Display MA[y], WA[y], MS[y], and WS[y]
+;|
+;| Set Mmu and Wmu to 0                        |Compute the mean of the actual
+;| Advancing i from 1 to y,                    |data.
+;|   Increase Mmu by MA[i] and Wmu by WA[i]
+;| Divide Mmu and Wmu by y
+;|
+;| Set totM, totW, resM, and resW to 0         |Compute the total absolute-value
+;| Advancing i from 1 to y,                    |deviation of the actual data from
+;|   Increase resM by (MA[i]-MS[i])^2          |the mean and from the simulated
+;|   Increase resW by (WA[i]-WS[i])^2          |data.
+;|   Increase totM by (MA[i]-Mmu)^2
+;|   Increase totW by (WA[i]-Wmu)^2
+;|
+;| Display "Moose:  " resM, totM, 1-resM/totM  |Display the results as a goodness-
+;| Display "Wolves: " resW, totW, 1-resW/totW  |of-fit measure.
+;
+;
+;
+; 
   
