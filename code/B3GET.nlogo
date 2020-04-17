@@ -1539,7 +1539,7 @@ INPUTBOX
 967
 102
 documentation-notes
-Printout code verification. Printout code verification. Printout code verification, FALSE only. Printout code verification, FALSE only. Printout code verification. Printout code verification. Printout code verification, FALSE only. Printout code verification. Printout code verification. Printout code verification. Printout code verification, FALSE only. Printout code verification, FALSE only. 
+NIL
 1
 0
 String
@@ -1675,7 +1675,7 @@ INPUTBOX
 1097
 299
 population
-p-20-04-01-02
+p15TRH
 1
 0
 String

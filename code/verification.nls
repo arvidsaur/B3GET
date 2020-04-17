@@ -185,7 +185,7 @@ to-report generate-verification-tape
   set header lput "An IDEAL-FORM model-structure has no standard deviation for body size in population?" header 
   set verification lput "dynamic" verification 
   set function lput "go" function
-  set boolean lput ( standard-deviation [body.size] of anima1s = 0 ) boolean 
+  set boolean lput ( ifelse-value ( model-structure = "ideal-form" ) [ standard-deviation [body.size] of anima1s = 0 ] [ true ] ) boolean 
   
   set header lput "All agents in the population have the same genotype in NO-EVOLUTION model-structure?" header 
   set verification lput "dynamic" verification 
@@ -331,16 +331,11 @@ to-report generate-verification-tape
   set verification lput "dyanmic" verification 
   set function lput "make-decisions" function
   set boolean lput ( not any? anima1s with [ is.alive and ( decision.vectors = [] or decision.vectors = 0 ) ] ) boolean     
-  
-  ;  set header lput "DEAD agents not not have any decision vectors?" header 
-  ;  set verification lput "dynamic" verification 
-  ;  set function lput "make-decisions" function
-  ;  set boolean lput ( not any? anima1s with [ not is.alive and total-decisions-count all-decision> 0 ] ) boolean
-  
+
   set header lput "GESTATEES don't target non-maternal others?" header
   set verification lput "dynamic" verification 
   set function lput "make-decisions" function
-  set boolean lput ( not any? anima1s with [ life.history = "gestatee" and any? my-targets with [ self != myself or self != mother ]] ) boolean 
+  set boolean lput ( not any? anima1s with [ life.history = "gestatee" and any? my-targets with [ self != myself and self != [mother] of myself ]] ) boolean 
   
   set header lput "No male agents can target a GESTATEE?" header
   set verification lput "dyanmic" verification 
@@ -834,12 +829,7 @@ to-report generate-verification-tape
   set verification lput "dynamic" verification 
   set function lput "conception-chance" function
   set boolean lput ( ( ifelse-value ( any? anima1s with [ life.history = "adult" ] ) [mean [conception.chance] of anima1s with [ life.history = "adult" ]][0] ) > ( ifelse-value ( any? anima1s with [ life.history = "juvenile" ] ) [mean [conception.chance] of anima1s with [ life.history = "juvenile"]] [0] )) boolean
-  
-  set header lput "Adults with offspring have higher conception chance than adults without offspring?" header 
-  set verification lput "dynamic" verification 
-  set function lput "conception-chance" function
-  set boolean lput ( ( ifelse-value ( any? anima1s with [ life.history = "adult" and count my-offspring > 0 ] ) [mean [conception.chance] of anima1s with [ life.history = "adult" and count my-offspring > 0 ]][0]) > ( ifelse-value ( any? anima1s with [ life.history = "adult" and count my-offspring = 0 ] ) [ mean [conception.chance] of anima1s with [ life.history = "adult" and count my-offspring = 0]] [0] ) ) boolean
-  
+
   set header lput "Adults with offspring have non-zero conception chance?" header 
   set verification lput "dynamic" verification 
   set function lput "conception-chance" function
@@ -1221,7 +1211,7 @@ to-report generate-verification-tape
       set gamma.chance saved-value 
       set boolean-check updated-value-check saved-value random-value new-value ]]
   set boolean lput ( boolean-check ) boolean
-  
+
   ; --------------------------------------------------------------------------------------------------------------------
   ; CHECK-INFANCY
   ; --------------------------------------------------------------------------------------------------------------------
@@ -1260,20 +1250,6 @@ to-report generate-verification-tape
   set verification lput "dynamic" verification 
   set function lput "check-infancy" function
   set boolean lput ( not any? anima1s with [ life.history = "gestatee" and not my-actions-include "check-infancy" ] ) boolean
-  
-  set header lput "The CHECK-INFANCY action updates infancy chance as expected?" header 
-  set verification lput "static" verification 
-  set function lput "check-infancy" function
-  set boolean-check false
-  if ( any? anima1s ) [
-    ask one-of anima1s [
-      let saved-value infancy.chance
-      let random-value one-of [ -1  1 ]
-      check-infancy random-value
-      let new-value infancy.chance
-      set infancy.chance saved-value 
-      set boolean-check updated-value-check saved-value random-value new-value ]]
-  set boolean lput ( boolean-check ) boolean
   
   set header lput "INFANTS do not check-infancy?" header 
   set verification lput "dynamic" verification 
@@ -1333,21 +1309,7 @@ to-report generate-verification-tape
   set verification lput "dynamic" verification 
   set function lput "check-check" function
   set boolean lput ( not any? anima1s with [ female.fertility = "pregnant" and not my-actions-include "check-birth" ] ) boolean
-  
-  set header lput "The CHECK-BIRTH action updates birthing chance as expected?" header 
-  set verification lput "static" verification 
-  set function lput "check-birth" function
-  set boolean-check false
-  if ( any? anima1s ) [
-    ask one-of anima1s [
-      let saved-value birthing.chance
-      let random-value one-of [ -1  1 ]
-      check-birth random-value
-      let new-value birthing.chance
-      set birthing.chance saved-value 
-      set boolean-check updated-value-check saved-value random-value new-value ]]
-  set boolean lput ( boolean-check ) boolean
-  
+
   set header lput "INFANTS do not check-birth?" header 
   set verification lput "dynamic" verification 
   set function lput "check-birth" function
@@ -1435,21 +1397,7 @@ to-report generate-verification-tape
   set verification lput "dynamic" verification 
   set function lput "check-juvenility" function
   set boolean lput ( not any? anima1s with [ ( life.history = "adult" or life.history = "senescent" ) and my-actions-include "check-juvenility" ] ) boolean
-  
-  set header lput "The CHECK-JUVENILITY action updates juvenility chance as expected?" header 
-  set verification lput "static" verification 
-  set function lput "check-juvenility" function
-  set boolean-check false
-  if ( any? anima1s ) [
-    ask one-of anima1s [
-      let saved-value juvenility.chance
-      let random-value one-of [ -1  1 ]
-      check-juvenility random-value
-      let new-value juvenility.chance
-      set juvenility.chance saved-value 
-      set boolean-check updated-value-check saved-value random-value new-value ]]
-  set boolean lput ( boolean-check ) boolean
-  
+
   ; --------------------------------------------------------------------------------------------------------------------
   ; CHECK-WEANING
   ; --------------------------------------------------------------------------------------------------------------------
@@ -1514,21 +1462,7 @@ to-report generate-verification-tape
   set verification lput "dynamic" verification 
   set function lput "check-weaning" function
   set boolean lput ( not any? anima1s with [ female.fertility = "lactating" and not my-actions-include "check-weaning" ] ) boolean
-  
-  set header lput "The CHECK-WEANING action updates weaning chance as expected?" header 
-  set verification lput "static" verification 
-  set function lput "check-weaning" function
-  set boolean-check false
-  if ( any? anima1s ) [
-    ask one-of anima1s [
-      let saved-value weaning.chance
-      let random-value one-of [ -1  1 ]
-      check-weaning random-value
-      let new-value weaning.chance
-      set weaning.chance saved-value 
-      set boolean-check updated-value-check saved-value random-value new-value ]]
-  set boolean lput ( boolean-check ) boolean
-  
+
   set header lput "INFANTS do not check-weaning?" header 
   set verification lput "dynamic" verification 
   set function lput "check-weaning" function
@@ -1591,21 +1525,7 @@ to-report generate-verification-tape
   set verification lput "dynamic" verification 
   set function lput "check-adulthood" function
   set boolean lput ( not any? anima1s with [ life.history = "juvenile" and not my-actions-include "check-adulthood" ] ) boolean
-  
-  set header lput "The CHECK-ADULTHOOD action updates adulthood chance as expected?" header 
-  set verification lput "static" verification 
-  set function lput "check-adulthood" function
-  set boolean-check false
-  if ( any? anima1s ) [
-    ask one-of anima1s [
-      let saved-value adulthood.chance
-      let random-value one-of [ -1  1 ]
-      check-adulthood random-value
-      let new-value adulthood.chance
-      set adulthood.chance saved-value 
-      set boolean-check updated-value-check saved-value random-value new-value ]]
-  set boolean lput ( boolean-check ) boolean    
-  
+
   set header lput "ADULT MALES do not check-adulthood?" header 
   set verification lput "dynamic" verification 
   set function lput "check-adulthood" function
@@ -1694,21 +1614,7 @@ to-report generate-verification-tape
   set verification lput "dynamic" verification 
   set function lput "check-senescence" function
   set boolean lput ( not any? anima1s with [ life.history = "senescent" and my-actions-include "check-senescence" ] ) boolean
-  
-  set header lput "The CHECK-SENESCENCE action updates senescent chance as expected?" header 
-  set verification lput "static" verification 
-  set function lput "check-adulthood" function
-  set boolean-check false
-  if ( any? anima1s ) [
-    ask one-of anima1s [
-      let saved-value adulthood.chance
-      let random-value one-of [ -1  1 ]
-      check-adulthood random-value
-      let new-value adulthood.chance
-      set adulthood.chance saved-value 
-      set boolean-check updated-value-check saved-value random-value new-value ]]
-  set boolean lput ( boolean-check ) boolean
-  
+
   ; --------------------------------------------------------------------------------------------------------------------
   ; UPDATE-TO-SENESCENT
   ; --------------------------------------------------------------------------------------------------------------------
@@ -1840,12 +1746,12 @@ to-report generate-verification-tape
   set function lput "eat" function
   set boolean lput ( profiler:calls "eat" <= decision-count-for "eat" ) boolean
   
-  set header lput "Calls to and number of allocated vectors for eat is the same?" header 
+  set header lput "Decision vectors count and allocated vectors count for eat are the same?" header 
   set verification lput "runtime" verification 
   set function lput "eat" function
-  set boolean lput ( profiler:calls "eat" = allocation-count-for "eat" ) boolean
+  set boolean lput ( decision-count-for "eat" = allocation-count-for "eat" ) boolean
   
-  set header lput "Calls to eat greater than or equal to number of decision vectors?" header 
+  set header lput "Calls to eat equal to number of action vectors?" header 
   set verification lput "runtime" verification
   set function lput "eat" function
   set boolean lput ( profiler:calls "eat" = action-count-for "eat" ) boolean
@@ -1891,18 +1797,8 @@ to-report generate-verification-tape
   ; --------------------------------------------------------------------------------------------------------------------
   ; RECEIVE-FROM
   ; --------------------------------------------------------------------------------------------------------------------
-  
-  set header lput "Calls to receive-from less than or equal to number of decision vectors?" header 
-  set verification lput "runtime" verification 
-  set function lput "receive-from" function
-  set boolean lput ( profiler:calls "receive-from" <= decision-count-for "receive-from" ) boolean
-  
-  set header lput "Calls to and number of allocated vectors for receive-from is the same?" header 
-  set verification lput "runtime" verification 
-  set function lput "receive-from" function
-  set boolean lput ( profiler:calls "receive-from" = allocation-count-for "receive-from" ) boolean
-  
-  set header lput "Calls to receive-from greater than or equal to number of decision vectors?" header 
+
+  set header lput "Calls to receive-from equal to number of action vectors?" header 
   set verification lput "runtime" verification
   set function lput "receive-from" function
   set boolean lput ( profiler:calls "receive-from" = action-count-for "receive-from" ) boolean
@@ -2109,41 +2005,11 @@ to-report generate-verification-tape
   set verification lput "visual" verification 
   set function lput "mate-with" function
   set boolean lput ( true ) boolean ; 2020-04-14
-  
-  set header lput "The ADAM-AND-EVE population shows female has mate-with allele and mate-with decision?" header ; meta-id: 98922
-  set verification lput "visual" verification 
-  set function lput "mate-with" function
-  set boolean lput ( true ) boolean ; 2020-04-14
-  
-  set header lput "The ADAM-AND-EVE population shows male and female adjacent to each other mate with '!'?" header
-  set verification lput "visual" verification 
-  set function lput "mate-with" function
-  set boolean lput ( true ) boolean ; 2020-04-14
-  
-  set header lput "The ADAM-AND-EVE population shows mate with '!' and female transitions from cycling to pregnant?" header
-  set verification lput "visual" verification 
-  set function lput "mate-with" function
-  set boolean lput ( true ) boolean ; 2020-04-14
-  
-  set header lput "The ADAM-AND-EVE population shows once female is pregnant the female and male do not mate and do not mate?" header
-  set verification lput "visual" verification 
-  set function lput "mate-with" function
-  set boolean lput ( true ) boolean ; 2020-04-14
-  
-  set header lput "Calls to mate-with less than or equal to number of decision vectors?" header 
-  set verification lput "runtime" verification 
-  set function lput "mate-with" function
-  set boolean lput ( profiler:calls "mate-with" <= decision-count-for "mate-with" ) boolean
-  
-  set header lput "Calls to and number of allocated vectors for mate-with is the same?" header 
-  set verification lput "runtime" verification 
-  set function lput "mate-with" function
-  set boolean lput ( profiler:calls "mate-with" = allocation-count-for "mate-with" ) boolean
-  
-  set header lput "Calls to mate-with greater than or equal to number of decision vectors?" header 
+
+  set header lput "Calls to mate-with non-zero if agent born during verification?" header 
   set verification lput "runtime" verification
   set function lput "mate-with" function
-  set boolean lput ( profiler:calls "mate-with" = action-count-for "mate-with" ) boolean
+  set boolean lput ( ifelse-value ( any? anima1s with [ life.history = "gestatee" and age <= how-many-ticks? ] ) [ profiler:calls "mate-with" > 0 ] [ true ] ) boolean
   
   set header lput "The only males who can MATE-WITH are adults?" header 
   set verification lput "dynamic" verification 
@@ -2301,7 +2167,7 @@ to-report generate-verification-tape
   set header lput "All agents have a natal group size two or greater?" header 
   set verification lput "dynamic" verification 
   set function lput "initialize-from-parents" function
-  set boolean lput ( not any? anima1s with [ natal-group-size <= 1 ] ) boolean  
+  set boolean lput ( not any? anima1s with [ generation-number > 0 and natal-group-size <= 1 ] ) boolean  
   
   set header lput "Gestatees do not have adult tracking values yet?" header 
   set verification lput "dynamic" verification 
@@ -2407,7 +2273,9 @@ end
 to-report my-targets
   let my-decisions filter [ vector -> item 1 vector = self ] population-decisions
   let my-targets-list remove-duplicates map [ i -> item 2 i ] my-decisions
-  report anima1s with [ member? self my-targets-list ]
+  let my-targs anima1s with [ member? self my-targets-list ]
+  ;if (life.history = "gestatee" ) [ ask my-targs [ inspect self ]]
+  report my-targs
 end
 
 ;to-report my-decisions-include [ input ]
@@ -2458,4 +2326,10 @@ end
   ;;  let mean-relatedness-with-father ( ifelse-value ( any? anima1s with [ father != nobody ] ) [ mean [relatedness-with father] of anima1s with [ father != nobody ] ] [ 0 ] )
   ;;  let sd-relatedness-with-father ( ifelse-value ( any? anima1s with [ father != nobody ] ) [ standard-deviation [relatedness-with father] of anima1s with [ father != nobody ] ] [ 0 ] )
   ;;  set boolean lput ( abs ( mean-relatedness-with-father - 0.5 ) < sd-relatedness-with-father ) boolean
+  
+  
+  ;  set header lput "DEAD agents not not have any decision vectors?" header 
+  ;  set verification lput "dynamic" verification 
+  ;  set function lput "make-decisions" function
+  ;  set boolean lput ( not any? anima1s with [ not is.alive and total-decisions-count all-decision> 0 ] ) boolean
   

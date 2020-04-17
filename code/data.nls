@@ -203,7 +203,7 @@ to save-population
       "vocal.range" "alpha.chance" "beta.chance" "gamma.chance"
       "birthing.chance" "weaning.chance" "infancy.chance"
       "juvenility.chance" "adulthood.chance" "senescency.chance"
-      "x.magnitude" "y.magnitude" )
+      "carried.items" )
     
     ask anima1s [
       
@@ -212,6 +212,13 @@ to save-population
       ; turtle variables can only be saved in string format
       set chromosome.I csv:to-string chromosome.I
       set chromosome.II csv:to-string chromosome.II
+      
+      let new-carried-items []
+      foreach carried.items [ itm ->
+        set new-carried-items [meta-id] of itm
+      ]
+      set carried.items new-carried-items
+      
       export-turtle-to (word "../data/" population ".csv") turtle-list 
       set chromosome.I csv:from-string chromosome.I
       set chromosome.II csv:from-string chromosome.II 
