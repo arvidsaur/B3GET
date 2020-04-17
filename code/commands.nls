@@ -270,6 +270,44 @@ to command
     ]
   ]
   
+  if (useful-commands = "view-allocation") [
+    let anima1-to-inspect one-of anima1s with [ read-from-string command-input = meta-id ]
+    output-print " ---------------------------------------------------------------------------"
+    output-print (word " ENERGY : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [meta-id] of anima1-to-inspect ) ] )
+    output-print " ---------------------------------------------------------------------------"
+    
+    ifelse ( any? anima1s with [ meta-id = read-from-string command-input ] ) [
+      ask one-of anima1s with [ meta-id = read-from-string command-input ] [
+        foreach energy.allocated [ decision ->
+          output-print (word " " decision )
+        ]
+      ]
+      set documentation-notes (word "View current decisions of organism " command-input ". " documentation-notes )
+    ][
+      set documentation-notes (word "Organism " read-from-string command-input " not found.")
+      output-print (word " Organism " read-from-string command-input " not found.")
+    ]
+  ]
+  
+    if (useful-commands = "view-actions") [
+    let anima1-to-inspect one-of anima1s with [ read-from-string command-input = meta-id ]
+    output-print " ---------------------------------------------------------------------------"
+    output-print (word " ACTIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [meta-id] of anima1-to-inspect ) ] )
+    output-print " ---------------------------------------------------------------------------"
+    
+    ifelse ( any? anima1s with [ meta-id = read-from-string command-input ] ) [
+      ask one-of anima1s with [ meta-id = read-from-string command-input ] [
+        foreach completed.actions [ decision ->
+          output-print (word " " decision )
+        ]
+      ]
+      set documentation-notes (word "View current decisions of organism " command-input ". " documentation-notes )
+    ][
+      set documentation-notes (word "Organism " read-from-string command-input " not found.")
+      output-print (word " Organism " read-from-string command-input " not found.")
+    ]
+  ]
+  
   if (useful-commands = "add-allele" ) [
     output-print " ---------------------------------------------------------------------------"
     output-print (word " ADD NEW ALLELE : " )

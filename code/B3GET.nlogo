@@ -76,6 +76,7 @@ anima1s-own [
   chromosome.I
   chromosome.II
   decision.vectors
+  energy.allocated
   completed.actions
   memory.storage
 
@@ -159,6 +160,11 @@ globals [
   simulation-id
   deterioration-rate
   selection-rate
+
+  ; TRACKING VARIABLS
+  population-decisions
+  population-allocations
+  population-actions
 ]
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -271,7 +277,7 @@ to go
   [ if (( count anima1s - 100 ) > 0 ) [ ask n-of ( count anima1s - 100 ) anima1s [ set ticks-at-death ticks die ]]]
   [ ask anima1s [check-mortality] ]
   ask anima1s [ deteriorate update-appearance ]
-  if ( model-structure = "sower" and count anima1s with [ biological.sex = "male" and life.history = "adult" ] > 0 and count anima1s with [ biological.sex = "female" and life.history = "adult" ] > 0 and (count anima1s < 100) ) [ repeat ( 100 - count anima1s ) [ ask one-of anima1s with [ biological.sex = "female" and life.history = "adult" ] [ conceive-with one-of anima1s with [ biological.sex = "male" and life.history = "adult" ] ] ] ] ; random mating
+  ;if ( model-structure = "sower" and count anima1s with [ biological.sex = "male" and life.history = "adult" ] > 0 and count anima1s with [ biological.sex = "female" and life.history = "adult" ] > 0 and (count anima1s < 100) ) [ repeat ( 100 - count anima1s ) [ ask one-of anima1s with [ biological.sex = "female" and life.history = "adult" ] [ conceive-with one-of anima1s with [ biological.sex = "male" and life.history = "adult" ] ] ] ] ; random mating
 
   ; AGENT AGENCY
   ask anima1s [
@@ -280,6 +286,7 @@ to go
       act ]]
 
   ; SIMULATION OUTPUT
+  track-population
   if output-results? [ output-results ]
 
   ; prints out current status of the simulation every 100 timesteps
@@ -449,6 +456,88 @@ to-report get-mutation-from-genoreader [ unmutated-codon ]
       [ sta7us-get-mutation unmutated-codon ] ) ])
 end
 
+to track-population
+
+  ask anima1s [ set population-decisions (sentence population-decisions decision.vectors ) ]
+  ask anima1s [ set population-allocations (sentence population-allocations energy.allocated ) ]
+  ask anima1s [ set population-actions (sentence population-actions completed.actions ) ]
+
+end
+
+;to collect-maintenance-data [ cost ]
+;  (ifelse
+;    ( relatedness-with myself = 1 ) [ ask myself [ set whole-related-help-cost whole-related-help-cost + cost ]]
+;    ( relatedness-with myself = 0.5 ) [ ask myself [ set half-related-help-cost half-related-help-cost + cost ]]
+;    ( relatedness-with myself = 0.25 ) [ ask myself [ set fourth-related-help-cost fourth-related-help-cost + cost ]]
+;    ( relatedness-with myself = 0.125 ) [ ask myself [ set eighth-related-help-cost eighth-related-help-cost + cost ]]
+;    [])
+;end
+;
+;to collect-eating-data [ energy-eaten cost-of-eating ]
+;  if (output-results?) [
+;
+;    set foraging-gains foraging-gains + energy-eaten
+;    set foraging-cost foraging-cost + cost-of-eating
+;
+;    ; group is tracking foraging performance of its members
+;    ask current-group [
+;      set total-energy-gained total-energy-gained + energy-eaten
+;      if ( [life.history] of myself = "gestatee" and [biological.sex] of myself = "female" ) [ set gestatee-female-energy-gained gestatee-female-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "gestatee" and [biological.sex] of myself = "male" ) [ set gestatee-male-energy-gained gestatee-male-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "infant" and [biological.sex] of myself = "female" ) [ set infant-female-energy-gained infant-female-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "infant" and [biological.sex] of myself = "male" ) [ set infant-male-energy-gained infant-male-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "juvenile" and [biological.sex] of myself = "female" ) [ set juvenile-female-energy-gained juvenile-female-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "juvenile" and [biological.sex] of myself = "male" ) [ set juvenile-male-energy-gained juvenile-male-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "adult" and [biological.sex] of myself = "female" and [female.fertility] of myself = "cycling" ) [ set adult-cycling-energy-gained adult-cycling-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "adult" and [biological.sex] of myself = "female" and [female.fertility] of myself = "pregnant" ) [ set adult-pregnant-energy-gained adult-pregnant-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "adult" and [biological.sex] of myself = "female" and [female.fertility] of myself = "lactating" ) [ set adult-lactating-energy-gained adult-lactating-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "adult" and [biological.sex] of myself = "male" ) [ set adult-male-energy-gained adult-male-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "senescent" and [biological.sex] of myself = "female" ) [ set senescent-female-energy-gained senescent-female-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "senescent" and [biological.sex] of myself = "male" ) [ set senescent-male-energy-gained senescent-male-energy-gained + energy-eaten ]
+;    ]
+;  ]
+;end
+;
+;
+;to collect-helping-data [ target cost ]
+;  ;  if ( output-results? and target != self ) [ ; Hamilton's Rule
+;  ;    let r relatedness-with target
+;  ;    ;print (word " me: " self " living.chance: " living.chance "  target: " target "   relatedness " relatedness-with target " ([living.chance] of target) " ([living.chance] of target)  "   value:"  value " update  " (get-updated-value [living.chance] of target ( value )) "  total: " (( get-updated-value [living.chance] of target ( value ) ) - [living.chance] of target ))
+;  ;    let B ( get-updated-value [living.chance] of target ( cost ) ) - [living.chance] of target ; how much target benefitted
+;  ;    let C living.chance - ( get-updated-value living.chance cost ) ; how much you *could have* benefitted by investing in yourself
+;  ;    set helping-benefit helping-benefit + r * B ; benefit to yourself based on relatedness to target
+;  ;    set helping-cost helping-cost + C ; cost of not helping yourself
+;  ;
+;  ;    if ( biological.sex = "female" and [biological.sex] of target = "female" and group.identity = [group.identity] of target ) [
+;  ;      set ingroup-female-female-help-cost ingroup-female-female-help-cost + cost
+;  ;    ]
+;  ;    if ( biological.sex = "male" and [biological.sex] of target = "male" and group.identity = [group.identity] of target ) [
+;  ;      set ingroup-male-male-help-cost ingroup-male-male-help-cost + cost
+;  ;    ]
+;  ;    if ( (( biological.sex = "female" and [biological.sex] of target = "male" ) or ( biological.sex = "male" and [biological.sex] of target = "female" )) and group.identity = [group.identity] of target ) [
+;  ;      set feingroup-male-male-help-cost feingroup-male-male-help-cost + cost
+;  ;    ]
+;  ;  ]
+;end
+;
+;
+;to collect-conception-data [ target ]
+;  if output-results? [
+;    set conceptions-list lput [meta-id] of target conceptions-list
+;    ask target [ set conceptions-list lput [meta-id] of myself conceptions-list ]]
+;end
+;
+;
+;to collect-mating-data [ target ]
+;  if output-results? [
+;    set matings-list lput [meta-id] of target matings-list
+;    ask target [ set matings-list lput [meta-id] of myself matings-list ]]
+;end
+
+
+
+
+
 ;--------------------------------------------------------------------------------------------------------------------
 ;
 ;                      dP   oo
@@ -462,17 +551,17 @@ end
 
 to act
 
+  set energy.allocated []
   set completed.actions []
   foreach decision.vectors [ vector ->
 
-    let decision-id item 0 vector
     let raw-value item 4 vector
     let energy-cost abs raw-value
 
     let passes-energy-check ifelse-value ( model-structure = "freelunch" ) [ true ] [ energy.supply > energy-cost ] ; FREE LUNCH always passes energy check
 
-    if ( not member? decision-id completed.actions and passes-energy-check ) [
-      set completed.actions lput decision-id completed.actions
+    if ( not member? vector energy.allocated and passes-energy-check ) [
+      set energy.allocated lput vector energy.allocated
       let target item 2 vector
       let action item 3 vector
       update-energy ( - energy-cost )
@@ -483,12 +572,12 @@ to act
 
 end
 
-to-report get-cost-and-process-decisions [ target action-name ]
-  let decisions filter [ vector -> item 2 vector = target and item 3 vector = action-name and not member? (item 0 vector) completed.actions ] decision.vectors ; list of decisions filtered by target and action and not completed
-  let ids map [ vector -> item 0 vector ] decisions ; list of ids from decisions
-  set completed.actions sentence ids completed.actions ; add ids to list of completed actions
-  let cost sum map [ vector -> item 4 vector ] decisions ; summation of costs for all decisions in the list
-  report cost ; return this cost summation
+to-report get-action-cost-of [ target action-name ]
+  report sum map [ vector -> item 3 vector ] filter [ vector -> item 1 vector = myself and item 2 vector = action-name ] [completed.actions] of target
+end
+
+to complete-action [ target action cost outcome ]
+  set completed.actions lput ( list self target action cost outcome ) completed.actions
 end
 
 ;----------------------------------------------------------------------------------------------
@@ -537,14 +626,14 @@ to do-action [ action-code target cost ]
     if action-code = "supply-to" [ supply-to target cost ]
     if action-code = "demand-from" [ demand-from target cost ]
     if action-code = "eat" [ eat target cost ]
-    if action-code = "join-group-of" [ join-group-of target cost ]
-    if action-code = "leave-group-of" [ join-group-of target ( - cost ) ]
+    if action-code = "join" [ join target cost ]
+    if action-code = "leave" [ leave target cost ]
     if action-code = "pick-up" [ pick-up target cost ]
-    if action-code = "put-down" [ pick-up target ( - cost ) ]
+    if action-code = "put-down" [ put-down target cost  ]
     if action-code = "cling-to" [ cling-to target cost ]
-    if action-code = "squirm-from" [ cling-to target ( - cost ) ]
+    if action-code = "squirm-from" [ squirm-from target cost ]
     if action-code = "help" [ help target cost ]
-    if action-code = "attack" [ help target ( - cost ) ]
+    if action-code = "attack" [ attack target cost ]
     if action-code = "mate-with" [ mate-with target cost ]
 
   ][  ]
@@ -563,46 +652,129 @@ end
 ;--------------------------------------------------------------------------------------------------------------------
 
 to maintain-body [ cost ]
+  complete-action self "maintain-body" cost 0
+  living-chance cost
+end
+
+to living-chance [ cost ]
+  let before-living-chance living.chance
   set living.chance get-updated-value living.chance cost
-  ;collect-maintenance-data cost
+  let after-living-chance living.chance
+  let change-in-living-chance after-living-chance - before-living-chance
+  complete-action self "living-chance" cost change-in-living-chance
 end
 
-to collect-maintenance-data [ cost ]
-  (ifelse
-    ( relatedness-with myself = 1 ) [ ask myself [ set whole-related-help-cost whole-related-help-cost + cost ]]
-    ( relatedness-with myself = 0.5 ) [ ask myself [ set half-related-help-cost half-related-help-cost + cost ]]
-    ( relatedness-with myself = 0.25 ) [ ask myself [ set fourth-related-help-cost fourth-related-help-cost + cost ]]
-    ( relatedness-with myself = 0.125 ) [ ask myself [ set eighth-related-help-cost eighth-related-help-cost + cost ]]
-    [])
+to body-size [ cost ]
+  let before-body-size body.size
+  set body.size get-updated-value body.size cost
+  let after-body-size body.size
+  let change-in-body-size after-body-size - before-body-size
+  complete-action self "body-size" cost change-in-body-size
 end
 
-to body-size [ cost ] set body.size get-updated-value body.size cost end
+to body-shade [ cost ]
+  let before-body-shade body.shade
+  set body.shade get-updated-value body.shade cost
+  let after-body-shade body.shade
+  let change-in-body-shade after-body-shade - before-body-shade
+  complete-action self "body-shade" cost change-in-body-shade
+end
 
-to body-shade [ cost ] set body.shade get-updated-value body.shade cost end
+to day-perception-range [ cost ]
+  let before-day-perception-range day.perception.range
+  set day.perception.range get-updated-value day.perception.range cost
+  let after-day-perception-range day.perception.range
+  let change-in-day-perception-range after-day-perception-range - before-day-perception-range
+  complete-action self "maintain-body" cost change-in-day-perception-range
+end
 
-to day-perception-range [ cost ] set day.perception.range get-updated-value day.perception.range cost end
+to night-perception-range [ cost ]
+  let before-night-perception-range night.perception.range
+  set night.perception.range get-updated-value night.perception.range cost
+  let after-night-perception-range night.perception.range
+  let change-in-night-perception-range after-night-perception-range - before-night-perception-range
+  complete-action self "day-perception-range" cost change-in-night-perception-range
+end
 
-to night-perception-range [ cost ] set night.perception.range get-updated-value night.perception.range cost end
+to audio-perception-range [ cost ]
+  let before-audio-perception-range audio.perception.range
+  set audio.perception.range get-updated-value audio.perception.range cost
+  let after-audio-perception-range audio.perception.range
+  let change-in-audio-perception-range before-audio-perception-range - after-audio-perception-range
+  complete-action self "audio-perception-range" cost change-in-audio-perception-range
+end
 
-to audio-perception-range [ cost ] set audio.perception.range get-updated-value audio.perception.range cost end
+to day-perception-angle [ cost ]
+  let before-day-perception-angle day.perception.angle
+  set day.perception.angle get-updated-value day.perception.angle cost
+  let after-day-perception-angle day.perception.angle
+  let change-in-day-perception-angle after-day-perception-angle - before-day-perception-angle
+  complete-action self "day-perception-angle" cost change-in-day-perception-angle
+end
 
-to day-perception-angle [ cost ] set day.perception.angle get-updated-value day.perception.angle cost end
+to night-perception-angle [ cost ]
+  let before-night-perception-angle night.perception.angle
+  set night.perception.angle get-updated-value night.perception.angle cost
+  let after-night-perception-angle night.perception.angle
+  let change-in-night-perception-angle after-night-perception-angle - before-night-perception-angle
+  complete-action self "night-perception-angle" cost change-in-night-perception-angle
+end
 
-to night-perception-angle [ cost ] set night.perception.angle get-updated-value night.perception.angle cost end
+to audio-perception-angle [ cost ]
+  let before-audio-perception-angle audio.perception.angle
+  set audio.perception.angle get-updated-value audio.perception.angle cost
+  let after-audio-perception-angle audio.perception.angle
+  let change-in-audio-perception-angle after-audio-perception-angle - before-audio-perception-angle
+  complete-action self "audio-perception-angle" cost change-in-audio-perception-angle
+end
 
-to audio-perception-angle [ cost ] set audio.perception.angle get-updated-value audio.perception.angle cost end
+to vocal-range [ cost ]
+  let before-vocal-range vocal.range
+  set vocal.range get-updated-value vocal.range cost
+  let after-vocal-range vocal.range
+  let change-in-vocal-range after-vocal-range - before-vocal-range
+  complete-action self "vocal-range" cost change-in-vocal-range
+end
 
-to vocal-range [ cost ] set vocal.range get-updated-value vocal.range cost end
+to conception-chance [ cost ]
+  let before-conception-chance conception.chance
+  set conception.chance get-updated-value conception.chance cost
+  let after-conception-chance conception.chance
+  let change-in-conception-chance after-conception-chance - before-conception-chance
+  complete-action self "conception-chance" cost change-in-conception-chance
+end
 
-to conception-chance [ cost ] set conception.chance get-updated-value conception.chance cost end
+to stomach-size [ cost ]
+  let before-stomach-size stomach.size
+  set stomach.size get-updated-value stomach.size cost
+  let after-stomach-size stomach.size
+  let change-in-stomach-size after-stomach-size - before-stomach-size
+  complete-action self "stomach-size" cost change-in-stomach-size
+end
 
-to stomach-size [ cost ] set stomach.size get-updated-value stomach.size cost end
+to mutation-chance [ cost ]
+  let before-mutation-chance mutation.chance
+  set mutation.chance get-updated-value mutation.chance cost
+  let after-mutation-chance mutation.chance
+  let change-in-mutation-chance after-mutation-chance - before-mutation-chance
+  complete-action self "mutation-chance" cost change-in-mutation-chance
+end
 
-to mutation-chance [ cost ] set mutation.chance get-updated-value mutation.chance cost end
+to sex-ratio [ cost ]
+  let before-sex-ratio sex.ratio
+  set sex.ratio get-updated-value sex.ratio cost
+  let after-sex-ratio sex.ratio
+  let change-in-sex-ratio after-sex-ratio - before-sex-ratio
+  complete-action self "sex-ratio" cost change-in-sex-ratio
+end
 
-to sex-ratio [ cost ] set sex.ratio get-updated-value sex.ratio cost end
-
-to litter-size [ cost ] set litter.size get-updated-value litter.size cost end
+to litter-size [ cost ]
+  let before-litter-size litter.size
+  set litter.size get-updated-value litter.size cost
+  let after-litter-size litter.size
+  let change-in-litter-size after-litter-size - before-litter-size
+  complete-action self "litter-size" cost change-in-litter-size
+end
 
   ;--------------------------------------------------------------------------------------------------------------------
   ; MOVEMENT
@@ -614,34 +786,28 @@ to move-toward [ target cost ]
     let xcor-difference ([xcor] of target - [xcor] of self )
     let angle ifelse-value ( ycor-difference = 0 and xcor-difference = 0 ) [ random 360 ] [ atan ycor-difference xcor-difference ]
     if ( cost < 0 ) [ set angle angle - 180 ]
-    set x.magnitude x.magnitude + (abs cost * sin angle)
-    set y.magnitude y.magnitude + (abs cost * cos angle)
+    set heading heading + angle
+    complete-action target "move-toward" cost heading
   ]
 end
 
 to turn-right [ cost ]
   ifelse ( cost > 0 )
-  [ right ( 360 * cost ) ]
-  [ left ( 360 * abs cost ) ]
+  [ right ( 360 * cost ) complete-action nobody "turn-right" cost heading ]
+  [ left ( 360 * abs cost ) complete-action nobody "turn-left" cost heading ]
 end
 
 to go-forward [ cost ]
   if ( life.history != "gestatee" ) [
     if ( cost < 0 ) [ right 180 ]
-
     let sum-weight size
-    foreach carried.items [ object ->
-      set sum-weight sum-weight + [size] of object ]
-    set heading (ifelse-value ( y.magnitude = 0 and x.magnitude = 0 ) [ 0 ] [ atan y.magnitude x.magnitude ] )
-    set x.magnitude x.magnitude + one-of [ 0.001 -0.001 ]
-    set y.magnitude y.magnitude + one-of [ 0.001 -0.001 ]
+    foreach carried.items [ object -> set sum-weight sum-weight + [size] of object ]
     let travel-distance (size * (sqrt (( 2 * abs cost ) / sum-weight )) )
     forward travel-distance
-    foreach carried.items [ object ->
-      if (object != nobody) [ ask object [ move-to myself ] ]]
-    if output-results? [
-      set distance-traveled distance-traveled + travel-distance
-      if not member? patch-here cells-occupied [ set cells-occupied lput patch-here cells-occupied ]]
+    foreach carried.items [ object -> ifelse (object = nobody) [ set carried.items remove-item nobody carried.items ] [ ask object [ move-to myself ] ]]
+    ; track travel
+    set distance-traveled distance-traveled + travel-distance
+    if not member? patch-here cells-occupied [ set cells-occupied lput patch-here cells-occupied ]
   ]
 end
 
@@ -653,8 +819,10 @@ to signal-alpha-on [ cost ]
   set alpha.chance get-updated-value alpha.chance cost
   ifelse ( random-float 1.0 < alpha.chance ) [
     set alpha.signal true
+    complete-action self "alpha-on" cost alpha.chance
   ][
     set alpha.signal false
+    complete-action self "alpha-off" cost alpha.chance
   ]
 end
 
@@ -662,8 +830,10 @@ to signal-beta-on [ cost ]
   set beta.chance get-updated-value beta.chance cost
   ifelse ( random-float 1.0 < beta.chance ) [
     set beta.signal true
+    complete-action self "beta-on" cost beta.chance
   ][
     set beta.signal false
+    complete-action self "beta-off" cost beta.chance
   ]
 end
 
@@ -671,8 +841,10 @@ to signal-gamma-on [ cost ]
   set gamma.chance get-updated-value gamma.chance cost
   ifelse ( random-float 1.0 < gamma.chance ) [
     set gamma.signal true
+    complete-action self "gamma-on" cost gamma.chance
   ][
     set gamma.signal false
+    complete-action self "gamma-off" cost gamma.chance
   ]
 end
 
@@ -680,19 +852,22 @@ end
 ; LIFE HISTORY
 ;--------------------------------------------------------------------------------------------------------------------
 
-to check-infancy [ cost ] ; fix so that die if mother dead right away
-  set infancy.chance get-updated-value infancy.chance cost
-  if ( life.history = "gestatee" and random-float 1.0 < infancy.chance ) [
-    set mother-initiated-birth false
-    ifelse ( mother = nobody )
-    [ set is.alive false ]
-    [ ask mother [ give-birth ]]
+to check-infancy [ cost ]
+  ifelse ( mother = nobody )
+  [ set is.alive false ] ; gestatees die if mother is dead
+  [ set infancy.chance get-updated-value infancy.chance cost
+    if ( life.history = "gestatee" and random-float 1.0 < infancy.chance ) [
+      set mother-initiated-birth false
+      complete-action self "check-infancy" cost infancy.chance
+      ask mother [ give-birth ]
+    ]
   ]
 end
 
 to check-birth [ cost ]
   set birthing.chance get-updated-value birthing.chance cost
   if ( female.fertility = "pregnant" and random-float 1.0 < birthing.chance ) [
+    complete-action self "check-birth" cost birthing.chance
     give-birth
   ]
 end
@@ -700,6 +875,7 @@ end
 to give-birth
   if ( female.fertility = "pregnant" ) [
     set female.fertility "lactating"
+    complete-action self "give-birth" 0 0
     ask my-offspring with [ life.history = "gestatee" ] [ update-to-infant ]
     set birthing.chance 0
   ]
@@ -710,13 +886,15 @@ to update-to-infant
   set female.fertility " "
   set hidden? false
   set ticks-at-birth ticks
-  if (output-results?) [ ask current-group [ set total-birth-count total-birth-count + 1 ]]
+  complete-action self "update-to-infant" 0 0
+  ask current-group [ set total-birth-count total-birth-count + 1 ]
 end
 
 to check-juvenility [ cost ]
   set juvenility.chance get-updated-value juvenility.chance cost
   if ( life.history = "infant" and random-float 1.0 < juvenility.chance ) [
     set mother-initiated-weaning false
+    complete-action self "check-juvenility" cost juvenility.chance
     ifelse ( mother = nobody )
     [ update-to-juvenile ]
     [ ask mother [ wean-offspring ]]
@@ -726,6 +904,7 @@ end
 to check-weaning [ cost ]
   set weaning.chance get-updated-value weaning.chance cost
   if ( female.fertility = "lactating" and random-float 1.0 < weaning.chance ) [
+    complete-action self "check-weaning" cost weaning.chance
     wean-offspring
   ]
 end
@@ -733,6 +912,7 @@ end
 to wean-offspring
   if ( female.fertility = "lactating" ) [
     set female.fertility "cycling"
+    complete-action self "wean-offspring" 0 0
     ask my-offspring with [ life.history = "infant" ] [ update-to-juvenile ]
     set weaning.chance 0
   ]
@@ -742,11 +922,13 @@ to update-to-juvenile
   set life.history "juvenile"
   set female.fertility " "
   set ticks-at-weaning ticks
+  complete-action self "update-to-juvenile" 0 0
 end
 
 to check-adulthood [ cost ]
   set adulthood.chance get-updated-value adulthood.chance cost
   if ( life.history = "juvenile" and random-float 1.0 < adulthood.chance ) [
+    complete-action self "check-adulthood" cost adulthood.chance
     update-to-adult
   ]
 end
@@ -773,11 +955,13 @@ to update-to-adult
   set adult-alpha-chance alpha.chance
   set adult-beta-chance beta.chance
   set adult-gamma-chance gamma.chance
+  complete-action self "update-to-adult" 0 0
 end
 
 to check-senescence [ cost ]
   set senescency.chance get-updated-value senescency.chance cost
   if ( life.history = "adult" and random-float 1.0 < senescency.chance ) [
+    complete-action self "check-senescence" cost senescency.chance
     update-to-senescent
   ]
 end
@@ -789,6 +973,7 @@ to update-to-senescent
   ask my-offspring with [ life.history = "gestatee" ] [ update-to-infant ]
   ask my-offspring with [ life.history = "infant" ] [ update-to-juvenile ]
   set ticks-at-senescence ticks
+  complete-action self "update-to-senescent" 0 0
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -797,24 +982,29 @@ end
 
 to supply-to [ target cost ]
   if ( target != self and is-anima1? target and ( female.fertility = "lactating" or female.fertility = "pregnant" ) ) [
-    let other-supply-cost get-cost-and-process-decisions target "supply-to"
-    let target-demand-cost [ get-cost-and-process-decisions myself "demand-from" ] of target
-    let net-cost ( cost + other-supply-cost + target-demand-cost )
-    if ( net-cost > 0 ) [ ask target [ receive-from myself net-cost ] ]
+    let target-demand-cost get-action-cost-of target "demand-to"
+    ifelse ( target-demand-cost > 0 )
+    [ let net-cost ( cost + target-demand-cost )
+      complete-action target "supply-to" cost net-cost
+      if ( net-cost > 0 ) [ ask target [ receive-from myself net-cost ] ]]
+    [ complete-action target "supply-to" cost 0 ]
   ]
 end
 
 to demand-from [ target cost ]
   if ( target != self and is-anima1? target and ( life.history = "gestatee" or life.history = "infant" ) ) [
-    let other-demand-cost get-cost-and-process-decisions target "demand-from"
-    let target-supply-cost [ get-cost-and-process-decisions myself "supply-to" ] of target
-    let net-cost ( cost + other-demand-cost + target-supply-cost )
-    if ( net-cost > 0 ) [ receive-from target net-cost ]
+    let target-supply-cost get-action-cost-of target "supply-to"
+    ifelse ( target-supply-cost > 0 )
+    [ let net-cost ( cost + target-supply-cost )
+      complete-action target "demand-from" cost net-cost
+      if ( net-cost > 0 ) [ receive-from target net-cost ]]
+    [ complete-action target "demand-from" cost 0 ]
   ]
 end
 
 to eat [ target cost ]
   if ( life.history = "juvenile" or life.history = "adult" or life.history = "senescent" and ( is-plant? target or is-anima1? target )) [
+    complete-action target "eat" cost [breed] of target
     receive-from target cost
   ]
 end
@@ -825,32 +1015,7 @@ to receive-from [ target cost ]
     let energy-received ifelse-value ( energy-wanted < [ energy.supply ] of target ) [ energy-wanted ] [ [ energy.supply ] of target ]
     update-energy energy-received
     ask target [ update-energy ( - energy-received ) ]
-    if ( is-plant? target ) [ collect-eating-data energy-received cost ] ; what about dead anima1?
-  ]
-end
-
-to collect-eating-data [ energy-eaten cost-of-eating ]
-  if (output-results?) [
-
-    set foraging-gains foraging-gains + energy-eaten
-    set foraging-cost foraging-cost + cost-of-eating
-
-    ; group is tracking foraging performance of its members
-    ask current-group [
-      set total-energy-gained total-energy-gained + energy-eaten
-      if ( [life.history] of myself = "gestatee" and [biological.sex] of myself = "female" ) [ set gestatee-female-energy-gained gestatee-female-energy-gained + energy-eaten ]
-      if ( [life.history] of myself = "gestatee" and [biological.sex] of myself = "male" ) [ set gestatee-male-energy-gained gestatee-male-energy-gained + energy-eaten ]
-      if ( [life.history] of myself = "infant" and [biological.sex] of myself = "female" ) [ set infant-female-energy-gained infant-female-energy-gained + energy-eaten ]
-      if ( [life.history] of myself = "infant" and [biological.sex] of myself = "male" ) [ set infant-male-energy-gained infant-male-energy-gained + energy-eaten ]
-      if ( [life.history] of myself = "juvenile" and [biological.sex] of myself = "female" ) [ set juvenile-female-energy-gained juvenile-female-energy-gained + energy-eaten ]
-      if ( [life.history] of myself = "juvenile" and [biological.sex] of myself = "male" ) [ set juvenile-male-energy-gained juvenile-male-energy-gained + energy-eaten ]
-      if ( [life.history] of myself = "adult" and [biological.sex] of myself = "female" and [female.fertility] of myself = "cycling" ) [ set adult-cycling-energy-gained adult-cycling-energy-gained + energy-eaten ]
-      if ( [life.history] of myself = "adult" and [biological.sex] of myself = "female" and [female.fertility] of myself = "pregnant" ) [ set adult-pregnant-energy-gained adult-pregnant-energy-gained + energy-eaten ]
-      if ( [life.history] of myself = "adult" and [biological.sex] of myself = "female" and [female.fertility] of myself = "lactating" ) [ set adult-lactating-energy-gained adult-lactating-energy-gained + energy-eaten ]
-      if ( [life.history] of myself = "adult" and [biological.sex] of myself = "male" ) [ set adult-male-energy-gained adult-male-energy-gained + energy-eaten ]
-      if ( [life.history] of myself = "senescent" and [biological.sex] of myself = "female" ) [ set senescent-female-energy-gained senescent-female-energy-gained + energy-eaten ]
-      if ( [life.history] of myself = "senescent" and [biological.sex] of myself = "male" ) [ set senescent-male-energy-gained senescent-male-energy-gained + energy-eaten ]
-    ]
+    complete-action target "receive-from" cost energy-received
   ]
 end
 
@@ -858,34 +1023,59 @@ end
 ; INTERACTIONS
 ;--------------------------------------------------------------------------------------------------------------------
 
-to join-group-of [ target cost ]
+to join [ target cost ]
   if ( is-anima1? target ) [
-    let other-join-cost get-cost-and-process-decisions target "join-group-of"
-    let target-join-cost [ get-cost-and-process-decisions myself "join-group-of" ] of target
-    let net-cost ( cost + other-join-cost + target-join-cost )
-    ifelse ( net-cost > 0 )
-    [ join-group ([group.identity] of target) net-cost ]
-    [ leave-group ([group.identity] of target) abs net-cost ]
-  ]
+    complete-action target "join" cost 0
+    if ( cost > 0 )
+    [ let target-cost get-action-cost-of target "recruit"
+      let probability ( cost + target-cost ) / cost
+      if ( cost + target-cost  > 0 ) [ join-group ([group.identity] of target) probability ]]]
 end
 
-to join-group [ group-id cost ]
-  if ( random-float 1.0 < cost and group.identity != group-id ) [
+to leave [ target cost ]
+  if ( is-anima1? target ) [
+    complete-action target "leave" cost 0
+    if ( cost > 0 )
+    [ let target-cost get-action-cost-of target "kick-out"
+      let probability ( cost + target-cost ) / cost
+      if ( cost + target-cost > 0 ) [ leave-group probability ]]]
+end
+
+to recruit [ target cost ]
+  if ( is-anima1? target ) [
+    complete-action target "recruit" cost 0
+    if ( cost > 0 )
+    [ let target-cost get-action-cost-of target "join"
+      let probability ( cost + target-cost ) / cost
+      if ( cost + target-cost > 0 ) [ ask target [ join-group [group.identity] of myself probability ]]]]
+end
+
+to kick-out [ target cost ]
+  if ( is-anima1? target ) [
+    complete-action target "kick-out" cost 0
+    if ( cost > 0 )
+    [ let target-cost get-action-cost-of target "leave"
+      let probability ( cost + target-cost ) / cost
+      if ( cost + target-cost > 0 ) [ ask target [ leave-group probability ]]]]
+end
+
+to join-group [ group-id probability ]
+  if ( random-float 1.0 < probability and group.identity != group-id ) [
     set previous-group-id group.identity
     set group.identity group-id
-    if output-results? [ set group-transfers-list lput [meta-id] of current-group group-transfers-list ]
-  ]
+    set group-transfers-list lput [meta-id] of current-group group-transfers-list
+    complete-action self "join-group" 0 group-id ]
 end
 
-to leave-group [ group-id cost ]
-  if ( random-float 1.0 < cost and group.identity != group-id ) [
+to leave-group [ probability ]
+  if ( random-float 1.0 < probability ) [
     set previous-group-id group.identity
     hatch-groups 1 [
       initialize-group
       set my-creator [meta-id] of myself
       ask myself [ set group.identity [meta-id] of myself ]]
     ask previous-group [ if not any? group-members [ die ]]
-  ]
+    complete-action self "leave-group" 0 0 ]
 end
 
 to-report previous-group
@@ -903,117 +1093,106 @@ to initialize-group
 end
 
 to pick-up [ target cost ]
-  if ( target != self and is-anima1? target ) [
-    let other-pickup-cost get-cost-and-process-decisions target "pick-up"
-    let target-clingto-cost [ get-cost-and-process-decisions myself "cling-to" ] of target
-    let net-cost ( cost + other-pickup-cost + target-clingto-cost )
-    ifelse ( net-cost > 0 )
-    [ if ( not member? target carried.items ) [ set carried.items lput target carried.items ] ]
-    [ if ( member? target carried.items ) [ set carried.items remove target carried.items ] ]
-  ]
+  if ( is-anima1? target ) [
+    complete-action target "pick-up" cost 0
+    if ( cost > 0 )
+    [ let target-cost get-action-cost-of target "cling-to"
+      let probability ( cost + target-cost ) / cost
+      if ( cost + target-cost > 0 ) [ carry target probability ]]]
+end
+
+to put-down [ target cost ]
+  if ( is-anima1? target ) [
+    complete-action target "put-down" cost 0
+    if ( cost > 0 )
+    [ let target-cost get-action-cost-of target "squirm-from"
+      let probability ( cost + target-cost ) / cost
+      if ( cost + target-cost > 0 ) [ drop target probability ]]]
 end
 
 to cling-to [ target cost ]
-  if ( target != self and is-anima1? target ) [
-    let other-clingto-cost get-cost-and-process-decisions target "cling-to"
-    let target-pickup-cost [ get-cost-and-process-decisions myself "pick-up" ] of target
-    let net-cost ( cost + other-clingto-cost + target-pickup-cost )
-    ifelse ( net-cost > 0 )
-    [ ask target [ if ( not member? myself carried.items ) [ set carried.items lput myself carried.items ] ]]
-    [ ask target [ if ( member? myself carried.items ) [ set carried.items remove myself carried.items ] ]]
-  ]
+  if ( is-anima1? target ) [
+    complete-action target "cling-to" cost 0
+    if ( cost > 0 )
+    [ let target-cost get-action-cost-of target "pick-up"
+      let probability ( cost + target-cost ) / cost
+      if ( cost + target-cost > 0 ) [ ask target [ carry myself probability ] ]]]
 end
 
-; must add helper functions to add to and take out of inventory that check if already in someone else's inventory
+to squirm-from [ target cost ]
+  if ( is-anima1? target ) [
+    complete-action target "squirm-from" cost 0
+    if ( cost > 0 )
+    [ let target-cost get-action-cost-of target "put-down"
+      let probability ( cost + target-cost ) / cost
+      if ( cost + target-cost > 0 ) [ ask target [ drop myself probability ] ]]]
+end
 
+to carry [ target probability ]
+  if ( random-float 1.0 < probability ) [
+    if ( not member? target [carried.items] of anima1s ) [
+      ask anima1s with [ member? target carried.items ] [ set carried.items remove-item target carried.items ]
+      set carried.items lput target carried.items
+      complete-action target "carry" 0 0 ]]
+end
+
+to drop [ target probability ]
+  if ( random-float 1.0 < probability ) [
+    if ( member? target carried.items ) [ set carried.items remove target carried.items ]
+    complete-action target "drop" 0 0
+  ]
+end
 
 to help [ target cost ]
-  if ( is-anima1? target ) [
-    let other-help-cost get-cost-and-process-decisions target "help"
-    let my-help-value size * ( cost + other-help-cost )
-    let target-attack-cost [ get-cost-and-process-decisions myself "attack" ] of target
-    let target-attack-value [size] of target * target-attack-cost
-    ( ifelse
-      ( my-help-value > 0 and target-attack-value > 0 ) [ maintain-body ( - target-attack-value ) ]
-      ( my-help-value > 0 and target-attack-value <= 0 ) [ ask target [ maintain-body ( my-help-value + target-attack-value ) ]]
-      ( my-help-value <= 0 and target-attack-value > 0 ) [ maintain-body ( - target-attack-value + my-help-value ) ]
-      [])
-  ]
-end
-
-to collect-helping-data [ target cost ]
-  ;  if ( output-results? and target != self ) [ ; Hamilton's Rule
-  ;    let r relatedness-with target
-  ;    ;print (word " me: " self " living.chance: " living.chance "  target: " target "   relatedness " relatedness-with target " ([living.chance] of target) " ([living.chance] of target)  "   value:"  value " update  " (get-updated-value [living.chance] of target ( value )) "  total: " (( get-updated-value [living.chance] of target ( value ) ) - [living.chance] of target ))
-  ;    let B ( get-updated-value [living.chance] of target ( cost ) ) - [living.chance] of target ; how much target benefitted
-  ;    let C living.chance - ( get-updated-value living.chance cost ) ; how much you *could have* benefitted by investing in yourself
-  ;    set helping-benefit helping-benefit + r * B ; benefit to yourself based on relatedness to target
-  ;    set helping-cost helping-cost + C ; cost of not helping yourself
-  ;
-  ;    if ( biological.sex = "female" and [biological.sex] of target = "female" and group.identity = [group.identity] of target ) [
-  ;      set ingroup-female-female-help-cost ingroup-female-female-help-cost + cost
-  ;    ]
-  ;    if ( biological.sex = "male" and [biological.sex] of target = "male" and group.identity = [group.identity] of target ) [
-  ;      set ingroup-male-male-help-cost ingroup-male-male-help-cost + cost
-  ;    ]
-  ;    if ( (( biological.sex = "female" and [biological.sex] of target = "male" ) or ( biological.sex = "male" and [biological.sex] of target = "female" )) and group.identity = [group.identity] of target ) [
-  ;      set feingroup-male-male-help-cost feingroup-male-male-help-cost + cost
-  ;    ]
-  ;  ]
+;  if ( is-anima1? target ) [
+;    complete-action target "help" cost 0
+;    if ( cost > 0 )
+;    [ let target-cost get-action-cost-of target "attack"
+;      let probability ( size / ( size + [size] of target ) )
+;      if ( cost + target-cost > 0 ) [ harm target probability ]]]
 end
 
 to attack [ target cost ]
-  if ( is-anima1? target ) [
-    let other-attack-cost get-cost-and-process-decisions target "attack"
-    let my-attack-value size * ( cost + other-attack-cost )
-    let target-help-cost [ get-cost-and-process-decisions myself "help" ] of target
-    let target-help-value [size] of target * target-help-cost
-    ( ifelse
-      ( my-attack-value > 0 and target-help-value > 0 ) [ ask target [ maintain-body ( - my-attack-value ) ] ]
-      ( my-attack-value > 0 and target-help-value <= 0 ) [ ask target [ maintain-body ( - my-attack-value - target-help-value ) ]]
-      ( my-attack-value <= 0 and target-help-value > 0 ) [ maintain-body ( target-help-value + my-attack-value ) ]
-      [])
+;  if ( is-anima1? target ) [
+;    complete-action target "attack" cost 0
+;    if ( cost > 0 )
+;    [ let target-cost get-action-cost-of target "help"
+;      let probability ifelse-value ( target-cost < 0 ) [ ( size / ( size + [size] of target ) ) ] [ 1.0 ]
+;      let net-cost cost + target-cost
+;      if ( net-cost > 0 ) [ harm target probability net-cost ]]]
+end
+
+to harm [ target probability cost ]
+  ;if ( random-float 1.0 < probability ) [ ask target [ set living.chance get-updated-value living.chance cost ] ]
+end
+
+to mate-with [ target my-mate-cost ]
+  if ( is-anima1? target and life.history = "adult" and ( biological.sex = "male" or ( biological.sex = "female" and female.fertility = "cycling" ))) [
+    let target-mate-cost get-action-cost-of target "mate-with"
+    ifelse ( target-mate-cost > 0 ) ; target has already paid cost to mate-with self
+    [ let net-mate-cost ( my-mate-cost + target-mate-cost )
+      if ( net-mate-cost > 0 and model-structure != "sower" ) [ ; SOWER calls conceive-with from an alternative source
+        complete-action target "mate-with" my-mate-cost net-mate-cost
+        set label "!" ; signals successful mating event
+        ifelse ( biological.sex = "female" )
+        [ conceive-with target net-mate-cost ]
+        [ ask target [ conceive-with myself net-mate-cost ]]]]
+    [ complete-action target "mate-with" my-mate-cost "" ]
   ]
 end
 
-to mate-with [ target cost ]
-  if ( is-anima1? target ) [
-    let other-mate-cost get-cost-and-process-decisions target "mate-with"
-    let target-mate-cost [ get-cost-and-process-decisions myself "mate-with" ] of target
-    let net-cost ( cost + other-mate-cost + target-mate-cost )
-    if ( net-cost > 0 and model-structure != "sower" ) [ ; SOWER calls conceive-with from an alternative source
-      ifelse ( biological.sex = "female" )
-      [ conceive-with target ]
-      [ ask target [ conceive-with myself ]]
-      collect-mating-data target
-    ]
-  ]
-end
-
-to collect-mating-data [ target ]
-  if output-results? [
-    set matings-list lput [meta-id] of target matings-list
-    ask target [ set matings-list lput [meta-id] of myself matings-list ]]
-end
-
-to conceive-with [ target ] ; FEMALE PROCEDURE
-  if biological.sex = "female" and female.fertility = "cycling" and life.history = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "male" [
-    set label "!"
-    if random-float 1.0 < (mean (list conception.chance [conception.chance] of target)) [
+to conceive-with [ target net-mate-cost ] ; FEMALE PROCEDURE
+  if ( biological.sex = "female" and female.fertility = "cycling" and life.history = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "male" ) [
+    if random-float 1.0 < ( get-updated-value (mean (list conception.chance [conception.chance] of target)) net-mate-cost ) [
       let preferred-litter 10 ^ ( mean (list litter.size [litter.size] of target))
       let floor-litter floor preferred-litter
       let percent-litter preferred-litter - floor-litter
       let my-litter-size ifelse-value ( random-float 1.0 < percent-litter ) [ floor-litter + 1 ] [ floor-litter ]
       hatch-anima1s my-litter-size [ initialize-from-parents myself target ]
       set female.fertility "pregnant"
-      collect-conception-data target
-  ]]
-end
-
-to collect-conception-data [ target ]
-  if output-results? [
-    set conceptions-list lput [meta-id] of target conceptions-list
-    ask target [ set conceptions-list lput [meta-id] of myself conceptions-list ]]
+      complete-action target "conceive-with" net-mate-cost my-litter-size
+    ]
+  ]
 end
 
 to initialize-from-parents [ m f ]
@@ -1360,7 +1539,7 @@ INPUTBOX
 967
 102
 documentation-notes
-View current decisions of organism 7320957. Organism 1879324 not found.
+Printout code verification, FALSE only. Printout code verification. Printout code verification, FALSE only. 
 1
 0
 String
@@ -1496,7 +1675,7 @@ INPUTBOX
 1097
 299
 population
-adam-and-eve
+p44HGJ
 1
 0
 String
@@ -1507,7 +1686,7 @@ INPUTBOX
 1097
 373
 genotype
-g5986273
+NIL
 1
 0
 String
@@ -1570,8 +1749,8 @@ CHOOSER
 373
 useful-commands
 useful-commands
-"help-me" "--------" "lotka-volterra" "age-histogram" "metafile-report" "verify-code" "check-runtime" "simulation-report" "clear-plants" "setup-plants" "clear-population" "view-genotype" "view-decisions" "add-allele" "delete-allele" "population-report"
-12
+"help-me" "--------" "lotka-volterra" "age-histogram" "metafile-report" "verify-code" "check-runtime" "simulation-report" "clear-plants" "setup-plants" "clear-population" "view-genotype" "view-decisions" "view-allocation" "view-actions" "add-allele" "delete-allele" "population-report"
+5
 
 BUTTON
 912
@@ -1684,7 +1863,7 @@ INPUTBOX
 967
 324
 command-input
-7320957
+false
 1
 0
 String (commands)
