@@ -458,9 +458,9 @@ end
 
 to track-population
 
-  ask anima1s [ set population-decisions (sentence population-decisions decision.vectors ) ]
-  ask anima1s [ set population-allocations (sentence population-allocations energy.allocated ) ]
-  ask anima1s [ set population-actions (sentence population-actions completed.actions ) ]
+;  ask anima1s [ set population-decisions (sentence population-decisions decision.vectors ) ]
+;  ask anima1s [ set population-allocations (sentence population-allocations energy.allocated ) ]
+;  ask anima1s [ set population-actions (sentence population-actions completed.actions ) ]
 
 end
 
@@ -685,7 +685,7 @@ to day-perception-range [ cost ]
   set day.perception.range get-updated-value day.perception.range cost
   let after-day-perception-range day.perception.range
   let change-in-day-perception-range after-day-perception-range - before-day-perception-range
-  complete-action self "maintain-body" cost change-in-day-perception-range
+  complete-action self "day-perception-range" cost change-in-day-perception-range
 end
 
 to night-perception-range [ cost ]
@@ -693,7 +693,7 @@ to night-perception-range [ cost ]
   set night.perception.range get-updated-value night.perception.range cost
   let after-night-perception-range night.perception.range
   let change-in-night-perception-range after-night-perception-range - before-night-perception-range
-  complete-action self "day-perception-range" cost change-in-night-perception-range
+  complete-action self "night-perception-range" cost change-in-night-perception-range
 end
 
 to audio-perception-range [ cost ]
@@ -776,9 +776,9 @@ to litter-size [ cost ]
   complete-action self "litter-size" cost change-in-litter-size
 end
 
-  ;--------------------------------------------------------------------------------------------------------------------
-  ; MOVEMENT
-  ;--------------------------------------------------------------------------------------------------------------------
+;--------------------------------------------------------------------------------------------------------------------
+; MOVEMENT
+;--------------------------------------------------------------------------------------------------------------------
 
 to move-toward [ target cost ]
   if (target != nobody ) [
@@ -1539,7 +1539,7 @@ INPUTBOX
 967
 102
 documentation-notes
-Printout code verification, FALSE only. Printout code verification. Printout code verification, FALSE only. 
+Printout code verification. Printout code verification. Printout code verification, FALSE only. Printout code verification, FALSE only. Printout code verification. Printout code verification. Printout code verification, FALSE only. Printout code verification. Printout code verification. Printout code verification. Printout code verification, FALSE only. Printout code verification, FALSE only. 
 1
 0
 String
@@ -1675,7 +1675,7 @@ INPUTBOX
 1097
 299
 population
-p44HGJ
+p-20-04-01-02
 1
 0
 String
@@ -1863,7 +1863,7 @@ INPUTBOX
 967
 324
 command-input
-false
+\"\"
 1
 0
 String (commands)
