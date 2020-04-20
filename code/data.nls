@@ -120,6 +120,11 @@ to-report population-file-exists?
   report file-exists? ( word "../data/" population ".csv" )
 end
 
+;to ask-anima1s-unlock-chromosomes
+;  set chromosome.I read-from-string chromosome.I
+;  set chromosome.II read-from-string chromosome.II
+;end
+
 to import-population
   clear-output
   output-print " ---------------------------------------------------------------------------"
@@ -130,12 +135,19 @@ to import-population
     
     import-turtles-from (word "../data/" population ".csv")
     
+    let id-memory table:make
+    
+    
     ask anima1s [
       
-      ask anima1s with [ biological.sex = "female" and life.history = "adult" ] [ set female.fertility "cycling" ]
+      ;ask anima1s with [ biological.sex = "female" and life.history = "adult" ] [ set female.fertility "cycling" ]
       
-      set meta-id random 9999999
-      set carried.items []
+      let new-id random 9999999
+      table:put id-memory meta-id new-id
+      set meta-id new-id
+      
+      set carried.items ifelse-value ( is-string? carried.items ) [ read-from-string carried.items ] [ [] ] ; for if population file does not have carried.items
+      
       set group-transfers-list []
       set matings-list []
       set conceptions-list []
@@ -146,9 +158,28 @@ to import-population
       if ( stomach.size = 0 ) [ set stomach.size 0.1 ]
       if ( is.alive = 0 ) [ set is.alive true ] ; note it will import both alive and dead as alive if population file has is.dead instead of is.alive
       
+      ;      set chromosome.I csv:from-string chromosome.I
+      ;      set chromosome.II read-from-string chromosome.II
+      ;ask-anima1s-unlock-chromosomes
     ]
     
-    ask anima1s [ if ((life.history = "gestatee" or life.history = "infant" ) and mother != nobody ) [ ask mother [ set carried.items lput myself carried.items ]] ]
+    ask anima1s [
+      
+      let updated-carried-items []
+      foreach carried.items [ c ->
+        set updated-carried-items lput one-of anima1s with [ meta-id = ( table:get id-memory c ) ] updated-carried-items
+      ]
+      set carried.items updated-carried-items
+      
+      if ( member? mother-identity table:keys id-memory ) [ 
+        set mother-identity table:get id-memory mother-identity
+      ]
+      
+      ;      let new-var read-from-string chromosome.II
+      ;      print new-var
+    ]
+    
+    ;ask anima1s [ if ((life.history = "gestatee" or life.history = "infant" ) and mother != nobody ) [ ask mother [ set carried.items lput myself carried.items ]] ]
     
     ask groups [
       
@@ -203,7 +234,7 @@ to save-population
       "vocal.range" "alpha.chance" "beta.chance" "gamma.chance"
       "birthing.chance" "weaning.chance" "infancy.chance"
       "juvenility.chance" "adulthood.chance" "senescency.chance"
-      "carried.items" )
+      "carried.items" "mother-identity" )
     
     ask anima1s [
       
@@ -213,16 +244,17 @@ to save-population
       set chromosome.I csv:to-string chromosome.I
       set chromosome.II csv:to-string chromosome.II
       
+      let old-carried-items carried.items
       let new-carried-items []
       foreach carried.items [ itm ->
-        set new-carried-items [meta-id] of itm
-      ]
+        set new-carried-items lput [meta-id] of itm new-carried-items ]
       set carried.items new-carried-items
       
       export-turtle-to (word "../data/" population ".csv") turtle-list 
+      
       set chromosome.I csv:from-string chromosome.I
       set chromosome.II csv:from-string chromosome.II 
-      
+      set carried.items old-carried-items
     ]
     
     foreach selected-groups [ g ->

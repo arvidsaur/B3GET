@@ -124,12 +124,13 @@ to import-turtles-from [ filename ]
           let value item j item i data-block ; the value for turtle i taken from column j of the DATA-BLOCK
           
           ; Put quotes around everything that is not a Number, Breed, or Boolean or List
-          if (not is-number? value and header != "breed" and not is-boolean? value and not member? "\n" value) [ set value (word "\"" value "\"")]
+          if (not is-number? value and header != "breed" and not is-boolean? value ) [ set value (word "\"" value "\"")] ; and not member? "\n" value
+          ;if ( is-string? value and member? "\n" value ) [ print value set value (word "\"" csv:from-string value "\"" ) print value print ""] ; set value (word "\"" csv:from-string value "\"" )
           
-          (ifelse ; fix to not rely on chromosome code
-            ( header = "chromosome.I" ) [ carefully [set chromosome.I csv:from-string value ][]]
-            ( header = "chromosome.II" ) [ carefully [ set chromosome.II csv:from-string value ][]]
-            [ carefully [ run (word "set " header " " value ) ] [ ]])
+;          (ifelse ; fix to not rely on chromosome code
+;            ( header = "chromosome.I" ) [ carefully [set chromosome.I csv:from-string value ][]]
+;            ( header = "chromosome.II" ) [ carefully [ set chromosome.II csv:from-string value ][]]
+;            [ carefully [ run (word "set " header " " value ) ] [ ]])
           
           
           ;          ; Put quotes around everything that is not a Number, Breed, or Boolean or List
@@ -139,7 +140,7 @@ to import-turtles-from [ filename ]
           ;          ]
           ;          
           ;          ; set each state variable according to the header and value
-          ;          carefully [ run (word "set " header " " value ) ] []
+          carefully [ run (word "set " header " " value ) ] []
 
         set j j + 1 ] 
       set i i + 1 ]]

@@ -70,8 +70,6 @@ anima1s-own [
   juvenility.chance
   adulthood.chance
   senescency.chance
-  x.magnitude
-  y.magnitude
 
   chromosome.I
   chromosome.II
@@ -1245,8 +1243,6 @@ to initialize-from-parents [ m f ]
   set vocal.range 0.1
   set carried.items []
   set decision.vectors []
-  set x.magnitude 0 ;one-of [ 0.001 -0.001 ]
-  set y.magnitude 0 ;one-of [ 0.001 -0.001 ]
   set previous-group-id 0
   set ticks-at-conception ticks
   set ticks-at-birth 0
@@ -1438,8 +1434,8 @@ GRAPHICS-WINDOW
 1
 1
 0
-0
-0
+1
+1
 1
 0
 49
@@ -1675,7 +1671,7 @@ INPUTBOX
 1097
 299
 population
-p15TRH
+p-20-04-01-02
 1
 0
 String
@@ -1750,7 +1746,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "--------" "lotka-volterra" "age-histogram" "metafile-report" "verify-code" "check-runtime" "simulation-report" "clear-plants" "setup-plants" "clear-population" "view-genotype" "view-decisions" "view-allocation" "view-actions" "add-allele" "delete-allele" "population-report"
-5
+4
 
 BUTTON
 912
@@ -1863,7 +1859,7 @@ INPUTBOX
 967
 324
 command-input
-\"\"
+921179
 1
 0
 String (commands)
