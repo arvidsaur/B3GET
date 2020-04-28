@@ -136,10 +136,12 @@
 ; LTS   2019-08-26   --> litter-size               
 ; TRT   2019-08-26   --> turn-right               
 ; TLF   2019-08-26   --> turn-left                 
-; GFD   2019-08-26   --> go-forward               
-; SAO   2019-08-26   --> signal-a-on               
-; SBO   2019-08-26   --> signal-b-on               
-; SCO   2019-08-26   --> signal-c-on               
+; GFD   2019-08-26   --> go-forward      
+; HED   2020-XX-XX   --> get-heading 
+; HID   2020-XX-XX   --> hide  
+; SAO   2019-08-26   --> signal-alpha-on               
+; SBO   2019-08-26   --> signal-beta-on               
+; SCO   2019-08-26   --> signal-gamma-on               
 ; CKI   2019-08-26   --> check-infancy             
 ; CKB   2019-08-26   --> check-birth               
 ; CKJ   2019-08-26   --> check-juvenility         
@@ -152,8 +154,10 @@
 ; GFT   2019-10-16   --> supply-to 
 ; RFT   2019-10-16   --> demand-from
 ; EAT   2019-10-16   --> eat
-; JNG   2019-09-XX   --> join-group-of
-; LEV   2019-08-26   --> leave-group-of  
+; JNG   2019-09-XX   --> join
+; LEV   2019-08-26   --> leave
+; RCT   2019-09-XX   --> recruit
+; KCK   2019-08-26   --> kick-out
 ; PKU   2019-09-XX   --> pick-up
 ; PDN   2019-10-16   --> put-down
 ; CLG   2020-04-XX   --> cling-to
@@ -173,7 +177,7 @@
 ; ENVIRONMENT: list of turtles (both plants and anima1s) observed by the caller.
 ;----------------------------------------------------------------------------------------------
 
-to-report g3notype-make-decisions [ environment ]
+to-report g3notype-get-decisions [ environment ]
   set decision.vectors []
   get-iterative-decisions self environment [] true ( sentence chromosome.I chromosome.II ) no-turtles []
   report decision.vectors
@@ -213,7 +217,7 @@ to get-iterative-decisions [ me old-environment old-gates old-boolean old-feed o
           ;              set vector-doesnt-exist false ; could make this more effient by doing it all at the same time at the end
           ;              set d replace-item 2 d ( item 2 d + new-weight)]]
           
-          if vector-doesnt-exist [ ask myself [ set decision.vectors lput (list random 9999999 self myself ( get-action new-action ) new-weight ) decision.vectors ]]
+          if vector-doesnt-exist [ ask myself [ set decision.vectors lput (list random 9999999 self myself ( get-g3notype-action new-action ) new-weight ) decision.vectors ]]
     ]]]
     
     ;---------------------------------------------------------------------------------------------- 
@@ -231,7 +235,7 @@ to get-iterative-decisions [ me old-environment old-gates old-boolean old-feed o
         ifelse ( not part-of-chunk ) [
           set remaining-allele lput c remaining-allele
         ][
-          ifelse ( member? c gate-code-list ) [
+          ifelse ( member? c gate-codons ) [
             
             ifelse ( length section-of-code > 0 ) [
               set remaining-allele lput c []
@@ -254,7 +258,7 @@ to get-iterative-decisions [ me old-environment old-gates old-boolean old-feed o
       ; (READ CODE) ---> CODE is a "LOGIC GATE" ---> SAVE LOGIC GATE and MOVE ON
       ;----------------------------------------------------------------------------------------------
       
-      ifelse ( member? first section-of-code gate-code-list ) [
+      ifelse ( member? first section-of-code gate-codons ) [
         
         let gate first section-of-code
         
@@ -323,6 +327,65 @@ to get-iterative-decisions [ me old-environment old-gates old-boolean old-feed o
   ]]
   
 end
+
+to-report get-g3notype-action [ action-code ]
+
+  report
+  (ifelse-value
+    ( action-code = "MNT" ) [ "maintain-body" ]
+    ( action-code = "GRW" ) [ "body-size" ]
+    ( action-code = "BSD" ) [ "body-shade" ]
+    ( action-code = "DPR" ) [ "day-perception-range" ]
+    ( action-code = "NPR" ) [ "night-perception-range" ]
+    ( action-code = "APR" ) [ "audio-perception-range" ]
+    ( action-code = "DPA" ) [ "day-perception-angle" ]
+    ( action-code = "NPA" ) [ "night-perception-angle" ]
+    ( action-code = "APA" ) [ "audio-perception-angle" ]
+    ( action-code = "VCR" ) [ "vocal-range" ]
+    ( action-code = "ICC" ) [ "conception-chance" ]
+    ( action-code = "STM" ) [ "stomach-size" ]   
+    ( action-code = "MTC" ) [ "mutation-chance" ]
+    ( action-code = "SXR" ) [ "sex-ratio" ]
+    ( action-code = "LTS" ) [ "litter-size" ]
+    ( action-code = "TRT" ) [ "turn-right" ]
+    ( action-code = "TLF" ) [ "turn-left" ]
+    ( action-code = "GFD" ) [ "go-forward" ]
+    ( action-code = "MOV" ) [ "move-toward" ]
+    ( action-code = "HED" ) [ "set-heading" ]
+    ( action-code = "HID" ) [ "hide" ]
+    ( action-code = "SAC" ) [ "signal-alpha-on" ]
+    ( action-code = "SBC" ) [ "signal-beta-on" ]
+    ( action-code = "SCC" ) [ "signal-gamma-on" ]
+    ( action-code = "INC" ) [ "infancy-chance" ]
+    ( action-code = "CKI" ) [ "check-infancy" ]
+    ( action-code = "GVB" ) [ "birthing-chance" ]
+    ( action-code = "CKB" ) [ "check-birth" ]
+    ( action-code = "JVC" ) [ "juvenile-chance" ]
+    ( action-code = "CKJ" ) [ "check-juvenility" ]
+    ( action-code = "WEN" ) [ "weaning-chance" ]
+    ( action-code = "CKW" ) [ "check-weaning" ]
+    ( action-code = "ADC" ) [ "adult-chance" ]
+    ( action-code = "CKA" ) [ "check-adulthood" ]
+    ( action-code = "SNC" ) [ "senescent-chance" ]
+    ( action-code = "CKS" ) [ "check-senescence" ]
+    ( action-code = "SPL" ) [ "supply-to" ]
+    ( action-code = "DMF" ) [ "demand-from" ]
+    ( action-code = "EAT" ) [ "eat" ]
+    ( action-code = "PKU" ) [ "pick-up" ]
+    ( action-code = "SQM" ) [ "squirm-from" ]
+    ( action-code = "PDN" ) [ "put-down" ]
+    ( action-code = "CLG" ) [ "cling-to" ]
+    ( action-code = "ATK" ) [ "attack" ]
+    ( action-code = "HLP" ) [ "help" ]
+    ( action-code = "JNG" ) [ "join" ]
+    ( action-code = "LEV" ) [ "leave" ]
+    ( action-code = "RCT" ) [ "recruit" ]
+    ( action-code = "KCK" ) [ "kick-out" ]
+    ( action-code = "MAT" ) [ "mate-with" ]
+    [ "" ])
+  
+end
+
 
 to-report read-section [ section ]
   let operator ifelse-value ( length section = 3 ) [ item 1 section ] [ "" ]
@@ -429,9 +492,6 @@ to-report read-code [ code ]
     [ false ])
 end
 
-
-
-
 ;----------------------------------------------------------------------------------------------
 ; GET-MUTATION
 ;
@@ -441,16 +501,16 @@ end
 ;----------------------------------------------------------------------------------------------
 
 to-report g3notype-get-mutation [ original-codon ]
-  report one-of (sentence gate-code-list action-code-list operation-code-list reporter-code-list )
+  report one-of (sentence gate-codons action-codons operation-codons reporter-codons )
 end
 
-to-report gate-code-list 
+to-report gate-codons
   report [ 
     "ANY" "UUU" "NNN" "ONE" "MEE" 
     "ALL" "THN" "TNT" ] ; "AND" "ORR" "NOT" 
 end
 
-to-report action-code-list-2 
+to-report action-codons
   report [ 
     "DEC" "MNT" "GRW" "BSD" "IPR" 
     "NPR" "APR" "ICC" "MTR" "SXR" 
@@ -464,11 +524,11 @@ to-report action-code-list-2
     "MAT" "DPA" "NPA" "APA" "VCR" ]
 end
 
-to-report operation-code-list
+to-report operation-codons
   report [ "EQL" "NQL" "GRT" "LST" "SDO" ]
 end
 
-to-report reporter-code-list
+to-report reporter-codons
   report [
     "MID" "SIZ" "COL" "SEX" "SHD"
     "LFH" "FER" "GRP" "AON" "BON"
@@ -489,20 +549,3 @@ to-report reporter-code-list
     "EAA" "EVR"
   ]
 end
-
-;to-report get-decisions-of [ target target-of-target action-name ] ; does NOT included completed actions
-;  report filter [ vector -> item 2 vector = target-of-target and item 3 vector = action-name and not member? (item 0 vector) completed.actions ] [ decision.vectors ] of target
-;end
-;
-;to-report get-decisions-cost [ vector-list ]
-;  report sum map [ vector -> item 4 vector ] vector-list
-;end
-;
-;to acted-on-decisions [ vector-list ]
-;  if ( not empty? vector-list ) [
-;    let vector-ids map [ vector -> item 0 vector ] vector-list
-;    set completed.actions sentence vector-ids completed.actions
-;  ]
-;end
-
-

@@ -6,7 +6,7 @@
 ; 88.  ... 88.  .88 88  88  88 88  88  88 88.  .88 88    88 88.  .88       88 
 ; `88888P' `88888P' dP  dP  dP dP  dP  dP `88888P8 dP    dP `88888P8 `88888P' 
 ;                                                                            
-; © 2019 K N Crouse
+; © 2020 K N Crouse
 ;-----------------------------------------------------------------------------                                                                          
 
 to command
@@ -38,11 +38,9 @@ end
 
 to output-command-menu
   
-  output-print " ----------------------------------"
-  output-print " HELP ME: a user guide for commands"
-  output-print " ----------------------------------"
+  output-header " HELP ME: a user guide for commands"
   output-print " Select a command option from the useful-commands dropdown menu and"
-  output-print " click ▷ to enact the command. Find a description of each command below." 
+  output-print " click ▷ to enact the command. A description of each command is listed below." 
   output-print " Commands that are denoted below by [ ] require an input to be written"
   output-print " in command-input. By default, command-input contains an example allele"
   output-print " for the add-allele and delete-allele commands."
@@ -79,10 +77,11 @@ to output-command-menu
 end
 
 to output-header [ header-title ]
+  clear-output
   output-print " ---------------------------------------------------------------------------"
   output-print ( word " " header-title )
   output-print " ---------------------------------------------------------------------------"
-  set documentation-notes ( word header-title " " documentation-notes ) 
+  update-metafile "commands" header-title 
 end
 
 to output-LV-plot
@@ -165,9 +164,7 @@ to output-verification [ input ]
 end
 
 to output-runtime
-    output-print "---------------------------------------------------------------------------"
-    output-print "CHECK RUNTIME :   "
-    output-print "---------------------------------------------------------------------------"
+    output-header "CHECK RUNTIME :   "
     profiler:reset
     profiler:start
     repeat how-many-ticks? [ go ]
@@ -177,10 +174,8 @@ to output-runtime
 end
 
 to output-simulation-report
-  output-print " ---------------------------------------------------------------------------"
-  output-print (word " SIMULATION REPORT : " simulation-id )
-  output-print " ---------------------------------------------------------------------------"
-  
+  output-header (word " SIMULATION REPORT : " simulation-id )
+
   ifelse (file-exists? (word path-to-experiment "/" simulation-id ".csv" ) ) [
     let header-list first csv:from-file (word path-to-experiment "/" simulation-id ".csv" )
     
@@ -213,27 +208,21 @@ to import-world-command
 end
 
 to output-clear-plants
-  output-print " ---------------------------------------------------------------------------"
-  output-print " CLEAR PLANTS :   "
-  output-print " ---------------------------------------------------------------------------"
+  output-header " CLEAR PLANTS :   "
   ask plants [ die ]
   output-print " Plants cleared."
   set documentation-notes (word "Clear all plants in simulation. " documentation-notes )
 end
 
 to output-setup-plants
-  output-print " ---------------------------------------------------------------------------"
-  output-print " SETUP PLANTS :   "
-  output-print " ---------------------------------------------------------------------------"
+  output-header " SETUP PLANTS :   "
   setup-plants
   output-print " Let there be plants!"
   set documentation-notes (word "Setup new plants in simulation. " documentation-notes )  
 end
 
 to output-clear-pop
-  output-print " ---------------------------------------------------------------------------"
-  output-print " CLEAR POPULATION :   "
-  output-print " ---------------------------------------------------------------------------"
+  output-header " CLEAR POPULATION :   "
   ask anima1s [ die ]
   ask groups [ die ]
   output-print " Population cleared."
@@ -242,9 +231,7 @@ end
 
 to output-genotype
   let anima1-to-inspect one-of anima1s with [ read-from-string command-input = meta-id ]
-  output-print " ---------------------------------------------------------------------------"
-  output-print (word " GENOTYPE : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [meta-id] of anima1-to-inspect ) ] )
-  output-print " ---------------------------------------------------------------------------"
+  output-header (word " GENOTYPE : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [meta-id] of anima1-to-inspect ) ] )
   ifelse ( anima1-to-inspect = nobody ) [
     set documentation-notes (word "Organism " read-from-string command-input " not found.")
     output-print (word " Organism " read-from-string command-input " not found.")
@@ -259,69 +246,59 @@ to output-genotype
 end
 
 to output-decisions
-  
-      let anima1-to-inspect one-of anima1s with [ read-from-string command-input = meta-id ]
-    output-print " ---------------------------------------------------------------------------"
-    output-print (word " DECISIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [meta-id] of anima1-to-inspect ) ] )
-    output-print " ---------------------------------------------------------------------------"
-    
-    ifelse ( any? anima1s with [ meta-id = read-from-string command-input ] ) [
-      ask one-of anima1s with [ meta-id = read-from-string command-input ] [
-        foreach decision.vectors [ decision ->
-          output-print (word " " decision )
-        ]
+  let anima1-to-inspect one-of anima1s with [ read-from-string command-input = meta-id ]
+  output-header (word " DECISIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [meta-id] of anima1-to-inspect ) ] )
+
+  ifelse ( any? anima1s with [ meta-id = read-from-string command-input ] ) [
+    ask one-of anima1s with [ meta-id = read-from-string command-input ] [
+      foreach decision.vectors [ decision ->
+        output-print (word " " decision )
       ]
-      set documentation-notes (word "View current decisions of organism " command-input ". " documentation-notes )
-    ][
-      set documentation-notes (word "Organism " read-from-string command-input " not found.")
-      output-print (word " Organism " read-from-string command-input " not found.")
     ]
+    set documentation-notes (word "View current decisions of organism " command-input ". " documentation-notes )
+  ][
+    set documentation-notes (word "Organism " read-from-string command-input " not found.")
+    output-print (word " Organism " read-from-string command-input " not found.")
+  ]
 end
 
 to output-allocation
+  let anima1-to-inspect one-of anima1s with [ read-from-string command-input = meta-id ]
+  output-header (word " ENERGY : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [meta-id] of anima1-to-inspect ) ] )
   
-      let anima1-to-inspect one-of anima1s with [ read-from-string command-input = meta-id ]
-    output-print " ---------------------------------------------------------------------------"
-    output-print (word " ENERGY : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [meta-id] of anima1-to-inspect ) ] )
-    output-print " ---------------------------------------------------------------------------"
-    
-    ifelse ( any? anima1s with [ meta-id = read-from-string command-input ] ) [
-      ask one-of anima1s with [ meta-id = read-from-string command-input ] [
-        foreach energy.allocated [ decision ->
-          output-print (word " " decision )
-        ]
+  ifelse ( any? anima1s with [ meta-id = read-from-string command-input ] ) [
+    ask one-of anima1s with [ meta-id = read-from-string command-input ] [
+      foreach energy.allocated [ decision ->
+        output-print (word " " decision )
       ]
-      set documentation-notes (word "View current decisions of organism " command-input ". " documentation-notes )
-    ][
-      set documentation-notes (word "Organism " read-from-string command-input " not found.")
-      output-print (word " Organism " read-from-string command-input " not found.")
     ]
+    set documentation-notes (word "View current decisions of organism " command-input ". " documentation-notes )
+  ][
+    set documentation-notes (word "Organism " read-from-string command-input " not found.")
+    output-print (word " Organism " read-from-string command-input " not found.")
+  ]
 end
 
 to output-actions
-      let anima1-to-inspect one-of anima1s with [ read-from-string command-input = meta-id ]
-    output-print " ---------------------------------------------------------------------------"
-    output-print (word " ACTIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [meta-id] of anima1-to-inspect ) ] )
-    output-print " ---------------------------------------------------------------------------"
-    
-    ifelse ( any? anima1s with [ meta-id = read-from-string command-input ] ) [
-      ask one-of anima1s with [ meta-id = read-from-string command-input ] [
-        foreach completed.actions [ decision ->
-          output-print (word " " decision )
-        ]
+  let anima1-to-inspect one-of anima1s with [ read-from-string command-input = meta-id ]
+  output-header (word " ACTIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [meta-id] of anima1-to-inspect ) ] )
+  
+  ifelse ( any? anima1s with [ meta-id = read-from-string command-input ] ) [
+    ask one-of anima1s with [ meta-id = read-from-string command-input ] [
+      foreach completed.actions [ decision ->
+        output-print (word " " decision )
       ]
-      set documentation-notes (word "View current decisions of organism " command-input ". " documentation-notes )
-    ][
-      set documentation-notes (word "Organism " read-from-string command-input " not found.")
-      output-print (word " Organism " read-from-string command-input " not found.")
     ]
+    set documentation-notes (word "View current decisions of organism " command-input ". " documentation-notes )
+  ][
+    set documentation-notes (word "Organism " read-from-string command-input " not found.")
+    output-print (word " Organism " read-from-string command-input " not found.")
+  ]
 end
 
 to output-add-allele
-  output-print " ---------------------------------------------------------------------------"
-  output-print (word " ADD NEW ALLELE : " )
-  output-print " ---------------------------------------------------------------------------"
-  
+  output-header (word " ADD NEW ALLELE : " )
+
   ifelse ( is-list? read-from-string command-input and length read-from-string command-input > 4 ) [
     ask anima1s [
       set chromosome.I lput run-result command-input chromosome.I
@@ -339,25 +316,22 @@ to output-add-allele
 end
 
 to output-delete-allele [ input ]
-  if ( is-list? read-from-string input ) [
-    output-print " ---------------------------------------------------------------------------"
-    output-print (word " DELETE ALLELE : " )
-    output-print " ---------------------------------------------------------------------------"
+  output-header (word " DELETE ALLELE : " )
+  
+  ifelse ( is-list? read-from-string input ) [
     ask anima1s [
       foreach chromosome.I [ i ->
         if ( i = read-from-string command-input ) [
-          set chromosome.I remove-item ( position i chromosome.I ) chromosome.I
-        ]
-      ]
+          set chromosome.I remove-item ( position i chromosome.I ) chromosome.I ]]
       foreach chromosome.II [ ii ->
         if ( ii = read-from-string command-input ) [
-          set chromosome.II remove-item ( position ii chromosome.II ) chromosome.II
-        ]
-      ]
-    ]
+          set chromosome.II remove-item ( position ii chromosome.II ) chromosome.II ]]]
+    
     set documentation-notes (word "Delete allele " read-from-string  command-input " from the population. " documentation-notes ) 
-    output-print (word " Allele " read-from-string command-input " successfully deleted." ) 
-  ]
+    output-print (word " Allele " read-from-string command-input " successfully deleted." )]
+  
+  [ output-print (word " Command input is not a list." )]
+  
 end
 
 to output-population

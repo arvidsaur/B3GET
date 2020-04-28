@@ -15,89 +15,93 @@
 ;
 ; List of all genotype cod0ns:
 ; 
-; CODE  MAINTENANCE  DESCRIPTION                
+; MAINTENANCE  CODE  DESCRIPTION                
 ;
-;  a    2019-09-XX   is an adult
-;  b    2019-09-XX   is bigger than myself
-;  c    2019-09-XX   is cycling
-;  d    2019-09-XX   is a plant (not an anima1)
-;  e    2019-09-XX   is myself
-;  f    2019-09-XX   is female
-;  g    2019-09-XX   is a gestatee
-;  h    2019-09-XX   is healthier than myself
-;  i    2019-09-XX   is an infant
-;  j    2019-09-XX   is a juvenile
-;  k    2019-09-XX   is kin (relatedness > 0.2)
-;  l    2019-09-XX   is lactating
-;  m    2019-09-XX   is a male
-;  n    2019-09-XX   is a group member
-;  o    2019-09-XX   is another (not myself)
-;  p    2019-09-XX   is pregnant
-;  q    2019-09-XX   is not kin (relatedness <= 0.2)
-;  r    2019-09-XX   is smaller than myself
-;  s    2019-09-XX   is senescent
-;  t    2019-09-XX   is neither carrying or carried by myself
-;  u    2019-09-XX   is a stranger (none-group member)
-;  v    2019-09-XX   is alive
-;  w    2019-09-XX   is dead
-;  x    2019-09-XX   is sicker than myself
-;  y    2019-09-XX   is carried by myself
-;  z    2019-09-XX   is an anima1 (not a plant)
-;  +    2019-09-XX   is carrying myself
-;  α    2019-09-XX   has alpha signal on
-;  å    2019-09-XX   has alpha signal off
-;  β    2019-09-XX   has beta signal on
-;  ß    2019-09-XX   has beta signal off
-;  ɣ    2019-09-XX   has gamma signal on
-;  œ    2019-09-XX   has gamma signal off
-;  *    2019-09-XX   is observed during the day
-;  -    2019-09-XX   is observed during the night
-;  #    2019-09-XX   has color shade between # = 0 [dark] and # = 9 [light]
-;  $    2019-09-XX   has more energy than myself
-;  ~    2019-09-XX   has less energy than myself
+; 2019-09-XX    a    is an adult
+; 2019-09-XX    b    is bigger than myself
+; 2019-09-XX    c    is cycling
+; 2019-09-XX    d    is a plant (not an anima1)
+; 2019-09-XX    e    is myself
+; 2019-09-XX    f    is female
+; 2019-09-XX    g    is a gestatee
+; 2019-09-XX    h    is healthier than myself
+; 2019-09-XX    i    is an infant
+; 2019-09-XX    j    is a juvenile
+; 2019-09-XX    k    is kin (relatedness > 0.2)
+; 2019-09-XX    l    is lactating
+; 2019-09-XX    m    is a male
+; 2019-09-XX    n    is a group member
+; 2019-09-XX    o    is another (not myself)
+; 2019-09-XX    p    is pregnant
+; 2019-09-XX    q    is not kin (relatedness <= 0.2)
+; 2019-09-XX    r    is smaller than myself
+; 2019-09-XX    s    is senescent
+; 2019-09-XX    t    is neither carrying or carried by myself
+; 2019-09-XX    u    is a stranger (none-group member)
+; 2019-09-XX    v    is alive
+; 2019-09-XX    w    is dead
+; 2019-09-XX    x    is sicker than myself
+; 2019-09-XX    y    is carried by myself
+; 2019-09-XX    z    is an anima1 (not a plant)
+; 2019-09-XX    +    is carrying myself
+; 2019-09-XX    α    has alpha signal on
+; 2019-09-XX    å    has alpha signal off
+; 2019-09-XX    β    has beta signal on
+; 2019-09-XX    ß    has beta signal off
+; 2019-09-XX    ɣ    has gamma signal on
+; 2019-09-XX    œ    has gamma signal off
+; 2019-09-XX    *    is observed during the day
+; 2019-09-XX    -    is observed during the night
+; 2019-09-XX    #    has color shade between # = 0 [dark] and # = 9 [light]
+; 2019-09-XX    $    has more energy than myself
+; 2019-09-XX    ~    has less energy than myself
 ;         
-; MNT   2019-08-26   --> maintain-body
-; GRW   2019-08-26   --> body-size                 
-; BSD   2019-08-26   --> body-shade              
-; IPR   2019-08-26   --> day-perception            
-; NPR   2019-08-26   --> night-perception          
-; APR   2019-08-26   --> audio-perception          
-; DPA   2019-08-26   --> day-perception-angle
-; NPA   2019-08-26   --> night-perception-angle
-; APA   2019-08-26   --> audio-perception-angle 
-; VCR   2019-08-26   --> vocal-range
-; ICC   2019-08-26   --> conception-chance
-; STM   2020-04-XX   --> stomach-size
-; MTR   2019-08-26   --> mutation-chance            
-; SXR   2019-08-26   --> sex-ratio               
-; LTS   2019-08-26   --> litter-size               
-; TRT   2019-08-26   --> turn-right               
-; TLF   2019-08-26   --> turn-left                 
-; GFD   2019-08-26   --> go-forward               
-; SAO   2019-08-26   --> signal-a-on               
-; SBO   2019-08-26   --> signal-b-on               
-; SCO   2019-08-26   --> signal-c-on               
-; CKI   2019-08-26   --> check-infancy             
-; CKB   2019-08-26   --> check-birth               
-; CKJ   2019-08-26   --> check-juvenility         
-; CKW   2019-08-26   --> check-weaning              
-; CKA   2019-08-26   --> check-adulthood           
-; CKS   2019-08-26   --> check-senescence         
+; 2019-08-26   --> maintain-body  
+; 2019-08-26   --> body-size             
+; 2019-08-26   --> body-shade            
+; 2019-08-26   --> day-perception           
+; 2019-08-26   --> night-perception        
+; 2019-08-26   --> audio-perception        
+; 2019-08-26   --> day-perception-angle  
+; 2019-08-26   --> night-perception-angle   
+; 2019-08-26   --> audio-perception-angle 
+; 2019-08-26   --> vocal-range    
+; 2019-08-26   --> conception-chance     
+; 2020-04-XX   --> stomach-size   
+; 2019-08-26   --> mutation-chance              
+; 2019-08-26   --> sex-ratio                
+; 2019-08-26   --> litter-size                
+; 2019-08-26   --> turn-right       
+; 2019-08-26   --> turn-left             
+; 2019-08-26   --> go-forward 
+; 2020-XX-XX   --> set-heading 
+; 2020-XX-XX   --> hide
+; 2019-08-26   --> signal-a-on       
+; 2019-08-26   --> signal-b-on           
+; 2019-08-26   --> signal-c-on              
+; 2019-08-26   --> check-infancy          
+; 2019-08-26   --> check-birth            
+; 2019-08-26   --> check-juvenility       
+; 2019-08-26   --> check-weaning
+; 2019-08-26   --> check-adulthood           
+; 2019-08-26   --> check-senescence         
 ;
-; MOV   2020-04-01   --> move-toward
-; MAF   2020-04-01   --> move-away-from
-; GFT   2019-10-16   --> supply-to 
-; RFT   2019-10-16   --> demand-from
-; EAT   2019-10-16   --> eat
-; JNG   2019-09-XX   --> join-group-of
-; LEV   2019-08-26   --> leave-group-of  
-; PKU   2019-09-XX   --> pick-up
-; PDN   2019-10-16   --> put-down
-; CLG   2020-04-XX   --> cling-to
-; SQM   2020-04-XX   --> squirm-from
-; HLP   2019-09-XX   --> help
-; ATK   2019-09-XX   --> attack 
-; MAT   2019-10-16   --> mate-with
+; 2020-04-01   --> move-toward 
+; 2020-04-01   --> move-away-from
+; 2019-10-16   --> supply-to 
+; 2019-10-16   --> demand-from  
+; 2019-10-16   --> eat   
+; 2019-09-XX   --> join 
+; 2019-08-26   --> leave
+; 2020-XX-XX   --> recruit
+; 2020-XX-XX   --> kick-out
+; 2019-09-XX   --> pick-up  
+; 2019-10-16   --> put-down 
+; 2020-04-XX   --> cling-to  
+; 2020-04-XX   --> squirm-from 
+; 2019-09-XX   --> help  
+; 2019-09-XX   --> attack 
+; 2019-10-16   --> mate-with 
 ; 
 ;----------------------------------------------------------------------------------------------
 
@@ -110,7 +114,7 @@
 ; ENVIRONMENT: list of turtles (both plants and anima1s) observed by the caller.
 ;----------------------------------------------------------------------------------------------
 
-to-report sta7us-make-decisions [ local-turtles ]
+to-report sta7us-get-decisions [ local-turtles ]
   
   let meself self
   let current-energy energy.supply
@@ -146,14 +150,14 @@ to-report sta7us-make-decisions [ local-turtles ]
               let vector-doesnt-exist true
               foreach decision-vectors [ v ->
                 
-                if ( item 2 v = other-guy ) and ( item 3 v = ( get-action gene-action ) ) [
+                if ( item 2 v = other-guy ) and ( item 3 v = ( get-sta7us-action gene-action ) ) [
                   set vector-doesnt-exist false
                   set decision-vectors remove-item position v decision-vectors decision-vectors
                   let new-vector replace-item 4 v ( item 4 v + precision ( gene-weight / ( distance-to-target ^ 2 )) 5 )
                   set decision-vectors lput new-vector decision-vectors ]]
               
               if vector-doesnt-exist [
-                set decision-vectors lput (list random 9999999 meself other-guy ( get-action gene-action ) precision ( gene-weight / ( distance-to-target ^ 2 )) 5 ) decision-vectors ]
+                set decision-vectors lput (list random 9999999 meself other-guy ( get-sta7us-action gene-action ) precision ( gene-weight / ( distance-to-target ^ 2 )) 5 ) decision-vectors ]
         ]]]
       ]
     ]
@@ -180,7 +184,7 @@ end
 ; REPORTERS
 ;--------------------------------------------------------------------------------------------------------------------
 
-to-report get-action [ action-code ] ; called by sta7us, fix
+to-report get-sta7us-action [ action-code ]
 
   report
   (ifelse-value
@@ -192,7 +196,7 @@ to-report get-action [ action-code ] ; called by sta7us, fix
     ( action-code = "APR" or action-code = "audio-perception" or action-code = "audio-perception-range" ) [ "audio-perception-range" ]
     ( action-code = "DPA" or action-code = "day-perception-angle" ) [ "day-perception-angle" ]
     ( action-code = "NPA" or action-code = "night-perception-angle" ) [ "night-perception-angle" ]
-    ( action-code = "APA" or action-code = "audio-perception-angle") [ "audio-perception-angle" ]
+    ( action-code = "APA" or action-code = "audio-perception-angle" ) [ "audio-perception-angle" ]
     ( action-code = "VCR" or action-code = "vocal-range" ) [ "vocal-range" ]
     ( action-code = "ICC" or action-code = "conception-chance" ) [ "conception-chance" ]
     ( action-code = "STM" or action-code = "stomach-size" ) [ "stomach-size" ]   
@@ -205,6 +209,7 @@ to-report get-action [ action-code ] ; called by sta7us, fix
     ( action-code = "GFD" or action-code = "go-forward" ) [ "go-forward" ]
     ( action-code = "MOV" or action-code = "move-toward" ) [ "move-toward" ]
     ( action-code = "HED" or action-code = "set-heading" ) [ "set-heading" ]
+    ( action-code = "HID" or action-code = "hide" ) [ "hide" ]
     ( action-code = "SAC" or action-code = "signal-a-chance" or action-code = "SAO" or action-code = "signal-a-on" or action-code = "signal-alpha-on" ) [ "signal-alpha-on" ]
     ( action-code = "SBC" or action-code = "signal-b-chance" or action-code = "SBO" or action-code = "signal-b-on" or action-code = "signal-beta-on") [ "signal-beta-on" ]
     ( action-code = "SCC" or action-code = "signal-c-chance" or action-code = "SCO" or action-code = "signal-c-on" or action-code = "signal-gamma-on" ) [ "signal-gamma-on" ]
@@ -220,9 +225,9 @@ to-report get-action [ action-code ] ; called by sta7us, fix
     ( action-code = "CKA" or action-code = "check-adulthood" ) [ "check-adulthood" ]
     ( action-code = "SNC" or action-code = "senescent-chance" ) [ "senescent-chance" ]
     ( action-code = "CKS" or action-code = "check-senescence" ) [ "check-senescence" ]
-    ( action-code = "DSC" or action-code = "digest-stomach" ) [ "digest-stomach" ]
-    ( action-code = "FAT" or action-code = "reserve-energy" ) [ "reserve-energy" ]
-    ( action-code = "BRN" or action-code = "burn-reserves" ) [ "burn-reserves" ]
+    ( action-code = "DSC" or action-code = "digest-stomach" ) [ "digest-stomach" ] ; obsolete
+    ( action-code = "FAT" or action-code = "reserve-energy" ) [ "reserve-energy" ] ; obsolete
+    ( action-code = "BRN" or action-code = "burn-reserves" ) [ "burn-reserves" ] ; obsolete
     ( action-code = "GFT" or action-code = "supply-to" ) [ "supply-to" ]
     ( action-code = "RFT" or action-code = "demand-from" ) [ "demand-from" ]
     ( action-code = "EAT" or action-code = "eat") [ "eat" ]
@@ -232,7 +237,10 @@ to-report get-action [ action-code ] ; called by sta7us, fix
     ( action-code = "CLG" or action-code = "cling-to" ) [ "cling-to" ]
     ( action-code = "ATK" or action-code = "attack" ) [ "attack" ]
     ( action-code = "HLP" or action-code = "help") [ "help" ]
-    ( action-code = "JNG" or action-code = "join-group-of" ) [ "join-group-of" ]
+    ( action-code = "JNG" or action-code = "join-group-of" or action-code = "join" ) [ "join" ]
+    ( action-code = "LEV" or action-code = "leave" ) [ "leave" ]
+    ( action-code = "RCT" or action-code = "recruit" ) [ "recruit" ]
+    ( action-code = "KCK" or action-code = "kick-out" ) [ "kick-out" ]
     ( action-code = "MAT" or action-code = "mate-with") [ "mate-with" ]
     [ "" ])
   
@@ -265,9 +273,11 @@ to-report status-of [ target ]
   ]
   
   ; BOTH
-  set status-report (word status-report ifelse-value ( get-solar-status = "DAY" ) [ "*" ][ "-" ] )
-  set status-report (word status-report ceiling [color] of target )
-  
+  set status-report ( word status-report ifelse-value ( get-solar-status = "DAY" ) [ "*" ][ "-" ] )
+  let my-color (word "" ceiling [color] of target "")
+  set status-report ( word status-report (ifelse-value ( length my-color = 1 ) [ (word "00" my-color ) ] ( length my-color = 2 ) [(word "0" my-color) ] [ my-color ] ))
+  ;foreach base-colors [ c -> set status-report (word status-report ifelse-value ( shade-of? c [color] of target ) [ ceiling (( [color] of target ) - c + 5 ) ] [ "" ] ) ]
+
   report status-report
 end
 
@@ -287,30 +297,30 @@ to-report status-code-list
     "a" "b" "c" "d" "e" "f" "g" 
     "h" "i" "j" "k" "l" "m" "n"
     "o" "p" "q" "r" "s" "t" "u"
-    "v" "w" "x" "y" "z" "+" "α"
-    "β" "ɣ" "*" "-" "#" "$" "~" 
-    "1" "2" "3" "4" "5" 
-    "6" "7" "8" "9" "0" ]
+    "v" "w" "x" "y" "z" "+" "α" 
+    "å" "β" "ß" "ɣ" "œ" "*" "-" 
+    "#" "$" "~" "1" "2" "3" "4" 
+    "5" "6" "7" "8" "9" "0" ]
 end
 
 to-report action-code-list
   report [ 
-    "DEC" "MNT" "GRW" "BSD" "IPR" 
-    "NPR" "APR" "ICC" "MTR" "SXR" 
-    "LTS" "LEV" "TRT" "TLF" "GFD" 
-    "HED" "SAC" "SBC" "SCC" "SAO" 
-    "SBO" "SCO" "INC" "CKI" "GVB" 
-    "MOV" "AWY"
-    "CKB" "CKJ" "CKW"
-    "CKA" "CKS" "DSC" 
-    "GFT" "RFT" "EAT" "SQM" "CLG"
-    "PKU" "PDN" "ATK" "HLP" "JNG"
-    "MAT" "DPA" "NPA" "APA" "VCR"  ]
+    "maintain-body" "body-size" "body-shade" 
+    "day-perception" "night-perception" "audio-perception" 
+    "day-perception-angle" "night-perception-angle" "audio-perception-angle" "vocal-range" 
+    "conception-chance" "stomach-size" "mutation-chance" "sex-ratio" "litter-size" 
+    "turn-right" "turn-left" "go-forward" "set-heading" "hide" 
+    "signal-alpha-on" "signal-beta-on" "signal-gamma-on" 
+    "check-infancy" "check-birth" "check-juvenility" 
+    "check-weaning" "check-adulthood" "check-senescence"
+    "move-toward" "move-away-from" "supply-to" "demand-from" "eat"
+    "join" "leave" "recruit" "kick-out"
+    "pick-up" "put-down" "cling-to" "squirm-from"
+    "help" "attack" "mate-with" ]
 end
 
 to-report generate-status
   let new-status one-of status-code-list
-  repeat (random 5) [ set new-status ( word new-status one-of status-code-list ) ]
+  repeat ( random 5 ) [ set new-status ( word new-status one-of status-code-list ) ]
   report new-status
 end
-

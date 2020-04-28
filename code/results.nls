@@ -774,3 +774,85 @@ end
 ;
 ; 
   
+
+
+
+
+;  ask anima1s [ set population-decisions (sentence population-decisions decision.vectors ) ]
+;  ask anima1s [ set population-allocations (sentence population-allocations energy.allocated ) ]
+;  ask anima1s [ set population-actions (sentence population-actions completed.actions ) ]
+
+
+;to collect-maintenance-data [ cost ]
+;  (ifelse
+;    ( relatedness-with myself = 1 ) [ ask myself [ set whole-related-help-cost whole-related-help-cost + cost ]]
+;    ( relatedness-with myself = 0.5 ) [ ask myself [ set half-related-help-cost half-related-help-cost + cost ]]
+;    ( relatedness-with myself = 0.25 ) [ ask myself [ set fourth-related-help-cost fourth-related-help-cost + cost ]]
+;    ( relatedness-with myself = 0.125 ) [ ask myself [ set eighth-related-help-cost eighth-related-help-cost + cost ]]
+;    [])
+;end
+;
+;to collect-eating-data [ energy-eaten cost-of-eating ]
+;  if (output-results?) [
+;
+;    set foraging-gains foraging-gains + energy-eaten
+;    set foraging-cost foraging-cost + cost-of-eating
+;
+;    ; group is tracking foraging performance of its members
+;    ask current-group [
+;      set total-energy-gained total-energy-gained + energy-eaten
+;      if ( [life.history] of myself = "gestatee" and [biological.sex] of myself = "female" ) [ set gestatee-female-energy-gained gestatee-female-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "gestatee" and [biological.sex] of myself = "male" ) [ set gestatee-male-energy-gained gestatee-male-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "infant" and [biological.sex] of myself = "female" ) [ set infant-female-energy-gained infant-female-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "infant" and [biological.sex] of myself = "male" ) [ set infant-male-energy-gained infant-male-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "juvenile" and [biological.sex] of myself = "female" ) [ set juvenile-female-energy-gained juvenile-female-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "juvenile" and [biological.sex] of myself = "male" ) [ set juvenile-male-energy-gained juvenile-male-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "adult" and [biological.sex] of myself = "female" and [female.fertility] of myself = "cycling" ) [ set adult-cycling-energy-gained adult-cycling-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "adult" and [biological.sex] of myself = "female" and [female.fertility] of myself = "pregnant" ) [ set adult-pregnant-energy-gained adult-pregnant-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "adult" and [biological.sex] of myself = "female" and [female.fertility] of myself = "lactating" ) [ set adult-lactating-energy-gained adult-lactating-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "adult" and [biological.sex] of myself = "male" ) [ set adult-male-energy-gained adult-male-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "senescent" and [biological.sex] of myself = "female" ) [ set senescent-female-energy-gained senescent-female-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "senescent" and [biological.sex] of myself = "male" ) [ set senescent-male-energy-gained senescent-male-energy-gained + energy-eaten ]
+;    ]
+;  ]
+;end
+;
+;
+;to collect-helping-data [ target cost ]
+;  ;  if ( output-results? and target != self ) [ ; Hamilton's Rule
+;  ;    let r relatedness-with target
+;  ;    ;print (word " me: " self " living.chance: " living.chance "  target: " target "   relatedness " relatedness-with target " ([living.chance] of target) " ([living.chance] of target)  "   value:"  value " update  " (get-updated-value [living.chance] of target ( value )) "  total: " (( get-updated-value [living.chance] of target ( value ) ) - [living.chance] of target ))
+;  ;    let B ( get-updated-value [living.chance] of target ( cost ) ) - [living.chance] of target ; how much target benefitted
+;  ;    let C living.chance - ( get-updated-value living.chance cost ) ; how much you *could have* benefitted by investing in yourself
+;  ;    set helping-benefit helping-benefit + r * B ; benefit to yourself based on relatedness to target
+;  ;    set helping-cost helping-cost + C ; cost of not helping yourself
+;  ;
+;  ;    if ( biological.sex = "female" and [biological.sex] of target = "female" and group.identity = [group.identity] of target ) [
+;  ;      set ingroup-female-female-help-cost ingroup-female-female-help-cost + cost
+;  ;    ]
+;  ;    if ( biological.sex = "male" and [biological.sex] of target = "male" and group.identity = [group.identity] of target ) [
+;  ;      set ingroup-male-male-help-cost ingroup-male-male-help-cost + cost
+;  ;    ]
+;  ;    if ( (( biological.sex = "female" and [biological.sex] of target = "male" ) or ( biological.sex = "male" and [biological.sex] of target = "female" )) and group.identity = [group.identity] of target ) [
+;  ;      set feingroup-male-male-help-cost feingroup-male-male-help-cost + cost
+;  ;    ]
+;  ;  ]
+;end
+;
+;
+;to collect-conception-data [ target ]
+;  if output-results? [
+;    set conceptions-list lput [meta-id] of target conceptions-list
+;    ask target [ set conceptions-list lput [meta-id] of myself conceptions-list ]]
+;end
+;
+;
+;to collect-mating-data [ target ]
+;  if output-results? [
+;    set matings-list lput [meta-id] of target matings-list
+;    ask target [ set matings-list lput [meta-id] of myself matings-list ]]
+;end
+
+
+
+

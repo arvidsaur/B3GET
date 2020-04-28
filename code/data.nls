@@ -116,22 +116,10 @@ to-report generate-population-id
   report ( word "p" random 99 one-of alphabet one-of alphabet one-of alphabet )
 end
 
-to-report population-file-exists?
-  report file-exists? ( word "../data/" population ".csv" )
-end
-
-;to ask-anima1s-unlock-chromosomes
-;  set chromosome.I read-from-string chromosome.I
-;  set chromosome.II read-from-string chromosome.II
-;end
-
 to import-population
-  clear-output
-  output-print " ---------------------------------------------------------------------------"
-  output-print (word " IMPORT POPULATION : " population )
-  output-print " ---------------------------------------------------------------------------"
+  output-header (word " IMPORT POPULATION : " population )
   
-  ifelse population-file-exists? [
+  ifelse file-exists? ( word "../data/" population ".csv" ) [
     
     import-turtles-from (word "../data/" population ".csv")
     
@@ -198,11 +186,8 @@ to import-population
 end
 
 to save-population
-  clear-output
-  output-print " ---------------------------------------------------------------------------"
-  output-print (word " SAVE POPULATION : " population )
-  output-print " ---------------------------------------------------------------------------"
-  
+  output-header (word " SAVE POPULATION : " population )
+
   ifelse ( file-exists? (word "../data/" population ".csv") )
   [ 
     let answer user-yes-or-no? 
@@ -241,8 +226,8 @@ to save-population
       if ( not member? group.identity selected-groups ) [ set selected-groups lput group.identity selected-groups ]
       
       ; turtle variables can only be saved in string format
-      set chromosome.I csv:to-string chromosome.I
-      set chromosome.II csv:to-string chromosome.II
+      ;set chromosome.I csv:to-string chromosome.I
+      ;set chromosome.II csv:to-string chromosome.II
       
       let old-carried-items carried.items
       let new-carried-items []
@@ -252,8 +237,8 @@ to save-population
       
       export-turtle-to (word "../data/" population ".csv") turtle-list 
       
-      set chromosome.I csv:from-string chromosome.I
-      set chromosome.II csv:from-string chromosome.II 
+      ;set chromosome.I csv:from-string chromosome.I
+      ;set chromosome.II csv:from-string chromosome.II 
       set carried.items old-carried-items
     ]
     
@@ -275,17 +260,10 @@ to-report generate-genotype-id
   report ( word "g" [meta-id] of one-of anima1s  )
 end
 
-to-report genotype-file-exists?
-  report file-exists? ( word "../data/" genotype ".txt" )
-end
-
 to import-genotype
-  clear-output
-  output-print " ---------------------------------------------------------------------------"
-  output-print (word " IMPORT GENOTYPE : " genotype )
-  output-print " ---------------------------------------------------------------------------"
-  
-  ifelse genotype-file-exists? [  
+  output-header (word " IMPORT GENOTYPE : " genotype )
+
+  ifelse file-exists? ( word "../data/" genotype ".txt" ) [  
     
     ask anima1s [
       
@@ -315,10 +293,7 @@ to import-genotype
 end
 
 to save-genotype
-  clear-output
-  output-print " ---------------------------------------------------------------------------"
-  output-print (word " SAVE GENOTYPE : organism " meta-id )
-  output-print " ---------------------------------------------------------------------------"
+  output-header (word " SAVE GENOTYPE : organism " meta-id )
   (csv:to-file ( word "../data/" genotype ".txt" ) (sentence chromosome.I [[]] chromosome.II ) " ")
   set documentation-notes (word "New genotype " genotype " saved. " documentation-notes )
   update-metafile "genotype" genotype
