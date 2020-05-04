@@ -16,16 +16,12 @@
 ;----------------------------------------------------------------------------------------------
 
 ;----------------------------------------------------------------------------------------------
-; METAFILE FILES
+; METAFILE
 ;----------------------------------------------------------------------------------------------
-
-to-report metafile-exists?
-  report file-exists? "../data/metafile.csv"
-end
 
 to setup-metafile
   
-  if ( not metafile-exists? ) [
+  if ( not file-exists? "../data/metafile.csv" ) [
     
     file-open "../data/metafile.csv"
     csv:to-file "../data/metafile.csv" (list (list
@@ -63,7 +59,7 @@ end
 to update-metafile [ type-of-file name-of-file ]
   
   ; Save whatever is currently in the METAFILE or create new
-  if ( not metafile-exists? ) [ setup-metafile ]
+  if ( not file-exists? "../data/metafile.csv" ) [ setup-metafile ]
   file-open "../data/metafile.csv"
   let old-metafile csv:from-file "../data/metafile.csv"
   
@@ -142,7 +138,7 @@ to import-population
       set cells-occupied []
       set infanticide-list []
       set decision.vectors []
-      set my-environment no-turtles
+      set my.environment no-turtles
       if ( stomach.size = 0 ) [ set stomach.size 0.1 ]
       if ( is.alive = 0 ) [ set is.alive true ] ; note it will import both alive and dead as alive if population file has is.dead instead of is.alive
       
@@ -206,20 +202,59 @@ to save-population
       "shape" "label" "label-color" "hidden?" "size" 
       "pen-size" "pen-mode" )
     
-    let turtle-list (list "breed" "meta-id" "age"
-      "color" "heading" "xcor" "ycor" "label" "label-color"
-      "shape" "hidden?" "size" "pen-size" "pen-mode"
-      "biological.sex" "life.history" "female.fertility" "energy.supply" 
-      "group.identity" "is.alive" "alpha.signal" "beta.signal" "gamma.signal"
-      "chromosome.I" "chromosome.II" "identity.I" "identity.II"
-      "living.chance" "body.size" "body.shade" "stomach.size" "mutation.chance"
-      "sex.ratio" "litter.size" "conception.chance"
-      "day.perception.angle" "night.perception.angle" "audio.perception.angle"
-      "day.perception.range" "night.perception.range" "audio.perception.range"
-      "vocal.range" "alpha.chance" "beta.chance" "gamma.chance"
-      "birthing.chance" "weaning.chance" "infancy.chance"
-      "juvenility.chance" "adulthood.chance" "senescency.chance"
-      "carried.items" "mother-identity" )
+    let turtle-list (list 
+      "breed" 
+      "meta-id" 
+      "age"
+      "color" 
+      "heading" 
+      "xcor" "ycor" 
+      "label" 
+      "label-color"
+      "shape" 
+      "hidden?" 
+      "size" 
+      "pen-size" 
+      "pen-mode"
+      "biological.sex" 
+      "life.history" 
+      "female.fertility" 
+      "energy.supply" 
+      "group.identity" 
+      "is.alive" 
+      "alpha.signal" 
+      "beta.signal" 
+      "gamma.signal"
+      "chromosome.I" 
+      "chromosome.II" 
+      "identity.I" 
+      "identity.II"
+      "living.chance" 
+      "body.size" 
+      "body.shade" 
+      "stomach.size" 
+      "mutation.chance"
+      "sex.ratio" 
+      "litter.size" 
+      "conception.chance"
+      "day.perception.angle"
+      "night.perception.angle" 
+      "audio.perception.angle"
+      "day.perception.range" 
+      "night.perception.range" 
+      "audio.perception.range"
+      "vocal.range" 
+      "alpha.chance" 
+      "beta.chance" 
+      "gamma.chance"
+      "birthing.chance" 
+      "weaning.chance"
+      "infancy.chance"
+      "juvenility.chance" 
+      "adulthood.chance"
+      "senescency.chance"
+      "carried.items" 
+      "mother-identity" )
     
     ask anima1s [
       
@@ -257,7 +292,7 @@ end
 ;----------------------------------------------------------------------------------------------
 
 to-report generate-genotype-id
-  report ( word "g" [meta-id] of one-of anima1s  )
+  report ( word "g" [meta-id] of one-of anima1s )
 end
 
 to import-genotype

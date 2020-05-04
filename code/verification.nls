@@ -160,8 +160,8 @@ to-report generate-verification-tape
   set function lput "go" function
   set boolean lput ( ifelse-value ( model-structure = "aspatial" ) 
     [ ifelse-value ( get-solar-status = "DAY" ) 
-      [ any? anima1s with [ max [distance myself] of my-environment > day.perception.range ] ] 
-      [ any? anima1s with [ max [distance myself] of my-environment > night.perception.range ] ] ] 
+      [ any? anima1s with [ max [distance myself] of my.environment > day.perception.range ] ] 
+      [ any? anima1s with [ max [distance myself] of my.environment > night.perception.range ] ] ] 
     [ true ] ) boolean
    
   set header lput "Agents not in the same location can interact with each other in an ASPATIAL model-structure?" header 
@@ -295,30 +295,30 @@ to-report generate-verification-tape
   set function lput "consider-environment" function
   set boolean lput ( profiler:calls "consider-environment" = count-alive-agents ) boolean
   
-  set header lput "The my-environment of agents is an agentset?" header 
+  set header lput "The my.environment of agents is an agentset?" header 
   set verification lput "dynamic" verification 
   set function lput "consider-environment" function
-  set boolean lput ( not any? anima1s with [ not is-agentset? my-environment ] ) boolean
+  set boolean lput ( not any? anima1s with [ not is-agentset? my.environment ] ) boolean
   
   set header lput "Not any agents with no DAY PERCEPTION RANGE who can see their environment during the day?" header 
   set verification lput "dynamic" verification 
   set function lput "consider-environment" function
-  set boolean lput ( ifelse-value ( get-solar-status = "DAY" ) [ any? anima1s with [ life.history != "gestatee" and day.perception.range = 0 and is-agentset? my-environment and count my-environment > 1 ] ] [ true ] ) boolean
+  set boolean lput ( ifelse-value ( get-solar-status = "DAY" ) [ any? anima1s with [ life.history != "gestatee" and day.perception.range = 0 and is-agentset? my.environment and count my.environment > 1 ] ] [ true ] ) boolean
   
   set header lput "Not any agents with no NIGHT PERCEPTION RANGE who can see their environment during the night?" header 
   set verification lput "dynamic" verification 
   set function lput "consider-environment" function
-  set boolean lput ( ifelse-value ( get-solar-status = "NIGHT" ) [ any? anima1s with [ life.history != "gestatee" and night.perception.range = 0 and is-agentset? my-environment and count my-environment > 1 ] ] [ true ] ) boolean
+  set boolean lput ( ifelse-value ( get-solar-status = "NIGHT" ) [ any? anima1s with [ life.history != "gestatee" and night.perception.range = 0 and is-agentset? my.environment and count my.environment > 1 ] ] [ true ] ) boolean
   
   set header lput "Not any agents with no DAY PERCEPTION ANGLE who can see their environment during the day?" header 
   set verification lput "dynamic" verification 
   set function lput "consider-environment" function
-  set boolean lput ( ifelse-value ( get-solar-status = "DAY" ) [ any? anima1s with [ life.history != "gestatee" and day.perception.angle = 0 and is-agentset? my-environment and count my-environment > 1 ] ] [ true ] ) boolean
+  set boolean lput ( ifelse-value ( get-solar-status = "DAY" ) [ any? anima1s with [ life.history != "gestatee" and day.perception.angle = 0 and is-agentset? my.environment and count my.environment > 1 ] ] [ true ] ) boolean
   
   set header lput "Not any agents with no NIGHT PERCEPTION ANGLE who can see their environment during the night?" header 
   set verification lput "dynamic" verification 
   set function lput "consider-environment" function
-  set boolean lput ( ifelse-value ( get-solar-status = "NIGHT" ) [ any? anima1s with [ life.history != "gestatee" and night.perception.angle = 0 and is-agentset? my-environment and count my-environment > 1 ] ] [ true ] ) boolean
+  set boolean lput ( ifelse-value ( get-solar-status = "NIGHT" ) [ any? anima1s with [ life.history != "gestatee" and night.perception.angle = 0 and is-agentset? my.environment and count my.environment > 1 ] ] [ true ] ) boolean
   
   ; --------------------------------------------------------------------------------------------------------------------
   ; MAKE-DECISIONS

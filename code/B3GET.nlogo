@@ -73,13 +73,15 @@ anima1s-own [
 
   chromosome.I
   chromosome.II
+
+  my.environment
   decision.vectors
   energy.allocated
   completed.actions
 
   ; TRACKING VARIABLES
-  my-environment
-  mother-identity
+
+  mother-identity ;
   father-identity
   generation-number
   previous-group-id
@@ -227,7 +229,7 @@ end
 ;--------------------------------------------------------------------------------------------------------------------
 
 to setup-parameters
-  set model-version "1.1.0"
+  set model-version "~1.1.0"
   set deterioration-rate -0.001
   set selection-rate 0.0001
 end
@@ -236,7 +238,8 @@ to setup-plants
   ask plants [ die ]
   ask patches [
     set pcolor 36
-    sprout-plants 1 [ initialize-plant set energy.supply 0.5 * plant-quality ]]
+    sprout-plants 1 [ initialize-plant set energy.supply 0.5 * plant-quality ]
+  ]
   repeat 100 [ update-plants ]
 end
 
@@ -267,7 +270,7 @@ end
 to go
 
   ; ENVIRONMENTAL CONTRAINTS
-  ;update-plants
+  update-plants
   ask turtles [ set age age + 1 ]
   ask anima1s [ foreach carried.items [ i -> ask i [ move-to myself ] ]] ; important to keep
   if selection-on? [ artificial-selection ]
@@ -411,35 +414,35 @@ to update-energy [ update ]
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
+;                             oo
 ;
-;                      dP   oo
-;                      88
-;  .d8888b. .d8888b. d8888P dP .d8888b. 88d888b. .d8888b.
-;  88'  `88 88'  `""   88   88 88'  `88 88'  `88 Y8ooooo.
-;  88.  .88 88.  ...   88   88 88.  .88 88    88       88
-;  `88888P8 `88888P'   dP   dP `88888P' dP    dP `88888P'
+;  .d8888b. 88d888b. .d8888b. dP 88d888b. .d8888b.
+;  88ooood8 88'  `88 88'  `88 88 88'  `88 88ooood8
+;  88.  ... 88    88 88.  .88 88 88    88 88.  ...
+;  `88888P' dP    dP `8888P88 dP dP    dP `88888P'
+;                         .88
+;                     d8888P
 ;
 ;--------------------------------------------------------------------------------------------------------------------
 
-
 to make-decisions
-  set my-environment no-turtles
+  set my.environment no-turtles
   let sun-status get-solar-status
 
   ; ASPATIAL WORLD
   ifelse ( model-structure = "aspatial" ) [
-    set my-environment up-to-n-of 100 turtles
+    set my.environment up-to-n-of 100 turtles
 
   ][ ; SPATIAL WORLD
     if ( sun-status = "DAY" ) [
-      set my-environment turtles with [ not is-group? self and not hidden? ] in-cone ( 5 * day.perception.range ) ( 360 * day.perception.angle )
-      if (female.fertility = "pregnant") [ set my-environment turtles with [ not is-group? self and (not hidden? or member? self [my-offspring] of myself ) ] in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) ] ] ; mothers can see gestatees
+      set my.environment turtles with [ not is-group? self and not hidden? ] in-cone ( 5 * day.perception.range ) ( 360 * day.perception.angle )
+      if (female.fertility = "pregnant") [ set my.environment turtles with [ not is-group? self and (not hidden? or member? self [my-offspring] of myself ) ] in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) ] ] ; mothers can see gestatees
 
     if ( sun-status = "NIGHT" ) [
-      set my-environment turtles with [ not is-group? self and not hidden? ] in-cone ( 5 * day.perception.range ) ( 360 * day.perception.angle ) ; set to night.perception.angle once genotype includes this
-      if (female.fertility = "pregnant") [ set my-environment turtles with [ not is-group? self and (not hidden? or member? self [my-offspring] of myself ) ] in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) ] ] ; mothers can see gestatees
+      set my.environment turtles with [ not is-group? self and not hidden? ] in-cone ( 5 * day.perception.range ) ( 360 * day.perception.angle ) ; set to night.perception.angle once genotype includes this
+      if (female.fertility = "pregnant") [ set my.environment turtles with [ not is-group? self and (not hidden? or member? self [my-offspring] of myself ) ] in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) ] ] ; mothers can see gestatees
 
-    if (life.history = "gestatee" ) [ set my-environment turtles with [ [meta-id] of self = [meta-id] of myself or meta-id = [mother-identity] of myself ]] ; gestatees can only see themselves, and their mothers
+    if (life.history = "gestatee" ) [ set my.environment turtles with [ [meta-id] of self = [meta-id] of myself or meta-id = [mother-identity] of myself ]] ; gestatees can only see themselves, and their mothers
   ]
 
   ; GENOTYPE READER
@@ -448,9 +451,9 @@ end
 
 to-report get-decisions
   report ( ifelse-value
-    ( genotype-reader = "sta7us" ) [ sta7us-get-decisions my-environment ]
-    ( genotype-reader = "g3notype" ) [ g3notype-get-decisions my-environment ]
-    [ sta7us-get-decisions my-environment ] ) ; default
+    ( genotype-reader = "sta7us" ) [ sta7us-get-decisions my.environment ]
+    ( genotype-reader = "g3notype" ) [ g3notype-get-decisions my.environment ]
+    [ sta7us-get-decisions my.environment ] ) ; default
 end
 
 to allocate-energy
@@ -538,6 +541,8 @@ to do-action [ action-code target cost ]
     action-code = "eat" [ eat target cost ]
     action-code = "join" [ join target cost ]
     action-code = "leave" [ leave target cost ]
+    action-code = "recruit" [ recruit target cost ]
+    action-code = "kick-out" [ kick-out target cost ]
     action-code = "pick-up" [ pick-up target cost ]
     action-code = "put-down" [ put-down target cost  ]
     action-code = "cling-to" [ cling-to target cost ]
@@ -549,6 +554,17 @@ to do-action [ action-code target cost ]
     [ ])
 
 end
+
+;--------------------------------------------------------------------------------------------------------------------
+;
+;                      dP   oo
+;                      88
+;  .d8888b. .d8888b. d8888P dP .d8888b. 88d888b. .d8888b.
+;  88'  `88 88'  `""   88   88 88'  `88 88'  `88 Y8ooooo.
+;  88.  .88 88.  ...   88   88 88.  .88 88    88       88
+;  `88888P8 `88888P'   dP   dP `88888P' dP    dP `88888P'
+;
+;--------------------------------------------------------------------------------------------------------------------
 
 ;--------------------------------------------------------------------------------------------------------------------
 ; ACTIONS
@@ -950,7 +966,7 @@ to join [ target cost ]
   if ( is-anima1? target ) [
     complete-action target "join" cost 0
     if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "recruit"
+    [ let target-cost get-action-cost-of target "join"
       let probability ( cost + target-cost ) / cost
       if ( cost + target-cost  > 0 ) [ join-group ([group.identity] of target) probability ]]]
 end
@@ -959,7 +975,7 @@ to leave [ target cost ]
   if ( is-anima1? target ) [
     complete-action target "leave" cost 0
     if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "kick-out"
+    [ let target-cost get-action-cost-of target "leave"
       let probability ( cost + target-cost ) / cost
       if ( cost + target-cost > 0 ) [ leave-group probability ]]]
 end
@@ -968,7 +984,7 @@ to recruit [ target cost ]
   if ( is-anima1? target ) [
     complete-action target "recruit" cost 0
     if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "join"
+    [ let target-cost get-action-cost-of target "recruit"
       let probability ( cost + target-cost ) / cost
       if ( cost + target-cost > 0 ) [ ask target [ join-group [group.identity] of myself probability ]]]]
 end
@@ -977,7 +993,7 @@ to kick-out [ target cost ]
   if ( is-anima1? target ) [
     complete-action target "kick-out" cost 0
     if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "leave"
+    [ let target-cost get-action-cost-of target "kick-out"
       let probability ( cost + target-cost ) / cost
       if ( cost + target-cost > 0 ) [ ask target [ leave-group probability ]]]]
 end
@@ -1197,7 +1213,7 @@ to initialize-from-parents [ m f ]
   set adult-gamma-chance 0
   set mother-initiated-birth true
   set mother-initiated-weaning true
-  set my-environment no-turtles
+  set my.environment no-turtles
   set distance-traveled 0
   set foraging-gains 0
   set foraging-cost 0
@@ -1608,7 +1624,7 @@ INPUTBOX
 1097
 299
 population
-speed-dating
+p-20-04-01-02
 1
 0
 String
@@ -1619,7 +1635,7 @@ INPUTBOX
 1097
 373
 genotype
-speed-dating
+NIL
 1
 0
 String
@@ -1683,7 +1699,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "--------" "lotka-volterra" "age-histogram" "metafile-report" "verify-code" "check-runtime" "simulation-report" "clear-plants" "setup-plants" "clear-population" "view-genotype" "view-decisions" "view-allocation" "view-actions" "add-allele" "delete-allele" "population-report"
-8
+17
 
 BUTTON
 912
@@ -1786,7 +1802,7 @@ SWITCH
 79
 selection-on?
 selection-on?
-0
+1
 1
 -1000
 
