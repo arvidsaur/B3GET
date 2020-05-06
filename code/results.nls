@@ -622,7 +622,7 @@ end
 
 to-report my-offspring
   report ifelse-value ( biological.sex = "female" )
-  [ anima1s with [ mother-identity = [meta-id] of myself ]]
+  [ anima1s with [ mother = myself ]]
   [ anima1s with [ father-identity = [meta-id] of myself ]]
 end
 
@@ -632,17 +632,17 @@ to-report current-group
   [ nobody ]
 end
 
-to-report mother
-  report ifelse-value (any? turtles with [ meta-id = [mother-identity] of myself ])
-  [ one-of turtles with [ meta-id = [mother-identity] of myself ]]
-  [ nobody ]
-end
-
-to-report father
-  report ifelse-value (any? turtles with [ meta-id = [father-identity] of myself ])
-  [ one-of turtles with [ meta-id = [father-identity] of myself ]]
-  [ nobody ]
-end
+;to-report mother
+;  report ifelse-value (any? turtles with [ meta-id = [mother-identity] of myself ])
+;  [ one-of turtles with [ meta-id = [mother-identity] of myself ]]
+;  [ nobody ]
+;end
+;
+;to-report father
+;  report ifelse-value (any? turtles with [ meta-id = [father-identity] of myself ])
+;  [ one-of turtles with [ meta-id = [father-identity] of myself ]]
+;  [ nobody ]
+;end
 
 ; --------------------------------------------------------------------------- ;
 ;

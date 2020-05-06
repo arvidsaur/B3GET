@@ -117,21 +117,32 @@ to import-population
   
   ifelse file-exists? ( word "../data/" population ".csv" ) [
     
-    import-turtles-from (word "../data/" population ".csv")
+    import-turtles-from ( word "../data/" population ".csv" )
     
-    let id-memory table:make
-    
-    
-    ask anima1s [
-      
-      ;ask anima1s with [ biological.sex = "female" and life.history = "adult" ] [ set female.fertility "cycling" ]
-      
+    ; create new meta-ids for everyone
+    let table-of-ids table:make
+    ask turtles [
       let new-id random 9999999
-      table:put id-memory meta-id new-id
-      set meta-id new-id
-      
-      set carried.items ifelse-value ( is-string? carried.items ) [ read-from-string carried.items ] [ [] ] ; for if population file does not have carried.items
-      
+      table:put table-of-ids meta-id new-id
+      set meta-id new-id ]
+    
+    ; update carried items list
+    ask anima1s [
+      if ( not is-list? carried.items ) [ set carried.items [] ]
+      foreach carried.items [ itm -> set carried.items remove itm ( lput one-of anima1s with [ meta-id = ( table:get table-of-ids itm ) ] carried.items ) ] ]
+    
+    ; update mother identity
+    ask anima1s [
+      if ( mother = 0 or mother = "nobody" ) [ set mother nobody ]
+      if ( member? mother table:keys table-of-ids ) [ 
+        set mother one-of turtles with [ table:get table-of-ids [mother] of myself = meta-id ] ]]
+
+    ; update group affilitations with new ids
+    ask anima1s [
+     set group.identity table:get table-of-ids group.identity ]
+    
+    ; generation initialization of variables
+    ask anima1s [
       set group-transfers-list []
       set matings-list []
       set conceptions-list []
@@ -140,38 +151,7 @@ to import-population
       set decision.vectors []
       set my.environment no-turtles
       if ( stomach.size = 0 ) [ set stomach.size 0.1 ]
-      if ( is.alive = 0 ) [ set is.alive true ] ; note it will import both alive and dead as alive if population file has is.dead instead of is.alive
-      
-      ;      set chromosome.I csv:from-string chromosome.I
-      ;      set chromosome.II read-from-string chromosome.II
-      ;ask-anima1s-unlock-chromosomes
-    ]
-    
-    ask anima1s [
-      
-      let updated-carried-items []
-      foreach carried.items [ c ->
-        set updated-carried-items lput one-of anima1s with [ meta-id = ( table:get id-memory c ) ] updated-carried-items
-      ]
-      set carried.items updated-carried-items
-      
-      if ( member? mother-identity table:keys id-memory ) [ 
-        set mother-identity table:get id-memory mother-identity
-      ]
-      
-      ;      let new-var read-from-string chromosome.II
-      ;      print new-var
-    ]
-    
-    ;ask anima1s [ if ((life.history = "gestatee" or life.history = "infant" ) and mother != nobody ) [ ask mother [ set carried.items lput myself carried.items ]] ]
-    
-    ask groups [
-      
-      let current-group-members group-members
-      set meta-id random 9999999
-      ask current-group-members [ set group.identity [meta-id] of myself ]
-      
-    ]
+      if ( is.alive = 0 ) [ set is.alive true ]]
     
     set documentation-notes (word "Population file " population " imported. " documentation-notes )
     update-metafile "population" population
@@ -186,29 +166,25 @@ to save-population
 
   ifelse ( file-exists? (word "../data/" population ".csv") )
   [ 
+    ; popup window options if population file already exists
     let answer user-yes-or-no? 
     (word "The population " population " already exists! "
-      "Would you like to: [ YES ] overwrite the existing file with current population, "
-      "[ NO ] save current population to a different randomly generated file name, "
-      "or [ HALT ] forget the whole darn thing?" )
+      "Would you like to: overwrite the existing file with current population [ YES ], "
+      "save current population to a different randomly generated file name [ NO ], "
+      "or forget the whole darn thing [ HALT ]?" )
     ifelse ( answer ) [ file-delete (word "../data/" population ".csv") save-population ] [ set population generate-population-id save-population ]
     
   ][
-    
-    let selected-groups []
-    
-    let group-list ( list "breed" "meta-id"
-      "color" "heading" "xcor" "ycor"
-      "shape" "label" "label-color" "hidden?" "size" 
-      "pen-size" "pen-mode" )
-    
+
+    ; list of turtle state variables to save
     let turtle-list (list 
       "breed" 
       "meta-id" 
       "age"
       "color" 
       "heading" 
-      "xcor" "ycor" 
+      "xcor" 
+      "ycor" 
       "label" 
       "label-color"
       "shape" 
@@ -225,6 +201,7 @@ to save-population
       "alpha.signal" 
       "beta.signal" 
       "gamma.signal"
+      "mother"
       "chromosome.I" 
       "chromosome.II" 
       "identity.I" 
@@ -253,34 +230,14 @@ to save-population
       "juvenility.chance" 
       "adulthood.chance"
       "senescency.chance"
-      "carried.items" 
-      "mother-identity" )
+      "carried.items" )
     
-    ask anima1s [
-      
-      if ( not member? group.identity selected-groups ) [ set selected-groups lput group.identity selected-groups ]
-      
-      ; turtle variables can only be saved in string format
-      ;set chromosome.I csv:to-string chromosome.I
-      ;set chromosome.II csv:to-string chromosome.II
-      
-      let old-carried-items carried.items
-      let new-carried-items []
-      foreach carried.items [ itm ->
-        set new-carried-items lput [meta-id] of itm new-carried-items ]
-      set carried.items new-carried-items
-      
+    ask turtles with [ breed = anima1s or breed = groups ] [ 
+      if ( is-anima1? self ) [ set mother ifelse-value ( mother != nobody ) [ [meta-id] of mother ] [ nobody ] ]
       export-turtle-to (word "../data/" population ".csv") turtle-list 
-      
-      ;set chromosome.I csv:from-string chromosome.I
-      ;set chromosome.II csv:from-string chromosome.II 
-      set carried.items old-carried-items
+      if ( is-anima1? self ) [ set mother ifelse-value ( mother != nobody ) [ one-of anima1s with [ meta-id = [mother] of myself ]] [ nobody ] ]
     ]
-    
-    foreach selected-groups [ g ->
-      ask one-of groups with [ meta-id = g ] [ export-turtle-to (word "../data/" population ".csv") group-list ]
-    ]
-    
+
     set documentation-notes (word "New population " population " saved. " documentation-notes )
     update-metafile "population" population
     output-print " Population successfully saved."

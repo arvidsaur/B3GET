@@ -150,14 +150,14 @@ to-report sta7us-get-decisions [ local-turtles ]
               let vector-doesnt-exist true
               foreach decision-vectors [ v ->
                 
-                if ( item 2 v = other-guy ) and ( item 3 v = ( get-sta7us-action gene-action ) ) [
+                if ( item 2 v = other-guy ) and ( item 3 v = ( sta7us-get-action gene-action ) ) [
                   set vector-doesnt-exist false
                   set decision-vectors remove-item position v decision-vectors decision-vectors
                   let new-vector replace-item 4 v ( item 4 v + precision ( gene-weight / ( distance-to-target ^ 2 )) 5 )
                   set decision-vectors lput new-vector decision-vectors ]]
               
               if vector-doesnt-exist [
-                set decision-vectors lput (list random 9999999 meself other-guy ( get-sta7us-action gene-action ) precision ( gene-weight / ( distance-to-target ^ 2 )) 5 ) decision-vectors ]
+                set decision-vectors lput (list random 9999999 meself other-guy ( sta7us-get-action gene-action ) precision ( gene-weight / ( distance-to-target ^ 2 )) 5 ) decision-vectors ]
         ]]]
       ]
     ]
@@ -184,7 +184,7 @@ end
 ; REPORTERS
 ;--------------------------------------------------------------------------------------------------------------------
 
-to-report get-sta7us-action [ action-code ]
+to-report sta7us-get-action [ action-code ]
 
   report
   (ifelse-value
@@ -274,7 +274,7 @@ to-report status-of [ target ]
   
   ; BOTH
   set status-report ( word status-report ifelse-value ( get-solar-status = "DAY" ) [ "*" ][ "-" ] )
-  let my-color (word "" ceiling [color] of target "")
+  let my-color (word "" round [color] of target "")
   set status-report ( word status-report (ifelse-value ( length my-color = 1 ) [ (word "00" my-color ) ] ( length my-color = 2 ) [(word "0" my-color) ] [ my-color ] ))
   ;foreach base-colors [ c -> set status-report (word status-report ifelse-value ( shade-of? c [color] of target ) [ ceiling (( [color] of target ) - c + 5 ) ] [ "" ] ) ]
 

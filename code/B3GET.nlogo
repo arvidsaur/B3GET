@@ -15,7 +15,7 @@ __includes [
   "commands.nls"
   "data.nls"
   "results.nls"
-  "g3notype.nls"
+  "g8tes.nls"
   "import-export.nls"
   "selection.nls"
   "sta7us.nls"
@@ -71,6 +71,7 @@ anima1s-own [
   adulthood.chance
   senescency.chance
 
+  mother
   chromosome.I
   chromosome.II
 
@@ -80,8 +81,7 @@ anima1s-own [
   completed.actions
 
   ; TRACKING VARIABLES
-
-  mother-identity ;
+  mother-identity
   father-identity
   generation-number
   previous-group-id
@@ -238,9 +238,9 @@ to setup-plants
   ask plants [ die ]
   ask patches [
     set pcolor 36
-    sprout-plants 1 [ initialize-plant set energy.supply 0.5 * plant-quality ]
+    ;sprout-plants 1 [ initialize-plant set energy.supply 0.5 * plant-quality ]
   ]
-  repeat 100 [ update-plants ]
+  ;repeat 100 [ update-plants ]
 end
 
 to setup [ new-simulation-id ]
@@ -250,9 +250,10 @@ to setup [ new-simulation-id ]
   reset-ticks
   set simulation-id new-simulation-id
   setup-parameters
-  setup-plants
+  ; import population must go first
   import-population
   import-genotype
+  setup-plants
   clear-output
 end
 
@@ -270,7 +271,7 @@ end
 to go
 
   ; ENVIRONMENTAL CONTRAINTS
-  update-plants
+  ;update-plants
   ask turtles [ set age age + 1 ]
   ask anima1s [ foreach carried.items [ i -> ask i [ move-to myself ] ]] ; important to keep
   if selection-on? [ artificial-selection ]
@@ -394,6 +395,12 @@ to check-mortality
   ]
 end
 
+to anima1-die
+  ; remove from anyone's carried items
+  ; remove from group and die if no other group members
+
+end
+
 to update-appearance
   set size body.size
   set label " "
@@ -452,7 +459,7 @@ end
 to-report get-decisions
   report ( ifelse-value
     ( genotype-reader = "sta7us" ) [ sta7us-get-decisions my.environment ]
-    ( genotype-reader = "g3notype" ) [ g3notype-get-decisions my.environment ]
+    ( genotype-reader = "g8tes" ) [ g8tes-get-decisions my.environment ]
     [ sta7us-get-decisions my.environment ] ) ; default
 end
 
@@ -585,121 +592,91 @@ end
 to living-chance [ cost ]
   let before-living-chance living.chance
   set living.chance get-updated-value living.chance cost
-  let after-living-chance living.chance
-  let change-in-living-chance after-living-chance - before-living-chance
-  complete-action self "living-chance" cost change-in-living-chance
+  complete-action self "living-chance" cost ( living.chance - before-living-chance )
 end
 
 to body-size [ cost ]
   let before-body-size body.size
   set body.size get-updated-value body.size cost
-  let after-body-size body.size
-  let change-in-body-size after-body-size - before-body-size
-  complete-action self "body-size" cost change-in-body-size
+  complete-action self "body-size" cost ( body.size - before-body-size )
 end
 
 to body-shade [ cost ]
   let before-body-shade body.shade
   set body.shade get-updated-value body.shade cost
-  let after-body-shade body.shade
-  let change-in-body-shade after-body-shade - before-body-shade
-  complete-action self "body-shade" cost change-in-body-shade
+  complete-action self "body-shade" cost ( body.shade - before-body-shade )
 end
 
 to day-perception-range [ cost ]
   let before-day-perception-range day.perception.range
   set day.perception.range get-updated-value day.perception.range cost
-  let after-day-perception-range day.perception.range
-  let change-in-day-perception-range after-day-perception-range - before-day-perception-range
-  complete-action self "day-perception-range" cost change-in-day-perception-range
+  complete-action self "day-perception-range" cost ( day.perception.range - before-day-perception-range )
 end
 
 to night-perception-range [ cost ]
   let before-night-perception-range night.perception.range
   set night.perception.range get-updated-value night.perception.range cost
-  let after-night-perception-range night.perception.range
-  let change-in-night-perception-range after-night-perception-range - before-night-perception-range
-  complete-action self "night-perception-range" cost change-in-night-perception-range
+  complete-action self "night-perception-range" cost ( night.perception.range - before-night-perception-range )
 end
 
 to audio-perception-range [ cost ]
   let before-audio-perception-range audio.perception.range
   set audio.perception.range get-updated-value audio.perception.range cost
-  let after-audio-perception-range audio.perception.range
-  let change-in-audio-perception-range before-audio-perception-range - after-audio-perception-range
-  complete-action self "audio-perception-range" cost change-in-audio-perception-range
+  complete-action self "audio-perception-range" cost ( audio.perception.range - before-audio-perception-range )
 end
 
 to day-perception-angle [ cost ]
   let before-day-perception-angle day.perception.angle
   set day.perception.angle get-updated-value day.perception.angle cost
-  let after-day-perception-angle day.perception.angle
-  let change-in-day-perception-angle after-day-perception-angle - before-day-perception-angle
-  complete-action self "day-perception-angle" cost change-in-day-perception-angle
+  complete-action self "day-perception-angle" cost ( day.perception.angle - before-day-perception-angle )
 end
 
 to night-perception-angle [ cost ]
   let before-night-perception-angle night.perception.angle
   set night.perception.angle get-updated-value night.perception.angle cost
-  let after-night-perception-angle night.perception.angle
-  let change-in-night-perception-angle after-night-perception-angle - before-night-perception-angle
-  complete-action self "night-perception-angle" cost change-in-night-perception-angle
+  complete-action self "night-perception-angle" cost ( night.perception.angle - before-night-perception-angle )
 end
 
 to audio-perception-angle [ cost ]
   let before-audio-perception-angle audio.perception.angle
   set audio.perception.angle get-updated-value audio.perception.angle cost
-  let after-audio-perception-angle audio.perception.angle
-  let change-in-audio-perception-angle after-audio-perception-angle - before-audio-perception-angle
-  complete-action self "audio-perception-angle" cost change-in-audio-perception-angle
+  complete-action self "audio-perception-angle" cost ( audio.perception.angle - before-audio-perception-angle )
 end
 
 to vocal-range [ cost ]
   let before-vocal-range vocal.range
   set vocal.range get-updated-value vocal.range cost
-  let after-vocal-range vocal.range
-  let change-in-vocal-range after-vocal-range - before-vocal-range
-  complete-action self "vocal-range" cost change-in-vocal-range
+  complete-action self "vocal-range" cost ( vocal.range - before-vocal-range )
 end
 
 to conception-chance [ cost ]
   let before-conception-chance conception.chance
   set conception.chance get-updated-value conception.chance cost
-  let after-conception-chance conception.chance
-  let change-in-conception-chance after-conception-chance - before-conception-chance
-  complete-action self "conception-chance" cost change-in-conception-chance
+  complete-action self "conception-chance" cost ( conception.chance - before-conception-chance )
 end
 
 to stomach-size [ cost ]
   let before-stomach-size stomach.size
   set stomach.size get-updated-value stomach.size cost
-  let after-stomach-size stomach.size
-  let change-in-stomach-size after-stomach-size - before-stomach-size
-  complete-action self "stomach-size" cost change-in-stomach-size
+  complete-action self "stomach-size" cost ( stomach.size - before-stomach-size )
 end
 
 to mutation-chance [ cost ]
   let before-mutation-chance mutation.chance
   set mutation.chance get-updated-value mutation.chance cost
-  let after-mutation-chance mutation.chance
-  let change-in-mutation-chance after-mutation-chance - before-mutation-chance
-  complete-action self "mutation-chance" cost change-in-mutation-chance
+  complete-action self "mutation-chance" cost ( mutation.chance - before-mutation-chance )
 end
 
 to sex-ratio [ cost ]
   let before-sex-ratio sex.ratio
   set sex.ratio get-updated-value sex.ratio cost
-  let after-sex-ratio sex.ratio
-  let change-in-sex-ratio after-sex-ratio - before-sex-ratio
-  complete-action self "sex-ratio" cost change-in-sex-ratio
+  complete-action self "sex-ratio" cost ( sex.ratio - before-sex-ratio )
 end
 
 to litter-size [ cost ]
   let before-litter-size litter.size
   set litter.size get-updated-value litter.size cost
-  let after-litter-size litter.size
-  let change-in-litter-size after-litter-size - before-litter-size
-  complete-action self "litter-size" cost change-in-litter-size
+  complete-action self "litter-size" cost ( litter.size - before-litter-size )
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -1144,6 +1121,7 @@ to initialize-from-parents [ m f ]
   set biological.sex ifelse-value ( random-float 1.0 < mean (list [sex.ratio] of m [sex.ratio] of f) ) ["male"] ["female"]
   set shape ifelse-value ( biological.sex = "female" ) ["circle"] ["triangle"]
   set generation-number [generation-number] of m + 1
+  set mother m
   ifelse ( model-structure = "noevolution" )
   [ set chromosome.I [chromosome.I] of m
     set chromosome.II [chromosome.II] of m ]
@@ -1369,7 +1347,7 @@ to-report get-mutation [ unmutated-codon ]
     ( is-number? unmutated-codon ) [ get-updated-value unmutated-codon ( one-of [ 1 -1 ] ) ] ; number mutations always result in slight increase or decrease of origional value
     [( ifelse-value
       ( genotype-reader = "sta7us" ) [ sta7us-get-mutation unmutated-codon ]
-      ( genotype-reader = "g3notype" ) [ g3notype-get-mutation unmutated-codon ]
+      ( genotype-reader = "g8tes" ) [ g8tes-get-mutation unmutated-codon ]
       [ sta7us-get-mutation unmutated-codon ] ) ]) ; default
 end
 @#$#@#$#@
@@ -1624,7 +1602,7 @@ INPUTBOX
 1097
 299
 population
-p-20-04-01-02
+life-history-channel
 1
 0
 String
@@ -1635,7 +1613,7 @@ INPUTBOX
 1097
 373
 genotype
-NIL
+g8-life-history-channel
 1
 0
 String
@@ -1698,8 +1676,8 @@ CHOOSER
 373
 useful-commands
 useful-commands
-"help-me" "--------" "lotka-volterra" "age-histogram" "metafile-report" "verify-code" "check-runtime" "simulation-report" "clear-plants" "setup-plants" "clear-population" "view-genotype" "view-decisions" "view-allocation" "view-actions" "add-allele" "delete-allele" "population-report"
-17
+"help-me" "--------" "lotka-volterra" "age-histogram" "metafile-report" "verify-code" "check-runtime" "simulation-report" "genotype-reader" "clear-plants" "setup-plants" "clear-population" "view-genotype" "view-decisions" "view-allocation" "view-actions" "add-allele" "delete-allele" "population-report"
+8
 
 BUTTON
 912
@@ -1802,7 +1780,7 @@ SWITCH
 79
 selection-on?
 selection-on?
-1
+0
 1
 -1000
 
@@ -1812,7 +1790,7 @@ INPUTBOX
 967
 324
 command-input
-1787114
+g8tes
 1
 0
 String (commands)
@@ -1855,6 +1833,7 @@ B3GET should come with the following file and [folder] structure. These extensio
 ------ import-export.nls
 ------ selection.nls
 ------ verification.nls
+------ g8tes.nls
 --- [data]
 ------ genotype.txt
 ------ population.csv
@@ -1932,7 +1911,7 @@ FILES: controls how files are created and data is stored within them.
 IMPORT-EXPORT: controls for importing and exporting populations of agents.
 SELECTION: controls for artificial selection of agents during simulation.
 STA7US: a simple genotype file reader.
-G3NOTYPE: a more complex genotype file reader.
+G8TES: a more complex genotype file reader.
 VERIFICATION: the verification code for this model.
 
 ### NEW EXPERIMENT
@@ -1996,7 +1975,7 @@ MATING: agents mate with each other to conceive offspring, gestated by the mothe
 
 ## Genotypes
 
-The actions listed above are athe range of possible actions that an agent can take. However, whether an agent performs these actions, how much effort they put into doing so, and who they target is up to their genotype. An indefinite number of genotype file configurations are possible, as long as they include the following: (1) each row represents one allele, (2) these alleles represent self-contained procedures that generate decision-vectors from considering the environment as input, and (3) each row contains a list of codons that can be altered during recombination and mutation. This version of B3GET comes with two genotype file extensions: sta7us and g3notype (beta version). Specific information about each file type can be found within those extension files.
+The actions listed above are athe range of possible actions that an agent can take. However, whether an agent performs these actions, how much effort they put into doing so, and who they target is up to their genotype. An indefinite number of genotype file configurations are possible, as long as they include the following: (1) each row represents one allele, (2) these alleles represent self-contained procedures that generate decision-vectors from considering the environment as input, and (3) each row contains a list of codons that can be altered during recombination and mutation. This version of B3GET comes with two genotype file extensions: sta7us and g8tes (beta version). Specific information about each file type can be found within those extension files.
 
 ## Phenotypes
 

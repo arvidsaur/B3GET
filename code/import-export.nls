@@ -26,7 +26,8 @@
 ; CALLER: observer
 ; TURTLESET: is the set of turtles to export to FILENAME.
 ; FILNAME: includes the full directory path to appropriate CSV file (if one does not exist, it will be created here).
-; VARIABLES-TO-RECORD: is a list of string names that the caller-turtle has access to, including global variables, function outputs, and its own state variables.
+; VARIABLES-TO-RECORD: is a list of string names that the caller-turtle has access to, including global variables, 
+; function outputs, and its own state variables.
 ;
 ;--------------------------------------------------------------------------------------------------------------------
 
@@ -43,12 +44,13 @@ end
 ;
 ; CALLER: observer
 ; FILNAME: includes the full directory path to appropriate CSV file (if one does not exist, it will be created here).
-; VARIABLES-TO-RECORD: is a list of string names that the caller-turtle has access to, including global variables, function outputs, and its own state variables.
+; VARIABLES-TO-RECORD: is a list of string names that the caller-turtle has access to, including global variables, 
+; function outputs, and its own state variables.
 ;
 ; THINGS TO KEEP IN MIND:
 ;  - You should save ids rather than direct turtle references and fix with code after because who cannot be modified.
 ;  - You CAN save multiple different turtles breeds to the same file
-;  - can handle boolean, numbers, strings, and lists (if first convert to string using csv:to-string)
+;  - can handle booleans, numbers, strings, and lists of turtles, numbers, strings, or booleans, and csv-formatted list
 ;--------------------------------------------------------------------------------------------------------------------
 
 to export-turtle-to [ filename variables-to-record ]
@@ -79,7 +81,16 @@ to export-turtle-to [ filename variables-to-record ]
   let new-header first csv:from-file filename 
   let data-list []
   foreach new-header [ text ->
-    carefully [ set data-list (sentence data-list (list run-result text ) ) ] [ set data-list (sentence data-list "" ) ]  
+    
+    carefully 
+    [ let value run-result text
+      ; converts list of lists into savable csv format
+      if ( is-list? value and is-list? first value ) [ set value csv:to-string value ]
+      ; convert list of turtles to list of savable ids
+      if ( is-list? value and is-turtle? first value ) [ foreach value [ trtl -> set value remove trtl value if ( is-turtle? trtl ) [ set value lput [meta-id] of trtl value ]] ]
+      set data-list (sentence data-list (list value ) ) ] 
+    ; if there is an error, record nothing in csv file
+    [ set data-list (sentence data-list "" ) ]  
   ]
   
   csv:to-file filename (sentence (list new-header ) body (list data-list) )
@@ -124,32 +135,20 @@ to import-turtles-from [ filename ]
           let value item j item i data-block ; the value for turtle i taken from column j of the DATA-BLOCK
           
           ; Put quotes around everything that is not a Number, Breed, or Boolean or List
-          if (not is-number? value and header != "breed" and not is-boolean? value and not member? "\n" value ) [ set value (word "\"" value "\"")] ; 
-          ;if ( is-string? value and member? "\n" value ) [ print value set value (word "\"" csv:from-string value "\"" ) print value print ""] ; set value (word "\"" csv:from-string value "\"" )
+          if (not is-number? value and header != "breed" and not is-boolean? value and not member? "\n" value and not member? "[" value ) [ set value (word "\"" value "\"")] ; 
           
           (ifelse ; fix to not rely on chromosome code
             ( header = "chromosome.I" ) [ carefully [set chromosome.I csv:from-string value ][]]
             ( header = "chromosome.II" ) [ carefully [ set chromosome.II csv:from-string value ][]]
             [ carefully [ run (word "set " header " " value ) ] [ ]]) ; carefully is put here to allow multiple breeds in same csv file
           
-;          ifelse ( not is-number? value and header != "breed" and not is-boolean? value and member? "\n" value  ) 
-;          [ carefully [ run (word "set " header " " "\"" value "\"" ) ] [] ] ; print value print csv:from-string value print (word "\"" csv:from-string value "\"" )
-;          [ carefully [ run (word "set " header " " value ) ] [] ]
+          ; when NetLogo fixes error to allow read-from-string to be called from command block, use this:          
+          ; ifelse ( not is-number? value and header != "breed" and not is-boolean? value and member? "\n" value ) 
+          ; [ carefully [ run (word "set " header " " "\"" csv:from-string value "\"" ) ] [] ]
+          ; [ carefully [ run (word "set " header " " value ) ] [] ]
           
-          ;          ; Put quotes around everything that is not a Number, Breed, or Boolean or List
-          ;          if ( not is-number? value and header != "breed" and not is-boolean? value ) [
-          ;            if ( not member? "\n" value ) [ set value (word "\"" value "\"") ]
-          ;            if ( member? "\n" value ) [ set value (word "\"" csv:from-string value "\"" )]
-          ;          ]
-          ;          
-          ;          ; set each state variable according to the header and value
-;           carefully [ run (word "set " header " " value ) ] []
-
-        set j j + 1 ] 
-      set i i + 1 ]]
-  
-  file-close ]
+          set j j + 1 ] 
+        set i i + 1 ]]
+    
+    file-close ]
 end
-
-
-

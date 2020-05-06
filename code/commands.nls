@@ -21,6 +21,7 @@ to command
     ( useful-commands = "verify-code" ) [ output-verification command-input ]
     ( useful-commands = "check-runtime" ) [ output-runtime ]  
     ( useful-commands = "simulation-report" ) [ output-simulation-report ]
+    ( useful-commands = "genotype-reader" ) [ output-genotype-reader command-input ]
     ( useful-commands = "import-world" ) [ ]
     ( useful-commands = "clear-plants" ) [ output-clear-plants ]
     ( useful-commands = "setup-plants" ) [ output-setup-plants ]
@@ -34,6 +35,19 @@ to command
     ( useful-commands = "population-report") [ output-population ]
     [])
 
+end
+
+to output-genotype-reader [ input ]
+  let genotype-list [ "sta7us" "g8tes" ]
+  ifelse ( member? input genotype-list ) [
+    ifelse ( genotype-reader = input ) [
+      set command-input one-of remove input genotype-list
+    ][
+      set genotype-reader input
+    ]
+  ][
+    set command-input one-of genotype-list
+  ]
 end
 
 to output-command-menu
@@ -56,6 +70,7 @@ to output-command-menu
   output-print "  verify-code : prints a summary of verification code checks"
   output-print "  check-runtime : prints a summary of simulation operations"    
   output-print "  simulation-report : prints a summary of current simulation"
+  output-print "  genotype-reader : set the genotype file format of simulation"
   output-print ""
   output-print " > WORLD"
   output-print ""
@@ -175,6 +190,14 @@ end
 
 to output-simulation-report
   output-header (word " SIMULATION REPORT : " simulation-id )
+  output-print ( word "  simulation-id:  " simulation-id )
+  output-print ( word "  model-version:  " model-version )
+  output-print ( word "  model-structure:  " model-structure )
+  output-print ( word "  genotype-reader:  " genotype-reader )
+end
+
+to output-simulation-file
+  output-header (word " SIMULATION FILE : " simulation-id )
 
   ifelse (file-exists? (word path-to-experiment "/" simulation-id ".csv" ) ) [
     let header-list first csv:from-file (word path-to-experiment "/" simulation-id ".csv" )
