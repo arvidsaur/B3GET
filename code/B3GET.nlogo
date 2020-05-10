@@ -236,11 +236,8 @@ end
 
 to setup-plants
   ask plants [ die ]
-  ask patches [
-    set pcolor 36
-    ;sprout-plants 1 [ initialize-plant set energy.supply 0.5 * plant-quality ]
-  ]
-  ;repeat 100 [ update-plants ]
+  ask patches [ set pcolor 36 ]
+  ask patches [ sprout-plants 1 [ initialize-plant ]]
 end
 
 to setup [ new-simulation-id ]
@@ -270,16 +267,30 @@ end
 
 to go
 
-  ; ENVIRONMENTAL CONTRAINTS
-  ;update-plants
-  ask turtles [ set age age + 1 ]
-  ask anima1s [ foreach carried.items [ i -> ask i [ move-to myself ] ]] ; important to keep
-  if selection-on? [ artificial-selection ]
+  ;delete
+  ask anima1s [ foreach carried.items [ i -> ask i [ move-to myself ] ]] ; important to keep for now
+
+  ; THE ENVIRONMENT
+  ifelse ( model-structure = "no-plants" )
+  [ ask plants [ die ] ]
+  [ update-plants ]
+
+  ; AGENT MORTALITY
   ifelse ( model-structure = "reaper" )
-  [ if (( count anima1s - 100 ) > 0 ) [ ask n-of ( count anima1s - 100 ) anima1s [ set ticks-at-death ticks die ]]]
+  [ if (( count anima1s - 100 ) > 0 ) [ ask n-of ( count anima1s - 100 ) anima1s [ remove-from-simulation ]]]
   [ ask anima1s [check-mortality] ]
-  ask anima1s [ deteriorate update-appearance ]
-  ;if ( model-structure = "sower" and count anima1s with [ biological.sex = "male" and life.history = "adult" ] > 0 and count anima1s with [ biological.sex = "female" and life.history = "adult" ] > 0 and (count anima1s < 100) ) [ repeat ( 100 - count anima1s ) [ ask one-of anima1s with [ biological.sex = "female" and life.history = "adult" ] [ conceive-with one-of anima1s with [ biological.sex = "male" and life.history = "adult" ] ] ] ] ; random mating
+
+  ; AGENT REPRODUCTION
+  if ( model-structure = "sower" and count anima1s < 100 ) ; random mating
+  [ repeat ( 100 - count anima1s ) [
+    if ( ( count anima1s with [ biological.sex = "male" and life.history = "adult" ] > 0 ) and ( count anima1s with [ biological.sex = "female" and life.history = "adult" ] > 0 ) )
+    [ ask one-of anima1s with [ biological.sex = "female" and life.history = "adult" ] [ conceive-with ( one-of anima1s with [ biological.sex = "male" and life.history = "adult" ] ) 999999 ]]]]
+
+  ; AGENT UPDATES
+  ask turtles [ set age age + 1 ] ; all turtles age each timestep
+  ask anima1s [
+    deteriorate
+    update-appearance ]
 
   ; AGENT AGENCY
   ask anima1s [
@@ -287,9 +298,11 @@ to go
     [ make-decisions
       allocate-energy ]]
 
+  ; ARTIFICAL SELECTION
+  if selection-on? [ artificial-selection ]
+
   ; SIMULATION OUTPUT
   if output-results? [ output-results ]
-
   ; prints out current status of the simulation every 100 timesteps
   if ( ticks > 0 and ceiling (ticks / 100) = (ticks / 100) and any? anima1s ) [
     let print-text (word "Simulation " simulation-id " is now at " precision (ticks / plant-annual-cycle) 3 " years, "
@@ -328,42 +341,89 @@ end
 to update-plants
   let season ( cos (( 360 / plant-annual-cycle ) * ticks))
   let daytime ( cos (( 360 / plant-daily-cycle ) * ticks))
-  ; set sun-status ifelse-value ( daytime > 0 ) [ "DAY" ] [ "NIGHT" ]
 
-  let energy-update get-updated-value ( plant-seasonality * ( 1 / 10000 ) * season ) ( 10 * daytime )
-
-  ;  if ( daytime > 0 ) [
-  ;  let terminal-threshold  0.5 * ( ( season * ( plant-seasonality / 100 ) ) + 1 ) * plant-quality
-
+  let energy-update ( plant-seasonality * ( 1 / 10000 ) * abs season )
+;
+;  if ( get-solar-status = "DAY" ) [
+;
+;    ask plants [
+;      set energy.supply ( get-updated-value energy.supply energy-update )
+;      update-plant-color ]
+;
+;  ]
+;
   ask plants [
-    ; if any? other plants-here [ ask other plants-here [ die ]] ; why are multiple plants in one cell?
-    set energy.supply ( get-updated-value energy.supply energy-update )
-    update-plant-color ]
 
-  ask n-of 1 patches [ sprout-plants 1 [ initialize-plant ]]
+;    if ( get-solar-status = "DAY" ) [
+;
+;      ifelse ( season > 0 )
+;      [ set energy.supply get-updated-value energy.supply energy-update ]
+;      [ set energy.supply get-updated-value energy.supply ( - energy-update ) ]
+;
+;    ]
 
-  ; only a small proportion of plants change each TIMESTEP
-  ask n-of (ceiling (0.01 * count patches)) patches [
-
-    ; calculate the total penergy of surrounding PLANT neighbors
-    let total-neighbor-penergy 0
+    let value 0
     ask neighbors [
       if any? plants-here [
-        ask plants-here [ set total-neighbor-penergy total-neighbor-penergy + 1 ]]] ;energy.supply
+        ask plants-here [ set value value + energy.supply ]]]
 
-    ; calculate a random value along a normal distribution of mean TOTAL-NEIGHBOR-PENERGY and standard deviation LIFE-SD
-    let normal-value ( random-normal total-neighbor-penergy 1.0 )
+    ifelse ( value >= plant-minimum-neighbors and value <= plant-maximum-neighbors )
+    [ set energy.supply get-updated-value energy.supply 0.001 ]
+    [ set energy.supply get-updated-value energy.supply ( - 0.001 ) ]
 
-    ; life occurs when the random value is within the MIN and MAX values
-    ifelse ( normal-value >= plant-minimum-neighbors and normal-value <= plant-maximum-neighbors )
-    [ if ( not any? plants-here ) [ sprout-plants 1 [ initialize-plant ]] ]
-    [ if ( any? plants-here ) [ ask plants-here [ die ]]] ]
+    update-plant-color
+  ]
+
+  ;  ; calculate the total penergy of surrounding PLANT neighbors
+  ;  let total-neighbor-penergy 0
+;  ask neighbors [
+;    if any? plants-here [
+;      ask plants-here [ set total-neighbor-penergy total-neighbor-penergy + 1 ]]] ;energy.supply
+;
+;  ; calculate a random value along a normal distribution of mean TOTAL-NEIGHBOR-PENERGY and standard deviation LIFE-SD
+;  let normal-value ( random-normal total-neighbor-penergy 1.0 )
+;
+;  ; life occurs when the random value is within the MIN and MAX values
+;  ifelse ( value >= plant-minimum-neighbors and value <= plant-maximum-neighbors )
+;  [ if ( not any? plants-here ) [ sprout-plants 1 [ initialize-plant ]] ]
+;  [ if ( any? plants-here ) [ ask plants-here [ die ]]] ]
+
+
+
+  ;  let energy-update get-updated-value ( plant-seasonality * ( 1 / 10000 ) * season ) ( 10 * daytime )
+  ;
+  ;  ;  if ( daytime > 0 ) [
+  ;  ;  let terminal-threshold  0.5 * ( ( season * ( plant-seasonality / 100 ) ) + 1 ) * plant-quality
+  ;
+  ;  ask plants [
+  ;    ; if any? other plants-here [ ask other plants-here [ die ]] ; why are multiple plants in one cell?
+  ;    set energy.supply ( get-updated-value energy.supply energy-update )
+  ;    update-plant-color ]
+  ;
+  ;  ask n-of 1 patches [ sprout-plants 1 [ initialize-plant ]]
+  ;
+  ;  ; only a small proportion of plants change each TIMESTEP
+  ;  ask n-of (ceiling (0.01 * count patches)) patches [
+  ;
+  ;    ; calculate the total penergy of surrounding PLANT neighbors
+  ;    let total-neighbor-penergy 0
+  ;    ask neighbors [
+  ;      if any? plants-here [
+  ;        ask plants-here [ set total-neighbor-penergy total-neighbor-penergy + 1 ]]] ;energy.supply
+  ;
+  ;    ; calculate a random value along a normal distribution of mean TOTAL-NEIGHBOR-PENERGY and standard deviation LIFE-SD
+  ;    let normal-value ( random-normal total-neighbor-penergy 1.0 )
+  ;
+  ;    ; life occurs when the random value is within the MIN and MAX values
+  ;    ifelse ( normal-value >= plant-minimum-neighbors and normal-value <= plant-maximum-neighbors )
+  ;    [ if ( not any? plants-here ) [ sprout-plants 1 [ initialize-plant ]] ]
+  ;    [ if ( any? plants-here ) [ ask plants-here [ die ]]] ]
 
 end
 
 to initialize-plant
   set meta-id random 9999999
-  set energy.supply 0
+  set energy.supply random-float plant-quality
   set hidden? false
   set size 1
   set shape "square"
@@ -384,21 +444,22 @@ to deteriorate
 end
 
 to check-mortality
+
   if ( random-float 1.0 > living.chance ) [
-    (ifelse
+    ifelse ( is.alive = false )
 
-      ; SECOND DEATH: remove agent from the simulation
-      ( is.alive = false ) [ die ]
+    ; SECOND DEATH: remove agent from the simulation
+    [ remove-from-simulation ]
 
-      ; FIRST DEATH: set anima1 to is.dead true
-      [ set is.alive false set ticks-at-death ticks ])
-  ]
+    ; FIRST DEATH: set anima1 to is.dead true
+    [ set is.alive false set ticks-at-death ticks ]]
 end
 
-to anima1-die
+to remove-from-simulation
   ; remove from anyone's carried items
   ; remove from group and die if no other group members
-
+  if ( ticks-at-death = 0 ) [ set ticks-at-death ticks ]
+  die
 end
 
 to update-appearance
@@ -469,15 +530,15 @@ to allocate-energy
   set completed.actions []
   foreach decision.vectors [ vector ->
 
-    let raw-value item 4 vector
+    let raw-value item 3 vector
     let energy-cost abs raw-value
 
-    let passes-energy-check ifelse-value ( model-structure = "freelunch" ) [ true ] [ energy.supply > energy-cost ] ; FREE LUNCH always passes energy check
+    let passes-energy-check ifelse-value ( model-structure = "free-lunch" ) [ true ] [ energy.supply > energy-cost ] ; FREE LUNCH always passes energy check
 
     if ( not member? vector energy.allocated and passes-energy-check ) [
       set energy.allocated lput vector energy.allocated
-      let target item 2 vector
-      let action item 3 vector
+      let target item 1 vector
+      let action item 2 vector
       update-energy ( - energy-cost )
 
       ifelse ifelse-value ( target = nobody ) [ false ] [ distance target < ( size / 2 + [size] of target / 2 ) ]
@@ -1122,7 +1183,7 @@ to initialize-from-parents [ m f ]
   set shape ifelse-value ( biological.sex = "female" ) ["circle"] ["triangle"]
   set generation-number [generation-number] of m + 1
   set mother m
-  ifelse ( model-structure = "noevolution" )
+  ifelse ( model-structure = "no-evolution" )
   [ set chromosome.I [chromosome.I] of m
     set chromosome.II [chromosome.II] of m ]
   [ setup-chromosomes-from m f ]
@@ -1202,7 +1263,7 @@ to initialize-from-parents [ m f ]
   set cells-occupied []
   set infanticide-list []
   set previous-group-id 0
-  if ( model-structure = "idealform" ) [ set-phenotype-to-ideal-form ]
+  if ( model-structure = "ideal-form" ) [ set-phenotype-to-ideal-form ]
 end
 
 to set-phenotype-to-ideal-form
@@ -1508,7 +1569,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-2.6
+6.2
 .1
 1
 NIL
@@ -1523,7 +1584,7 @@ plant-maximum-neighbors
 plant-maximum-neighbors
 0
 8
-7.9
+8.0
 .1
 1
 NIL
@@ -1602,7 +1663,7 @@ INPUTBOX
 1097
 299
 population
-life-history-channel
+two-timers
 1
 0
 String
@@ -1613,7 +1674,7 @@ INPUTBOX
 1097
 373
 genotype
-g8-life-history-channel
+two-timers
 1
 0
 String
@@ -1676,8 +1737,8 @@ CHOOSER
 373
 useful-commands
 useful-commands
-"help-me" "--------" "lotka-volterra" "age-histogram" "metafile-report" "verify-code" "check-runtime" "simulation-report" "genotype-reader" "clear-plants" "setup-plants" "clear-population" "view-genotype" "view-decisions" "view-allocation" "view-actions" "add-allele" "delete-allele" "population-report"
-8
+"help-me" "--------" "lotka-volterra" "age-histogram" "metafile-report" "verify-code" "check-runtime" "simulation-report" "genotype-reader" "model-structure" "clear-plants" "setup-plants" "clear-population" "view-genotype" "view-decisions" "view-allocation" "view-actions" "add-allele" "delete-allele" "population-report"
+7
 
 BUTTON
 912
@@ -1756,7 +1817,7 @@ plant-quality
 plant-quality
 .01
 1
-0.5
+1.0
 .01
 1
 NIL
@@ -1790,7 +1851,7 @@ INPUTBOX
 967
 324
 command-input
-g8tes
+sower
 1
 0
 String (commands)

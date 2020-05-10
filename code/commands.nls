@@ -22,6 +22,7 @@ to command
     ( useful-commands = "check-runtime" ) [ output-runtime ]  
     ( useful-commands = "simulation-report" ) [ output-simulation-report ]
     ( useful-commands = "genotype-reader" ) [ output-genotype-reader command-input ]
+    ( useful-commands = "model-structure" ) [ output-model-structure command-input ]
     ( useful-commands = "import-world" ) [ ]
     ( useful-commands = "clear-plants" ) [ output-clear-plants ]
     ( useful-commands = "setup-plants" ) [ output-setup-plants ]
@@ -50,6 +51,19 @@ to output-genotype-reader [ input ]
   ]
 end
 
+to output-model-structure [ input ]
+  let structure-list [ "no-plants" "reaper" "sower" "aspatial" "free-lunch" "no-evolution" "ideal-form" "uninvadable" ]
+  ifelse ( member? input structure-list ) [
+    ifelse ( model-structure = input ) [
+      set command-input one-of remove input structure-list
+    ][
+      set model-structure input
+    ]
+  ][
+    set command-input one-of structure-list
+  ]
+end
+
 to output-command-menu
   
   output-header " HELP ME: a user guide for commands"
@@ -71,6 +85,7 @@ to output-command-menu
   output-print "  check-runtime : prints a summary of simulation operations"    
   output-print "  simulation-report : prints a summary of current simulation"
   output-print "  genotype-reader : set the genotype file format of simulation"
+  output-print "  model-structure : set the model structure for the simulation"
   output-print ""
   output-print " > WORLD"
   output-print ""
