@@ -554,7 +554,7 @@ to-report plant-patchiness
   while [ j < world-height ] [
     while [ i < world-width ] [
       
-      set patch-list lput count plants with [ xcor > i and xcor <= i-next and ycor > j and ycor <= j-next ] patch-list
+      set patch-list lput sum [ penergy.supply ] of patches with [ pxcor > i and pxcor <= i-next and pycor > j and pycor <= j-next ] patch-list
       set i i-next
       set i-next ifelse-value (( i + patch-diameter ) > world-width ) [ world-width ] [ i + patch-diameter ] ]
 
@@ -563,7 +563,7 @@ to-report plant-patchiness
     set j j-next
     set j-next ifelse-value (( j + patch-diameter ) > world-height ) [ world-height ] [ j + patch-diameter ] ]
 
-  report ( variance patch-list / mean patch-list )
+  report ifelse-value ( mean patch-list = 0 ) [ 0 ] [ ( variance patch-list / mean patch-list ) ]
 end
   
 to-report get-data [ filename column-name ]
