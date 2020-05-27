@@ -29,7 +29,7 @@ to output-results
   ; -------------
   let verification? false         ; TRUE = runs periodic code verification checks set by the VERIFICATION-RATE
   let verification-rate 0.001 
-  let record-simulation? false   ; TRUE = records the simulation ;
+  let record-simulation? false    ; TRUE = records the simulation ;
   let record-group? false         ; TRUE = records every group upon its creation ;
   let record-agent? false         ; TRUE = records every agent upon its death
   let scan-interval 100        
@@ -223,7 +223,7 @@ to record-agent
   )
 end 
 
-to scan-simulation
+to scan-simulation ;;;
   export-turtle-to 
   simulation-file-path
   (list 
@@ -313,24 +313,24 @@ to scan-group
     "sun-status"
     "ticks" 
     "meta-id" 
-    "total-birth-count" 
-    "current-group-size" 
-    "adult-female-group-size" 
-    "population-density" 
-    "total-energy-gained" 
-    "gestatee-female-energy-gained" 
-    "gestatee-male-energy-gained" 
-    "infant-female-energy-gained" 
-    "infant-male-energy-gained" 
-    "juvenile-female-energy-gained" 
-    "juvenile-male-energy-gained" 
-    "adult-cycling-energy-gained" 
-    "adult-pregnant-energy-gained" 
-    "adult-lactating-energy-gained" 
-    "adult-male-energy-gained" 
-    "senescent-female-energy-gained" 
-    "senescent-male-energy-gained" 
-    "distance-traveled" )
+    "total-birth-count" ;
+    "current-group-size" ;
+    "adult-female-group-size" ;
+    "population-density" ;
+    "total-energy-gained" ;
+    "gestatee-female-energy-gained" ;
+    "gestatee-male-energy-gained" ;
+    "infant-female-energy-gained" ;
+    "infant-male-energy-gained" ;
+    "juvenile-female-energy-gained" ;
+    "juvenile-male-energy-gained" ;
+    "adult-cycling-energy-gained" ;
+    "adult-pregnant-energy-gained" ;
+    "adult-lactating-energy-gained" ;
+    "adult-male-energy-gained" ;
+    "senescent-female-energy-gained" ; 
+    "senescent-male-energy-gained" ;
+    "distance-traveled" ) ;
 end
 
 to scan-agent
@@ -386,11 +386,11 @@ to scan-agent
     "senescency.chance"
     "x.magnitude" 
     "y.magnitude"
-    "distance-traveled" 
-    "foraging-gains" 
-    "foraging-losses" 
-    "helping-benefit" 
-    "helping-cost" )
+    "distance-traveled" ;
+    "foraging-gains" ;
+    "foraging-losses"  ;
+    "helping-benefit" ;
+    "helping-cost" ) ;
 end
 
 to scan-focal
@@ -446,11 +446,11 @@ to scan-focal
     "senescency.chance"
     "x.magnitude" 
     "y.magnitude"
-    "distance-traveled" 
-    "foraging-gains" 
-    "foraging-losses" 
-    "helping-benefit" 
-    "helping-cost" )
+    "distance-traveled" ;
+    "foraging-gains"  ;
+    "foraging-losses"  ;
+    "helping-benefit"  ;
+    "helping-cost" ) ;
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -543,7 +543,7 @@ end
 to-report predator-prey report false end
    
 to-report plant-patchiness
-  let patch-diameter 5
+  let patch-diameter 10
   let patch-list []
   
   let i 0

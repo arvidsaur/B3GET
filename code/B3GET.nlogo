@@ -257,8 +257,8 @@ to setup [ new-simulation-id ]
   setup-parameters
   import-population ; must go first
   import-genotype
-  setup-plants
-  ;setup-patches
+  ;setup-plants
+  setup-patches
   clear-output
 end
 
@@ -279,8 +279,8 @@ to go
   ifelse ( model-structure = "no-plants" )
   [ ask plants [ die ] ]
   [
-    update-plants
-    ;update-patches
+    ;update-plants
+    update-patches
   ]
 
   ; AGENT MORTALITY
@@ -296,17 +296,13 @@ to go
 
   ; AGENT UPDATES
   ask turtles [ set age age + 1 ] ; all turtles age each timestep
-  ask anima1s [
-    deteriorate
-    update-appearance ]
+  ask anima1s [ deteriorate update-appearance ]
 
   ; AGENT AGENCY
-  ask anima1s [
-    if ( is.alive )
-    [ consider-environment
-      make-decisions
-      allocate-energy
-      do-actions ]]
+  ask anima1s with [ is.alive ] [ consider-environment ]
+  ask anima1s with [ is.alive ] [ make-decisions ]
+  ask anima1s with [ is.alive ] [ allocate-energy ]
+  ask anima1s with [ is.alive ] [ do-actions ]
 
   ; ARTIFICAL SELECTION
   if selection-on? [ artificial-selection ]
@@ -369,7 +365,7 @@ to update-plants
     if energy.supply >= plant-quality [ set energy.supply plant-quality ]
     if energy.supply <= 0 [ set energy.supply 0 ]
 
-    set label precision value 1
+    ;set label precision value 1
     update-plant-color
   ]
 end
@@ -377,29 +373,57 @@ end
 to update-patches
   let season ( cos (( 360 / plant-annual-cycle ) * ticks))
 
+;  ask patches [
+;
+;    let a 1
+;    let b ( plant-minimum-neighbors + plant-maximum-neighbors ) / 2
+;    let c ( b - plant-minimum-neighbors )
+;    let x sum [penergy.supply] of neighbors
+;
+;    let probability-value ( a * e ^ ( - (( x - b ) ^ 2 ) / ( 2 * ( c ^ 2 ) )) ) -  0.5 + ( 0.5 * season * plant-seasonality / 100 )
+;
+;    let boolean-result random-float 1.0 <= ( abs probability-value )
+;
+;    let change-in-energy plant-daily-cycle / plant-annual-cycle
+;
+;    if ( probability-value > 0 and boolean-result = true ) [ set penergy.supply penergy.supply + change-in-energy ]
+;    if ( probability-value <= 0 and boolean-result = true ) [ set penergy.supply penergy.supply - change-in-energy ]
+;
+;    if penergy.supply >= plant-quality [ set penergy.supply plant-quality ]
+  ;    if penergy.supply <= 0 [ set penergy.supply 0 ]
+  ;
+  ;    ;set plabel precision x 1
+  ;    update-patch-color ]
+
   ask patches [
 
-    let neighbor-value sum [penergy.supply] of neighbors
-    let change-in-energy 0.01
-    let y-axis-change ( ( normal-probability-density ( ( plant-minimum-neighbors + plant-maximum-neighbors ) / 2 ) ) / 2 )
-    let probability-value ( normal-probability-density neighbor-value ) - y-axis-change ; + ifelse-value ( season > 0 ) [ y-axis-change * season * plant-seasonality ] [ ( - y-axis-change * season * plant-seasonality )  ]
+    let a 1 ;( season * plant-seasonality / 100 )
+    let b ( plant-minimum-neighbors + plant-maximum-neighbors ) / 2
+    let c ( b - plant-minimum-neighbors )
+    let x sum [penergy.supply] of neighbors
+
+    let up ( a * e ^ ( - (( x - b ) ^ 2 ) / ( 2 * ( c ^ 2 ) )) ) ; - 0.5 + ( 0.5 * season * plant-seasonality / 100 )
+
     let boolean-result random-float 1.0 <= ( abs probability-value )
 
-    if ( probability-value > 0 and boolean-result = true ) [ set penergy.supply penergy.supply + change-in-energy ]
-    if ( probability-value < 0 and boolean-result = true ) [ set penergy.supply penergy.supply - change-in-energy ]
+    let change-in-energy 0.001 ; plant-daily-cycle / plant-annual-cycle
 
+;    ifelse ( probability-value > 0 )
+;    [ set penergy.supply penergy.supply + change-in-energy ]
+;    [ set penergy.supply penergy.supply - change-in-energy ]
+
+    ;if ( probability-value <= 0 and boolean-result = true ) [ set penergy.supply penergy.supply - change-in-energy ]
+
+    ;set penergy.supply penergy.supply + ifelse-value ( season > 0 ) [ 0.0001 ] [ ( - 0.0001 ) ]
+    set penergy.supply penergy.supply + probability-value * change-in-energy
     if penergy.supply >= plant-quality [ set penergy.supply plant-quality ]
     if penergy.supply <= 0 [ set penergy.supply 0 ]
 
-    set plabel ifelse-value boolean-result [ boolean-result ] [ precision neighbor-value 1 ]
+    set plabel precision x 1
     update-patch-color ]
 
-end
+ ; diffuse penergy.supply 0.001
 
-to-report normal-probability-density [ x ]
-  let mean-value ( plant-minimum-neighbors + plant-maximum-neighbors ) / 2
-  let st-dev ( mean-value - plant-minimum-neighbors )
-  report ( 1 / ( st-dev * sqrt ( 2 * pi ) )) * e ^ ( ( - 0.5 ) * ( ( x - mean-value ) / st-dev ) ^ 2 )
 end
 
 to initialize-plant
@@ -586,7 +610,7 @@ end
 to do-actions
 
   set completed.actions []
-  foreach energy.allocated [ vector ->
+  foreach filter [ vector -> not member? vector completed.actions ] energy.allocated [ vector ->
     let target item 1 vector
     let action item 2 vector
     let cost item 3 vector
@@ -643,21 +667,21 @@ to do-actions
 
       [ ])]
 
-    [ if ( target != nobody ) [ move-toward target ( abs cost ) ]]]
+    [ if ( target != nobody ) [ move-toward target ( abs cost ) ]]] ; do I want it absolute?
 
 end
 
 to-report get-action-cost-of [ target action-name ]
-  let caller self
-  let action-list [ completed.actions ] of target
-  report ifelse-value ( is-list? action-list ) [ sum map [ vector -> item 3 vector ] filter [ vector -> item 1 vector = caller and item 2 vector = action-name ] action-list ] [ 0 ]
+  let allocated-actions filter [ vector -> item 1 vector = target and item 2 vector = action-name and not member? vector completed.actions ] energy.allocated
+  foreach allocated-actions [ vector -> complete-action ( item 1 vector ) ( item 2 vector ) ( item 3 vector ) "get-action-cost-of" ]
+  report sum map [ vector -> item 3 vector ] filter [ vector -> item 1 vector = target and item 2 vector = action-name ] completed.actions
 end
 
 to complete-action [ target action cost outcome ]
   if ( not is-list? completed.actions ) [ set completed.actions [] ]
   set completed.actions lput ( list self target action cost outcome ) completed.actions
   if ( not is-list? population-actions ) [ set population-actions [] ]
-  set population-actions lput ( list self target action cost outcome ) population-actions
+  set population-actions lput ( list ticks self target action cost outcome ) population-actions
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -1461,13 +1485,13 @@ to-report get-mutation [ unmutated-codon ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-6
+8
 85
-712
-792
+711
+789
 -1
 -1
-6.98
+34.75
 1
 10
 1
@@ -1478,9 +1502,9 @@ GRAPHICS-WINDOW
 1
 1
 0
-99
+19
 0
-99
+19
 1
 1
 1
@@ -1617,7 +1641,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-4.0
+6.1
 .1
 1
 NIL
@@ -1658,7 +1682,7 @@ plant-seasonality
 plant-seasonality
 0
 100
-100.0
+0.0
 5
 1
 %
@@ -1688,7 +1712,7 @@ plant-daily-cycle
 plant-daily-cycle
 1
 100
-20.0
+10.0
 1
 1
 ticks
@@ -1711,7 +1735,7 @@ INPUTBOX
 1097
 299
 population
-two-timers
+NIL
 1
 0
 String
@@ -1722,7 +1746,7 @@ INPUTBOX
 1097
 373
 genotype
-s7-two-timers
+NIL
 1
 0
 String
@@ -1786,7 +1810,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "--------" "lotka-volterra" "age-histogram" "metafile-report" "verify-code" "check-runtime" "simulation-report" "genotype-reader" "model-structure" "clear-plants" "setup-plants" "clear-population" "view-genotype" "view-decisions" "view-allocation" "view-actions" "add-allele" "delete-allele" "population-report"
-9
+12
 
 BUTTON
 912
@@ -1912,12 +1936,23 @@ OUTPUT
 11
 
 MONITOR
-104
-98
-211
-143
+96
+805
+203
+850
 NIL
 plant-patchiness
+1
+1
+11
+
+MONITOR
+211
+805
+327
+850
+platn abundance
+sum [ penergy.supply] of patches
 1
 1
 11
