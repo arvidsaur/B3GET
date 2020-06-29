@@ -123,6 +123,7 @@ to record-simulation
 
     ; kin-selection
     ; predator-prey
+    
   )
 end
 
@@ -460,7 +461,7 @@ end
 ;:::: global :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 to-report population-density report count turtles / ( world-width * world-height ) end
-to-report plant-abundance report precision ( sum [ energy.supply ] of plants ) 3 end
+;to-report plant-abundance report precision ( sum [ energy.supply ] of plants ) 3 end
 to-report mean-generation-number report ifelse-value (any? anima1s ) [ precision ( mean [ generation-number ] of anima1s ) 3 ] [ 0 ] end
 to-report number-of-organisms report count anima1s with [ is.alive ] end
 to-report number-of-females report count anima1s with [ biological.sex = "female" ] end
@@ -543,7 +544,7 @@ end
 to-report predator-prey report false end
    
 to-report plant-patchiness
-  let patch-diameter 10
+  let patch-diameter 5
   let patch-list []
   
   let i 0
@@ -856,3 +857,54 @@ end
 
 
 
+;to setup-climate-table
+;;  set climate-table table:make
+;;
+;;  let i 0
+;;  let j -1
+;;  let k 0
+;;  let l 0
+;;
+;;  while [ i < 1.0 ] [
+;;    set j 0
+;;    while [ j < 8 ] [
+;;      set j -1
+;;      while [ k < 1 ] [
+;;        ;table:put climate-table ( i * j ) ( growth i j 0 )
+;;        set k k + 0.1
+;;      ]
+;;      set j j + 0.1
+;;    ]
+;;    set i i + 0.1
+;;  ]
+;end
+;
+;to-report get-climate-change [ x season ]
+;
+;  let x-floor floor ( x * 10 ) / 10
+;  let season-floor floor ( season * 10 ) / 10
+;
+;  report table:get climate-table ( x-floor * season-floor )
+;end
+
+
+
+
+
+
+
+;to-report growth [ x season density ]
+;
+;  let a-up ( ( season + 1 ) / 2 )
+;  let b-up ( plant-minimum-neighbors + plant-maximum-neighbors ) / 2
+;  let c-up ( b-up - plant-minimum-neighbors )
+;  let probability-up growth-probability a-up b-up c-up x
+;
+;  let y plant-seasonality * ( plant-daily-cycle / plant-annual-cycle ) * ( ( density ) * ( 2 * probability-up - 1 ) + ( ( ( season + 1 ) / 2 ) - density ) )
+;
+;  report y
+;end
+;
+;to-report growth-probability [ a b c x ]
+;  report ifelse-value ( c = 0 ) [ 0 ] [ ( a * e ^ ( - (( x - b ) ^ 2 ) / ( 2 * ( c ^ 2 ) )) ) ]
+;end

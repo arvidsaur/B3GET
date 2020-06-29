@@ -22,13 +22,12 @@ __includes [
   "results.nls"
 ]
 
-breed [ plants plant ]
 breed [ groups group ]
 breed [ anima1s anima1 ]
 
 turtles-own [ meta-id age energy.supply ]
 
-patches-own [ penergy.supply ]
+patches-own [ pmeta-id penergy.supply ]
 
 anima1s-own [
 
@@ -161,6 +160,8 @@ globals [
   model-structure
   genotype-reader
   simulation-id
+  climate-table
+
   deterioration-rate
   selection-rate
 
@@ -238,14 +239,11 @@ to setup-parameters
   set selection-rate 0.0001
 end
 
-to setup-plants
-  ask plants [ die ]
-  ask patches [ set pcolor 36 ]
-  ask patches [ sprout-plants 1 [ initialize-plant ]]
-end
-
 to setup-patches
-  ask patches [ initialize-patch ]
+  ask patches [
+    set penergy.supply random-float plant-quality
+    set pmeta-id random 9999999
+    update-patch-color ]
 end
 
 to setup [ new-simulation-id ]
@@ -255,9 +253,8 @@ to setup [ new-simulation-id ]
   reset-ticks
   set simulation-id new-simulation-id
   setup-parameters
-  import-population ; must go first
+  import-population
   import-genotype
-  ;setup-plants
   setup-patches
   clear-output
 end
@@ -277,11 +274,8 @@ to go
 
   ; THE ENVIRONMENT
   ifelse ( model-structure = "no-plants" )
-  [ ask plants [ die ] ]
-  [
-    ;update-plants
-    update-patches
-  ]
+  [ ask patches [ set pcolor brown ] ]
+  [ update-patches ]
 
   ; AGENT MORTALITY
   ifelse ( model-structure = "reaper" )
@@ -312,7 +306,7 @@ to go
   ; prints out current status of the simulation every 100 timesteps
   if ( ticks > 0 and ceiling (ticks / 100) = (ticks / 100) and any? anima1s ) [
     let print-text (word "Simulation " simulation-id " is now at " precision (ticks / plant-annual-cycle) 3 " years, "
-      precision sum [energy.supply] of plants 3 " plant units, "
+      precision sum [penergy.supply] of patches 3 " plant units, "
       precision mean [generation-number] of anima1s 3 " generations, and contains "
       count anima1s with [ is.alive ] " living organisms.")
     print print-text
@@ -341,107 +335,37 @@ to-report generate-simulation-id
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
-; PLANTS
+; PATCHES
 ;--------------------------------------------------------------------------------------------------------------------
 
-to update-plants
-  let season ( cos (( 360 / plant-annual-cycle ) * ticks))
-  let daytime ( cos (( 360 / plant-daily-cycle ) * ticks))
-
-  ask plants [
-
-    let energy-update ( random-float plant-seasonality * ( abs season ) * ( 1 / 10000 ) )
-    let random-change random-float 0.001
-
-    let value 0
-    ask neighbors [
-      if any? plants-here [
-        ask plants-here [ set value value + energy.supply ]]]
-
-    set energy.supply ifelse-value ( season > 0 )
-    [ energy.supply + random-change + ifelse-value ( value >= plant-minimum-neighbors and value <= plant-maximum-neighbors ) [ energy-update ] [  0 ] ]
-    [ energy.supply - random-change ]
-
-    if energy.supply >= plant-quality [ set energy.supply plant-quality ]
-    if energy.supply <= 0 [ set energy.supply 0 ]
-
-    ;set label precision value 1
-    update-plant-color
-  ]
-end
-
 to update-patches
-  let season ( cos (( 360 / plant-annual-cycle ) * ticks))
 
-;  ask patches [
-;
-;    let a 1
-;    let b ( plant-minimum-neighbors + plant-maximum-neighbors ) / 2
-;    let c ( b - plant-minimum-neighbors )
-;    let x sum [penergy.supply] of neighbors
-;
-;    let probability-value ( a * e ^ ( - (( x - b ) ^ 2 ) / ( 2 * ( c ^ 2 ) )) ) -  0.5 + ( 0.5 * season * plant-seasonality / 100 )
-;
-;    let boolean-result random-float 1.0 <= ( abs probability-value )
-;
-;    let change-in-energy plant-daily-cycle / plant-annual-cycle
-;
-;    if ( probability-value > 0 and boolean-result = true ) [ set penergy.supply penergy.supply + change-in-energy ]
-;    if ( probability-value <= 0 and boolean-result = true ) [ set penergy.supply penergy.supply - change-in-energy ]
-;
-;    if penergy.supply >= plant-quality [ set penergy.supply plant-quality ]
-  ;    if penergy.supply <= 0 [ set penergy.supply 0 ]
-  ;
-  ;    ;set plabel precision x 1
-  ;    update-patch-color ]
+  let season ( cos (( 360 / plant-annual-cycle ) * ticks))
+  let density ( sum [penergy.supply] of patches ) / count patches
 
   ask patches [
 
-    let a 1 ;( season * plant-seasonality / 100 )
-    let b ( plant-minimum-neighbors + plant-maximum-neighbors ) / 2
-    let c ( b - plant-minimum-neighbors )
-    let x sum [penergy.supply] of neighbors
-
-    let up ( a * e ^ ( - (( x - b ) ^ 2 ) / ( 2 * ( c ^ 2 ) )) ) ; - 0.5 + ( 0.5 * season * plant-seasonality / 100 )
-
-    let boolean-result random-float 1.0 <= ( abs probability-value )
-
-    let change-in-energy 0.001 ; plant-daily-cycle / plant-annual-cycle
-
-;    ifelse ( probability-value > 0 )
-;    [ set penergy.supply penergy.supply + change-in-energy ]
-;    [ set penergy.supply penergy.supply - change-in-energy ]
-
-    ;if ( probability-value <= 0 and boolean-result = true ) [ set penergy.supply penergy.supply - change-in-energy ]
-
-    ;set penergy.supply penergy.supply + ifelse-value ( season > 0 ) [ 0.0001 ] [ ( - 0.0001 ) ]
-    set penergy.supply penergy.supply + probability-value * change-in-energy
-    if penergy.supply >= plant-quality [ set penergy.supply plant-quality ]
-    if penergy.supply <= 0 [ set penergy.supply 0 ]
-
-    set plabel precision x 1
+    set penergy.supply updated-plant-energy penergy.supply ( sum [penergy.supply] of neighbors ) season density
     update-patch-color ]
 
- ; diffuse penergy.supply 0.001
-
 end
 
-to initialize-plant
-  set meta-id random 9999999
-  set energy.supply random-float plant-quality
-  set hidden? false
-  set size 1
-  set shape "square"
-  update-plant-color
-end
+to-report updated-plant-energy [ old-energy neighbor-energy season plant-density ]
 
-to initialize-patch
-  set penergy.supply random-float plant-quality
-  update-patch-color
-end
+  let energy-to-report old-energy
 
-to update-plant-color
-  set color scale-color green energy.supply 1.5 -0.25
+  let a ( ( season + 1 ) / 2 )
+  let b ( plant-minimum-neighbors + plant-maximum-neighbors ) / 2
+  let c ( b - plant-minimum-neighbors )
+  let x ( neighbor-energy / plant-quality )
+  let probability-up ifelse-value ( c = 0 ) [ 0 ] [ ( a * e ^ ( - (( x - b ) ^ 2 ) / ( 2 * ( c ^ 2 ) )) ) ]
+  let y plant-seasonality * ( plant-daily-cycle / plant-annual-cycle ) * ( ( plant-density ) * ( 2 * probability-up - 1 ) + ( ( ( season + 1 ) / 2 ) - plant-density ) )
+  set energy-to-report ( ( energy-to-report / plant-quality ) + ( random-float y ) * plant-quality ) * plant-quality
+
+  if energy-to-report >= plant-quality [ set energy-to-report plant-quality ]
+  if energy-to-report <= 0.000 [ set energy-to-report 0.000 ]
+
+  report energy-to-report
 end
 
 to update-patch-color
@@ -510,7 +434,7 @@ end
 
 ;----------------------------------------------------------------------------------------------
 ;
-; FILTER ENVIRONMENT TO BE CONSIDERED TO SUROUNDING CONIC SECTION
+; FILTER ENVIRONMENT TO BE CONSIDERED TO SURROUNDING CONIC SECTION
 ;
 ; This subroutine ...
 ;
@@ -521,24 +445,24 @@ end
 ;----------------------------------------------------------------------------------------------
 
 to consider-environment
-  set my.environment no-turtles
+  set my.environment lput self []
   let sun-status get-solar-status
 
   ; ASPATIAL WORLD
-  ifelse ( model-structure = "aspatial" ) [
-    set my.environment up-to-n-of 100 turtles
+  ifelse ( model-structure = "aspatial" )
+  [ ask n-of 100 patches [ ask myself [ set my.environment lput myself my.environment ] ]]
 
-  ][ ; SPATIAL WORLD
-    if ( sun-status = "DAY" ) [
-      set my.environment turtles with [ not is-group? self and not hidden? ] in-cone ( 5 * day.perception.range ) ( 360 * day.perception.angle )
-      if (female.fertility = "pregnant") [ set my.environment turtles with [ not is-group? self and (not hidden? or member? self [my-offspring] of myself ) ] in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) ] ] ; mothers can see gestatees
+  [ ; SPATIAL WORLD
+    if ( sun-status = "DAY" ) [ ask patches in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) [ ask myself [ set my.environment lput myself my.environment ] ]]
+    if ( sun-status = "NIGHT" ) [ ask patches in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) [ ask myself [ set my.environment lput myself my.environment ]]]]
 
-    if ( sun-status = "NIGHT" ) [
-      set my.environment turtles with [ not is-group? self and not hidden? ] in-cone ( 5 * day.perception.range ) ( 360 * day.perception.angle ) ; set to night.perception.angle once genotype includes this
-      if (female.fertility = "pregnant") [ set my.environment turtles with [ not is-group? self and (not hidden? or member? self [my-offspring] of myself ) ] in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) ] ] ; mothers can see gestatees
+  foreach my.environment [ p -> ask [turtles-here] of p [
+    ifelse ( is-anima1? self and [life.history] of myself = "gestatee" )
+    [ if ( self = myself or self = mother ) [ ask myself [ set my.environment lput myself my.environment ] ] ]
+    [ if ( not hidden? ) [ ask myself [ set my.environment lput myself my.environment ] ]]]]
 
-    if (life.history = "gestatee" ) [ set my.environment turtles with [ [meta-id] of self = [meta-id] of myself or meta-id = [mother-identity] of myself ]] ; gestatees can only see themselves, and their mothers
-  ]
+  foreach carried.items [ c -> if ([life.history] of c = "gestatee") [ set my.environment lput c my.environment ]]
+
 end
 
 ;----------------------------------------------------------------------------------------------
@@ -610,12 +534,12 @@ end
 to do-actions
 
   set completed.actions []
-  foreach filter [ vector -> not member? vector completed.actions ] energy.allocated [ vector ->
+  foreach filter [ vector -> not member? vector completed.actions ] energy.allocated [ vector -> ; does this work?
     let target item 1 vector
     let action item 2 vector
     let cost item 3 vector
 
-    ifelse ( ifelse-value ( target = nobody ) [ false ] [ distance target < ( size / 2 + [size] of target / 2 ) ] )
+    ifelse ( ifelse-value ( target = nobody ) [ false ] [ distance target < ( size / 2 + ( ifelse-value ( is-patch? target ) [ 1 ] [[size] of target / 2 ])) ] )
 
     [( ifelse
 
@@ -681,7 +605,7 @@ to complete-action [ target action cost outcome ]
   if ( not is-list? completed.actions ) [ set completed.actions [] ]
   set completed.actions lput ( list self target action cost outcome ) completed.actions
   if ( not is-list? population-actions ) [ set population-actions [] ]
-  set population-actions lput ( list ticks self target action cost outcome ) population-actions
+  ;set population-actions lput ( list ticks self target action cost outcome ) population-actions
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -804,16 +728,22 @@ end
 to move-toward [ target cost ]
   if (target != nobody ) [
 
-    let ycor-difference ([ycor] of target - [ycor] of self )
-    let xcor-difference ([xcor] of target - [xcor] of self )
+    ; deteremine x and y coordinate difference to target
+    let ycor-difference ( ( ifelse-value ( is-patch? target ) [ [pycor] of target ] [ [ycor] of target ] ) - [ycor] of self )
+    let xcor-difference ( ( ifelse-value ( is-patch? target ) [ [pxcor] of target ] [ [xcor] of target ] ) - [xcor] of self )
+
     if ( not ( ycor-difference = 0 and xcor-difference = 0 ) ) [
 
-      let angle atan ycor-difference xcor-difference
+      ; calculate angle to target
+      let angle atan xcor-difference ycor-difference
       if ( cost < 0 ) [ set angle angle - 180 ]
+
+      ; set magnitudes based on cost
       set x.magnitude x.magnitude + (abs cost * sin angle)
       set y.magnitude y.magnitude + (abs cost * cos angle) ]
 
-    set heading ifelse-value ( x.magnitude = 0 and y.magnitude = 0 ) [ heading ] [ ( atan y.magnitude x.magnitude ) ]
+    ; set heading based on magnitudes
+    set heading ifelse-value ( x.magnitude = 0 and y.magnitude = 0 ) [ heading ] [ ( atan x.magnitude y.magnitude ) ]
     complete-action target "move-toward" cost heading
   ]
 end
@@ -827,9 +757,6 @@ end
 to go-forward [ cost ]
   if ( life.history != "gestatee" ) [
 
-    set x.magnitude 0
-    set y.magnitude 0
-
     if ( cost < 0 ) [ right 180 ]
     let sum-weight size
     foreach carried.items [ object -> set sum-weight sum-weight + [size] of object ]
@@ -837,6 +764,10 @@ to go-forward [ cost ]
     forward travel-distance
     foreach carried.items [ object -> ifelse (object = nobody) [ set carried.items remove-item nobody carried.items ] [ ask object [ move-to myself ] ]]
     complete-action self "go-forward" cost heading
+
+    set x.magnitude 0
+    set y.magnitude 0
+
     ; track travel
     set distance-traveled distance-traveled + travel-distance
     if not member? patch-here cells-occupied [ set cells-occupied lput patch-here cells-occupied ]
@@ -1048,18 +979,21 @@ to demand-from [ target cost ]
 end
 
 to eat [ target cost ]
-  if ( life.history = "juvenile" or life.history = "adult" or life.history = "senescent" and ( is-plant? target or is-anima1? target )) [
-    complete-action target "eat" cost [breed] of target
+  if ( life.history = "juvenile" or life.history = "adult" or life.history = "senescent" and ( is-patch? target or is-anima1? target )) [
+    complete-action target "eat" cost ""
     receive-from target cost
   ]
 end
 
 to receive-from [ target cost ]
-  if ( cost > 0 and is-anima1? target or is-plant? target ) [
+  if ( cost > 0 and is-anima1? target or is-patch? target ) [
     let energy-wanted get-updated-value stomach.size cost
-    let energy-received ifelse-value ( energy-wanted < [ energy.supply ] of target ) [ energy-wanted ] [ [ energy.supply ] of target ]
+    let energy-supply ifelse-value ( is-patch? target ) [ [ penergy.supply ] of target ] [ [ energy.supply ] of target ]
+    let energy-received ifelse-value ( energy-wanted < energy-supply ) [ energy-wanted ] [ energy-supply ]
     update-energy energy-received
-    ask target [ update-energy ( - energy-received ) ]
+    ifelse ( is-patch? target )
+    [ ask target [ set penergy.supply penergy.supply - energy-received ]]
+    [ ask target [ update-energy ( - energy-received ) ]]
     complete-action target "receive-from" cost energy-received
   ]
 end
@@ -1485,13 +1419,13 @@ to-report get-mutation [ unmutated-codon ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-8
+7
 85
-711
-789
+712
+791
 -1
 -1
-34.75
+6.97
 1
 10
 1
@@ -1502,9 +1436,9 @@ GRAPHICS-WINDOW
 1
 1
 0
-19
+99
 0
-19
+99
 1
 1
 1
@@ -1573,33 +1507,13 @@ NIL
 NIL
 1
 
-PLOT
-720
-106
-967
-260
-plot
-NIL
-NIL
-0.0
-10.0
-0.0
-1.0
-true
-false
-"" "if any? anima1s [\n\nif (useful-commands = \"age-histogram\") [\n  clear-plot\n  set-plot-x-range 0 max [age] of anima1s with [ is.alive ] + 1000\n  set-plot-y-range 0 10 ]\n  \nif (useful-commands = \"lotka-volterra\") [\n  let plts ( plant-quality * count plants / 100 )\n  let anls count anima1s\n  let max-value max (list plts anls )\n  set-plot-x-range 0 10\n  set-plot-y-range 0 ( max-value + 10 ) ]\n ]\n  \n"
-PENS
-"age" 1000.0 1 -16777216 true "" "if (useful-commands = \"age-histogram\") [ histogram [age] of anima1s with [ is.alive ] ]"
-"plants" 1.0 0 -13840069 true "" "if (useful-commands != \"age-histogram\") [ plot ( mean [energy.supply] of plants ) ]"
-"organisms" 1.0 0 -6459832 true "" "if (useful-commands != \"age-histogram\") [ plot ( count anima1s ) ]"
-
 INPUTBOX
 720
 10
 967
 102
 documentation-notes
-NIL
+Printout runtime check.
 1
 0
 String
@@ -1641,7 +1555,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-6.1
+6.0
 .1
 1
 NIL
@@ -1681,11 +1595,11 @@ SLIDER
 plant-seasonality
 plant-seasonality
 0
-100
-0.0
-5
 1
-%
+1.0
+.05
+1
+NIL
 HORIZONTAL
 
 SLIDER
@@ -1735,7 +1649,7 @@ INPUTBOX
 1097
 299
 population
-NIL
+p57PVT
 1
 0
 String
@@ -1746,7 +1660,7 @@ INPUTBOX
 1097
 373
 genotype
-NIL
+g8607035
 1
 0
 String
@@ -1810,7 +1724,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "--------" "lotka-volterra" "age-histogram" "metafile-report" "verify-code" "check-runtime" "simulation-report" "genotype-reader" "model-structure" "clear-plants" "setup-plants" "clear-population" "view-genotype" "view-decisions" "view-allocation" "view-actions" "add-allele" "delete-allele" "population-report"
-12
+6
 
 BUTTON
 912
@@ -1902,7 +1816,7 @@ SWITCH
 43
 output-results?
 output-results?
-0
+1
 1
 -1000
 
@@ -1923,7 +1837,7 @@ INPUTBOX
 967
 324
 command-input
-no-plants
+9772014
 1
 0
 String (commands)
@@ -1935,27 +1849,23 @@ OUTPUT
 788
 11
 
-MONITOR
-96
-805
-203
-850
+PLOT
+722
+106
+966
+259
+plot 1
 NIL
-plant-patchiness
-1
-1
-11
-
-MONITOR
-211
-805
-327
-850
-platn abundance
-sum [ penergy.supply] of patches
-1
-1
-11
+NIL
+0.0
+8.0
+-0.01
+0.01
+true
+false
+"" ""
+PENS
+"default" 1.0 2 -16777216 true "" "plot sum [penergy.supply] of patches"
 
 @#$#@#$#@
 # B3GET 1.1.0 INFORMATION
@@ -2330,6 +2240,7 @@ ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
   set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "B" plant-minimum-neighbors plant-maximum-neighbors )
 ]</setup>
     <go>go</go>
+    <final>crt 1 [ record-simulation die ]</final>
     <timeLimit steps="101"/>
     <exitCondition>not any? anima1s or median [generation-number] of anima1s &gt; 100</exitCondition>
     <enumeratedValueSet variable="path-to-experiment">
@@ -2406,8 +2317,7 @@ ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
 
 setup simulation-id</setup>
     <go>go</go>
-    <final>crt 1 [ record-simulation die ]</final>
-    <timeLimit steps="1001"/>
+    <timeLimit steps="100"/>
     <exitCondition>not any? anima1s</exitCondition>
     <enumeratedValueSet variable="path-to-experiment">
       <value value="&quot;../results/&quot;"/>
@@ -2416,13 +2326,13 @@ setup simulation-id</setup>
       <value value="&quot;baseline&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="genotype-reader">
-      <value value="&quot;status&quot;"/>
+      <value value="&quot;sta7us&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="deterioration-rate">
-      <value value="-0.01"/>
+      <value value="-0.001"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="output-results?">
-      <value value="true"/>
+      <value value="false"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="selection-on?">
       <value value="false"/>
@@ -2461,10 +2371,7 @@ setup simulation-id</setup>
       <value value="8"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="population">
-      <value value="&quot;Chimpanzees&quot;"/>
-      <value value="&quot;Geladas&quot;"/>
-      <value value="&quot;Olives&quot;"/>
-      <value value="&quot;Hamadryas&quot;"/>
+      <value value="&quot;p-20-04-01-02&quot;"/>
     </enumeratedValueSet>
   </experiment>
   <experiment name="WORLD-TEST1" repetitions="1" runMetricsEveryStep="true">
@@ -2483,7 +2390,8 @@ ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
 
 setup simulation-id</setup>
     <go>go</go>
-    <timeLimit steps="1001"/>
+    <final>crt 1 [ record-simulation die ]</final>
+    <timeLimit steps="100"/>
     <exitCondition>not any? anima1s</exitCondition>
     <enumeratedValueSet variable="path-to-experiment">
       <value value="&quot;../results/&quot;"/>
@@ -2492,13 +2400,13 @@ setup simulation-id</setup>
       <value value="&quot;baseline&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="genotype-reader">
-      <value value="&quot;status&quot;"/>
+      <value value="&quot;sta7us&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="deterioration-rate">
       <value value="-0.01"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="output-results?">
-      <value value="true"/>
+      <value value="false"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="selection-on?">
       <value value="false"/>

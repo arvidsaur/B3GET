@@ -114,7 +114,7 @@
 ; ENVIRONMENT: list of turtles (both plants and anima1s) observed by the caller.
 ;----------------------------------------------------------------------------------------------
 
-to-report sta7us-get-decisions [ local-turtles ]
+to-report sta7us-get-decisions [ my-environment ]
   
   let meself self
   let current-energy energy.supply
@@ -124,9 +124,11 @@ to-report sta7us-get-decisions [ local-turtles ]
   let status-list []
 
   let status-table table:make
-  ask local-turtles [
-    table:put status-table [meta-id] of self [ status-of myself ] of myself ]
-  
+  foreach my-environment [ obj ->
+    if ( is-patch? obj ) [ table:put status-table ( [pmeta-id] of obj ) ( status-of obj ) ]
+    if ( is-turtle? obj ) [ table:put status-table ( [meta-id] of obj ) ( status-of obj ) ]
+  ]
+
   foreach (sentence chromosome.I chromosome.II) [ g ->
     if ( length g = 5 and is-boolean? first g and is-string? item 1 g and is-string? item 2 g and is-string? item 3 g and is-number? item 4 g ) [ ; checks that allele correctly organized
       let gene-ego item 1 g
@@ -138,33 +140,34 @@ to-report sta7us-get-decisions [ local-turtles ]
       if first-string-is-part-of-last? ( gene-ego ) ( ego-status ) [
         
         ; Consider status-of others in the environment
-        ask local-turtles [
-          let other-guy self
-          let other-status table:get status-table [meta-id] of self
+        foreach my-environment [ other-guy ->
+          let other-status table:get status-table ifelse-value ( is-patch? other-guy ) [ [pmeta-id] of other-guy ] [ [meta-id] of other-guy ]
           
           ; Check that second CODON matches other
           if first-string-is-part-of-last? ( gene-other ) ( other-status ) [
             
-            ask myself [
-              let distance-to-target ifelse-value ( distance other-guy > 1 ) [ distance other-guy ] [ 1 ]
-              let vector-doesnt-exist true
-              foreach decision-vectors [ v ->
-                
-                if ( item 1 v = other-guy ) and ( item 2 v = ( sta7us-get-action gene-action ) ) [
-                  set vector-doesnt-exist false
-                  set decision-vectors remove-item position v decision-vectors decision-vectors
-                  let new-vector replace-item 3 v ( item 3 v + precision ( gene-weight / ( distance-to-target ^ 2 )) 5 )
-                  set decision-vectors lput new-vector decision-vectors ]]
-              
-              if vector-doesnt-exist [
-                set decision-vectors lput (list meself other-guy ( sta7us-get-action gene-action ) precision ( gene-weight / ( distance-to-target ^ 2 )) 5 ) decision-vectors ]
-        ]]]
+            let distance-to-target ifelse-value ( distance other-guy > 1 ) [ distance other-guy ] [ 1 ]
+            ;let vector-doesnt-exist true
+            ;            foreach decision-vectors [ v ->
+            ;              
+            ;              if ( item 1 v = other-guy ) and ( item 2 v = ( sta7us-get-action gene-action ) ) [
+            ;                set vector-doesnt-exist false
+            ;                set decision-vectors remove-item position v decision-vectors decision-vectors
+            ;                let new-vector replace-item 3 v ( item 3 v + precision ( gene-weight / ( distance-to-target ^ 2 )) 5 )
+            ;                set decision-vectors lput new-vector decision-vectors ]]
+            
+            ;if vector-doesnt-exist [
+            set decision-vectors lput (list meself other-guy ( sta7us-get-action gene-action ) precision ( gene-weight / ( distance-to-target ^ 2 )) 5 ) decision-vectors 
+            ;]
+        ]]
       ]
     ]
   ]
   
   report decision-vectors
 end
+
+
 
 ;----------------------------------------------------------------------------------------------
 ; GET MUTATION
@@ -249,8 +252,9 @@ end
 to-report status-of [ target ]
   let status-report ""
 
-  ifelse (is-anima1? target) 
-  [ ; ANIMALS
+  set status-report ( word status-report ifelse-value ( get-solar-status = "DAY" ) [ "*" ][ "-" ] )
+  
+  if (is-anima1? target) [ ; ANIMALS
     let target-kind "z"
     let target-self ifelse-value ( target = self ) [ "e" ] [ "o" ]
     let target-alive ifelse-value ( is.alive ) [ "v" ] [ "w" ]
@@ -262,22 +266,16 @@ to-report status-of [ target ]
     let target-kin ifelse-value ( relatedness-with target > 0.2 ) [ "k" ] [ "q" ]
     let target-group ifelse-value ( [group.identity] of target = group.identity ) [ "n" ] [ "u" ] 
     let target-carry ifelse-value ( member? target carried.items ) [ "y" ] [ ifelse-value ( member? self [carried.items] of target ) [ "+" ] [ "t" ] ]
-    let target-signal (word ifelse-value alpha.signal [ "α" ][ "å" ] ifelse-value beta.signal [ "β" ][ "ß" ] ifelse-value gamma.signal [ "ɣ" ][ "œ" ] )
+    let target-signal (word ifelse-value [alpha.signal] of target [ "α" ][ "å" ] ifelse-value [beta.signal] of target [ "β" ][ "ß" ] ifelse-value [gamma.signal] of target [ "ɣ" ][ "œ" ] )
     let target-energy ifelse-value ( [energy.supply] of target > energy.supply ) [ "$" ] [ "~" ]
-    set status-report (word target-self target-alive target-kind target-sex target-life-history target-fertility target-size target-health target-kin target-group target-carry target-signal )
+    let target-color (word "" round [color] of target "")
+    set status-report (word target-self target-alive target-kind target-sex target-life-history target-fertility target-size target-health target-kin target-group target-carry target-signal target-color ) ]
     
-  ][ 
-    ; PLANTS
+  if ( is-patch? target ) [ ; PATCHES
     let target-kind "d" 
-    set status-report ( word target-kind ) 
-  ]
+    let target-pcolor (word "" round [pcolor] of target "")
+    set status-report ( word target-kind target-pcolor )]
   
-  ; BOTH
-  set status-report ( word status-report ifelse-value ( get-solar-status = "DAY" ) [ "*" ][ "-" ] )
-  let my-color (word "" round [color] of target "")
-  set status-report ( word status-report (ifelse-value ( length my-color = 1 ) [ (word "00" my-color ) ] ( length my-color = 2 ) [(word "0" my-color) ] [ my-color ] ))
-  ;foreach base-colors [ c -> set status-report (word status-report ifelse-value ( shade-of? c [color] of target ) [ ceiling (( [color] of target ) - c + 5 ) ] [ "" ] ) ]
-
   report status-report
 end
 
@@ -285,7 +283,8 @@ to-report first-string-is-part-of-last? [ string1 string2 ]
   let first-is-part-of-last true
   let index 0
   if ( is-string? string1 and is-string? string2 ) [
-    while [index < length string1] [
+    let string1-length length string1 ; saves on runtime
+    while [ first-is-part-of-last and index < string1-length ] [
       if ( not member? item index string1 string2 ) and ( item index string1 != " " ) [ set first-is-part-of-last false ]
       set index index + 1 ]
   ]

@@ -93,7 +93,7 @@ to-report generate-verification-tape
   
   ; COLLECT BEFORE DATA
   let time-of-day-before get-solar-status
-  let plant-abundance-before sum [ energy.supply ] of plants
+  ;let plant-abundance-before sum [ energy.supply ] of plants
   let count-alive-agents 0
   let count-all-agents 0
   
@@ -114,7 +114,7 @@ to-report generate-verification-tape
   
   ; COLLECT AFTER DATA
   let time-of-day-after get-solar-status
-  let plant-abundance-after sum [ energy.supply ] of plants
+  ;let plant-abundance-after sum [ energy.supply ] of plants
   
   let header (list "date-and-time" "model-version" "simulation-id" "ticks" )
   let verification (list "" "" "" "" )
@@ -203,48 +203,48 @@ to-report generate-verification-tape
   ; UPDATE-PLANTS
   ;--------------------------------------------------------------------------------------------------------------------
   
-  set header lput "Plants change as expected while the simulation runs? 1.1.0" header 
-  set verification lput "visual" verification 
-  set function lput "go" function
-  set boolean lput true boolean ; 2020-04-01
-  
-  set header lput "Calls to UPDATE-PLANTS same as length of timesteps for verification?" header 
-  set verification lput "runtime" verification 
-  set function lput "update-plants" function
-  set boolean lput ( profiler:calls "update-plants" = how-many-ticks? ) boolean   
-  
-  set header lput "Plant energy supply does not exceed PLANT-QUALITY?" header 
-  set verification lput "dynamic" verification 
-  set function lput "update-plants" function
-  set boolean lput ( not any? plants with [ energy.supply > plant-quality ] ) boolean
-  
-  set header lput "All patches either are within PLANT-MINIMUM-NEIGHBORS and PLANT-MAXIMUM-NEIGHBORS or they are not?" header 
-  set verification lput "dynamic" verification 
-  set function lput "update-plants" function
-  let count-plants-with-incorrect-neighbors count patches with [ ( count neighbors with [ any? plants-here ] ) < plant-minimum-neighbors or ( count neighbors with [ any? plants-here ] ) > plant-maximum-neighbors ]
-  let count-plants-with-correct-neighbors count patches with [ ( count neighbors with [ any? plants-here ] ) >= plant-minimum-neighbors and ( count neighbors with [ any? plants-here ] ) <= plant-maximum-neighbors ]
-  set boolean lput ( count-plants-with-incorrect-neighbors + count-plants-with-correct-neighbors = count patches ) boolean
-  
-  set header lput "Over 95% of patches have an amount of neighbors as set by PLANT-MINIMUM-NEIGHBORS and PLANT-MAXIMUM-NEIGHBORS?" header 
-  set verification lput "dynamic" verification 
-  set function lput "update-plants" function
-  set boolean lput ( ( count-plants-with-incorrect-neighbors / count-plants-with-correct-neighbors ) < 0.05 ) boolean
-  
-  set header lput "There are not more plants than there are patches?" header 
-  set verification lput "dynamic" verification 
-  set function lput "update-plants" function
-  set boolean lput ( count plants < count patches ) boolean
-  
-  set header lput "Transitions from DAY to NIGHT lead to decrease in plant abundance?" header 
-  set verification lput "dynamic" verification 
-  set function lput "update-plants" function
-  set boolean lput ( ifelse-value ( time-of-day-before = "DAY" and time-of-day-after = "NIGHT" ) [ plant-abundance-before > plant-abundance-after ] [ true ] ) boolean
-  
-  set header lput "Transitions from NIGHT to DAY lead to increase in plant abundance?" header 
-  set verification lput "dynamic" verification 
-  set function lput "update-plants" function
-  set boolean lput ( ifelse-value ( time-of-day-before = "NIGHT" and time-of-day-after = "DAY" ) [ plant-abundance-before < plant-abundance-after ] [ true ] ) boolean
-  
+;  set header lput "Plants change as expected while the simulation runs? 1.1.0" header 
+;  set verification lput "visual" verification 
+;  set function lput "go" function
+;  set boolean lput true boolean ; 2020-04-01
+;  
+;  set header lput "Calls to UPDATE-PLANTS same as length of timesteps for verification?" header 
+;  set verification lput "runtime" verification 
+;  set function lput "update-plants" function
+;  set boolean lput ( profiler:calls "update-plants" = how-many-ticks? ) boolean   
+;  
+;;  set header lput "Plant energy supply does not exceed PLANT-QUALITY?" header 
+;;  set verification lput "dynamic" verification 
+;;  set function lput "update-plants" function
+;;  set boolean lput ( not any? plants with [ energy.supply > plant-quality ] ) boolean
+;  
+;  set header lput "All patches either are within PLANT-MINIMUM-NEIGHBORS and PLANT-MAXIMUM-NEIGHBORS or they are not?" header 
+;  set verification lput "dynamic" verification 
+;  set function lput "update-plants" function
+;  let count-plants-with-incorrect-neighbors count patches with [ ( count neighbors with [ any? plants-here ] ) < plant-minimum-neighbors or ( count neighbors with [ any? plants-here ] ) > plant-maximum-neighbors ]
+;  let count-plants-with-correct-neighbors count patches with [ ( count neighbors with [ any? plants-here ] ) >= plant-minimum-neighbors and ( count neighbors with [ any? plants-here ] ) <= plant-maximum-neighbors ]
+;  set boolean lput ( count-plants-with-incorrect-neighbors + count-plants-with-correct-neighbors = count patches ) boolean
+;  
+;  set header lput "Over 95% of patches have an amount of neighbors as set by PLANT-MINIMUM-NEIGHBORS and PLANT-MAXIMUM-NEIGHBORS?" header 
+;  set verification lput "dynamic" verification 
+;  set function lput "update-plants" function
+;  set boolean lput ( ( count-plants-with-incorrect-neighbors / count-plants-with-correct-neighbors ) < 0.05 ) boolean
+;  
+;  set header lput "There are not more plants than there are patches?" header 
+;  set verification lput "dynamic" verification 
+;  set function lput "update-plants" function
+;  set boolean lput ( count plants < count patches ) boolean
+;  
+;  set header lput "Transitions from DAY to NIGHT lead to decrease in plant abundance?" header 
+;  set verification lput "dynamic" verification 
+;  set function lput "update-plants" function
+;  set boolean lput ( ifelse-value ( time-of-day-before = "DAY" and time-of-day-after = "NIGHT" ) [ plant-abundance-before > plant-abundance-after ] [ true ] ) boolean
+;  
+;  set header lput "Transitions from NIGHT to DAY lead to increase in plant abundance?" header 
+;  set verification lput "dynamic" verification 
+;  set function lput "update-plants" function
+;  set boolean lput ( ifelse-value ( time-of-day-before = "NIGHT" and time-of-day-after = "DAY" ) [ plant-abundance-before < plant-abundance-after ] [ true ] ) boolean
+;  
   ;--------------------------------------------------------------------------------------------------------------------
   ; DETERIORATE
   ;--------------------------------------------------------------------------------------------------------------------

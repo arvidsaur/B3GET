@@ -115,13 +115,13 @@ to output-header [ header-title ]
 end
 
 to output-LV-plot
-  clear-plot
-  let plts ( plant-quality * count plants / 100 )
-  let anls count anima1s
-  let max-value max (list plts anls )
-  set-plot-x-range 0 10
-  set-plot-y-range 0 ( max-value + 10 )
-  
+;  clear-plot
+;  let plts ( plant-quality * count plants / 100 )
+;  let anls count anima1s
+;  let max-value max (list plts anls )
+;  set-plot-x-range 0 10
+;  set-plot-y-range 0 ( max-value + 10 )
+;  
 end
 
 to output-metafile-report
@@ -246,17 +246,17 @@ to import-world-command
 end
 
 to output-clear-plants
-  output-header " CLEAR PLANTS :   "
-  ask plants [ die ]
-  output-print " Plants cleared."
-  set documentation-notes (word "Clear all plants in simulation. " documentation-notes )
+;  output-header " CLEAR PLANTS :   "
+;  ask plants [ die ]
+;  output-print " Plants cleared."
+;  set documentation-notes (word "Clear all plants in simulation. " documentation-notes )
 end
 
 to output-setup-plants
-  output-header " SETUP PLANTS :   "
-  setup-plants
-  output-print " Let there be plants!"
-  set documentation-notes (word "Setup new plants in simulation. " documentation-notes )  
+;  output-header " SETUP PLANTS :   "
+;  setup-plants
+;  output-print " Let there be plants!"
+;  set documentation-notes (word "Setup new plants in simulation. " documentation-notes )  
 end
 
 to output-clear-pop
