@@ -230,6 +230,8 @@ to save-population
       "juvenility.chance" 
       "adulthood.chance"
       "senescency.chance"
+      "x.magnitude"
+      "y.magnitude"
       "carried.items" )
     
     ask turtles with [ breed = anima1s or breed = groups ] [ 

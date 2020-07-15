@@ -14,19 +14,20 @@ extensions [ csv profiler table ]
 __includes [
   "commands.nls"
   "data.nls"
-  "results.nls"
-  "g8tes.nls"
   "import-export.nls"
   "selection.nls"
-  "sta7us.nls"
   "verification.nls"
+  "sta7us.nls"
+  "g8tes.nls"
+  "results.nls"
 ]
 
-breed [ plants plant ]
 breed [ groups group ]
 breed [ anima1s anima1 ]
 
 turtles-own [ meta-id age energy.supply ]
+
+patches-own [ pmeta-id penergy.supply ]
 
 anima1s-own [
 
@@ -72,18 +73,19 @@ anima1s-own [
   senescency.chance
 
   mother
+  x.magnitude
+  y.magnitude
   chromosome.I
   chromosome.II
 
   my.environment
   decision.vectors
-  energy.allocated
   completed.actions
 
   ; TRACKING VARIABLES
+  generation-number
   mother-identity
   father-identity
-  generation-number
   previous-group-id
   natal-group-id
   natal-group-size
@@ -157,6 +159,8 @@ globals [
   model-structure
   genotype-reader
   simulation-id
+  climate-table
+
   deterioration-rate
   selection-rate
 
@@ -234,10 +238,11 @@ to setup-parameters
   set selection-rate 0.0001
 end
 
-to setup-plants
-  ask plants [ die ]
-  ask patches [ set pcolor 36 ]
-  ask patches [ sprout-plants 1 [ initialize-plant ]]
+to setup-patches
+  ask patches [
+    set penergy.supply random-float plant-quality
+    set pmeta-id random 9999999
+    update-patch-color ]
 end
 
 to setup [ new-simulation-id ]
@@ -247,10 +252,10 @@ to setup [ new-simulation-id ]
   reset-ticks
   set simulation-id new-simulation-id
   setup-parameters
-  ; import population must go first
   import-population
   import-genotype
-  setup-plants
+  ;setup-patches
+  ask patches [ set pcolor brown + 1 ]
   clear-output
 end
 
@@ -267,13 +272,10 @@ end
 
 to go
 
-  ;delete
-  ask anima1s [ foreach carried.items [ i -> ask i [ move-to myself ] ]] ; important to keep for now
-
   ; THE ENVIRONMENT
-  ifelse ( model-structure = "no-plants" )
-  [ ask plants [ die ] ]
-  [ update-plants ]
+;  ifelse ( model-structure = "no-plants" )
+;  [ ask patches [ set pcolor brown + 1 ] ]
+;  [ update-patches ]
 
   ; AGENT MORTALITY
   ifelse ( model-structure = "reaper" )
@@ -283,20 +285,18 @@ to go
   ; AGENT REPRODUCTION
   if ( model-structure = "sower" and count anima1s < 100 ) ; random mating
   [ repeat ( 100 - count anima1s ) [
-    if ( ( count anima1s with [ biological.sex = "male" and life.history = "adult" ] > 0 ) and ( count anima1s with [ biological.sex = "female" and life.history = "adult" ] > 0 ) )
-    [ ask one-of anima1s with [ biological.sex = "female" and life.history = "adult" ] [ conceive-with ( one-of anima1s with [ biological.sex = "male" and life.history = "adult" ] ) 999999 ]]]]
+    if ( ( count anima1s with [ biological.sex = "male" and life.history = "adult" ] > 0 ) and ( count anima1s with [ biological.sex = "female" and life.history = "adult" and female.fertility = "cycling" ] > 0 ) )
+    [ ask one-of anima1s with [ biological.sex = "female" and life.history = "adult" and female.fertility = "cycling" ] [ conceive-with ( one-of anima1s with [ biological.sex = "male" and life.history = "adult" ] ) 999999 ]]]]
 
   ; AGENT UPDATES
   ask turtles [ set age age + 1 ] ; all turtles age each timestep
-  ask anima1s [
-    deteriorate
-    update-appearance ]
+  ask anima1s [ deteriorate update-appearance ]
 
   ; AGENT AGENCY
-  ask anima1s [
-    if ( is.alive )
-    [ make-decisions
-      allocate-energy ]]
+  ask anima1s with [ is.alive ] [ consider-environment ]
+  ask anima1s with [ is.alive ] [ make-decisions ]
+  ;ask anima1s with [ is.alive ] [ allocate-energy ]
+  ask anima1s with [ is.alive ] [ do-actions ]
 
   ; ARTIFICAL SELECTION
   if selection-on? [ artificial-selection ]
@@ -306,7 +306,7 @@ to go
   ; prints out current status of the simulation every 100 timesteps
   if ( ticks > 0 and ceiling (ticks / 100) = (ticks / 100) and any? anima1s ) [
     let print-text (word "Simulation " simulation-id " is now at " precision (ticks / plant-annual-cycle) 3 " years, "
-      precision sum [energy.supply] of plants 3 " plant units, "
+      precision sum [penergy.supply] of patches 3 " plant units, "
       precision mean [generation-number] of anima1s 3 " generations, and contains "
       count anima1s with [ is.alive ] " living organisms.")
     print print-text
@@ -335,103 +335,40 @@ to-report generate-simulation-id
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
-; PLANTS
+; PATCHES
 ;--------------------------------------------------------------------------------------------------------------------
 
-to update-plants
+to update-patches
+
   let season ( cos (( 360 / plant-annual-cycle ) * ticks))
-  let daytime ( cos (( 360 / plant-daily-cycle ) * ticks))
+  let density ( sum [penergy.supply] of patches ) / count patches
 
-  let energy-update ( plant-seasonality * ( 1 / 10000 ) * abs season )
-;
-;  if ( get-solar-status = "DAY" ) [
-;
-;    ask plants [
-;      set energy.supply ( get-updated-value energy.supply energy-update )
-;      update-plant-color ]
-;
-;  ]
-;
-  ask plants [
-
-;    if ( get-solar-status = "DAY" ) [
-;
-;      ifelse ( season > 0 )
-;      [ set energy.supply get-updated-value energy.supply energy-update ]
-;      [ set energy.supply get-updated-value energy.supply ( - energy-update ) ]
-;
-;    ]
-
-    let value 0
-    ask neighbors [
-      if any? plants-here [
-        ask plants-here [ set value value + energy.supply ]]]
-
-    ifelse ( value >= plant-minimum-neighbors and value <= plant-maximum-neighbors )
-    [ set energy.supply get-updated-value energy.supply 0.001 ]
-    [ set energy.supply get-updated-value energy.supply ( - 0.001 ) ]
-
-    update-plant-color
-  ]
-
-  ;  ; calculate the total penergy of surrounding PLANT neighbors
-  ;  let total-neighbor-penergy 0
-;  ask neighbors [
-;    if any? plants-here [
-;      ask plants-here [ set total-neighbor-penergy total-neighbor-penergy + 1 ]]] ;energy.supply
-;
-;  ; calculate a random value along a normal distribution of mean TOTAL-NEIGHBOR-PENERGY and standard deviation LIFE-SD
-;  let normal-value ( random-normal total-neighbor-penergy 1.0 )
-;
-;  ; life occurs when the random value is within the MIN and MAX values
-;  ifelse ( value >= plant-minimum-neighbors and value <= plant-maximum-neighbors )
-;  [ if ( not any? plants-here ) [ sprout-plants 1 [ initialize-plant ]] ]
-;  [ if ( any? plants-here ) [ ask plants-here [ die ]]] ]
-
-
-
-  ;  let energy-update get-updated-value ( plant-seasonality * ( 1 / 10000 ) * season ) ( 10 * daytime )
-  ;
-  ;  ;  if ( daytime > 0 ) [
-  ;  ;  let terminal-threshold  0.5 * ( ( season * ( plant-seasonality / 100 ) ) + 1 ) * plant-quality
-  ;
-  ;  ask plants [
-  ;    ; if any? other plants-here [ ask other plants-here [ die ]] ; why are multiple plants in one cell?
-  ;    set energy.supply ( get-updated-value energy.supply energy-update )
-  ;    update-plant-color ]
-  ;
-  ;  ask n-of 1 patches [ sprout-plants 1 [ initialize-plant ]]
-  ;
-  ;  ; only a small proportion of plants change each TIMESTEP
-  ;  ask n-of (ceiling (0.01 * count patches)) patches [
-  ;
-  ;    ; calculate the total penergy of surrounding PLANT neighbors
-  ;    let total-neighbor-penergy 0
-  ;    ask neighbors [
-  ;      if any? plants-here [
-  ;        ask plants-here [ set total-neighbor-penergy total-neighbor-penergy + 1 ]]] ;energy.supply
-  ;
-  ;    ; calculate a random value along a normal distribution of mean TOTAL-NEIGHBOR-PENERGY and standard deviation LIFE-SD
-  ;    let normal-value ( random-normal total-neighbor-penergy 1.0 )
-  ;
-  ;    ; life occurs when the random value is within the MIN and MAX values
-  ;    ifelse ( normal-value >= plant-minimum-neighbors and normal-value <= plant-maximum-neighbors )
-  ;    [ if ( not any? plants-here ) [ sprout-plants 1 [ initialize-plant ]] ]
-  ;    [ if ( any? plants-here ) [ ask plants-here [ die ]]] ]
+  ask patches [
+    set penergy.supply updated-plant-energy penergy.supply ( sum [penergy.supply] of neighbors ) season density
+    update-patch-color ]
 
 end
 
-to initialize-plant
-  set meta-id random 9999999
-  set energy.supply random-float plant-quality
-  set hidden? false
-  set size 1
-  set shape "square"
-  update-plant-color
+to-report updated-plant-energy [ old-energy neighbor-energy season plant-density ]
+
+  let energy-to-report old-energy
+
+  let a ( ( season + 1 ) / 2 )
+  let b ( plant-minimum-neighbors + plant-maximum-neighbors ) / 2
+  let c ( b - plant-minimum-neighbors )
+  let x ( neighbor-energy / plant-quality )
+  let probability-up ifelse-value ( c = 0 ) [ 0 ] [ ( a * e ^ ( - (( x - b ) ^ 2 ) / ( 2 * ( c ^ 2 ) )) ) ]
+  let y plant-seasonality * ( plant-daily-cycle / plant-annual-cycle ) * ( ( plant-density ) * ( 2 * probability-up - 1 ) + ( ( ( season + 1 ) / 2 ) - plant-density ) )
+  set energy-to-report ( ( energy-to-report / plant-quality ) + ( random-float y ) * plant-quality ) * plant-quality
+
+  if energy-to-report >= plant-quality [ set energy-to-report plant-quality ]
+  if energy-to-report <= 0.000 [ set energy-to-report 0.000 ]
+
+  report energy-to-report
 end
 
-to update-plant-color
-  set color scale-color green energy.supply 1.5 -0.25
+to update-patch-color
+  set pcolor scale-color green penergy.supply 1.5 -0.25
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -444,21 +381,21 @@ to deteriorate
 end
 
 to check-mortality
-
   if ( random-float 1.0 > living.chance ) [
     ifelse ( is.alive = false )
 
     ; SECOND DEATH: remove agent from the simulation
     [ remove-from-simulation ]
 
-    ; FIRST DEATH: set anima1 to is.dead true
+    ; FIRST DEATH: set anima1 to is.alive false
     [ set is.alive false set ticks-at-death ticks ]]
 end
 
 to remove-from-simulation
-  ; remove from anyone's carried items
-  ; remove from group and die if no other group members
+  let me-the-dying-agent self
   if ( ticks-at-death = 0 ) [ set ticks-at-death ticks ]
+  ask anima1s with [ member? myself carried.items ] [ set carried.items remove myself remove-duplicates carried.items ]
+  ask current-group [ if ( not any? group-members with [ self != me-the-dying-agent ] ) [ die ] ]
   die
 end
 
@@ -491,136 +428,174 @@ end
 ;                         .88
 ;                     d8888P
 ;
+; consider-environment > make-decisions > allocate-energy > do-actions
 ;--------------------------------------------------------------------------------------------------------------------
 
-to make-decisions
-  set my.environment no-turtles
+;----------------------------------------------------------------------------------------------
+;
+; FILTER ENVIRONMENT TO BE CONSIDERED TO SURROUNDING CONIC SECTION
+;
+; This subroutine ...
+;
+; ENTRY:
+;
+; EXIT:
+;
+;----------------------------------------------------------------------------------------------
+
+to consider-environment
+  set my.environment lput self []
   let sun-status get-solar-status
 
   ; ASPATIAL WORLD
-  ifelse ( model-structure = "aspatial" ) [
-    set my.environment up-to-n-of 100 turtles
+  ifelse ( model-structure = "aspatial" )
+  [ ask n-of 100 patches [ ask myself [ set my.environment lput myself my.environment ] ]]
 
-  ][ ; SPATIAL WORLD
-    if ( sun-status = "DAY" ) [
-      set my.environment turtles with [ not is-group? self and not hidden? ] in-cone ( 5 * day.perception.range ) ( 360 * day.perception.angle )
-      if (female.fertility = "pregnant") [ set my.environment turtles with [ not is-group? self and (not hidden? or member? self [my-offspring] of myself ) ] in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) ] ] ; mothers can see gestatees
+  [ ; SPATIAL WORLD
+    if ( sun-status = "DAY" ) [ ask patches in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) [ ask myself [ set my.environment lput myself my.environment ] ]]
+    if ( sun-status = "NIGHT" ) [ ask patches in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) [ ask myself [ set my.environment lput myself my.environment ]]]]
 
-    if ( sun-status = "NIGHT" ) [
-      set my.environment turtles with [ not is-group? self and not hidden? ] in-cone ( 5 * day.perception.range ) ( 360 * day.perception.angle ) ; set to night.perception.angle once genotype includes this
-      if (female.fertility = "pregnant") [ set my.environment turtles with [ not is-group? self and (not hidden? or member? self [my-offspring] of myself ) ] in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) ] ] ; mothers can see gestatees
+  foreach my.environment [ p -> ask [turtles-here] of p [
+    ifelse ( is-anima1? self and [life.history] of myself = "gestatee" )
+    [ if ( self = myself or self = mother ) [ ask myself [ set my.environment lput myself my.environment ] ] ]
+    [ if ( not hidden? ) [ ask myself [ set my.environment lput myself my.environment ] ]]]]
 
-    if (life.history = "gestatee" ) [ set my.environment turtles with [ [meta-id] of self = [meta-id] of myself or meta-id = [mother-identity] of myself ]] ; gestatees can only see themselves, and their mothers
-  ]
+  foreach carried.items [ c -> if ([life.history] of c = "gestatee") [ set my.environment lput c my.environment ]]
 
-  ; GENOTYPE READER
-  set decision.vectors get-decisions
+  set completed.actions []
+
 end
 
-to-report get-decisions
-  report ( ifelse-value
+;----------------------------------------------------------------------------------------------
+;
+; MAKE-DECISIONS
+;
+; This subroutine ...
+;
+; ENTRY:  'input-chromosome' is the chromosome to be copied.
+;         'mutation-chance-per-locus' defines the chance that a mutation will
+;         occur at each allele loci.
+;
+; EXIT:   'mutate-chromosome' returns a copy of the chromosome with
+;         modifications to a subset of the alleles.
+;
+;----------------------------------------------------------------------------------------------
+
+to make-decisions
+  set decision.vectors ( ifelse-value
     ( genotype-reader = "sta7us" ) [ sta7us-get-decisions my.environment ]
     ( genotype-reader = "g8tes" ) [ g8tes-get-decisions my.environment ]
     [ sta7us-get-decisions my.environment ] ) ; default
 end
 
-to allocate-energy
+;----------------------------------------------------------------------------------------------
+;
+; COMPLETE LIST OF ACTIONS THAT HAVE BEEN ALLOCATED ENERGY
+;
+; This routine allows the caller to complete all actions that have been included in the
+; 'alocated.energy list.
+;
+; ENTRY:
+;
+; EXIT:
+;
+;----------------------------------------------------------------------------------------------
 
-  set energy.allocated []
-  set completed.actions []
+to do-actions
+
   foreach decision.vectors [ vector ->
+    let done item 4 vector
 
-    let raw-value item 3 vector
-    let energy-cost abs raw-value
-
-    let passes-energy-check ifelse-value ( model-structure = "free-lunch" ) [ true ] [ energy.supply > energy-cost ] ; FREE LUNCH always passes energy check
-
-    if ( not member? vector energy.allocated and passes-energy-check ) [
-      set energy.allocated lput vector energy.allocated
+    if ( not done and check-energy vector ) [
       let target item 1 vector
       let action item 2 vector
-      update-energy ( - energy-cost )
+      let cost item 3 vector
 
-      ifelse ifelse-value ( target = nobody ) [ false ] [ distance target < ( size / 2 + [size] of target / 2 ) ]
-      [ do-action action target raw-value ]
-      [ if (target != nobody ) [ move-toward target raw-value ]]]]
+      ( ifelse
 
+        action = "maintain-body" [ maintain-body cost ] ; should these have distance checkers too?
+        action = "body-size" [ body-size cost ]
+        action = "body-shade" [ body-shade cost ]
+        action = "day-perception-range" [ day-perception-range cost ]
+        action = "night-perception-range" [ night-perception-range cost ]
+        action = "audio-perception-range" [ audio-perception-range cost ]
+        action = "day-perception-angle" [ day-perception-angle cost ]
+        action = "night-perception-angle" [ night-perception-angle cost ]
+        action = "audio-perception-angle" [ audio-perception-angle cost ]
+        action = "vocal-range" [ vocal-range cost ]
+        action = "conception-chance" [ conception-chance cost ]
+        action = "stomach-size" [ stomach-size cost ]
+        action = "mutation-chance" [ mutation-chance cost ]
+        action = "sex-ratio" [ sex-ratio cost ]
+        action = "litter-size" [ litter-size cost ]
+        action = "move-toward" [ move-toward target cost ]
+        action = "move-away-from" [ move-toward target ( - cost ) ]
+        action = "turn-right" [ turn-right cost ]
+        action = "turn-left" [ turn-right ( - cost ) ]
+        action = "go-forward" [ go-forward cost ]
+        action = "set-heading" [ set-heading cost ]
+        action = "hide" [ hide cost ]
+        action = "signal-alpha-on" [ signal-alpha-on cost ]
+        action = "signal-beta-on" [ signal-beta-on cost ]
+        action = "signal-gamma-on" [ signal-gamma-on cost ]
+        action = "check-infancy" [ check-infancy cost ]
+        action = "check-birth" [ check-birth cost ]
+        action = "check-juvenility" [ check-juvenility cost ]
+        action = "check-weaning" [ check-weaning cost ]
+        action = "check-adulthood" [ check-adulthood cost ]
+        action = "check-senescence" [ check-senescence cost ]
+        action = "supply-to" [ if ( check-distance target ) [ supply-to target cost ]]
+        action = "demand-from" [ if ( check-distance target ) [ demand-from target cost ]]
+        action = "eat" [ if ( check-distance target ) [ eat target cost ]]
+        action = "join" [ join target cost ]
+        action = "leave" [ leave target cost ]
+        action = "recruit" [ recruit target cost ]
+        action = "kick-out" [ kick-out target cost ]
+        action = "pick-up" [ if ( check-distance target ) [ pick-up target cost ]]
+        action = "put-down" [ if ( check-distance target ) [ put-down target cost  ]]
+        action = "cling-to" [ if ( check-distance target ) [ cling-to target cost ]]
+        action = "squirm-from" [ if ( check-distance target ) [ squirm-from target cost ]]
+        action = "help" [ if ( check-distance target ) [ help target cost ]]
+        action = "attack" [ if ( check-distance target ) [ attack target cost ]]
+        action = "mate-with" [ if ( check-distance target ) [ mate-with target cost ]]
+
+        [ ])
+    ]
+  ]
+
+end
+
+to-report check-distance [ target ]
+  report ifelse-value ( target = nobody ) [ false ] [ distance target < ( size / 2 + ( ifelse-value ( is-patch? target ) [ 1 ] [[size] of target / 2 ])) ]
+end
+
+to-report check-energy [ vector ]
+  let cost item 3 vector
+  let passes-energy-check ifelse-value ( model-structure = "free-lunch" ) [ true ] [ energy.supply > abs cost ] ; FREE LUNCH always passes energy check
+
+  if ( passes-energy-check ) [
+    update-energy ( - abs cost )
+    let new-vector lput true but-last vector
+    let vector-index position vector decision.vectors
+    if ( is-number? vector-index ) [
+      set decision.vectors remove-item vector-index decision.vectors
+      set decision.vectors lput new-vector decision.vectors ]]
+
+  report passes-energy-check
 end
 
 to-report get-action-cost-of [ target action-name ]
-  let caller self
-  let action-list [ completed.actions ] of target
-  report ifelse-value ( is-list? action-list ) [ sum map [ vector -> item 3 vector ] filter [ vector -> item 1 vector = caller and item 2 vector = action-name ] action-list ] [ 0 ]
+  let not-done-decisions filter [ vector -> item 1 vector = target and item 2 vector = action-name and item 4 vector = false ] decision.vectors
+  foreach not-done-decisions [ vector ->
+    if ( check-energy vector ) [
+      complete-action ( item 1 vector ) ( item 2 vector ) ( item 3 vector ) "get-action-cost-of" ]]
+  let action-cost sum map [ vector -> item 3 vector ] filter [ vector -> item 1 vector = target and item 2 vector = action-name and item 4 vector = true ] completed.actions
+  ;print action-cost
+  report action-cost
 end
 
 to complete-action [ target action cost outcome ]
-  if ( not is-list? completed.actions ) [ set completed.actions [] ]
   set completed.actions lput ( list self target action cost outcome ) completed.actions
-end
-
-;----------------------------------------------------------------------------------------------
-; DO-ACTION
-;
-; Operation to do a given ACTION directed to a given TARGET with a given VALUE.
-;
-; CALLER: anima1
-; ACTION: the action code representing the action to perform.
-; TARGET: the receiver of an inter-action.
-; VALUE: the amount of energy allotted to the action.
-;----------------------------------------------------------------------------------------------
-
-to do-action [ action-code target cost ]
-
-  ( ifelse
-
-    action-code = "maintain-body" [ maintain-body cost ]
-    action-code = "body-size" [ body-size cost ]
-    action-code = "body-shade" [ body-shade cost ]
-    action-code = "day-perception-range" [ day-perception-range cost ]
-    action-code = "night-perception-range" [ night-perception-range cost ]
-    action-code = "audio-perception-range" [ audio-perception-range cost ]
-    action-code = "day-perception-angle" [ day-perception-angle cost ]
-    action-code = "night-perception-angle" [ night-perception-angle cost ]
-    action-code = "audio-perception-angle" [ audio-perception-angle cost ]
-    action-code = "vocal-range" [ vocal-range cost ]
-    action-code = "conception-chance" [ conception-chance cost ]
-    action-code = "stomach-size" [ stomach-size cost ]
-    action-code = "mutation-chance" [ mutation-chance cost ]
-    action-code = "sex-ratio" [ sex-ratio cost ]
-    action-code = "litter-size" [ litter-size cost ]
-    action-code = "move-toward" [ move-toward target cost ]
-    action-code = "move-away-from" [ move-toward target ( - cost ) ]
-    action-code = "turn-right" [ turn-right cost ]
-    action-code = "turn-left" [ turn-right ( - cost ) ]
-    action-code = "go-forward" [ go-forward cost ]
-    action-code = "set-heading" [ set-heading cost ]
-    action-code = "hide" [ hide cost ]
-    action-code = "signal-alpha-on" [ signal-alpha-on cost ]
-    action-code = "signal-beta-on" [ signal-beta-on cost ]
-    action-code = "signal-gamma-on" [ signal-gamma-on cost ]
-    action-code = "check-infancy" [ check-infancy cost ]
-    action-code = "check-birth" [ check-birth cost ]
-    action-code = "check-juvenility" [ check-juvenility cost ]
-    action-code = "check-weaning" [ check-weaning cost ]
-    action-code = "check-adulthood" [ check-adulthood cost ]
-    action-code = "check-senescence" [ check-senescence cost ]
-    action-code = "supply-to" [ supply-to target cost ]
-    action-code = "demand-from" [ demand-from target cost ]
-    action-code = "eat" [ eat target cost ]
-    action-code = "join" [ join target cost ]
-    action-code = "leave" [ leave target cost ]
-    action-code = "recruit" [ recruit target cost ]
-    action-code = "kick-out" [ kick-out target cost ]
-    action-code = "pick-up" [ pick-up target cost ]
-    action-code = "put-down" [ put-down target cost  ]
-    action-code = "cling-to" [ cling-to target cost ]
-    action-code = "squirm-from" [ squirm-from target cost ]
-    action-code = "help" [ help target cost ]
-    action-code = "attack" [ attack target cost ]
-    action-code = "mate-with" [ mate-with target cost ]
-
-    [ ])
-
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -632,10 +607,6 @@ end
 ;  88.  .88 88.  ...   88   88 88.  .88 88    88       88
 ;  `88888P8 `88888P'   dP   dP `88888P' dP    dP `88888P'
 ;
-;--------------------------------------------------------------------------------------------------------------------
-
-;--------------------------------------------------------------------------------------------------------------------
-; ACTIONS
 ;
 ; CALLER: the anima1 doing the action
 ; COST: the energy to be used to do the action, can be negative
@@ -746,29 +717,47 @@ end
 
 to move-toward [ target cost ]
   if (target != nobody ) [
-    let ycor-difference ([ycor] of target - [ycor] of self )
-    let xcor-difference ([xcor] of target - [xcor] of self )
-    let angle ifelse-value ( xcor-difference = 0 and ycor-difference = 0 ) [ random 360 ] [ atan xcor-difference ycor-difference ]
-    if ( cost < 0 ) [ set angle angle - 180 ]
-    set heading ( heading + angle ) / 2
+
+    ; deteremine x and y coordinate difference to target
+    let ycor-difference ( ( ifelse-value ( is-patch? target ) [ [pycor] of target ] [ [ycor] of target ] ) - [ycor] of self )
+    let xcor-difference ( ( ifelse-value ( is-patch? target ) [ [pxcor] of target ] [ [xcor] of target ] ) - [xcor] of self )
+
+    if ( not ( ycor-difference = 0 and xcor-difference = 0 ) ) [
+
+      ; calculate angle to target
+      let angle atan xcor-difference ycor-difference
+      if ( cost < 0 ) [ set angle angle - 180 ]
+
+      ; set magnitudes based on cost
+      set x.magnitude x.magnitude + (abs cost * sin angle)
+      set y.magnitude y.magnitude + (abs cost * cos angle) ]
+
+    ; set heading based on magnitudes
+    set heading ifelse-value ( x.magnitude = 0 and y.magnitude = 0 ) [ heading ] [ ( atan x.magnitude y.magnitude ) ]
     complete-action target "move-toward" cost heading
   ]
 end
 
 to turn-right [ cost ]
   ifelse ( cost > 0 )
-  [ right ( 360 * cost ) complete-action nobody "turn-right" cost heading ]
-  [ left ( 360 * abs cost ) complete-action nobody "turn-left" cost heading ]
+  [ right ( 360 * cost ) complete-action self "turn-right" cost heading ]
+  [ left ( 360 * abs cost ) complete-action self "turn-left" cost heading ]
 end
 
 to go-forward [ cost ]
   if ( life.history != "gestatee" ) [
+
     if ( cost < 0 ) [ right 180 ]
     let sum-weight size
     foreach carried.items [ object -> set sum-weight sum-weight + [size] of object ]
     let travel-distance (size * (sqrt (( 2 * abs cost ) / sum-weight )) )
     forward travel-distance
     foreach carried.items [ object -> ifelse (object = nobody) [ set carried.items remove-item nobody carried.items ] [ ask object [ move-to myself ] ]]
+    complete-action self "go-forward" cost heading
+
+    set x.magnitude 0
+    set y.magnitude 0
+
     ; track travel
     set distance-traveled distance-traveled + travel-distance
     if not member? patch-here cells-occupied [ set cells-occupied lput patch-here cells-occupied ]
@@ -777,7 +766,7 @@ end
 
 to set-heading [ cost ]
   set heading cost * 360
-  complete-action nobody "set-heading" cost heading
+  complete-action self "set-heading" cost heading
 end
 
 to hide [ cost ]
@@ -785,7 +774,7 @@ to hide [ cost ]
     ifelse ( cost > 0 )
     [ set hidden? true ]
     [ set hidden? false ]
-    complete-action nobody "hide" cost hidden? ]
+    complete-action self "hide" cost hidden? ]
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -980,18 +969,21 @@ to demand-from [ target cost ]
 end
 
 to eat [ target cost ]
-  if ( life.history = "juvenile" or life.history = "adult" or life.history = "senescent" and ( is-plant? target or is-anima1? target )) [
-    complete-action target "eat" cost [breed] of target
+  if ( life.history = "juvenile" or life.history = "adult" or life.history = "senescent" and ( is-patch? target or is-anima1? target )) [
+    complete-action target "eat" cost ""
     receive-from target cost
   ]
 end
 
 to receive-from [ target cost ]
-  if ( cost > 0 and is-anima1? target or is-plant? target ) [
+  if ( cost > 0 and is-anima1? target or is-patch? target ) [
     let energy-wanted get-updated-value stomach.size cost
-    let energy-received ifelse-value ( energy-wanted < [ energy.supply ] of target ) [ energy-wanted ] [ [ energy.supply ] of target ]
+    let energy-supply ifelse-value ( is-patch? target ) [ [ penergy.supply ] of target ] [ [ energy.supply ] of target ]
+    let energy-received ifelse-value ( energy-wanted < energy-supply ) [ energy-wanted ] [ energy-supply ]
     update-energy energy-received
-    ask target [ update-energy ( - energy-received ) ]
+    ifelse ( is-patch? target )
+    [ ask target [ set penergy.supply penergy.supply - energy-received ]]
+    [ ask target [ update-energy ( - energy-received ) ]]
     complete-action target "receive-from" cost energy-received
   ]
 end
@@ -1006,7 +998,7 @@ to join [ target cost ]
     if ( cost > 0 )
     [ let target-cost get-action-cost-of target "join"
       let probability ( cost + target-cost ) / cost
-      if ( cost + target-cost  > 0 ) [ join-group ([group.identity] of target) probability ]]]
+      if ( random-float 1.0 <= probability ) [ join-group ([group.identity] of target) ]]]
 end
 
 to leave [ target cost ]
@@ -1015,7 +1007,7 @@ to leave [ target cost ]
     if ( cost > 0 )
     [ let target-cost get-action-cost-of target "leave"
       let probability ( cost + target-cost ) / cost
-      if ( cost + target-cost > 0 ) [ leave-group probability ]]]
+      if ( random-float 1.0 <= probability ) [ leave-group ]]]
 end
 
 to recruit [ target cost ]
@@ -1024,7 +1016,7 @@ to recruit [ target cost ]
     if ( cost > 0 )
     [ let target-cost get-action-cost-of target "recruit"
       let probability ( cost + target-cost ) / cost
-      if ( cost + target-cost > 0 ) [ ask target [ join-group [group.identity] of myself probability ]]]]
+      if ( random-float 1.0 <= probability ) [ ask target [ join-group [group.identity] of myself ]]]]
 end
 
 to kick-out [ target cost ]
@@ -1033,26 +1025,25 @@ to kick-out [ target cost ]
     if ( cost > 0 )
     [ let target-cost get-action-cost-of target "kick-out"
       let probability ( cost + target-cost ) / cost
-      if ( cost + target-cost > 0 ) [ ask target [ leave-group probability ]]]]
+      if ( random-float 1.0 <= probability ) [ ask target [ leave-group ]]]]
 end
 
-to join-group [ group-id probability ]
-  if ( random-float 1.0 < probability and group.identity != group-id ) [
+to join-group [ group-id ]
+  if ( group.identity != group-id ) [
     set previous-group-id group.identity
     set group.identity group-id
     set group-transfers-list lput [meta-id] of current-group group-transfers-list
     complete-action self "join-group" 0 group-id ]
 end
 
-to leave-group [ probability ]
-  if ( random-float 1.0 < probability ) [
-    set previous-group-id group.identity
-    hatch-groups 1 [
-      initialize-group
-      set my-creator [meta-id] of myself
-      ask myself [ set group.identity [meta-id] of myself ]]
-    ask previous-group [ if not any? group-members [ die ]]
-    complete-action self "leave-group" 0 0 ]
+to leave-group
+  set previous-group-id group.identity
+  hatch-groups 1 [
+    initialize-group
+    set my-creator [meta-id] of myself
+    ask myself [ set group.identity [meta-id] of myself ]]
+  ask previous-group [ if not any? group-members [ die ]]
+  complete-action self "leave-group" 0 0
 end
 
 to-report previous-group
@@ -1073,76 +1064,81 @@ to pick-up [ target cost ]
   if ( is-anima1? target ) [
     complete-action target "pick-up" cost 0
     if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "cling-to"
+    [ let target-cost get-action-cost-of target "pick-up"
       let probability ( cost + target-cost ) / cost
-      if ( cost + target-cost > 0 ) [ carry target probability ]]]
+      if ( random-float 1.0 <= probability ) [ carry target ]]]
 end
 
 to put-down [ target cost ]
   if ( is-anima1? target ) [
     complete-action target "put-down" cost 0
     if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "squirm-from"
+    [ let target-cost get-action-cost-of target "put-down"
       let probability ( cost + target-cost ) / cost
-      if ( cost + target-cost > 0 ) [ drop target probability ]]]
+      if ( random-float 1.0 <= probability ) [ drop target ]]]
 end
 
 to cling-to [ target cost ]
   if ( is-anima1? target ) [
     complete-action target "cling-to" cost 0
     if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "pick-up"
+    [ let target-cost get-action-cost-of target "cling-to"
       let probability ( cost + target-cost ) / cost
-      if ( cost + target-cost > 0 ) [ ask target [ carry myself probability ] ]]]
+      if ( random-float 1.0 <= probability ) [ ask target [ carry myself ] ]]]
 end
 
 to squirm-from [ target cost ]
   if ( is-anima1? target ) [
     complete-action target "squirm-from" cost 0
     if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "put-down"
+    [ let target-cost get-action-cost-of target "squirm-from"
       let probability ( cost + target-cost ) / cost
-      if ( cost + target-cost > 0 ) [
-        ask target [ drop myself probability ] ]]]
+      if ( random-float 1.0 <= probability ) [ ask target [ drop myself ] ]]]
 end
 
-to carry [ target probability ]
-  if ( random-float 1.0 < probability ) [
-    if ( not member? target [carried.items] of anima1s ) [
-      ask anima1s with [ member? target carried.items ] [ set carried.items remove-item ( position target remove-duplicates carried.items ) remove-duplicates carried.items ]
-      set carried.items lput target carried.items
-      ask target [ move-to myself ]
-      complete-action target "carry" 0 0 ]]
+to carry [ target ]
+  if ( not member? target [carried.items] of anima1s ) [
+    ask anima1s with [ member? target carried.items ] [ set carried.items remove-item ( position target remove-duplicates carried.items ) remove-duplicates carried.items ]
+    set carried.items lput target carried.items
+    ask target [ move-to myself ]
+    complete-action target "carry" 0 0 ]
 end
 
-to drop [ target probability ]
-  if ( random-float 1.0 < probability ) [
-    if ( member? target carried.items ) [ set carried.items remove target carried.items ]
-    complete-action target "drop" 0 0
-  ]
+to drop [ target ]
+  if ( member? target carried.items ) [ set carried.items remove target remove-duplicates carried.items ]
+  complete-action target "drop" 0 0
 end
 
 to help [ target cost ]
-;  if ( is-anima1? target ) [
-;    complete-action target "help" cost 0
-;    if ( cost > 0 )
-;    [ let target-cost get-action-cost-of target "attack"
-;      let probability ( size / ( size + [size] of target ) )
-;      if ( cost + target-cost > 0 ) [ harm target probability ]]]
+  if ( is-anima1? target ) [
+    complete-action target "help" cost 0
+    if ( cost > 0 )
+    [ let target-cost get-action-cost-of target "help"
+      let cost-probability ( cost + target-cost ) / cost
+      let size-probability ( size / ( size + [size] of target ) )
+      let net-cost cost + target-cost
+      if ( random-float 1.0 <= ( cost-probability * size-probability ) ) [ aid target net-cost ]]]
 end
 
 to attack [ target cost ]
-;  if ( is-anima1? target ) [
-;    complete-action target "attack" cost 0
-;    if ( cost > 0 )
-;    [ let target-cost get-action-cost-of target "help"
-;      let probability ifelse-value ( target-cost < 0 ) [ ( size / ( size + [size] of target ) ) ] [ 1.0 ]
-;      let net-cost cost + target-cost
-;      if ( net-cost > 0 ) [ harm target probability net-cost ]]]
+  if ( is-anima1? target ) [
+    complete-action target "attack" cost 0
+    if ( cost > 0 )
+    [ let target-cost get-action-cost-of target "attack"
+      let cost-probability ( cost + target-cost ) / cost
+      let size-probability ( size / ( size + [size] of target ) )
+      let net-cost cost + target-cost
+      if ( random-float 1.0 <= ( cost-probability * size-probability ) ) [ harm target net-cost ]]]
 end
 
-to harm [ target probability cost ]
-  ;if ( random-float 1.0 < probability ) [ ask target [ set living.chance get-updated-value living.chance cost ] ]
+to harm [ target cost ]
+  ask target [ living-chance ( - cost ) ]
+  complete-action target "harm" cost 0
+end
+
+to aid [ target cost ]
+  ask target [ living-chance cost ]
+  complete-action target "aid" cost 0
 end
 
 to mate-with [ target my-mate-cost ]
@@ -1413,13 +1409,13 @@ to-report get-mutation [ unmutated-codon ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-6
+7
 85
-708
-788
+712
+791
 -1
 -1
-6.94
+6.97
 1
 10
 1
@@ -1501,26 +1497,6 @@ NIL
 NIL
 1
 
-PLOT
-720
-106
-967
-260
-plot
-NIL
-NIL
-0.0
-10.0
-0.0
-1.0
-true
-false
-"" "if any? anima1s [\n\nif (useful-commands = \"age-histogram\") [\n  clear-plot\n  set-plot-x-range 0 max [age] of anima1s with [ is.alive ] + 1000\n  set-plot-y-range 0 10 ]\n  \nif (useful-commands = \"lotka-volterra\") [\n  let plts ( plant-quality * count plants / 100 )\n  let anls count anima1s\n  let max-value max (list plts anls )\n  set-plot-x-range 0 10\n  set-plot-y-range 0 ( max-value + 10 ) ]\n ]\n  \n"
-PENS
-"age" 1000.0 1 -16777216 true "" "if (useful-commands = \"age-histogram\") [ histogram [age] of anima1s with [ is.alive ] ]"
-"plants" 1.0 0 -13840069 true "" "if (useful-commands != \"age-histogram\") [ plot ( mean [energy.supply] of plants ) ]"
-"organisms" 1.0 0 -6459832 true "" "if (useful-commands != \"age-histogram\") [ plot ( count anima1s ) ]"
-
 INPUTBOX
 720
 10
@@ -1533,10 +1509,10 @@ NIL
 String
 
 MONITOR
-18
-102
-95
-147
+20
+98
+97
+143
 simulation
 (word simulation-id )
 17
@@ -1569,7 +1545,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-6.2
+4.0
 .1
 1
 NIL
@@ -1609,11 +1585,11 @@ SLIDER
 plant-seasonality
 plant-seasonality
 0
-100
-50.0
-5
 1
-%
+1.0
+.05
+1
+NIL
 HORIZONTAL
 
 SLIDER
@@ -1640,7 +1616,7 @@ plant-daily-cycle
 plant-daily-cycle
 1
 100
-20.0
+10.0
 1
 1
 ticks
@@ -1663,7 +1639,7 @@ INPUTBOX
 1097
 299
 population
-two-timers
+night-and-day
 1
 0
 String
@@ -1674,7 +1650,7 @@ INPUTBOX
 1097
 373
 genotype
-two-timers
+g8-night-and-day
 1
 0
 String
@@ -1737,8 +1713,8 @@ CHOOSER
 373
 useful-commands
 useful-commands
-"help-me" "--------" "lotka-volterra" "age-histogram" "metafile-report" "verify-code" "check-runtime" "simulation-report" "genotype-reader" "model-structure" "clear-plants" "setup-plants" "clear-population" "view-genotype" "view-decisions" "view-allocation" "view-actions" "add-allele" "delete-allele" "population-report"
-7
+"help-me" "--------" "lotka-volterra" "age-histogram" "metafile-report" "verify-code" "check-runtime" "simulation-report" "genotype-reader" "model-structure" "clear-plants" "setup-plants" "clear-population" "view-genotype" "view-decisions" "view-actions" "add-allele" "delete-allele" "population-report"
+8
 
 BUTTON
 912
@@ -1830,7 +1806,7 @@ SWITCH
 43
 output-results?
 output-results?
-0
+1
 1
 -1000
 
@@ -1841,7 +1817,7 @@ SWITCH
 79
 selection-on?
 selection-on?
-0
+1
 1
 -1000
 
@@ -1851,7 +1827,7 @@ INPUTBOX
 967
 324
 command-input
-sower
+g8tes
 1
 0
 String (commands)
@@ -1862,6 +1838,24 @@ OUTPUT
 1218
 788
 11
+
+PLOT
+722
+106
+966
+259
+plot 1
+NIL
+NIL
+0.0
+8.0
+-0.01
+0.01
+true
+false
+"" ""
+PENS
+"default" 1.0 2 -16777216 true "" "plot sum [penergy.supply] of patches"
 
 @#$#@#$#@
 # B3GET 1.1.0 INFORMATION
@@ -2236,6 +2230,7 @@ ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
   set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "B" plant-minimum-neighbors plant-maximum-neighbors )
 ]</setup>
     <go>go</go>
+    <final>crt 1 [ record-simulation die ]</final>
     <timeLimit steps="101"/>
     <exitCondition>not any? anima1s or median [generation-number] of anima1s &gt; 100</exitCondition>
     <enumeratedValueSet variable="path-to-experiment">
@@ -2312,8 +2307,7 @@ ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
 
 setup simulation-id</setup>
     <go>go</go>
-    <final>crt 1 [ record-simulation die ]</final>
-    <timeLimit steps="1001"/>
+    <timeLimit steps="100"/>
     <exitCondition>not any? anima1s</exitCondition>
     <enumeratedValueSet variable="path-to-experiment">
       <value value="&quot;../results/&quot;"/>
@@ -2322,13 +2316,13 @@ setup simulation-id</setup>
       <value value="&quot;baseline&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="genotype-reader">
-      <value value="&quot;status&quot;"/>
+      <value value="&quot;sta7us&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="deterioration-rate">
-      <value value="-0.01"/>
+      <value value="-0.001"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="output-results?">
-      <value value="true"/>
+      <value value="false"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="selection-on?">
       <value value="false"/>
@@ -2367,10 +2361,7 @@ setup simulation-id</setup>
       <value value="8"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="population">
-      <value value="&quot;Chimpanzees&quot;"/>
-      <value value="&quot;Geladas&quot;"/>
-      <value value="&quot;Olives&quot;"/>
-      <value value="&quot;Hamadryas&quot;"/>
+      <value value="&quot;p-20-04-01-02&quot;"/>
     </enumeratedValueSet>
   </experiment>
   <experiment name="WORLD-TEST1" repetitions="1" runMetricsEveryStep="true">
@@ -2389,7 +2380,8 @@ ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
 
 setup simulation-id</setup>
     <go>go</go>
-    <timeLimit steps="1001"/>
+    <final>crt 1 [ record-simulation die ]</final>
+    <timeLimit steps="100"/>
     <exitCondition>not any? anima1s</exitCondition>
     <enumeratedValueSet variable="path-to-experiment">
       <value value="&quot;../results/&quot;"/>
@@ -2398,13 +2390,13 @@ setup simulation-id</setup>
       <value value="&quot;baseline&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="genotype-reader">
-      <value value="&quot;status&quot;"/>
+      <value value="&quot;sta7us&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="deterioration-rate">
       <value value="-0.01"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="output-results?">
-      <value value="true"/>
+      <value value="false"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="selection-on?">
       <value value="false"/>
