@@ -80,13 +80,12 @@ anima1s-own [
 
   my.environment
   decision.vectors
-  energy.allocated
   completed.actions
 
   ; TRACKING VARIABLES
+  generation-number
   mother-identity
   father-identity
-  generation-number
   previous-group-id
   natal-group-id
   natal-group-size
@@ -255,7 +254,8 @@ to setup [ new-simulation-id ]
   setup-parameters
   import-population
   import-genotype
-  setup-patches
+  ;setup-patches
+  ask patches [ set pcolor brown + 1 ]
   clear-output
 end
 
@@ -273,9 +273,9 @@ end
 to go
 
   ; THE ENVIRONMENT
-  ifelse ( model-structure = "no-plants" )
-  [ ask patches [ set pcolor brown ] ]
-  [ update-patches ]
+;  ifelse ( model-structure = "no-plants" )
+;  [ ask patches [ set pcolor brown + 1 ] ]
+;  [ update-patches ]
 
   ; AGENT MORTALITY
   ifelse ( model-structure = "reaper" )
@@ -295,7 +295,7 @@ to go
   ; AGENT AGENCY
   ask anima1s with [ is.alive ] [ consider-environment ]
   ask anima1s with [ is.alive ] [ make-decisions ]
-  ask anima1s with [ is.alive ] [ allocate-energy ]
+  ;ask anima1s with [ is.alive ] [ allocate-energy ]
   ask anima1s with [ is.alive ] [ do-actions ]
 
   ; ARTIFICAL SELECTION
@@ -344,7 +344,6 @@ to update-patches
   let density ( sum [penergy.supply] of patches ) / count patches
 
   ask patches [
-
     set penergy.supply updated-plant-energy penergy.supply ( sum [penergy.supply] of neighbors ) season density
     update-patch-color ]
 
@@ -388,7 +387,7 @@ to check-mortality
     ; SECOND DEATH: remove agent from the simulation
     [ remove-from-simulation ]
 
-    ; FIRST DEATH: set anima1 to is.dead true
+    ; FIRST DEATH: set anima1 to is.alive false
     [ set is.alive false set ticks-at-death ticks ]]
 end
 
@@ -463,6 +462,8 @@ to consider-environment
 
   foreach carried.items [ c -> if ([life.history] of c = "gestatee") [ set my.environment lput c my.environment ]]
 
+  set completed.actions []
+
 end
 
 ;----------------------------------------------------------------------------------------------
@@ -489,37 +490,6 @@ end
 
 ;----------------------------------------------------------------------------------------------
 ;
-; ALLOCATE-ENERGY
-;
-; This subroutine ...
-;
-; ENTRY:  'input-chromosome' is the chromosome to be copied.
-;         'mutation-chance-per-locus' defines the chance that a mutation will
-;         occur at each allele loci.
-;
-; EXIT:   'mutate-chromosome' returns a copy of the chromosome with
-;         modifications to a subset of the alleles.
-;
-;----------------------------------------------------------------------------------------------
-
-to allocate-energy
-
-  set energy.allocated []
-  foreach decision.vectors [ vector ->
-
-    let raw-value item 3 vector
-    let energy-cost abs raw-value
-
-    let passes-energy-check ifelse-value ( model-structure = "free-lunch" ) [ true ] [ energy.supply > energy-cost ] ; FREE LUNCH always passes energy check
-
-    if ( not member? vector energy.allocated and passes-energy-check ) [
-      set energy.allocated lput vector energy.allocated
-      update-energy ( - energy-cost ) ]]
-
-end
-
-;----------------------------------------------------------------------------------------------
-;
 ; COMPLETE LIST OF ACTIONS THAT HAVE BEEN ALLOCATED ENERGY
 ;
 ; This routine allows the caller to complete all actions that have been included in the
@@ -533,79 +503,99 @@ end
 
 to do-actions
 
-  set completed.actions []
-  foreach filter [ vector -> not member? vector completed.actions ] energy.allocated [ vector -> ; does this work?
-    let target item 1 vector
-    let action item 2 vector
-    let cost item 3 vector
+  foreach decision.vectors [ vector ->
+    let done item 4 vector
 
-    ifelse ( ifelse-value ( target = nobody ) [ false ] [ distance target < ( size / 2 + ( ifelse-value ( is-patch? target ) [ 1 ] [[size] of target / 2 ])) ] )
+    if ( not done and check-energy vector ) [
+      let target item 1 vector
+      let action item 2 vector
+      let cost item 3 vector
 
-    [( ifelse
+      ( ifelse
 
-      action = "maintain-body" [ maintain-body cost ]
-      action = "body-size" [ body-size cost ]
-      action = "body-shade" [ body-shade cost ]
-      action = "day-perception-range" [ day-perception-range cost ]
-      action = "night-perception-range" [ night-perception-range cost ]
-      action = "audio-perception-range" [ audio-perception-range cost ]
-      action = "day-perception-angle" [ day-perception-angle cost ]
-      action = "night-perception-angle" [ night-perception-angle cost ]
-      action = "audio-perception-angle" [ audio-perception-angle cost ]
-      action = "vocal-range" [ vocal-range cost ]
-      action = "conception-chance" [ conception-chance cost ]
-      action = "stomach-size" [ stomach-size cost ]
-      action = "mutation-chance" [ mutation-chance cost ]
-      action = "sex-ratio" [ sex-ratio cost ]
-      action = "litter-size" [ litter-size cost ]
-      action = "move-toward" [ move-toward target cost ]
-      action = "move-away-from" [ move-toward target ( - cost ) ]
-      action = "turn-right" [ turn-right cost ]
-      action = "turn-left" [ turn-right ( - cost ) ]
-      action = "go-forward" [ go-forward cost ]
-      action = "set-heading" [ set-heading cost ]
-      action = "hide" [ hide cost ]
-      action = "signal-alpha-on" [ signal-alpha-on cost ]
-      action = "signal-beta-on" [ signal-beta-on cost ]
-      action = "signal-gamma-on" [ signal-gamma-on cost ]
-      action = "check-infancy" [ check-infancy cost ]
-      action = "check-birth" [ check-birth cost ]
-      action = "check-juvenility" [ check-juvenility cost ]
-      action = "check-weaning" [ check-weaning cost ]
-      action = "check-adulthood" [ check-adulthood cost ]
-      action = "check-senescence" [ check-senescence cost ]
-      action = "supply-to" [ supply-to target cost ]
-      action = "demand-from" [ demand-from target cost ]
-      action = "eat" [ eat target cost ]
-      action = "join" [ join target cost ]
-      action = "leave" [ leave target cost ]
-      action = "recruit" [ recruit target cost ]
-      action = "kick-out" [ kick-out target cost ]
-      action = "pick-up" [ pick-up target cost ]
-      action = "put-down" [ put-down target cost  ]
-      action = "cling-to" [ cling-to target cost ]
-      action = "squirm-from" [ squirm-from target cost ]
-      action = "help" [ help target cost ]
-      action = "attack" [ attack target cost ]
-      action = "mate-with" [ mate-with target cost ]
+        action = "maintain-body" [ maintain-body cost ] ; should these have distance checkers too?
+        action = "body-size" [ body-size cost ]
+        action = "body-shade" [ body-shade cost ]
+        action = "day-perception-range" [ day-perception-range cost ]
+        action = "night-perception-range" [ night-perception-range cost ]
+        action = "audio-perception-range" [ audio-perception-range cost ]
+        action = "day-perception-angle" [ day-perception-angle cost ]
+        action = "night-perception-angle" [ night-perception-angle cost ]
+        action = "audio-perception-angle" [ audio-perception-angle cost ]
+        action = "vocal-range" [ vocal-range cost ]
+        action = "conception-chance" [ conception-chance cost ]
+        action = "stomach-size" [ stomach-size cost ]
+        action = "mutation-chance" [ mutation-chance cost ]
+        action = "sex-ratio" [ sex-ratio cost ]
+        action = "litter-size" [ litter-size cost ]
+        action = "move-toward" [ move-toward target cost ]
+        action = "move-away-from" [ move-toward target ( - cost ) ]
+        action = "turn-right" [ turn-right cost ]
+        action = "turn-left" [ turn-right ( - cost ) ]
+        action = "go-forward" [ go-forward cost ]
+        action = "set-heading" [ set-heading cost ]
+        action = "hide" [ hide cost ]
+        action = "signal-alpha-on" [ signal-alpha-on cost ]
+        action = "signal-beta-on" [ signal-beta-on cost ]
+        action = "signal-gamma-on" [ signal-gamma-on cost ]
+        action = "check-infancy" [ check-infancy cost ]
+        action = "check-birth" [ check-birth cost ]
+        action = "check-juvenility" [ check-juvenility cost ]
+        action = "check-weaning" [ check-weaning cost ]
+        action = "check-adulthood" [ check-adulthood cost ]
+        action = "check-senescence" [ check-senescence cost ]
+        action = "supply-to" [ if ( check-distance target ) [ supply-to target cost ]]
+        action = "demand-from" [ if ( check-distance target ) [ demand-from target cost ]]
+        action = "eat" [ if ( check-distance target ) [ eat target cost ]]
+        action = "join" [ join target cost ]
+        action = "leave" [ leave target cost ]
+        action = "recruit" [ recruit target cost ]
+        action = "kick-out" [ kick-out target cost ]
+        action = "pick-up" [ if ( check-distance target ) [ pick-up target cost ]]
+        action = "put-down" [ if ( check-distance target ) [ put-down target cost  ]]
+        action = "cling-to" [ if ( check-distance target ) [ cling-to target cost ]]
+        action = "squirm-from" [ if ( check-distance target ) [ squirm-from target cost ]]
+        action = "help" [ if ( check-distance target ) [ help target cost ]]
+        action = "attack" [ if ( check-distance target ) [ attack target cost ]]
+        action = "mate-with" [ if ( check-distance target ) [ mate-with target cost ]]
 
-      [ ])]
+        [ ])
+    ]
+  ]
 
-    [ if ( target != nobody ) [ move-toward target ( abs cost ) ]]] ; do I want it absolute?
+end
 
+to-report check-distance [ target ]
+  report ifelse-value ( target = nobody ) [ false ] [ distance target < ( size / 2 + ( ifelse-value ( is-patch? target ) [ 1 ] [[size] of target / 2 ])) ]
+end
+
+to-report check-energy [ vector ]
+  let cost item 3 vector
+  let passes-energy-check ifelse-value ( model-structure = "free-lunch" ) [ true ] [ energy.supply > abs cost ] ; FREE LUNCH always passes energy check
+
+  if ( passes-energy-check ) [
+    update-energy ( - abs cost )
+    let new-vector lput true but-last vector
+    let vector-index position vector decision.vectors
+    if ( is-number? vector-index ) [
+      set decision.vectors remove-item vector-index decision.vectors
+      set decision.vectors lput new-vector decision.vectors ]]
+
+  report passes-energy-check
 end
 
 to-report get-action-cost-of [ target action-name ]
-  let allocated-actions filter [ vector -> item 1 vector = target and item 2 vector = action-name and not member? vector completed.actions ] energy.allocated
-  foreach allocated-actions [ vector -> complete-action ( item 1 vector ) ( item 2 vector ) ( item 3 vector ) "get-action-cost-of" ]
-  report sum map [ vector -> item 3 vector ] filter [ vector -> item 1 vector = target and item 2 vector = action-name ] completed.actions
+  let not-done-decisions filter [ vector -> item 1 vector = target and item 2 vector = action-name and item 4 vector = false ] decision.vectors
+  foreach not-done-decisions [ vector ->
+    if ( check-energy vector ) [
+      complete-action ( item 1 vector ) ( item 2 vector ) ( item 3 vector ) "get-action-cost-of" ]]
+  let action-cost sum map [ vector -> item 3 vector ] filter [ vector -> item 1 vector = target and item 2 vector = action-name and item 4 vector = true ] completed.actions
+  ;print action-cost
+  report action-cost
 end
 
 to complete-action [ target action cost outcome ]
-  if ( not is-list? completed.actions ) [ set completed.actions [] ]
   set completed.actions lput ( list self target action cost outcome ) completed.actions
-  if ( not is-list? population-actions ) [ set population-actions [] ]
-  ;set population-actions lput ( list ticks self target action cost outcome ) population-actions
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -1513,7 +1503,7 @@ INPUTBOX
 967
 102
 documentation-notes
-Printout runtime check.
+NIL
 1
 0
 String
@@ -1555,7 +1545,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-6.0
+4.0
 .1
 1
 NIL
@@ -1649,7 +1639,7 @@ INPUTBOX
 1097
 299
 population
-p57PVT
+night-and-day
 1
 0
 String
@@ -1660,7 +1650,7 @@ INPUTBOX
 1097
 373
 genotype
-g8607035
+g8-night-and-day
 1
 0
 String
@@ -1723,8 +1713,8 @@ CHOOSER
 373
 useful-commands
 useful-commands
-"help-me" "--------" "lotka-volterra" "age-histogram" "metafile-report" "verify-code" "check-runtime" "simulation-report" "genotype-reader" "model-structure" "clear-plants" "setup-plants" "clear-population" "view-genotype" "view-decisions" "view-allocation" "view-actions" "add-allele" "delete-allele" "population-report"
-6
+"help-me" "--------" "lotka-volterra" "age-histogram" "metafile-report" "verify-code" "check-runtime" "simulation-report" "genotype-reader" "model-structure" "clear-plants" "setup-plants" "clear-population" "view-genotype" "view-decisions" "view-actions" "add-allele" "delete-allele" "population-report"
+8
 
 BUTTON
 912
@@ -1837,7 +1827,7 @@ INPUTBOX
 967
 324
 command-input
-9772014
+g8tes
 1
 0
 String (commands)

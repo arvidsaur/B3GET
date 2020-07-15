@@ -204,12 +204,12 @@ to-report get-iterative-decisions [ me old-environment old-gates old-boolean old
     if ( self = subject ) [ print allele ]
     
     ;---------------------------------------------------------------------------------------------- 
-    ; ALLELE CODE IS EMPTY ---> CREATE DECISION VECTORS 
+    ; ALLELE CODE IS EMPTY ---> CREATE DECISION VECTORS ; fix for non-agentset
     ;----------------------------------------------------------------------------------------------
     
     ifelse ( length allele = 0 ) [
 
-      ask old-targets [ ; passed through new call to iterative function
+      ask old-targets [ ; passed through new call to iterative function ; fix here
         let new-target self
         
         foreach old-vectors [ v ->
@@ -300,7 +300,7 @@ to-report get-iterative-decisions [ me old-environment old-gates old-boolean old
             let new-weight item 1 section-of-code
             set new-targets old-targets
 
-            ask old-targets [
+            ask old-targets [ ; fix here
               
               set decision-vectors ( sentence decision-vectors ( get-iterative-decisions me old-environment [] new-boolean (list first new-feed ) new-targets (lput (list new-action new-weight ) old-vectors)))
           ]]
@@ -308,7 +308,7 @@ to-report get-iterative-decisions [ me old-environment old-gates old-boolean old
           ; settings for continuing iteration 
           set new-boolean true ; really?
           set new-feed ( but-first new-feed )
-          set new-targets no-turtles
+          set new-targets no-turtles ; fix here
           set new-vectors []
         ]
         
@@ -423,9 +423,9 @@ to-report read-code [ code ]
     ( is-number? code ) [ code ]
     
     ; what EGO can see about ANYONE
-    ( code = "MID" ) [ meta-id ]
-    ( code = "SIZ" ) [ size ]
-    ( code = "COL" ) [ round color ]
+    ( code = "MID" ) [ meta-id ] ;
+    ( code = "SIZ" ) [ size ] ;
+    ( code = "COL" ) [ round color ] ;
     ( code = "SEX" and is-anima1? self ) [ biological.sex ]
     ( code = "SHD" and is-anima1? self ) [ body.shade ]
     ( code = "LFH" and is-anima1? self ) [ life.history ] 
@@ -438,9 +438,9 @@ to-report read-code [ code ]
 
     ; what EGO can see about OTHERS
     ( code = "EGO" ) [ self = myself ] 
-    ( code = "DSE" ) [ distance myself ]
+    ( code = "DSE" ) [ distance myself ] ;
     ( code = "ISA" ) [ is-anima1? self ]
-    ;( code = "ISP" ) [ is-plant? self ]
+    ;( code = "ISP" ) [ is-plant? self ] ;
     ( code = "DED" and is-anima1? self ) [ is.alive = false ]
     ( code = "CRD" and is-anima1? self ) [ member? self [carried.items] of myself ]
     ( code = "CRG" and is-anima1? self ) [ member? myself carried.items ]

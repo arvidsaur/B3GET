@@ -29,7 +29,6 @@ to command
     ( useful-commands = "clear-population" ) [ output-clear-pop ]
     ( useful-commands = "view-genotype" ) [ output-genotype ]
     ( useful-commands = "view-decisions" ) [ output-decisions ]
-    ( useful-commands = "view-allocation" ) [ output-allocation ]
     ( useful-commands = "view-actions") [ output-actions ]
     ( useful-commands = "add-allele" ) [ output-add-allele ]
     ( useful-commands = "delete-allele" ) [ output-delete-allele command-input ]
@@ -290,23 +289,6 @@ to output-decisions
   ifelse ( any? anima1s with [ meta-id = read-from-string command-input ] ) [
     ask one-of anima1s with [ meta-id = read-from-string command-input ] [
       foreach decision.vectors [ decision ->
-        output-print (word " " decision )
-      ]
-    ]
-    set documentation-notes (word "View current decisions of organism " command-input ". " documentation-notes )
-  ][
-    set documentation-notes (word "Organism " read-from-string command-input " not found.")
-    output-print (word " Organism " read-from-string command-input " not found.")
-  ]
-end
-
-to output-allocation
-  let anima1-to-inspect one-of anima1s with [ read-from-string command-input = meta-id ]
-  output-header (word " ENERGY : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [meta-id] of anima1-to-inspect ) ] )
-  
-  ifelse ( any? anima1s with [ meta-id = read-from-string command-input ] ) [
-    ask one-of anima1s with [ meta-id = read-from-string command-input ] [
-      foreach energy.allocated [ decision ->
         output-print (word " " decision )
       ]
     ]

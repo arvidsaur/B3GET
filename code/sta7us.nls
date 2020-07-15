@@ -129,7 +129,12 @@ to-report sta7us-get-decisions [ my-environment ]
     if ( is-turtle? obj ) [ table:put status-table ( [meta-id] of obj ) ( status-of obj ) ]
   ]
 
+  ;print my-environment
+  
   foreach (sentence chromosome.I chromosome.II) [ g ->
+    
+    ;print g
+    
     if ( length g = 5 and is-boolean? first g and is-string? item 1 g and is-string? item 2 g and is-string? item 3 g and is-number? item 4 g ) [ ; checks that allele correctly organized
       let gene-ego item 1 g
       let gene-other item 2 g
@@ -138,15 +143,16 @@ to-report sta7us-get-decisions [ my-environment ]
       
       ; Check that first CODON matches self
       if first-string-is-part-of-last? ( gene-ego ) ( ego-status ) [
-        
+
         ; Consider status-of others in the environment
         foreach my-environment [ other-guy ->
           let other-status table:get status-table ifelse-value ( is-patch? other-guy ) [ [pmeta-id] of other-guy ] [ [meta-id] of other-guy ]
-          
+
           ; Check that second CODON matches other
           if first-string-is-part-of-last? ( gene-other ) ( other-status ) [
             
-            let distance-to-target ifelse-value ( distance other-guy > 1 ) [ distance other-guy ] [ 1 ]
+            let distance-to-target distance other-guy
+            set distance-to-target ifelse-value ( distance-to-target > 1 ) [ distance-to-target ] [ 1 ]
             ;let vector-doesnt-exist true
             ;            foreach decision-vectors [ v ->
             ;              
@@ -157,7 +163,7 @@ to-report sta7us-get-decisions [ my-environment ]
             ;                set decision-vectors lput new-vector decision-vectors ]]
             
             ;if vector-doesnt-exist [
-            set decision-vectors lput (list meself other-guy ( sta7us-get-action gene-action ) precision ( gene-weight / ( distance-to-target ^ 2 )) 5 ) decision-vectors 
+            set decision-vectors lput (list meself other-guy ( gene-action ) precision ( gene-weight / ( distance-to-target ^ 2 )) 5 false ) decision-vectors 
             ;]
         ]]
       ]
@@ -166,8 +172,6 @@ to-report sta7us-get-decisions [ my-environment ]
   
   report decision-vectors
 end
-
-
 
 ;----------------------------------------------------------------------------------------------
 ; GET MUTATION
@@ -269,12 +273,12 @@ to-report status-of [ target ]
     let target-signal (word ifelse-value [alpha.signal] of target [ "α" ][ "å" ] ifelse-value [beta.signal] of target [ "β" ][ "ß" ] ifelse-value [gamma.signal] of target [ "ɣ" ][ "œ" ] )
     let target-energy ifelse-value ( [energy.supply] of target > energy.supply ) [ "$" ] [ "~" ]
     let target-color (word "" round [color] of target "")
-    set status-report (word target-self target-alive target-kind target-sex target-life-history target-fertility target-size target-health target-kin target-group target-carry target-signal target-color ) ]
+    set status-report (word status-report target-self target-alive target-kind target-sex target-life-history target-fertility target-size target-health target-kin target-group target-carry target-signal target-color ) ]
     
   if ( is-patch? target ) [ ; PATCHES
     let target-kind "d" 
     let target-pcolor (word "" round [pcolor] of target "")
-    set status-report ( word target-kind target-pcolor )]
+    set status-report (word status-report word target-kind target-pcolor )]
   
   report status-report
 end
@@ -286,8 +290,7 @@ to-report first-string-is-part-of-last? [ string1 string2 ]
     let string1-length length string1 ; saves on runtime
     while [ first-is-part-of-last and index < string1-length ] [
       if ( not member? item index string1 string2 ) and ( item index string1 != " " ) [ set first-is-part-of-last false ]
-      set index index + 1 ]
-  ]
+      set index index + 1 ]]
   report first-is-part-of-last
 end
 

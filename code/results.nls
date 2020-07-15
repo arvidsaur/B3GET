@@ -908,3 +908,36 @@ end
 ;to-report growth-probability [ a b c x ]
 ;  report ifelse-value ( c = 0 ) [ 0 ] [ ( a * e ^ ( - (( x - b ) ^ 2 ) / ( 2 * ( c ^ 2 ) )) ) ]
 ;end
+
+
+;----------------------------------------------------------------------------------------------
+;
+; ALLOCATE-ENERGY
+;
+; This subroutine ...
+;
+; ENTRY:  'input-chromosome' is the chromosome to be copied.
+;         'mutation-chance-per-locus' defines the chance that a mutation will
+;         occur at each allele loci.
+;
+; EXIT:   'mutate-chromosome' returns a copy of the chromosome with
+;         modifications to a subset of the alleles.
+;
+;----------------------------------------------------------------------------------------------
+
+;to allocate-energy
+;
+;  set energy.allocated []
+;  foreach decision.vectors [ vector ->
+;
+;    let raw-value item 3 vector
+;    let energy-cost abs raw-value
+;
+;    let passes-energy-check ifelse-value ( model-structure = "free-lunch" ) [ true ] [ energy.supply > energy-cost ] ; FREE LUNCH always passes energy check
+;
+;    if ( not member? vector energy.allocated and passes-energy-check ) [
+;      set energy.allocated lput vector energy.allocated
+;      update-energy ( - energy-cost ) ]]
+;
+;end
+
