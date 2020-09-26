@@ -1,0 +1,77 @@
+;-------------------------------------------------------------------------------------------------                                                                                                                                                   
+;
+;                    dP                     dP   oo                   
+;                    88                     88                        
+;  .d8888b. .d8888b. 88 .d8888b. .d8888b. d8888P dP .d8888b. 88d888b. 
+;  Y8ooooo. 88ooood8 88 88ooood8 88'  `""   88   88 88'  `88 88'  `88 
+;        88 88.  ... 88 88.  ... 88.  ...   88   88 88.  .88 88    88 
+;  `88888P' `88888P' dP `88888P' `88888P'   dP   dP `88888P' dP    dP 
+;
+; © 2020 K N Crouse
+;-------------------------------------------------------------------------------------------------
+; 
+; This extension contains all functions that allow users to apply artificial selection
+; on organismal populations. Selection can be turned ON or OFF with the SELECTION-ON? 
+; switch on the user interface. When ON is selected, the ARTIFICIAL-SELECTION function is 
+; applied once every timestep and artificially selects for a population that can better
+; persist in its environment.
+;
+;-------------------------------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------------------------------
+; ARTIFICIAL-SELECTION
+;
+; Operation that allows an override of B3GET to artificially select for populations that are
+; better able to survive in the environmental conditions set by the model parameters.
+;-------------------------------------------------------------------------------------------------
+
+to artificial-selection
+
+  ; MUTATE GENOTYPES
+  if ( ticks = 0 ) [ ask anima1s [ mutate-chromosomes 0.1 ]] ; increases the genetic variation of the initial population
+  
+  ; RESET SIMULATION
+  if ( criteria-met-for-restarting-simulation ) [
+    
+    if ( not is-number? read-from-string last genotype ) [ set genotype ( word genotype "-0" ) ]
+    let selected-anima1 max-one-of anima1s with [ generation.number > read-from-string last genotype ] [ generation.number ]
+    ifelse ( selected-anima1 != nobody ) 
+    [ set genotype ( word but-last genotype ( read-from-string last genotype + 1 ) ) ; set new genotype name up one more number increment
+      ask selected-anima1 [ save-genotype ]]
+    [ 
+      ;set genotype ( word genotype "x" )
+      ;ask one-of anima1s [ save-genotype ]
+    ]
+    setup
+    
+  ]
+  
+end
+
+to-report criteria-met-for-restarting-simulation
+  let criteria-met false
+  
+  if ( count anima1s < 50 and count anima1s >= 1 )[ set criteria-met true ]
+  if ( not any? anima1s with [ biological.sex = "female" ] or not any? anima1s with [ biological.sex = "male" ] ) [ set criteria-met true ]
+  ;if ( sum [ total.energy.gains ] of anima1s < sum [ total.energy.cost] of anima1s ) [ set criteria-met true ]
+  
+  report criteria-met
+end
+
+to-report get-next-available-file-name [ file-name file-designation ]
+  let new-number 1
+  while [file-exists? (word path-to-experiment file-name new-number file-designation ) ][ set new-number new-number + 1 ]
+  report (word file-name new-number )
+end
+
+;to output-successful-population
+;  let file-name get-next-available-file-name (word (get-file-string genotype-file-number) "_o" ) ".csv"
+;  export-world file-name
+;  printout-genotype-of ( n-of 1 primates ) file-name
+;end
+;
+;to restart-unsuccessful-population
+;  let file-name get-next-available-file-name (word (get-file-string genotype-file-number) "_x" ) ".csv"
+;  export-world file-name
+;  setup-world
+;end
