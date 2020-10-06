@@ -12,162 +12,139 @@
 extensions [ csv profiler table ]
 
 __includes [
-  "commands.nls"
-  "data.nls"
-  "import-export.nls"
-  "selection.nls"
-  "verification.nls"
-  "sta7us.nls"
-  "g8tes.nls"
-  "results.nls"
+  "extensions/commands.nls"
+  "extensions/data.nls"
+  "extensions/import-export.nls"
+  "extensions/selection.nls"
+  "extensions/verification.nls"
+  "extensions/sta7us.nls"
+  "extensions/results.nls"
 ]
 
-breed [ groups group ]
 breed [ anima1s anima1 ]
-
-turtles-own [ meta-id age energy.supply ]
-
-patches-own [ pmeta-id penergy.supply ]
 
 anima1s-own [
 
-  ; PHENOTYPE VARIABLES
-  ; visible
+  meta.id
+
+  ; PHENOTYPE VARIABLES: visible to all agents
   biological.sex
   life.history
   female.fertility
   group.identity
   is.alive
-  alpha.signal
-  beta.signal
-  gamma.signal
-  living.chance
+  yellow.signal
+  red.signal
+  blue.signal
   body.size
   body.shade
+  is.resting
 
   identity.I
   identity.II
   carried.items
 
-  ; hidden
-  stomach.size
+  ; PHENOTYPE VARIABLES: hidden to all agents but self
+  living.chance
+  energy.supply
+  bite.capacity
   mutation.chance
   sex.ratio
   litter.size
   conception.chance
-  day.perception.angle
-  night.perception.angle
-  audio.perception.angle
-  day.perception.range
-  night.perception.range
-  audio.perception.range
-  vocal.range
-  alpha.chance
-  beta.chance
-  gamma.chance
+  visual.angle
+  visual.range
+  day.perception
+  night.perception
+  yellow.chance
+  red.chance
+  blue.chance
   birthing.chance
   weaning.chance
   infancy.chance
   juvenility.chance
   adulthood.chance
-  senescency.chance
-
-  mother
   x.magnitude
   y.magnitude
+
   chromosome.I
   chromosome.II
 
   my.environment
   decision.vectors
-  completed.actions
+  actions.completed
 
-  ; TRACKING VARIABLES
-  generation-number
-  mother-identity
-  father-identity
-  previous-group-id
-  natal-group-id
-  natal-group-size
-  ticks-at-conception
-  ticks-at-birth
-  ticks-at-weaning
-  ticks-at-sexual-maturity
-  ticks-at-senescence
-  ticks-at-death
-  adult-living-chance
-  adult-body-size
-  adult-body-shade
-  adult-stomach-size
-  adult-mutation-chance
-  adult-sex-ratio
-  adult-litter-size
-  adult-conception-chance
-  adult-day-perception-angle
-  adult-night-perception-angle
-  adult-audio-perception-angle
-  adult-day-perception-range
-  adult-night-perception-range
-  adult-audio-perception-range
-  adult-vocal-range
-  adult-alpha-chance
-  adult-beta-chance
-  adult-gamma-chance
-  mother-initiated-birth
-  mother-initiated-weaning
-  distance-traveled
-  foraging-gains
-  foraging-cost
-  ingroup-female-female-help-cost
-  ingroup-male-male-help-cost
-  ingroup-male-female-help-cost
-  whole-related-help-cost
-  half-related-help-cost
-  fourth-related-help-cost
-  eighth-related-help-cost
-  matings-list
-  conceptions-list
-  group-transfers-list
-  cells-occupied
-  infanticide-list ;; to do
-  cause-of-death
+  ; TRACKING VARIABLES: hidden to all agents
+  age.in.ticks
+  generation.number
+  my.mother
+  mother.identity
+  father.identity
+  natal.group.id
+  natal.group.size
+  ticks.at.conception
+  ticks.at.birth
+  ticks.at.weaning
+  ticks.at.sexual.maturity
+  ticks.at.death
+  adult.living.chance
+  adult.body.size
+  adult.body.shade
+  adult.energy.supply
+  adult.bite.capacity
+  adult.mutation.chance
+  adult.sex.ratio
+  adult.litter.size
+  adult.conception.chance
+  adult.visual.angle
+  adult.visual.range
+  adult.day.perception
+  adult.night.perception
+  adult.yellow.chance
+  adult.red.chance
+  adult.blue.chance
+  distance.traveled
+  cells.occupied
+  mother.initiated.birth
+  mother.initiated.weaning
+  whole.related.help.cost
+  half.related.help.cost
+  fourth.related.help.cost
+  eighth.related.help.cost
+  foraging.gains
+  total.energy.gains
+  total.energy.cost
+  receiving.history
+  carried.history
+  aid.history
+  harm.history
+  copulations.history
+  conceptions.history
+  group.transfers.history
+  infanticide.history
 ]
 
-groups-own [
-
-  ; TRACKING VARIABLES
-  my-creator
-  distance-traveled
-  total-birth-count
-  total-energy-gained
-  gestatee-female-energy-gained
-  gestatee-male-energy-gained
-  infant-female-energy-gained
-  infant-male-energy-gained
-  juvenile-female-energy-gained
-  juvenile-male-energy-gained
-  adult-cycling-energy-gained
-  adult-pregnant-energy-gained
-  adult-lactating-energy-gained
-  adult-male-energy-gained
-  senescent-female-energy-gained
-  senescent-male-energy-gained
-]
+patches-own [
+  pmeta.id
+  pterminal.energy
+  penergy.supply ]
 
 globals [
   model-version
   model-structure
   genotype-reader
   simulation-id
-  climate-table
-
   deterioration-rate
-  selection-rate
+  maximum-visual-range
+  base-litter-size
 
-  ; TRACKING VARIABLS
-  population-decisions
-  population-allocations
-  population-actions
+  ; TRACKING VARIABLES
+  verification-results
+  plant-abundance-record
+  plant-patchiness-record
+  animal-graveyard
+  animal-decisions-made
+  animal-actions-completed
 ]
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -182,7 +159,8 @@ globals [
 ;--------------------------------------------------------------------------------------------------------------------
 
 to setup-button
-  setup generate-simulation-id
+  if ( simulation-id != 0 ) [ record-world ]
+  setup
 end
 
 to go-button
@@ -192,7 +170,7 @@ end
 to save-button
   ifelse ( simulation-id = 0 )
   [ set simulation-id generate-simulation-id ]
-  [ set documentation-notes (word "Simulation " simulation-id " saved. " documentation-notes )
+  [ set observation-notes (word simulation-id ": " observation-notes )
     update-metafile "simulation" simulation-id ]
 end
 
@@ -213,7 +191,7 @@ to reset-genotype-button
 end
 
 to export-genotype-button
-  ask anima1s with [ read-from-string but-first genotype = meta-id ] [ save-genotype ]
+  ask anima1s with [ read-from-string but-first genotype = meta.id ] [ save-genotype ]
 end
 
 to import-genotype-button
@@ -234,28 +212,32 @@ end
 
 to setup-parameters
   set model-version "~1.1.0"
-  set deterioration-rate -0.001
-  set selection-rate 0.0001
+  set deterioration-rate -0.01
+  set maximum-visual-range 6
+  set base-litter-size 10
+  set model-structure []
+  set verification-results []
+  set animal-actions-completed []
 end
 
 to setup-patches
   ask patches [
-    set penergy.supply random-float plant-quality
-    set pmeta-id random 9999999
+    set pterminal.energy random-float plant-quality
+    set pmeta.id random 9999999
     update-patch-color ]
+  ;repeat 100 [ update-patches ask patches [ set penergy.supply penergy.supply + 10 / plant-annual-cycle if penergy.supply > pterminal.energy [ set penergy.supply pterminal.energy ] update-patch-color ] ]
 end
 
-to setup [ new-simulation-id ]
+to setup ; [ new-simulation-id ]
   ; save world file of old simulation before starting new simulation under following conditions
-  if ( simulation-id != 0 and behaviorspace-run-number = 0 and output-results? = true ) [ record-world ]
+  ;if ( simulation-id != 0 and behaviorspace-run-number = 0 and output-results? = true ) [ record-world ]
   clear-all
   reset-ticks
-  set simulation-id new-simulation-id
+  set simulation-id generate-simulation-id ; new-simulation-id
   setup-parameters
   import-population
   import-genotype
-  ;setup-patches
-  ask patches [ set pcolor brown + 1 ]
+  setup-patches
   clear-output
 end
 
@@ -273,29 +255,36 @@ end
 to go
 
   ; THE ENVIRONMENT
-;  ifelse ( model-structure = "no-plants" )
-;  [ ask patches [ set pcolor brown + 1 ] ]
-;  [ update-patches ]
+  ifelse ( member? "no-plants" model-structure )
+  [ ask patches [ set pcolor brown + 1 ] ]
+  [ update-patches ]
 
-  ; AGENT MORTALITY
-  ifelse ( model-structure = "reaper" )
-  [ if (( count anima1s - 100 ) > 0 ) [ ask n-of ( count anima1s - 100 ) anima1s [ remove-from-simulation ]]]
-  [ ask anima1s [check-mortality] ]
-
-  ; AGENT REPRODUCTION
-  if ( model-structure = "sower" and count anima1s < 100 ) ; random mating
-  [ repeat ( 100 - count anima1s ) [
-    if ( ( count anima1s with [ biological.sex = "male" and life.history = "adult" ] > 0 ) and ( count anima1s with [ biological.sex = "female" and life.history = "adult" and female.fertility = "cycling" ] > 0 ) )
-    [ ask one-of anima1s with [ biological.sex = "female" and life.history = "adult" and female.fertility = "cycling" ] [ conceive-with ( one-of anima1s with [ biological.sex = "male" and life.history = "adult" ] ) 999999 ]]]]
+  ask patches [ set penergy.supply penergy.supply + 1 / plant-annual-cycle ]
+  ask patches [ if penergy.supply > pterminal.energy [ set penergy.supply pterminal.energy ]]
 
   ; AGENT UPDATES
-  ask turtles [ set age age + 1 ] ; all turtles age each timestep
-  ask anima1s [ deteriorate update-appearance ]
+  ask anima1s [ set age.in.ticks age.in.ticks + 1 ] ; all individuals age at each time step
+  ask anima1s [ deteriorate ] ; all individuals decay at every time step
+  ask anima1s with [ is.alive ] [ update-appearance ]
+  ask anima1s with [ not empty? carried.items ] [ foreach carried.items [ itm -> ask itm [ move-to myself ]]] ; update carried items to be with carrier
+
+  ; AGENT MORTALITY
+  ifelse ( member? "reaper" model-structure  )
+  [ if (( count anima1s with [ is.alive ] - 100 ) > 0 ) [ ask n-of ( count anima1s with [ is.alive ] - 100 ) anima1s [ set-to-dead ]]
+    ask anima1s with [ is.alive = false ] [ check-mortality ]] ; this organization ensures that 100 individuals stay alive at all times
+  [ ask anima1s [ check-mortality ] ]
+
+  ; AGENT REPRODUCTION
+  if ( member? "stork" model-structure and count anima1s with [ is.alive ] < 100 ) ; random mating
+  [ repeat ( 100 - count anima1s with [ is.alive ]) [
+    if ( ( count anima1s with [ biological.sex = "male" and life.history = "adult" and is.alive ] > 0 )                                        ; if there is at least one adult male
+      and ( count anima1s with [ biological.sex = "female" and life.history = "adult" and female.fertility = "cycling" and is.alive ] > 0 ) )  ; and one adult cycling female left in the simulation,
+    [ ask one-of anima1s with [ biological.sex = "female" and life.history = "adult" and female.fertility = "cycling" and is.alive ]           ; randomly select one adult male and one cycling female,
+      [ conceive-with ( one-of anima1s with [ biological.sex = "male" and life.history = "adult" and is.alive ] ) 999999 ]]]]                  ; and the female spontaneously conceives a new offspring from their alleles
 
   ; AGENT AGENCY
   ask anima1s with [ is.alive ] [ consider-environment ]
   ask anima1s with [ is.alive ] [ make-decisions ]
-  ;ask anima1s with [ is.alive ] [ allocate-energy ]
   ask anima1s with [ is.alive ] [ do-actions ]
 
   ; ARTIFICAL SELECTION
@@ -307,7 +296,7 @@ to go
   if ( ticks > 0 and ceiling (ticks / 100) = (ticks / 100) and any? anima1s ) [
     let print-text (word "Simulation " simulation-id " is now at " precision (ticks / plant-annual-cycle) 3 " years, "
       precision sum [penergy.supply] of patches 3 " plant units, "
-      precision mean [generation-number] of anima1s 3 " generations, and contains "
+      precision mean [generation.number] of anima1s 3 " generations, and contains "
       count anima1s with [ is.alive ] " living organisms.")
     print print-text
     if ( behaviorspace-run-number > 0 ) [ output-print print-text ] ]
@@ -330,8 +319,16 @@ to-report get-updated-value [ current-value update-value ]
 end
 
 to-report generate-simulation-id
-  let alphabet [ "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z" ]
+  let alphabet get-alphabet
   report ( word "s" random 99 one-of alphabet one-of alphabet one-of alphabet )
+end
+
+to-report get-lower-alphabet
+  report [ "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o" "p" "q" "r" "s" "t" "u" "v" "w" "x" "y" "z" ]
+end
+
+to-report get-alphabet
+  report [ "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z" ]
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -344,7 +341,7 @@ to update-patches
   let density ( sum [penergy.supply] of patches ) / count patches
 
   ask patches [
-    set penergy.supply updated-plant-energy penergy.supply ( sum [penergy.supply] of neighbors ) season density
+    set pterminal.energy updated-plant-energy pterminal.energy ( sum [penergy.supply] of neighbors ) season density
     update-patch-color ]
 
 end
@@ -353,12 +350,13 @@ to-report updated-plant-energy [ old-energy neighbor-energy season plant-density
 
   let energy-to-report old-energy
 
-  let a ( ( season + 1 ) / 2 )
+  let seasonal ( ( plant-seasonality * season + 1 ) / 2 )
+  let a seasonal
   let b ( plant-minimum-neighbors + plant-maximum-neighbors ) / 2
   let c ( b - plant-minimum-neighbors )
   let x ( neighbor-energy / plant-quality )
   let probability-up ifelse-value ( c = 0 ) [ 0 ] [ ( a * e ^ ( - (( x - b ) ^ 2 ) / ( 2 * ( c ^ 2 ) )) ) ]
-  let y plant-seasonality * ( plant-daily-cycle / plant-annual-cycle ) * ( ( plant-density ) * ( 2 * probability-up - 1 ) + ( ( ( season + 1 ) / 2 ) - plant-density ) )
+  let y ( plant-daily-cycle / plant-annual-cycle ) * ( ( plant-density ) * ( 2 * probability-up - 1 ) + ( seasonal - plant-density ) )
   set energy-to-report ( ( energy-to-report / plant-quality ) + ( random-float y ) * plant-quality ) * plant-quality
 
   if energy-to-report >= plant-quality [ set energy-to-report plant-quality ]
@@ -368,7 +366,7 @@ to-report updated-plant-energy [ old-energy neighbor-energy season plant-density
 end
 
 to update-patch-color
-  set pcolor scale-color green penergy.supply 1.5 -0.25
+  set pcolor scale-color green ( ( pterminal.energy + penergy.supply ) / 2 ) 1.5 -0.25
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -388,34 +386,45 @@ to check-mortality
     [ remove-from-simulation ]
 
     ; FIRST DEATH: set anima1 to is.alive false
-    [ set is.alive false set ticks-at-death ticks ]]
+    [ set-to-dead ]]
+end
+
+to set-to-dead
+  set is.alive false
+  set ticks.at.death ticks
+  set label "x"
 end
 
 to remove-from-simulation
-  let me-the-dying-agent self
-  if ( ticks-at-death = 0 ) [ set ticks-at-death ticks ]
+  if ( ticks.at.death = 0 ) [ set ticks.at.death ticks ]
   ask anima1s with [ member? myself carried.items ] [ set carried.items remove myself remove-duplicates carried.items ]
-  ask current-group [ if ( not any? group-members with [ self != me-the-dying-agent ] ) [ die ] ]
   die
 end
 
 to update-appearance
   set size body.size
   set label " "
-  set color (( [color] of one-of groups with [ meta-id = [group.identity] of myself ] ) + 5 - ( 10 ^ body.shade ))
+  set color round ( wrap-color group.identity + 5 - ( 10 ^ body.shade ))
   set shape get-shape
 end
 
 to-report get-shape
   let base_shape ifelse-value ( biological.sex = "male" ) [ "triangle" ] [ "circle" ]
-  let a_on ifelse-value alpha.signal [ "a" ] [ "" ]
-  let b_on ifelse-value beta.signal [ "b" ] [ "" ]
-  let c_on ifelse-value gamma.signal [ "c" ] [ "" ]
-  report ( word base_shape a_on b_on c_on )
+  let eye_size ( ifelse-value ( visual.range < ( 1 / 3 ) ) [ "1" ] ( visual.range < ( 2 / 3 ) ) [ "2" ] [ "3" ] )
+  let eye_spacing ( ifelse-value ( visual.angle < ( 1 / 3 ) ) [ "1" ] ( visual.angle < ( 2 / 3 ) ) [ "2" ] [ "3" ] )
+  let current-perception ifelse-value ( get-solar-status = "DAY" ) [ day.perception ] [ night.perception ]
+  let eye_acuity ( ifelse-value ( is.resting ) [ "1" ] ( current-perception > 0.5 ) [ "3" ] ( current-perception > 0 ) [ "2" ] [ "1" ])
+  let a_on ifelse-value yellow.signal [ "a" ] [ "" ]
+  let b_on ifelse-value red.signal [ "b" ] [ "" ]
+  let c_on ifelse-value blue.signal [ "c" ] [ "" ]
+  report ( word base_shape eye_size eye_spacing eye_acuity a_on b_on c_on )
 end
 
 to update-energy [ update ]
   set energy.supply energy.supply + update
+  ifelse ( update > 0 )
+  [ set total.energy.gains total.energy.gains + update ]
+  [ set total.energy.cost total.energy.cost + abs update ]
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -431,75 +440,71 @@ end
 ; consider-environment > make-decisions > allocate-energy > do-actions
 ;--------------------------------------------------------------------------------------------------------------------
 
-;----------------------------------------------------------------------------------------------
-;
-; FILTER ENVIRONMENT TO BE CONSIDERED TO SURROUNDING CONIC SECTION
-;
-; This subroutine ...
-;
-; ENTRY:
-;
-; EXIT:
-;
-;----------------------------------------------------------------------------------------------
-
 to consider-environment
-  set my.environment lput self []
+  set my.environment []
   let sun-status get-solar-status
 
   ; ASPATIAL WORLD
-  ifelse ( model-structure = "aspatial" )
-  [ ask n-of 100 patches [ ask myself [ set my.environment lput myself my.environment ] ]]
+  ifelse ( member? "aspatial" model-structure )
+  [ ask n-of 10 patches [ ask myself [ set my.environment lput myself my.environment ] ]]
 
-  [ ; SPATIAL WORLD
-    if ( sun-status = "DAY" ) [ ask patches in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) [ ask myself [ set my.environment lput myself my.environment ] ]]
-    if ( sun-status = "NIGHT" ) [ ask patches in-cone ( 5 * day.perception.range ) ( 300 * day.perception.angle ) [ ask myself [ set my.environment lput myself my.environment ]]]]
+  ; SPATIAL WORLD
+  [ ask patches in-cone ( maximum-visual-range * visual.range ) ( 360 * visual.angle ) [ ask myself [ set my.environment lput myself my.environment ] ]]
 
-  foreach my.environment [ p -> ask [turtles-here] of p [
-    ifelse ( is-anima1? self and [life.history] of myself = "gestatee" )
-    [ if ( self = myself or self = mother ) [ ask myself [ set my.environment lput myself my.environment ] ] ]
-    [ if ( not hidden? ) [ ask myself [ set my.environment lput myself my.environment ] ]]]]
+  foreach my.environment [ p -> ask [anima1s-here] of p [ ; look at each patch in environment taken from above
+    if ( is-anima1? self and [life.history] of myself != "gestatee" )
+    ;[ if ( self = myself or self = my.mother) [ ask myself [ set my.environment lput myself my.environment ] ] ] ; gestatees can only see themselves and their mothers
+    [ if ( not hidden? or self = myself ) [ ask myself [ set my.environment lput myself my.environment ] ]]]] ; non-gestatees can see self and all non-hidden others in environment
 
-  foreach carried.items [ c -> if ([life.history] of c = "gestatee") [ set my.environment lput c my.environment ]]
+  if ( not member? "aspatial" model-structure ) [
+    let complete-environment remove-duplicates my.environment
+    let complete-count length complete-environment
+    set my.environment up-to-n-of ( ( ifelse-value ( sun-status = "DAY" ) [ day.perception ] [ night.perception ] ) * complete-count ) complete-environment ]
 
-  set completed.actions []
+  foreach carried.items [ c -> if ( [my.mother] of c = self ) [
+    set my.environment lput c my.environment ; mothers can see their gestatees, infants and juveniles
+    ask c [ set my.environment lput myself my.environment ] ]]  ; gestatees, infants and juveniles can see their mothers
+
+  set my.environment remove-duplicates lput self my.environment ; self is always in environment
+  set actions.completed []
 
 end
-
-;----------------------------------------------------------------------------------------------
-;
-; MAKE-DECISIONS
-;
-; This subroutine ...
-;
-; ENTRY:  'input-chromosome' is the chromosome to be copied.
-;         'mutation-chance-per-locus' defines the chance that a mutation will
-;         occur at each allele loci.
-;
-; EXIT:   'mutate-chromosome' returns a copy of the chromosome with
-;         modifications to a subset of the alleles.
-;
-;----------------------------------------------------------------------------------------------
 
 to make-decisions
+
+  ; Get decisions from selected genotype reader
   set decision.vectors ( ifelse-value
     ( genotype-reader = "sta7us" ) [ sta7us-get-decisions my.environment ]
-    ( genotype-reader = "g8tes" ) [ g8tes-get-decisions my.environment ]
     [ sta7us-get-decisions my.environment ] ) ; default
-end
 
-;----------------------------------------------------------------------------------------------
-;
-; COMPLETE LIST OF ACTIONS THAT HAVE BEEN ALLOCATED ENERGY
-;
-; This routine allows the caller to complete all actions that have been included in the
-; 'alocated.energy list.
-;
-; ENTRY:
-;
-; EXIT:
-;
-;----------------------------------------------------------------------------------------------
+  ;REDUCE DECISIONS TO ONE PER TARGET-ACTION COMBO
+  let reduced-decisions []
+
+  foreach decision.vectors [ original-vector ->
+    let original-target item 1 original-vector
+    let original-action item 2 original-vector
+    let original-weight item 3 original-vector
+    let vector-doesnt-exist true
+
+    let index 0
+    foreach reduced-decisions [ reduced-vector ->
+      let reduced-target item 1 reduced-vector
+      let reduced-action item 2 reduced-vector
+      let reduced-weight item 3 reduced-vector
+
+      if ( reduced-target = original-target ) and ( reduced-action = original-action ) [
+        set vector-doesnt-exist false
+        let new-vector ( list self reduced-target reduced-action ( reduced-weight + original-weight ) false )
+        set reduced-decisions remove-item index reduced-decisions
+        set reduced-decisions lput new-vector reduced-decisions ]
+      set index index + 1
+    ]
+    if vector-doesnt-exist [ set reduced-decisions lput ( list self original-target original-action original-weight false ) reduced-decisions ]
+  ]
+
+  set decision.vectors reduced-decisions
+
+end
 
 to do-actions
 
@@ -509,69 +514,73 @@ to do-actions
     if ( not done and check-energy vector ) [
       let target item 1 vector
       let action item 2 vector
-      let cost item 3 vector
+      let cost item 3 vector ; must put check here to only call if cost not 0
 
-      ( ifelse
+      if ( is.resting = false )
 
-        action = "maintain-body" [ maintain-body cost ] ; should these have distance checkers too?
-        action = "body-size" [ body-size cost ]
-        action = "body-shade" [ body-shade cost ]
-        action = "day-perception-range" [ day-perception-range cost ]
-        action = "night-perception-range" [ night-perception-range cost ]
-        action = "audio-perception-range" [ audio-perception-range cost ]
-        action = "day-perception-angle" [ day-perception-angle cost ]
-        action = "night-perception-angle" [ night-perception-angle cost ]
-        action = "audio-perception-angle" [ audio-perception-angle cost ]
-        action = "vocal-range" [ vocal-range cost ]
-        action = "conception-chance" [ conception-chance cost ]
-        action = "stomach-size" [ stomach-size cost ]
-        action = "mutation-chance" [ mutation-chance cost ]
-        action = "sex-ratio" [ sex-ratio cost ]
-        action = "litter-size" [ litter-size cost ]
+      [ ( ifelse  ; these actions can only be performed when not resting
+
         action = "move-toward" [ move-toward target cost ]
         action = "move-away-from" [ move-toward target ( - cost ) ]
         action = "turn-right" [ turn-right cost ]
         action = "turn-left" [ turn-right ( - cost ) ]
         action = "go-forward" [ go-forward cost ]
         action = "set-heading" [ set-heading cost ]
+        action = "set-heading-random" [ set-heading-random cost ]
         action = "hide" [ hide cost ]
-        action = "signal-alpha-on" [ signal-alpha-on cost ]
-        action = "signal-beta-on" [ signal-beta-on cost ]
-        action = "signal-gamma-on" [ signal-gamma-on cost ]
-        action = "check-infancy" [ check-infancy cost ]
-        action = "check-birth" [ check-birth cost ]
-        action = "check-juvenility" [ check-juvenility cost ]
-        action = "check-weaning" [ check-weaning cost ]
-        action = "check-adulthood" [ check-adulthood cost ]
-        action = "check-senescence" [ check-senescence cost ]
         action = "supply-to" [ if ( check-distance target ) [ supply-to target cost ]]
         action = "demand-from" [ if ( check-distance target ) [ demand-from target cost ]]
         action = "eat" [ if ( check-distance target ) [ eat target cost ]]
         action = "join" [ join target cost ]
         action = "leave" [ leave target cost ]
         action = "recruit" [ recruit target cost ]
-        action = "kick-out" [ kick-out target cost ]
+        action = "expel" [ expel target cost ]
         action = "pick-up" [ if ( check-distance target ) [ pick-up target cost ]]
         action = "put-down" [ if ( check-distance target ) [ put-down target cost  ]]
         action = "cling-to" [ if ( check-distance target ) [ cling-to target cost ]]
         action = "squirm-from" [ if ( check-distance target ) [ squirm-from target cost ]]
         action = "help" [ if ( check-distance target ) [ help target cost ]]
-        action = "attack" [ if ( check-distance target ) [ attack target cost ]]
+        action = "hurt" [ if ( check-distance target ) [ hurt target cost ]]
         action = "mate-with" [ if ( check-distance target ) [ mate-with target cost ]]
+        [])]
 
-        [ ])
+      ( ifelse ; these actions can be performed resting or not resting
+        action = "rest" [ rest cost ]
+        action = "living-chance" [ living-chance cost ] ; should these have distance checkers too?
+        action = "body-size" [ body-size cost ]
+        action = "body-shade" [ body-shade cost ]
+        action = "visual-range" [ visual-range cost ]
+        action = "visual-angle" [ visual-angle cost ]
+        action = "day-perception" [ day-perception cost ]
+        action = "night-perception" [ night-perception cost ]
+        action = "conception-chance" [ conception-chance cost ]
+        action = "bite-capacity" [ bite-capacity cost ]
+        action = "mutation-chance" [ mutation-chance cost ]
+        action = "sex-ratio" [ sex-ratio cost ]
+        action = "litter-size" [ litter-size cost ]
+        action = "yellow-signal-on" [ yellow-signal-on cost ]
+        action = "red-signal-on" [ red-signal-on cost ]
+        action = "blue-signal-on" [ blue-signal-on cost ]
+        action = "check-infancy" [ check-infancy cost ]
+        action = "check-birth" [ check-birth cost ]
+        action = "check-juvenility" [ check-juvenility cost ]
+        action = "check-weaning" [ check-weaning cost ]
+        action = "check-adulthood" [ check-adulthood cost ]
+        [])
     ]
   ]
-
 end
 
 to-report check-distance [ target ]
-  report ifelse-value ( target = nobody ) [ false ] [ distance target < ( size / 2 + ( ifelse-value ( is-patch? target ) [ 1 ] [[size] of target / 2 ])) ]
+  report ( ifelse-value
+    ( member? "aspatial" model-structure ) [ true ]
+    ( target = nobody ) [ false ]
+    [ distance target < ( size / 2 + ( ifelse-value ( is-patch? target ) [ 1 ] [[size] of target / 2 ])) ])
 end
 
 to-report check-energy [ vector ]
   let cost item 3 vector
-  let passes-energy-check ifelse-value ( model-structure = "free-lunch" ) [ true ] [ energy.supply > abs cost ] ; FREE LUNCH always passes energy check
+  let passes-energy-check ifelse-value ( member? "free-lunch" model-structure ) [ true ] [ energy.supply > abs cost ] ; FREE LUNCH always passes energy check
 
   if ( passes-energy-check ) [
     update-energy ( - abs cost )
@@ -585,17 +594,24 @@ to-report check-energy [ vector ]
 end
 
 to-report get-action-cost-of [ target action-name ]
-  let not-done-decisions filter [ vector -> item 1 vector = target and item 2 vector = action-name and item 4 vector = false ] decision.vectors
-  foreach not-done-decisions [ vector ->
-    if ( check-energy vector ) [
-      complete-action ( item 1 vector ) ( item 2 vector ) ( item 3 vector ) "get-action-cost-of" ]]
-  let action-cost sum map [ vector -> item 3 vector ] filter [ vector -> item 1 vector = target and item 2 vector = action-name and item 4 vector = true ] completed.actions
-  ;print action-cost
+
+  ; ask target to complete actions from incomplete related decisions
+  let not-done-decisions filter [ vector -> item 1 vector = self and item 2 vector = action-name and item 4 vector = false ] [decision.vectors] of target
+  ask target [
+    foreach not-done-decisions [ vector ->
+      if ( check-energy vector ) [
+        complete-action ( item 1 vector ) ( item 2 vector ) ( item 3 vector ) "get-action-cost-of" ]]]
+
+  ; get summation of target related cost and report
+  let action-cost sum map [ vector -> item 3 vector ] filter [ vector -> item 1 vector = self and item 2 vector = action-name ] [actions.completed] of target
   report action-cost
+
 end
 
 to complete-action [ target action cost outcome ]
-  set completed.actions lput ( list self target action cost outcome ) completed.actions
+  let completed-action ( list self target action ( precision cost 10 ) outcome )
+  set actions.completed lput completed-action actions.completed
+  set animal-actions-completed lput (sentence ticks but-last completed-action) animal-actions-completed
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -616,11 +632,6 @@ end
 ;
 ;--------------------------------------------------------------------------------------------------------------------
 
-to maintain-body [ cost ]
-  complete-action self "maintain-body" cost 0
-  living-chance cost
-end
-
 to living-chance [ cost ]
   let before-living-chance living.chance
   set living.chance get-updated-value living.chance cost
@@ -639,46 +650,28 @@ to body-shade [ cost ]
   complete-action self "body-shade" cost ( body.shade - before-body-shade )
 end
 
-to day-perception-range [ cost ]
-  let before-day-perception-range day.perception.range
-  set day.perception.range get-updated-value day.perception.range cost
-  complete-action self "day-perception-range" cost ( day.perception.range - before-day-perception-range )
+to visual-range [ cost ]
+  let before-visual-range visual.range
+  set visual.range get-updated-value visual.range cost
+  complete-action self "visual-range" cost ( visual.range - before-visual-range )
 end
 
-to night-perception-range [ cost ]
-  let before-night-perception-range night.perception.range
-  set night.perception.range get-updated-value night.perception.range cost
-  complete-action self "night-perception-range" cost ( night.perception.range - before-night-perception-range )
+to visual-angle [ cost ]
+  let before-visual-angle visual.angle
+  set visual.angle get-updated-value visual.angle cost
+  complete-action self "visual-angle" cost ( visual.angle - before-visual-angle )
 end
 
-to audio-perception-range [ cost ]
-  let before-audio-perception-range audio.perception.range
-  set audio.perception.range get-updated-value audio.perception.range cost
-  complete-action self "audio-perception-range" cost ( audio.perception.range - before-audio-perception-range )
+to day-perception [ cost ]
+  let before-day-perception day.perception
+  set day.perception get-updated-value day.perception cost
+  complete-action self "day-perception" cost ( day.perception - before-day-perception )
 end
 
-to day-perception-angle [ cost ]
-  let before-day-perception-angle day.perception.angle
-  set day.perception.angle get-updated-value day.perception.angle cost
-  complete-action self "day-perception-angle" cost ( day.perception.angle - before-day-perception-angle )
-end
-
-to night-perception-angle [ cost ]
-  let before-night-perception-angle night.perception.angle
-  set night.perception.angle get-updated-value night.perception.angle cost
-  complete-action self "night-perception-angle" cost ( night.perception.angle - before-night-perception-angle )
-end
-
-to audio-perception-angle [ cost ]
-  let before-audio-perception-angle audio.perception.angle
-  set audio.perception.angle get-updated-value audio.perception.angle cost
-  complete-action self "audio-perception-angle" cost ( audio.perception.angle - before-audio-perception-angle )
-end
-
-to vocal-range [ cost ]
-  let before-vocal-range vocal.range
-  set vocal.range get-updated-value vocal.range cost
-  complete-action self "vocal-range" cost ( vocal.range - before-vocal-range )
+to night-perception [ cost ]
+  let before-night-perception night.perception
+  set night.perception get-updated-value night.perception cost
+  complete-action self "night-perception" cost ( night.perception - before-night-perception )
 end
 
 to conception-chance [ cost ]
@@ -687,10 +680,10 @@ to conception-chance [ cost ]
   complete-action self "conception-chance" cost ( conception.chance - before-conception-chance )
 end
 
-to stomach-size [ cost ]
-  let before-stomach-size stomach.size
-  set stomach.size get-updated-value stomach.size cost
-  complete-action self "stomach-size" cost ( stomach.size - before-stomach-size )
+to bite-capacity [ cost ]
+  let before-bite-capacity bite.capacity
+  set bite.capacity get-updated-value bite.capacity cost
+  complete-action self "bite-capacity" cost ( bite.capacity - before-bite-capacity )
 end
 
 to mutation-chance [ cost ]
@@ -752,21 +745,24 @@ to go-forward [ cost ]
     foreach carried.items [ object -> set sum-weight sum-weight + [size] of object ]
     let travel-distance (size * (sqrt (( 2 * abs cost ) / sum-weight )) )
     forward travel-distance
-    foreach carried.items [ object -> ifelse (object = nobody) [ set carried.items remove-item nobody carried.items ] [ ask object [ move-to myself ] ]]
     complete-action self "go-forward" cost heading
 
     set x.magnitude 0
     set y.magnitude 0
 
     ; track travel
-    set distance-traveled distance-traveled + travel-distance
-    if not member? patch-here cells-occupied [ set cells-occupied lput patch-here cells-occupied ]
+    set distance.traveled distance.traveled + travel-distance
+    if not member? patch-here cells.occupied [ set cells.occupied lput patch-here cells.occupied ]
   ]
 end
 
 to set-heading [ cost ]
   set heading cost * 360
   complete-action self "set-heading" cost heading
+end
+
+to set-heading-random [ cost ]
+  set heading heading + cost * ( random 360 ) - cost * ( random 360 )
 end
 
 to hide [ cost ]
@@ -777,40 +773,45 @@ to hide [ cost ]
     complete-action self "hide" cost hidden? ]
 end
 
+to rest [ cost ]
+  if ( cost > 0 ) [ set is.resting true ]
+  if ( cost < 0 ) [ set is.resting false ]
+end
+
 ;--------------------------------------------------------------------------------------------------------------------
 ; SIGNALING
 ;--------------------------------------------------------------------------------------------------------------------
 
-to signal-alpha-on [ cost ]
-  set alpha.chance get-updated-value alpha.chance cost
-  ifelse ( random-float 1.0 < alpha.chance ) [
-    set alpha.signal true
-    complete-action self "alpha-on" cost alpha.chance
+to yellow-signal-on [ cost ]
+  set yellow.chance get-updated-value yellow.chance cost
+  ifelse ( random-float 1.0 < yellow.chance ) [
+    set yellow.signal true
+    complete-action self "yellow-signal-on" cost yellow.chance
   ][
-    set alpha.signal false
-    complete-action self "alpha-off" cost alpha.chance
+    set yellow.signal false
+    complete-action self "yellow-signal-off" cost yellow.chance
   ]
 end
 
-to signal-beta-on [ cost ]
-  set beta.chance get-updated-value beta.chance cost
-  ifelse ( random-float 1.0 < beta.chance ) [
-    set beta.signal true
-    complete-action self "beta-on" cost beta.chance
+to red-signal-on [ cost ]
+  set red.chance get-updated-value red.chance cost
+  ifelse ( random-float 1.0 < red.chance ) [
+    set red.signal true
+    complete-action self "red-signal-on" cost red.chance
   ][
-    set beta.signal false
-    complete-action self "beta-off" cost beta.chance
+    set red.signal false
+    complete-action self "red-signal-off" cost red.chance
   ]
 end
 
-to signal-gamma-on [ cost ]
-  set gamma.chance get-updated-value gamma.chance cost
-  ifelse ( random-float 1.0 < gamma.chance ) [
-    set gamma.signal true
-    complete-action self "gamma-on" cost gamma.chance
+to blue-signal-on [ cost ]
+  set blue.chance get-updated-value blue.chance cost
+  ifelse ( random-float 1.0 < blue.chance ) [
+    set blue.signal true
+    complete-action self "blue-signal-on" cost blue.chance
   ][
-    set gamma.signal false
-    complete-action self "gamma-off" cost gamma.chance
+    set blue.signal false
+    complete-action self "blue-signal-off" cost blue.chance
   ]
 end
 
@@ -819,13 +820,13 @@ end
 ;--------------------------------------------------------------------------------------------------------------------
 
 to check-infancy [ cost ]
-  ifelse ( mother = nobody )
+  ifelse ( my.mother = nobody )
   [ set is.alive false ] ; gestatees die if mother is dead
   [ set infancy.chance get-updated-value infancy.chance cost
     if ( life.history = "gestatee" and random-float 1.0 < infancy.chance ) [
-      set mother-initiated-birth false
+      set mother.initiated.birth false
       complete-action self "check-infancy" cost infancy.chance
-      ask mother [ give-birth ]
+      ask my.mother [ give-birth ]
     ]
   ]
 end
@@ -851,19 +852,19 @@ to update-to-infant
   set life.history "infant"
   set female.fertility " "
   set hidden? false
-  set ticks-at-birth ticks
+  set ticks.at.birth ticks
+  set label "i"
   complete-action self "update-to-infant" 0 0
-  ask current-group [ set total-birth-count total-birth-count + 1 ]
 end
 
 to check-juvenility [ cost ]
   set juvenility.chance get-updated-value juvenility.chance cost
   if ( life.history = "infant" and random-float 1.0 < juvenility.chance ) [
-    set mother-initiated-weaning false
+    set mother.initiated.weaning false
     complete-action self "check-juvenility" cost juvenility.chance
-    ifelse ( mother = nobody )
+    ifelse ( my.mother = nobody )
     [ update-to-juvenile ]
-    [ ask mother [ wean-offspring ]]
+    [ ask my.mother [ wean-offspring ]]
   ]
 end
 
@@ -887,8 +888,11 @@ end
 to update-to-juvenile
   set life.history "juvenile"
   set female.fertility " "
-  set ticks-at-weaning ticks
+  set ticks.at.weaning ticks
   complete-action self "update-to-juvenile" 0 0
+  let my-meta-id meta.id
+  set label "j"
+  ask anima1s with [ member? my-meta-id infanticide.history ] [ set infanticide.history remove my-meta-id remove-duplicates infanticide.history ]
 end
 
 to check-adulthood [ cost ]
@@ -902,44 +906,25 @@ end
 to update-to-adult
   set life.history "adult"
   set female.fertility ifelse-value ( biological.sex = "male" ) [ " " ] [ "cycling" ]
-  set ticks-at-sexual-maturity ticks
-  set adult-living-chance living.chance
-  set adult-body-size body.size
-  set adult-body-shade body.shade
-  set adult-stomach-size stomach.size
-  set adult-mutation-chance mutation.chance
-  set adult-sex-ratio sex.ratio
-  set adult-litter-size litter.size
-  set adult-conception-chance conception.chance
-  set adult-day-perception-angle day.perception.angle
-  set adult-night-perception-angle night.perception.angle
-  set adult-audio-perception-angle audio.perception.angle
-  set adult-day-perception-range day.perception.range
-  set adult-night-perception-range night.perception.range
-  set adult-audio-perception-range audio.perception.range
-  set adult-vocal-range vocal.range
-  set adult-alpha-chance alpha.chance
-  set adult-beta-chance beta.chance
-  set adult-gamma-chance gamma.chance
+  set ticks.at.sexual.maturity ticks
+  set adult.living.chance living.chance
+  set adult.body.size body.size
+  set adult.body.shade body.shade
+  set adult.energy.supply energy.supply
+  set adult.bite.capacity bite.capacity
+  set adult.mutation.chance mutation.chance
+  set adult.sex.ratio sex.ratio
+  set adult.litter.size litter.size
+  set adult.conception.chance conception.chance
+  set adult.visual.angle visual.angle
+  set adult.visual.range visual.range
+  set adult.day.perception day.perception
+  set adult.night.perception night.perception
+  set adult.yellow.chance yellow.chance
+  set adult.red.chance red.chance
+  set adult.blue.chance blue.chance
+  set label "a"
   complete-action self "update-to-adult" 0 0
-end
-
-to check-senescence [ cost ]
-  set senescency.chance get-updated-value senescency.chance cost
-  if ( life.history = "adult" and random-float 1.0 < senescency.chance ) [
-    complete-action self "check-senescence" cost senescency.chance
-    update-to-senescent
-  ]
-end
-
-to update-to-senescent
-  set life.history "senescent"
-  set female.fertility " "
-  ; all dependent offspring are made independent by this process
-  ask my-offspring with [ life.history = "gestatee" ] [ update-to-infant ]
-  ask my-offspring with [ life.history = "infant" ] [ update-to-juvenile ]
-  set ticks-at-senescence ticks
-  complete-action self "update-to-senescent" 0 0
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -947,7 +932,7 @@ end
 ;--------------------------------------------------------------------------------------------------------------------
 
 to supply-to [ target cost ]
-  if ( target != self and is-anima1? target and ( female.fertility = "lactating" or female.fertility = "pregnant" ) ) [
+  if ( target != self and is-anima1? target and [ is.alive ] of target = true and ( female.fertility = "lactating" or female.fertility = "pregnant" ) ) [
     let target-cost get-action-cost-of target "demand-from"
     let net-cost ( cost + target-cost )
     ifelse ( net-cost > 0 )
@@ -958,7 +943,7 @@ to supply-to [ target cost ]
 end
 
 to demand-from [ target cost ]
-  if ( target != self and is-anima1? target and ( life.history = "gestatee" or life.history = "infant" ) ) [
+  if ( target != self and is-anima1? target and [ is.alive ] of target = true and ( life.history = "gestatee" or life.history = "infant" ) ) [
     let target-supply-cost get-action-cost-of target "supply-to"
     let net-cost ( cost + target-supply-cost )
     ifelse ( net-cost > 0 )
@@ -977,7 +962,7 @@ end
 
 to receive-from [ target cost ]
   if ( cost > 0 and is-anima1? target or is-patch? target ) [
-    let energy-wanted get-updated-value stomach.size cost
+    let energy-wanted get-updated-value bite.capacity cost
     let energy-supply ifelse-value ( is-patch? target ) [ [ penergy.supply ] of target ] [ [ energy.supply ] of target ]
     let energy-received ifelse-value ( energy-wanted < energy-supply ) [ energy-wanted ] [ energy-supply ]
     update-energy energy-received
@@ -985,6 +970,7 @@ to receive-from [ target cost ]
     [ ask target [ set penergy.supply penergy.supply - energy-received ]]
     [ ask target [ update-energy ( - energy-received ) ]]
     complete-action target "receive-from" cost energy-received
+    if ( life.history = "juvenile" or life.history = "adult" or life.history = "senescent" ) [ set foraging.gains foraging.gains + energy-received ]
   ]
 end
 
@@ -993,7 +979,7 @@ end
 ;--------------------------------------------------------------------------------------------------------------------
 
 to join [ target cost ]
-  if ( is-anima1? target ) [
+  if ( is-anima1? target and [ is.alive ] of target = true ) [
     complete-action target "join" cost 0
     if ( cost > 0 )
     [ let target-cost get-action-cost-of target "join"
@@ -1002,7 +988,7 @@ to join [ target cost ]
 end
 
 to leave [ target cost ]
-  if ( is-anima1? target ) [
+  if ( is-anima1? target and [ is.alive ] of target = true ) [
     complete-action target "leave" cost 0
     if ( cost > 0 )
     [ let target-cost get-action-cost-of target "leave"
@@ -1011,7 +997,7 @@ to leave [ target cost ]
 end
 
 to recruit [ target cost ]
-  if ( is-anima1? target ) [
+  if ( is-anima1? target and [ is.alive ] of target = true ) [
     complete-action target "recruit" cost 0
     if ( cost > 0 )
     [ let target-cost get-action-cost-of target "recruit"
@@ -1019,45 +1005,27 @@ to recruit [ target cost ]
       if ( random-float 1.0 <= probability ) [ ask target [ join-group [group.identity] of myself ]]]]
 end
 
-to kick-out [ target cost ]
-  if ( is-anima1? target ) [
-    complete-action target "kick-out" cost 0
+to expel [ target cost ]
+  if ( is-anima1? target and [ is.alive ] of target = true ) [
+    complete-action target "expel" cost 0
     if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "kick-out"
+    [ let target-cost get-action-cost-of target "expel"
       let probability ( cost + target-cost ) / cost
       if ( random-float 1.0 <= probability ) [ ask target [ leave-group ]]]]
 end
 
 to join-group [ group-id ]
   if ( group.identity != group-id ) [
-    set previous-group-id group.identity
     set group.identity group-id
-    set group-transfers-list lput [meta-id] of current-group group-transfers-list
+    set label "="
+    set group.transfers.history lput group.identity group.transfers.history
     complete-action self "join-group" 0 group-id ]
 end
 
 to leave-group
-  set previous-group-id group.identity
-  hatch-groups 1 [
-    initialize-group
-    set my-creator [meta-id] of myself
-    ask myself [ set group.identity [meta-id] of myself ]]
-  ask previous-group [ if not any? group-members [ die ]]
+  set group.identity ( random 10000 * 140 + one-of base-colors )
+  set label "~"
   complete-action self "leave-group" 0 0
-end
-
-to-report previous-group
-  report ifelse-value (any? groups with [ meta-id = [previous-group-id] of myself ])
-  [ one-of groups with [ meta-id = [previous-group-id] of myself ]]
-  [ nobody ]
-end
-
-to initialize-group
-  set hidden? true
-  set age 0
-  set color one-of base-colors
-  set meta-id random 99999999
-  move-to one-of patches
 end
 
 to pick-up [ target cost ]
@@ -1101,16 +1069,20 @@ to carry [ target ]
     ask anima1s with [ member? target carried.items ] [ set carried.items remove-item ( position target remove-duplicates carried.items ) remove-duplicates carried.items ]
     set carried.items lput target carried.items
     ask target [ move-to myself ]
+    set carried.history lput [meta.id] of target carried.history
+    set label "^"
     complete-action target "carry" 0 0 ]
 end
 
 to drop [ target ]
-  if ( member? target carried.items ) [ set carried.items remove target remove-duplicates carried.items ]
-  complete-action target "drop" 0 0
+  if ( member? target carried.items ) [
+    set carried.items remove target remove-duplicates carried.items
+    set label "*"
+    complete-action target "drop" 0 0 ]
 end
 
 to help [ target cost ]
-  if ( is-anima1? target ) [
+  if ( is-anima1? target and [ is.alive ] of target = true ) [
     complete-action target "help" cost 0
     if ( cost > 0 )
     [ let target-cost get-action-cost-of target "help"
@@ -1120,11 +1092,26 @@ to help [ target cost ]
       if ( random-float 1.0 <= ( cost-probability * size-probability ) ) [ aid target net-cost ]]]
 end
 
-to attack [ target cost ]
-  if ( is-anima1? target ) [
-    complete-action target "attack" cost 0
+to aid [ target cost ]
+  if ( is-anima1? target and [ is.alive ] of target = true ) [
+    complete-action target "aid" cost 0
+    ask target [ living-chance cost ]
+    set aid.history lput [meta.id] of target aid.history
+    set label "+"
+    ; recording kin selection
+    let relatedness-with-target relatedness-with target
+    if ( relatedness-with-target > 0.75 ) [ set whole.related.help.cost whole.related.help.cost + cost ]
+    if ( relatedness-with-target <= 0.75 and relatedness-with-target > 0.375 ) [ set half.related.help.cost half.related.help.cost + cost ]
+    if ( relatedness-with-target <= 0.375 and relatedness-with-target > 0.1875 ) [ set fourth.related.help.cost fourth.related.help.cost + cost ]
+    if ( relatedness-with-target <= 0.1875  ) [ set eighth.related.help.cost eighth.related.help.cost + cost ]
+  ]
+end
+
+to hurt [ target cost ]
+  if ( is-anima1? target and [ is.alive ] of target = true ) [
+    complete-action target "hurt" cost 0
     if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "attack"
+    [ let target-cost get-action-cost-of target "hurt"
       let cost-probability ( cost + target-cost ) / cost
       let size-probability ( size / ( size + [size] of target ) )
       let net-cost cost + target-cost
@@ -1132,69 +1119,124 @@ to attack [ target cost ]
 end
 
 to harm [ target cost ]
-  ask target [ living-chance ( - cost ) ]
-  complete-action target "harm" cost 0
-end
-
-to aid [ target cost ]
-  ask target [ living-chance cost ]
-  complete-action target "aid" cost 0
-end
-
-to mate-with [ target my-mate-cost ]
-  if ( is-anima1? target and life.history = "adult" and ( biological.sex = "male" or ( biological.sex = "female" and female.fertility = "cycling" ))) [
-    let target-mate-cost get-action-cost-of target "mate-with"
-    ifelse ( target-mate-cost > 0 ) ; target has already paid cost to mate-with self
-    [ let net-mate-cost ( my-mate-cost + target-mate-cost )
-      if ( net-mate-cost > 0 and model-structure != "sower" ) [ ; SOWER calls conceive-with from an alternative source
-        complete-action target "mate-with" my-mate-cost net-mate-cost
-        set label "!" ; signals successful mating event
-        ifelse ( biological.sex = "female" )
-        [ conceive-with target net-mate-cost ]
-        [ ask target [ conceive-with myself net-mate-cost ]]]]
-    [ complete-action target "mate-with" my-mate-cost "" ]
+  if ( is-anima1? target and [ is.alive ] of target = true ) [
+    complete-action target "harm" cost 0
+    ask target [ living-chance ( - cost ) ]
+    set harm.history lput [meta.id] of target harm.history
+    set label "-"
+    if ( [ life.history ] of target = "infant" ) [ set infanticide.history lput [meta.id] of target infanticide.history ]
   ]
 end
 
+to mate-with [ target cost ]
+  if ( is-anima1? target and [ is.alive ] of target = true and life.history = "adult" and ( biological.sex = "male" or ( biological.sex = "female" and female.fertility = "cycling" ))) [
+    complete-action target "mate-with" cost 0
+    if ( cost > 0 )
+    [ let target-cost get-action-cost-of target "mate-with"
+      let probability ( cost + target-cost ) / cost
+      if ( random-float 1.0 <= probability ) [ copulate-with target ( cost + target-cost ) ]
+  ]]
+end
+
+to copulate-with [ target net-cost ]
+  complete-action target "copulate-with" net-cost 0
+  set copulations.history lput [meta.id] of target copulations.history
+  ask target [ set copulations.history lput [meta.id] of myself copulations.history ]
+  ifelse ( biological.sex = "female" )
+  [ ask target [ set label "!" ]
+    conceive-with target net-cost ]
+  [ set label "!" ; signals successful mating event
+    ask target [ conceive-with myself net-cost ]]
+end
+
 to conceive-with [ target net-mate-cost ] ; FEMALE PROCEDURE
-  if ( biological.sex = "female" and female.fertility = "cycling" and life.history = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "male" ) [
+  if ( biological.sex = "female" and female.fertility = "cycling" and life.history = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "male" and [ is.alive ] of target = true ) [
     if random-float 1.0 < ( get-updated-value (mean (list conception.chance [conception.chance] of target)) net-mate-cost ) [
-      let preferred-litter 10 ^ ( mean (list litter.size [litter.size] of target))
+      let preferred-litter base-litter-size ^ ( mean (list litter.size [litter.size] of target))
       let floor-litter floor preferred-litter
       let percent-litter preferred-litter - floor-litter
       let my-litter-size ifelse-value ( random-float 1.0 < percent-litter ) [ floor-litter + 1 ] [ floor-litter ]
       hatch-anima1s my-litter-size [ initialize-from-parents myself target ]
       set female.fertility "pregnant"
       complete-action target "conceive-with" net-mate-cost my-litter-size
+      set conceptions.history lput [meta.id] of target conceptions.history
+      ask target [ set conceptions.history lput [meta.id] of myself conceptions.history ]
     ]
   ]
 end
 
 to initialize-from-parents [ m f ]
-  set meta-id random 9999999
-  set hidden? true
+  set meta.id random 9999999
   set is.alive true
-  ask m [ set carried.items lput myself carried.items ]
   set biological.sex ifelse-value ( random-float 1.0 < mean (list [sex.ratio] of m [sex.ratio] of f) ) ["male"] ["female"]
-  set shape ifelse-value ( biological.sex = "female" ) ["circle"] ["triangle"]
-  set generation-number [generation-number] of m + 1
-  set mother m
-  ifelse ( model-structure = "no-evolution" )
+  set generation.number ( max (list [generation.number] of m [generation.number] of f ) + 1 )
+  set my.mother m
+  ifelse ( member? "no-evolution" model-structure )
   [ set chromosome.I [chromosome.I] of m
     set chromosome.II [chromosome.II] of m ]
   [ setup-chromosomes-from m f ]
   set group.identity [group.identity] of m
-  set natal-group-id group.identity
-  set mother-identity [meta-id] of m
-  set father-identity [meta-id] of f
-  set energy.supply 1
+  set natal.group.id group.identity
+  set mother.identity [meta.id] of m
+  set father.identity [meta.id] of f
+  set energy.supply 0
   set life.history "gestatee"
   set female.fertility " "
-  set label-color black
-  set age 0
+  set label-color white
+  set age.in.ticks 0
+  set carried.items []
+  set my.environment []
+  set decision.vectors []
+  set actions.completed []
+  set ticks.at.conception ticks
+  set ticks.at.birth 0
+  set ticks.at.weaning 0
+  set ticks.at.sexual.maturity 0
+  set ticks.at.death 0
+  set adult.living.chance 0
+  set adult.body.size 0
+  set adult.body.shade 0
+  set adult.energy.supply 0
+  set adult.bite.capacity 0
+  set adult.mutation.chance 0
+  set adult.sex.ratio 0
+  set adult.litter.size 0
+  set adult.conception.chance 0
+  set adult.visual.angle 0
+  set adult.visual.range 0
+  set adult.day.perception 0
+  set adult.night.perception 0
+  set adult.yellow.chance 0
+  set adult.red.chance 0
+  set adult.blue.chance 0
+  set mother.initiated.birth true
+  set mother.initiated.weaning true
+  set whole.related.help.cost 0
+  set half.related.help.cost 0
+  set fourth.related.help.cost 0
+  set eighth.related.help.cost 0
+  set foraging.gains 0
+  set total.energy.gains 0
+  set total.energy.cost 0
+  set distance.traveled 0
+  set cells.occupied []
+  set natal.group.size count anima1s with [ group.identity = [group.identity] of myself ]
+  set receiving.history []
+  set aid.history []
+  set harm.history []
+  set copulations.history []
+  set conceptions.history []
+  set group.transfers.history []
+  set infanticide.history []
+  ifelse ( member? "ideal-form" model-structure ) [ set-phenotype-to-ideal-form ] [ set-phenotype-to-initialized-form ]
+end
+
+to set-phenotype-to-initialized-form
+  ask my.mother [ set carried.items lput myself carried.items ]
+  set hidden? true
   set body.size 0.01
   set body.shade 0
-  set stomach.size 0.1
+  set bite.capacity 0.1
   set mutation.chance 0.1
   set sex.ratio 0.5
   set litter.size 0
@@ -1204,71 +1246,28 @@ to initialize-from-parents [ m f ]
   set infancy.chance 0
   set juvenility.chance 0
   set adulthood.chance 0
-  set senescency.chance 0
   set living.chance 1
-  set alpha.chance 0
-  set beta.chance 0
-  set gamma.chance 0
-  set alpha.signal false
-  set beta.signal false
-  set gamma.signal false
-  set day.perception.range 0.1
-  set night.perception.range 0.1
-  set audio.perception.range 0.1
-  set day.perception.angle 0.1
-  set night.perception.angle 0.1
-  set audio.perception.angle 0.1
-  set vocal.range 0.1
-  set carried.items []
-  set decision.vectors []
-  set previous-group-id 0
-  set ticks-at-conception ticks
-  set ticks-at-birth 0
-  set ticks-at-weaning 0
-  set ticks-at-sexual-maturity 0
-  set ticks-at-senescence 0
-  set ticks-at-death 0
-  set adult-living-chance 0
-  set adult-body-size 0
-  set adult-body-shade 0
-  set adult-day-perception-angle 0
-  set adult-night-perception-angle 0
-  set adult-audio-perception-angle 0
-  set adult-day-perception-range 0
-  set adult-night-perception-range 0
-  set adult-audio-perception-range 0
-  set adult-vocal-range 0
-  set adult-conception-chance 0
-  set adult-stomach-size 0
-  set adult-mutation-chance 0
-  set adult-sex-ratio 0
-  set adult-litter-size 0
-  set adult-alpha-chance 0
-  set adult-beta-chance 0
-  set adult-gamma-chance 0
-  set mother-initiated-birth true
-  set mother-initiated-weaning true
-  set my.environment no-turtles
-  set distance-traveled 0
-  set foraging-gains 0
-  set foraging-cost 0
-  set natal-group-size [group-size] of current-group
-  set group-transfers-list []
-  set matings-list []
-  set conceptions-list []
-  set cells-occupied []
-  set infanticide-list []
-  set previous-group-id 0
-  if ( model-structure = "ideal-form" ) [ set-phenotype-to-ideal-form ]
+  set yellow.chance 0
+  set red.chance 0
+  set blue.chance 0
+  set yellow.signal false
+  set red.signal false
+  set blue.signal false
+  set visual.angle 0.1
+  set visual.range 0.1
+  set day.perception 0.1
+  set night.perception 0.1
 end
 
 to set-phenotype-to-ideal-form
+  ask my.mother [
+    let new-energy-supply ( energy.supply / 2 )
+    set energy.supply new-energy-supply
+    ask myself [ set energy.supply new-energy-supply ]]
+  set hidden? false
   set body.size mean [body.size] of anima1s
   set body.shade mean [body.shade] of anima1s
-  set day.perception.range mean [day.perception.range] of anima1s
-  set night.perception.range mean [night.perception.range] of anima1s
-  set audio.perception.range mean [audio.perception.range] of anima1s
-  set stomach.size mean [stomach.size] of anima1s
+  set bite.capacity mean [bite.capacity] of anima1s
   set mutation.chance mean [mutation.chance] of anima1s
   set sex.ratio mean [sex.ratio] of anima1s
   set litter.size mean [litter.size] of anima1s
@@ -1278,18 +1277,17 @@ to set-phenotype-to-ideal-form
   set infancy.chance mean [infancy.chance] of anima1s
   set juvenility.chance mean [juvenility.chance] of anima1s
   set adulthood.chance mean [adulthood.chance] of anima1s
-  set senescency.chance mean [senescency.chance] of anima1s
   set living.chance mean [living.chance] of anima1s
-  set alpha.chance mean [alpha.chance] of anima1s
-  set beta.chance mean [beta.chance] of anima1s
-  set gamma.chance mean [gamma.chance] of anima1s
-  set day.perception.range mean [day.perception.range] of anima1s
-  set night.perception.range mean [night.perception.range] of anima1s
-  set audio.perception.range mean [audio.perception.range] of anima1s
-  set day.perception.angle mean [day.perception.angle] of anima1s
-  set night.perception.angle mean [night.perception.angle] of anima1s
-  set audio.perception.angle mean [audio.perception.angle] of anima1s
-  set vocal.range mean [vocal.range] of anima1s
+  set yellow.chance mean [yellow.chance] of anima1s
+  set red.chance mean [red.chance] of anima1s
+  set blue.chance mean [blue.chance] of anima1s
+  set yellow.signal one-of modes [yellow.signal] of anima1s
+  set red.signal one-of modes [red.signal] of anima1s
+  set blue.signal one-of modes [blue.signal] of anima1s
+  set visual.angle mean [ visual.angle ] of anima1s
+  set visual.range mean [ visual.range ] of anima1s
+  set day.perception mean [ day.perception ] of anima1s
+  set night.perception mean [ night.perception ] of anima1s
   update-to-adult
 end
 
@@ -1332,7 +1330,8 @@ to setup-chromosomes-from [m f]
     set i i + 1 ]
 
   let rate-of-mutation mean (list [mutation.chance] of m [mutation.chance] of f)
-  mutate-chromosomes 0.15 ; rate-of-mutation
+  mutate-chromosomes rate-of-mutation
+
 end
 
 to mutate-chromosomes [ rate-of-mutation ]
@@ -1340,56 +1339,51 @@ to mutate-chromosomes [ rate-of-mutation ]
   set chromosome.II mutate-chromosome chromosome.II rate-of-mutation
 end
 
-; --------------------------------------------------------------------------- ;
-;
-; MODIFY CHROMOSOME WITH NOVEL MUTATIONS AT RANDOM ALLELE LOCI
-;
-; This subroutine creates a copy of a given chromosome with a subset
-; of its alleles modified according to the probability of a mutation occuring at
-; each locus.
-;
-; ENTRY:  'input-chromosome' is the chromosome to be copied.
-;         'mutation-chance-per-locus' defines the chance that a mutation will
-;         occur at each allele loci.
-;
-; EXIT:   'mutate-chromosome' returns a copy of the chromosome with
-;         modifications to a subset of the alleles.
-;
-; --------------------------------------------------------------------------- ;
-
-to-report mutate-chromosome [ input-chromosome  mutation-chance-per-locus ]
+to-report mutate-chromosome [ input-chromosome mutation-chance-per-locus ]
 
   let ouput-chromosome []
   foreach input-chromosome [ allele ->
     let updated-alleles (list allele)
 
-    if ( first allele = true and random-float 1.0 < mutation-chance-per-locus ) [
+    let first-allele first allele
 
-      let choice random 5
+    if ( ( first-allele != "[0]"
+      or first-allele = true ) ; this line is for capatibility with older genotype files that have a boolean in first position
+      and random-float 1.0 < mutation-chance-per-locus ) [
+
+      let choice ( ifelse-value
+        ( first-allele = "[1]" ) [ 1 ]
+        ( first-allele = "[2]" ) [ one-of [ 1 2 ] ]
+        ( first-allele = "[3]" ) [ one-of [ 1 2 3 ] ]
+        ( first-allele = "[4]" ) [ one-of [ 1 2 3 4 5 ] ]
+        ( first-allele = "[5]" ) [ one-of [ 1 2 3 4 5 6 7 ] ]
+        [ one-of [ 1 2 3 4 5 6 7 ] ] ) ; when first-allele is true
 
       (ifelse
 
-        ; delete allele
-        ( choice = 0 ) [
-          set updated-alleles [] ] ; redundant but complete
-
-        ; duplicate allele
-        ( choice = 1 ) [
-          set updated-alleles (list allele allele) ]
-
         ; mutate allele
-        ( choice >= 2 ) [
+        ( choice < 6 ) [
           let new-allele []
-          let random-index random length allele
+          let random-index random ( length allele - 1 ) + 1 ; excludes first codon from mutation
           let index 0
           foreach allele [ codon ->
             ( ifelse
-              ( choice = 2 and random-index = index and model-structure != "uninvadable" ) [ set new-allele lput get-mutation codon new-allele ] ; mutate codon
-              ( choice = 3 and random-index = index ) [ repeat 2 [ set new-allele lput codon new-allele ] ] ; duplicate codon
-              ( choice = 4 and random-index = index ) [  ] ; delete codon
+              ( choice = 1 and random-index = index and not member? "uninvadable" model-structure ) [ set new-allele lput get-mutation codon "numbers" new-allele ] ; mutate codon, numbers only
+              ( choice = 2 and random-index = index and not member? "uninvadable" model-structure ) [ set new-allele lput get-mutation codon "letters" new-allele ] ; mutate codon, letters only
+              ( choice = 3 and random-index = index and not member? "uninvadable" model-structure ) [ set new-allele lput get-mutation codon "both" new-allele ] ; mutate codon, both numbers and letters
+              ( choice = 4 and random-index = index ) [ repeat 2 [ set new-allele lput codon new-allele ] ] ; duplicate codon
+              ( choice = 5 and random-index = index ) [  ] ; delete codon
               [ set new-allele lput codon new-allele ])
             set index index + 1 ]
           set updated-alleles ( list new-allele ) ]
+
+        ; duplicate allele
+        ( choice = 6 ) [
+          set updated-alleles (list allele allele) ]
+
+        ; delete allele
+        ( choice = 7 ) [
+          set updated-alleles [] ]
 
         [])]
 
@@ -1399,23 +1393,20 @@ to-report mutate-chromosome [ input-chromosome  mutation-chance-per-locus ]
   report ouput-chromosome
 end
 
-to-report get-mutation [ unmutated-codon ]
-  report (ifelse-value
-    ( is-number? unmutated-codon ) [ get-updated-value unmutated-codon ( one-of [ 1 -1 ] ) ] ; number mutations always result in slight increase or decrease of origional value
-    [( ifelse-value
-      ( genotype-reader = "sta7us" ) [ sta7us-get-mutation unmutated-codon ]
-      ( genotype-reader = "g8tes" ) [ g8tes-get-mutation unmutated-codon ]
-      [ sta7us-get-mutation unmutated-codon ] ) ]) ; default
+to-report get-mutation [ unmutated-codon type-of-mutation ]
+  report ( ifelse-value
+      ( genotype-reader = "sta7us" ) [ sta7us-get-mutation unmutated-codon type-of-mutation]
+      [ sta7us-get-mutation unmutated-codon type-of-mutation ] ); default
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-7
-85
-712
-791
+6
+86
+836
+917
 -1
 -1
-6.97
+8.22
 1
 10
 1
@@ -1436,9 +1427,9 @@ timesteps
 30.0
 
 BUTTON
-270
+396
 10
-336
+462
 79
 setup
 setup-button
@@ -1453,9 +1444,9 @@ NIL
 1
 
 BUTTON
-341
+467
 10
-408
+534
 79
 go
 go-button
@@ -1472,18 +1463,18 @@ NIL
 INPUTBOX
 7
 10
-263
+387
 79
 path-to-experiment
-../results/
+../results/verification-populations/
 1
 0
 String
 
 BUTTON
-414
+540
 10
-489
+615
 79
 go once
 go-button
@@ -1498,11 +1489,11 @@ NIL
 1
 
 INPUTBOX
-720
+849
 10
-967
-102
-documentation-notes
+1092
+254
+observation-notes
 NIL
 1
 0
@@ -1520,9 +1511,9 @@ simulation
 11
 
 BUTTON
-637
+763
 10
-711
+837
 80
 save
 save-button
@@ -1537,24 +1528,24 @@ NIL
 1
 
 SLIDER
-974
+1103
 155
-1217
+1346
 188
 plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-4.0
+0.0
 .1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-974
+1103
 191
-1217
+1346
 224
 plant-maximum-neighbors
 plant-maximum-neighbors
@@ -1567,10 +1558,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-538
-98
-613
-143
+665
+97
+740
+142
 season
 ( cos (( 360 / plant-annual-cycle ) * ticks))
 3
@@ -1578,24 +1569,24 @@ season
 11
 
 SLIDER
-974
+1103
 82
-1217
+1346
 115
 plant-seasonality
 plant-seasonality
 0
 1
-1.0
+0.0
 .05
 1
 NIL
 HORIZONTAL
 
 SLIDER
-974
+1102
 10
-1217
+1346
 43
 plant-annual-cycle
 plant-annual-cycle
@@ -1608,25 +1599,25 @@ ticks
 HORIZONTAL
 
 SLIDER
-974
+1102
 46
-1217
+1346
 79
 plant-daily-cycle
 plant-daily-cycle
 1
 100
-10.0
+20.0
 1
 1
 ticks
 HORIZONTAL
 
 MONITOR
-619
-98
-698
-143
+746
+97
+825
+142
 time
 get-solar-status
 17
@@ -1634,31 +1625,31 @@ get-solar-status
 11
 
 INPUTBOX
-974
+1103
 230
-1097
+1226
 299
 population
-night-and-day
+population
 1
 0
 String
 
 INPUTBOX
-974
-304
-1097
+1103
+305
+1226
 373
 genotype
-g8-night-and-day
+genotype
 1
 0
 String
 
 BUTTON
-1102
+1231
 230
-1157
+1286
 299
 ⟳
 reset-population-button
@@ -1673,9 +1664,9 @@ NIL
 1
 
 BUTTON
-1162
+1291
 230
-1217
+1346
 263
 ⤒
 export-population-button
@@ -1690,9 +1681,9 @@ NIL
 1
 
 BUTTON
-1162
+1291
 266
-1217
+1346
 299
 ⤓
 import-population-button
@@ -1707,19 +1698,19 @@ NIL
 1
 
 CHOOSER
-720
+849
 328
-908
+1033
 373
 useful-commands
 useful-commands
-"help-me" "--------" "lotka-volterra" "age-histogram" "metafile-report" "verify-code" "check-runtime" "simulation-report" "genotype-reader" "model-structure" "clear-plants" "setup-plants" "clear-population" "view-genotype" "view-decisions" "view-actions" "add-allele" "delete-allele" "population-report"
-8
+"help-me" "--------" "meta-report" "verify-code" "check-runtime" "simulation-report" "model-structure" "reset-plants" "clear-population" "view-genotype" "view-decisions" "view-actions" "view-history" "view-status"
+5
 
 BUTTON
-912
+1037
 328
-967
+1092
 373
 ▷
 command
@@ -1734,9 +1725,9 @@ NIL
 1
 
 BUTTON
-1102
+1232
 304
-1157
+1287
 373
 ⟳
 reset-genotype-button
@@ -1751,9 +1742,9 @@ NIL
 1
 
 BUTTON
-1162
+1291
 340
-1217
+1346
 373
 ⤓
 import-genotype-button
@@ -1768,9 +1759,9 @@ NIL
 1
 
 BUTTON
-1162
+1291
 304
-1217
+1346
 337
 ⤒
 export-genotype-button
@@ -1785,24 +1776,24 @@ NIL
 1
 
 SLIDER
-974
+1103
 118
-1217
+1346
 151
 plant-quality
 plant-quality
 .01
 1
-1.0
+0.99
 .01
 1
 NIL
 HORIZONTAL
 
 SWITCH
-495
+621
 10
-631
+757
 43
 output-results?
 output-results?
@@ -1811,9 +1802,9 @@ output-results?
 -1000
 
 SWITCH
-495
+621
 46
-631
+757
 79
 selection-on?
 selection-on?
@@ -1822,40 +1813,22 @@ selection-on?
 -1000
 
 INPUTBOX
-720
-264
-967
-324
+849
+262
+1092
+322
 command-input
-g8tes
+NIL
 1
 0
 String (commands)
 
 OUTPUT
-720
-380
-1218
-788
-11
-
-PLOT
-722
-106
-966
-259
-plot 1
-NIL
-NIL
-0.0
-8.0
--0.01
-0.01
-true
-false
-"" ""
-PENS
-"default" 1.0 2 -16777216 true "" "plot sum [penergy.supply] of patches"
+849
+385
+1348
+918
+10
 
 @#$#@#$#@
 # B3GET 1.1.0 INFORMATION
@@ -1864,9 +1837,9 @@ Compatible with NetLogo 6.1.1
 
 ## WHAT IS IT?
 
-B3GET is designed to test hypotheses in biology by simulating populations of virtual organisms evolving over generations, whose evolutionary outcomes reflect the selection pressures of their environment. Users input populuation files to seed the initial population and run simulations to evolve these populations - and their genotypes - over generations. Behavioral strategies that are beneficial for their environmental context are expected to emerge.
+B3GET is designed to test hypotheses in biology by simulating populations of virtual organisms evolving over generations, whose evolutionary outcomes reflect the selection pressures of their environment. Users input populuation files to seed the initial population and run simulations to evolve these populations - and their genotypes - over generations. Behavioral strategies that are beneficial for their ecological context are expected to emerge.
 
-B3GET helps answer fundamental questions in evolutionary biology by offering users a virtual field site to precisely track the evolution of organismal populations. Researchers can use B3GET to: (1) investigate how populations vary in response to ecological pressures; (2) trace evolutionary histories over indefinite time scales and generations; (3) track an individual for every moment of their life from conception to post-mortem decay; and (4) create virtual analogues of living species, including primates like baboons and chimpanzees, to answer species-specific questions. Users are able to save, edit, and import population and genotype files, offering an array of possibilities for creating controlled biological experiments.
+B3GET helps answer fundamental questions in evolutionary biology by offering users a virtual field site to precisely track the evolution of organismal populations. Researchers can use B3GET to: (1) investigate how populations vary in response to ecological pressures; (2) trace evolutionary histories over indefinite time scales and generations; (3) track an individual for every moment of their life from conception to post-mortem decay; (4) create virtual analogues of living species, including primates like baboons and chimpanzees, to answer species-specific questions; and (5) determine the plausible evolutionary pathways of optimal strategies in response to ecological pressures. Users are able to save, edit, and import population and genotype files, offering an array of possibilities for creating controlled biological experiments.
 
 ## HOW IT WORKS
 
@@ -1881,21 +1854,22 @@ B3GET should come with the following file and [folder] structure. These extensio
 > [B3GET]
 --- [code]
 ------ B3GET.nlogo
------- commands.nls
------- data.nls
------- files.nls
------- sta7us.nls
------- import-export.nls
------- selection.nls
------- verification.nls
------- g8tes.nls
+------ [ extensions ]
+--------- commands.nls
+--------- data.nls
+--------- files.nls
+--------- sta7us.nls
+--------- import-export.nls
+--------- selection.nls
+--------- verification.nls
+--------- g3notype.nls
 --- [data]
 ------ genotype.txt
 ------ population.csv
 --- [docs]
 ------ B3GET-ODD-protocol.pdf
 
-B3GET starts with PATH-TO-EXPERIMENT set to [../data/], which means that any data or files generated during simulation will be saved in the [data] folder. Initially, POPULATION is set to [population] and GENOTYPE is set to [genotype], which are files included during download. With these settings, you can just click SETUP and GO to start your first simulation! Please refer to the 'control' descriptions below to perform more complex tasks.
+B3GET starts with PATH-TO-EXPERIMENT set to [../data/], which means that any data or files generated during simulation will be saved in the [data] folder. Initially, POPULATION is set to [population] and GENOTYPE is set to [genotype], which are files included during download. With these settings, you can just click SETUP and GO to start your first simulation! Please refer to the descriptions of the controls below to perform more complex tasks.
 
 ### PRIMARY CONTROLS
 
@@ -1918,7 +1892,7 @@ TIME: varies from DAY to NIGHT according to plant-daily-cycle.
 
 ### ENVIRONMENTAL CONTROLS
 
-Plants and plant life and growth are modeled after Conway's Game of Life, a cellular automaton model that contained rules for when a cell could be 'alive' or 'dead', thus simulating a living ecosystem. In B3GET, 'alive' cells contain plant agents, depicated as a green squares in the model.
+Plants, plant life and growth are inspired by Conway's Game of Life, a cellular automaton model that contained rules for when a cell could be 'alive' or 'dead', thus simulating a living ecosystem. In B3GET, 'alive' cells contain plant agents, depicated as a green squares in the model.
 
 PLANT-ANNUAL-CYCLE: the length of a year in timesteps.
 PLANT-SEASONALITY: the degree of difference in plant abundance from summer to winter.
@@ -1987,7 +1961,7 @@ Cite this model:
 
 Crouse, Kristin (2020). “B3GET” (Version 1.1.0). CoMSES Computational Model Library. Retrieved from: https://www.comses.net/codebases/6b10f629-7958-4b31-b489-d51c17d0f5b8/releases/1.1.0/
 
-Peer-reviewed paper:
+Peer-reviewed publication on an earlier version of this model:
 
 Crouse, K. N., Miller, C. M., & Wilson, M. L. (2019). New approaches to modeling primate socioecology: Does small female group size BEGET loyal males?. Journal of human evolution, 137, 102671.
 
@@ -2082,131 +2056,4854 @@ true
 0
 Polygon -7500403 true true 150 5 40 250 150 205 260 250
 
-circle
+circle111
 true
 0
-Circle -7500403 true true 0 0 300
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
 
-circlea
+circle111a
 true
 0
-Circle -7500403 true true 0 0 300
-Circle -1184463 true false 103 13 92
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
 
-circleab
+circle111ab
 true
 0
-Circle -7500403 true true 0 0 300
-Circle -1184463 true false 103 13 92
-Polygon -2674135 true false 30 120 270 120 285 165 15 165 30 120
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
 
-circleabc
+circle111abc
 true
 0
-Circle -7500403 true true 0 0 300
-Circle -1184463 true false 103 13 92
-Polygon -14835848 true false 150 210 270 180 240 240 150 285 60 240 30 180
-Polygon -2674135 true false 30 120 270 120 285 165 15 165 30 120
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
 
-circleac
+circle111ac
 true
 0
-Circle -7500403 true true 0 0 300
-Circle -1184463 true false 103 13 92
-Polygon -14835848 true false 150 210 270 180 240 240 150 285 60 240 30 180
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
 
-circleb
+circle111b
 true
 0
-Circle -7500403 true true 0 0 300
-Polygon -2674135 true false 30 120 270 120 285 165 15 165 30 120
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
 
-circlebc
+circle111bc
 true
 0
-Circle -7500403 true true 0 0 300
-Polygon -14835848 true false 150 210 270 180 240 240 150 285 60 240 30 180
-Polygon -2674135 true false 30 120 270 120 285 165 15 165 30 120
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
 
-circlec
+circle111c
 true
 0
-Circle -7500403 true true 0 0 300
-Polygon -14835848 true false 150 210 270 180 240 240 150 285 60 240 30 180
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
 
-line
+circle112
 true
 0
-Line -7500403 true 150 0 150 300
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
+Circle -1 true false 96 21 18
+Circle -1 true false 186 21 18
+Circle -16777216 true false 101 24 6
+Circle -16777216 true false 192 24 6
 
-plant
-false
-0
-Rectangle -7500403 true true 135 90 165 300
-Polygon -7500403 true true 135 255 90 210 45 195 75 255 135 285
-Polygon -7500403 true true 165 255 210 210 255 195 225 255 165 285
-Polygon -7500403 true true 135 180 90 135 45 120 75 180 135 210
-Polygon -7500403 true true 165 180 165 210 225 180 255 120 210 135
-Polygon -7500403 true true 135 105 90 60 45 45 75 105 135 135
-Polygon -7500403 true true 165 105 165 135 225 105 255 45 210 60
-Polygon -7500403 true true 135 90 120 45 150 15 180 45 165 90
-
-square
-false
-0
-Rectangle -7500403 true true 30 30 270 270
-
-triangle
+circle112a
 true
 0
-Polygon -7500403 true true 150 30 15 255 285 255
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
+Circle -1 true false 96 21 18
+Circle -1 true false 186 21 18
+Circle -16777216 true false 101 24 6
+Circle -16777216 true false 192 24 6
 
-trianglea
+circle112ab
 true
 0
-Polygon -7500403 true true 150 30 15 255 285 255
-Circle -1184463 true false 120 75 60
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 96 21 18
+Circle -1 true false 186 21 18
+Circle -16777216 true false 101 24 6
+Circle -16777216 true false 192 24 6
 
-triangleab
+circle112abc
 true
 0
-Polygon -7500403 true true 150 30 15 255 285 255
-Circle -1184463 true false 120 75 60
-Polygon -2674135 true false 90 150 210 150 225 180 75 180
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 96 21 18
+Circle -1 true false 186 21 18
+Circle -16777216 true false 101 24 6
+Circle -16777216 true false 192 24 6
 
-triangleabc
+circle112ac
 true
 0
-Polygon -7500403 true true 150 30 15 255 285 255
-Circle -1184463 true false 120 75 60
-Polygon -2674135 true false 90 150 210 150 225 180 75 180
-Polygon -14835848 true false 75 195 225 195 255 240 45 240
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
+Circle -1 true false 96 21 18
+Circle -1 true false 186 21 18
+Circle -16777216 true false 101 24 6
+Circle -16777216 true false 192 24 6
 
-triangleac
+circle112b
 true
 0
-Polygon -7500403 true true 150 30 15 255 285 255
-Circle -1184463 true false 120 75 60
-Polygon -14835848 true false 75 195 225 195 255 240 45 240
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 96 21 18
+Circle -1 true false 186 21 18
+Circle -16777216 true false 101 24 6
+Circle -16777216 true false 192 24 6
 
-triangleb
+circle112bc
 true
 0
-Polygon -7500403 true true 150 30 15 255 285 255
-Polygon -2674135 true false 90 150 210 150 225 180 75 180
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 96 21 18
+Circle -1 true false 186 21 18
+Circle -16777216 true false 101 24 6
+Circle -16777216 true false 192 24 6
 
-trianglebc
+circle112c
 true
 0
-Polygon -7500403 true true 150 30 15 255 285 255
-Polygon -2674135 true false 90 150 210 150 225 180 75 180
-Polygon -14835848 true false 75 195 225 195 255 240 45 240
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
+Circle -1 true false 96 21 18
+Circle -1 true false 186 21 18
+Circle -16777216 true false 101 24 6
+Circle -16777216 true false 192 24 6
 
-trianglec
+circle113
 true
 0
-Polygon -7500403 true true 150 30 15 255 285 255
-Polygon -14835848 true false 75 195 225 195 255 240 45 240
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
+Circle -1 true false 96 21 18
+Circle -1 true false 186 21 18
+Circle -16777216 true false 99 22 10
+Circle -16777216 true false 190 22 10
+
+circle113a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
+Circle -1 true false 96 21 18
+Circle -1 true false 186 21 18
+Circle -16777216 true false 99 22 10
+Circle -16777216 true false 190 22 10
+
+circle113ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 96 21 18
+Circle -1 true false 186 21 18
+Circle -16777216 true false 99 22 10
+Circle -16777216 true false 190 22 10
+
+circle113abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 96 21 18
+Circle -1 true false 186 21 18
+Circle -16777216 true false 99 22 10
+Circle -16777216 true false 190 22 10
+
+circle113ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
+Circle -1 true false 96 21 18
+Circle -1 true false 186 21 18
+Circle -16777216 true false 99 22 10
+Circle -16777216 true false 190 22 10
+
+circle113b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 96 21 18
+Circle -1 true false 186 21 18
+Circle -16777216 true false 99 22 10
+Circle -16777216 true false 190 22 10
+
+circle113bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 96 21 18
+Circle -1 true false 186 21 18
+Circle -16777216 true false 99 22 10
+Circle -16777216 true false 190 22 10
+
+circle113c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 90 15 30
+Circle -7500403 true true 180 15 30
+Circle -1 true false 96 21 18
+Circle -1 true false 186 21 18
+Circle -16777216 true false 99 22 10
+Circle -16777216 true false 190 22 10
+
+circle121
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+
+circle121a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+
+circle121ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+circle121abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+circle121ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+
+circle121b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+circle121bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+circle121c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+
+circle122
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+Circle -1 true false 51 51 18
+Circle -1 true false 231 51 18
+Circle -16777216 true false 56 56 4
+Circle -16777216 true false 239 56 4
+
+circle122a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+Circle -1 true false 51 51 18
+Circle -1 true false 231 51 18
+Circle -16777216 true false 56 56 4
+Circle -16777216 true false 239 56 4
+
+circle122ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 51 51 18
+Circle -1 true false 231 51 18
+Circle -16777216 true false 56 56 4
+Circle -16777216 true false 239 56 4
+
+circle122abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 51 51 18
+Circle -1 true false 231 51 18
+Circle -16777216 true false 56 56 4
+Circle -16777216 true false 239 56 4
+
+circle122ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+Circle -1 true false 51 51 18
+Circle -1 true false 231 51 18
+Circle -16777216 true false 56 56 4
+Circle -16777216 true false 239 56 4
+
+circle122b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 51 51 18
+Circle -1 true false 231 51 18
+Circle -16777216 true false 56 56 4
+Circle -16777216 true false 239 56 4
+
+circle122bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 51 51 18
+Circle -1 true false 231 51 18
+Circle -16777216 true false 56 56 4
+Circle -16777216 true false 239 56 4
+
+circle122c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+Circle -1 true false 51 51 18
+Circle -1 true false 231 51 18
+Circle -16777216 true false 56 56 4
+Circle -16777216 true false 239 56 4
+
+circle123
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+Circle -1 true false 51 51 18
+Circle -1 true false 231 51 18
+Circle -16777216 true false 53 53 10
+Circle -16777216 true false 236 53 10
+
+circle123a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+Circle -1 true false 51 51 18
+Circle -1 true false 231 51 18
+Circle -16777216 true false 53 53 10
+Circle -16777216 true false 236 53 10
+
+circle123ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 51 51 18
+Circle -1 true false 231 51 18
+Circle -16777216 true false 53 53 10
+Circle -16777216 true false 236 53 10
+
+circle123abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 51 51 18
+Circle -1 true false 231 51 18
+Circle -16777216 true false 53 53 10
+Circle -16777216 true false 236 53 10
+
+circle123ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+Circle -1 true false 51 51 18
+Circle -1 true false 231 51 18
+Circle -16777216 true false 53 53 10
+Circle -16777216 true false 236 53 10
+
+circle123b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 51 51 18
+Circle -1 true false 231 51 18
+Circle -16777216 true false 53 53 10
+Circle -16777216 true false 236 53 10
+
+circle123bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 51 51 18
+Circle -1 true false 231 51 18
+Circle -16777216 true false 53 53 10
+Circle -16777216 true false 236 53 10
+
+circle123c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 45 30
+Circle -7500403 true true 225 45 30
+Circle -1 true false 51 51 18
+Circle -1 true false 231 51 18
+Circle -16777216 true false 53 53 10
+Circle -16777216 true false 236 53 10
+
+circle131
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+
+circle131a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+
+circle131ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+circle131abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+circle131ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+
+circle131b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+circle131bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+circle131c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+
+circle132
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+Circle -1 true false 24 81 18
+Circle -1 true false 258 81 18
+Circle -16777216 true false 28 86 6
+Circle -16777216 true false 266 86 6
+
+circle132a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+Circle -1 true false 24 81 18
+Circle -1 true false 258 81 18
+Circle -16777216 true false 28 86 6
+Circle -16777216 true false 266 86 6
+
+circle132ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 24 81 18
+Circle -1 true false 258 81 18
+Circle -16777216 true false 28 86 6
+Circle -16777216 true false 266 86 6
+
+circle132abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 24 81 18
+Circle -1 true false 258 81 18
+Circle -16777216 true false 28 86 6
+Circle -16777216 true false 266 86 6
+
+circle132ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+Circle -1 true false 24 81 18
+Circle -1 true false 258 81 18
+Circle -16777216 true false 28 86 6
+Circle -16777216 true false 266 86 6
+
+circle132b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 24 81 18
+Circle -1 true false 258 81 18
+Circle -16777216 true false 28 86 6
+Circle -16777216 true false 266 86 6
+
+circle132bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 24 81 18
+Circle -1 true false 258 81 18
+Circle -16777216 true false 28 86 6
+Circle -16777216 true false 266 86 6
+
+circle132c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+Circle -1 true false 24 81 18
+Circle -1 true false 258 81 18
+Circle -16777216 true false 28 86 6
+Circle -16777216 true false 266 86 6
+
+circle133
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+Circle -1 true false 24 81 18
+Circle -1 true false 258 81 18
+Circle -16777216 true false 26 84 10
+Circle -16777216 true false 264 84 10
+
+circle133a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+Circle -1 true false 24 81 18
+Circle -1 true false 258 81 18
+Circle -16777216 true false 26 84 10
+Circle -16777216 true false 264 84 10
+
+circle133ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 24 81 18
+Circle -1 true false 258 81 18
+Circle -16777216 true false 26 84 10
+Circle -16777216 true false 264 84 10
+
+circle133abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 24 81 18
+Circle -1 true false 258 81 18
+Circle -16777216 true false 26 84 10
+Circle -16777216 true false 264 84 10
+
+circle133ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+Circle -1 true false 24 81 18
+Circle -1 true false 258 81 18
+Circle -16777216 true false 26 84 10
+Circle -16777216 true false 264 84 10
+
+circle133b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 24 81 18
+Circle -1 true false 258 81 18
+Circle -16777216 true false 26 84 10
+Circle -16777216 true false 264 84 10
+
+circle133bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 24 81 18
+Circle -1 true false 258 81 18
+Circle -16777216 true false 26 84 10
+Circle -16777216 true false 264 84 10
+
+circle133c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 18 75 30
+Circle -7500403 true true 252 75 30
+Circle -1 true false 24 81 18
+Circle -1 true false 258 81 18
+Circle -16777216 true false 26 84 10
+Circle -16777216 true false 264 84 10
+
+circle211
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+
+circle211a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+
+circle211ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+circle211abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+circle211ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+
+circle211b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+circle211bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+circle211c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+
+circle212
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+Circle -1 true false 93 11 24
+Circle -16777216 true false 100 15 8
+Circle -1 true false 182 11 24
+Circle -16777216 true false 189 15 8
+
+circle212a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+Circle -1 true false 93 11 24
+Circle -16777216 true false 100 15 8
+Circle -1 true false 182 11 24
+Circle -16777216 true false 189 15 8
+
+circle212ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 93 11 24
+Circle -16777216 true false 100 15 8
+Circle -1 true false 182 11 24
+Circle -16777216 true false 189 15 8
+
+circle212abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 93 11 24
+Circle -16777216 true false 100 15 8
+Circle -1 true false 182 11 24
+Circle -16777216 true false 189 15 8
+
+circle212ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+Circle -1 true false 93 11 24
+Circle -16777216 true false 100 15 8
+Circle -1 true false 182 11 24
+Circle -16777216 true false 189 15 8
+
+circle212b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 93 11 24
+Circle -16777216 true false 100 15 8
+Circle -1 true false 182 11 24
+Circle -16777216 true false 189 15 8
+
+circle212bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 93 11 24
+Circle -16777216 true false 100 15 8
+Circle -1 true false 182 11 24
+Circle -16777216 true false 189 15 8
+
+circle212c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+Circle -1 true false 93 11 24
+Circle -16777216 true false 100 15 8
+Circle -1 true false 182 11 24
+Circle -16777216 true false 189 15 8
+
+circle213
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+Circle -1 true false 93 11 24
+Circle -16777216 true false 98 13 13
+Circle -1 true false 182 11 24
+Circle -16777216 true false 187 13 13
+
+circle213a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+Circle -1 true false 93 11 24
+Circle -16777216 true false 98 13 13
+Circle -1 true false 182 11 24
+Circle -16777216 true false 187 13 13
+
+circle213ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 93 11 24
+Circle -16777216 true false 98 13 13
+Circle -1 true false 182 11 24
+Circle -16777216 true false 187 13 13
+
+circle213abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 93 11 24
+Circle -16777216 true false 98 13 13
+Circle -1 true false 182 11 24
+Circle -16777216 true false 187 13 13
+
+circle213ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+Circle -1 true false 93 11 24
+Circle -16777216 true false 98 13 13
+Circle -1 true false 182 11 24
+Circle -16777216 true false 187 13 13
+
+circle213b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 93 11 24
+Circle -16777216 true false 98 13 13
+Circle -1 true false 182 11 24
+Circle -16777216 true false 187 13 13
+
+circle213bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 93 11 24
+Circle -16777216 true false 98 13 13
+Circle -1 true false 182 11 24
+Circle -16777216 true false 187 13 13
+
+circle213c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 84 2 42
+Circle -7500403 true true 173 2 42
+Circle -1 true false 93 11 24
+Circle -16777216 true false 98 13 13
+Circle -1 true false 182 11 24
+Circle -16777216 true false 187 13 13
+
+circle221
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+
+circle221a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+
+circle221ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+circle221abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+circle221ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+
+circle221b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+circle221bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+circle221c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+
+circle222
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+Circle -1 true false 48 33 24
+Circle -16777216 true false 53 38 8
+Circle -1 true false 228 32 24
+Circle -16777216 true false 238 37 8
+
+circle222a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+Circle -1 true false 48 33 24
+Circle -16777216 true false 53 38 8
+Circle -1 true false 228 32 24
+Circle -16777216 true false 238 37 8
+
+circle222ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 48 33 24
+Circle -16777216 true false 53 38 8
+Circle -1 true false 228 32 24
+Circle -16777216 true false 238 37 8
+
+circle222abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 48 33 24
+Circle -16777216 true false 53 38 8
+Circle -1 true false 228 32 24
+Circle -16777216 true false 238 37 8
+
+circle222ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+Circle -1 true false 48 33 24
+Circle -16777216 true false 53 38 8
+Circle -1 true false 228 32 24
+Circle -16777216 true false 238 37 8
+
+circle222b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 48 33 24
+Circle -16777216 true false 53 38 8
+Circle -1 true false 228 32 24
+Circle -16777216 true false 238 37 8
+
+circle222bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 48 33 24
+Circle -16777216 true false 53 38 8
+Circle -1 true false 228 32 24
+Circle -16777216 true false 238 37 8
+
+circle222c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+Circle -1 true false 48 33 24
+Circle -16777216 true false 53 38 8
+Circle -1 true false 228 32 24
+Circle -16777216 true false 238 37 8
+
+circle223
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+Circle -1 true false 48 33 24
+Circle -16777216 true false 51 36 13
+Circle -1 true false 228 32 24
+Circle -16777216 true false 236 35 13
+
+circle223a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+Circle -1 true false 48 33 24
+Circle -16777216 true false 51 36 13
+Circle -1 true false 228 32 24
+Circle -16777216 true false 236 35 13
+
+circle223ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 48 33 24
+Circle -16777216 true false 51 36 13
+Circle -1 true false 228 32 24
+Circle -16777216 true false 236 35 13
+
+circle223abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 48 33 24
+Circle -16777216 true false 51 36 13
+Circle -1 true false 228 32 24
+Circle -16777216 true false 236 35 13
+
+circle223ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+Circle -1 true false 48 33 24
+Circle -16777216 true false 51 36 13
+Circle -1 true false 228 32 24
+Circle -16777216 true false 236 35 13
+
+circle223b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 48 33 24
+Circle -16777216 true false 51 36 13
+Circle -1 true false 228 32 24
+Circle -16777216 true false 236 35 13
+
+circle223bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 48 33 24
+Circle -16777216 true false 51 36 13
+Circle -1 true false 228 32 24
+Circle -16777216 true false 236 35 13
+
+circle223c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 24 42
+Circle -7500403 true true 219 24 42
+Circle -1 true false 48 33 24
+Circle -16777216 true false 51 36 13
+Circle -1 true false 228 32 24
+Circle -16777216 true false 236 35 13
+
+circle231
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+
+circle231a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+
+circle231ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+circle231abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+circle231ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+
+circle231b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+circle231bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+circle231c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+
+circle232
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+Circle -1 true false 18 78 24
+Circle -16777216 true false 22 84 8
+Circle -1 true false 258 77 24
+Circle -16777216 true false 269 83 8
+
+circle232a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+Circle -1 true false 18 78 24
+Circle -16777216 true false 22 84 8
+Circle -1 true false 258 77 24
+Circle -16777216 true false 269 83 8
+
+circle232ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 18 78 24
+Circle -16777216 true false 22 84 8
+Circle -1 true false 258 77 24
+Circle -16777216 true false 269 83 8
+
+circle232abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 18 78 24
+Circle -16777216 true false 22 84 8
+Circle -1 true false 258 77 24
+Circle -16777216 true false 269 83 8
+
+circle232ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+Circle -1 true false 18 78 24
+Circle -16777216 true false 22 84 8
+Circle -1 true false 258 77 24
+Circle -16777216 true false 269 83 8
+
+circle232b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 18 78 24
+Circle -16777216 true false 22 84 8
+Circle -1 true false 258 77 24
+Circle -16777216 true false 269 83 8
+
+circle232bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 18 78 24
+Circle -16777216 true false 22 84 8
+Circle -1 true false 258 77 24
+Circle -16777216 true false 269 83 8
+
+circle232c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+Circle -1 true false 18 78 24
+Circle -16777216 true false 22 84 8
+Circle -1 true false 258 77 24
+Circle -16777216 true false 269 83 8
+
+circle233
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+Circle -1 true false 18 78 24
+Circle -16777216 true false 20 82 13
+Circle -1 true false 258 77 24
+Circle -16777216 true false 267 81 13
+
+circle233a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+Circle -1 true false 18 78 24
+Circle -16777216 true false 20 82 13
+Circle -1 true false 258 77 24
+Circle -16777216 true false 267 81 13
+
+circle233ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 18 78 24
+Circle -16777216 true false 20 82 13
+Circle -1 true false 258 77 24
+Circle -16777216 true false 267 81 13
+
+circle233abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 18 78 24
+Circle -16777216 true false 20 82 13
+Circle -1 true false 258 77 24
+Circle -16777216 true false 267 81 13
+
+circle233ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+Circle -1 true false 18 78 24
+Circle -16777216 true false 20 82 13
+Circle -1 true false 258 77 24
+Circle -16777216 true false 267 81 13
+
+circle233b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 18 78 24
+Circle -16777216 true false 20 82 13
+Circle -1 true false 258 77 24
+Circle -16777216 true false 267 81 13
+
+circle233bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 18 78 24
+Circle -16777216 true false 20 82 13
+Circle -1 true false 258 77 24
+Circle -16777216 true false 267 81 13
+
+circle233c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 9 69 42
+Circle -7500403 true true 249 68 42
+Circle -1 true false 18 78 24
+Circle -16777216 true false 20 82 13
+Circle -1 true false 258 77 24
+Circle -16777216 true false 267 81 13
+
+circle311
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 75 -22 60
+Circle -7500403 true true 165 -22 60
+
+circle311a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 75 -22 60
+Circle -7500403 true true 165 -22 60
+
+circle311ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 75 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 165 -22 60
+
+circle311abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 165 -22 60
+
+circle311ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 -22 60
+Circle -7500403 true true 165 -22 60
+
+circle311b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 75 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 165 -22 60
+
+circle311bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 165 -22 60
+
+circle311c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 -22 60
+Circle -7500403 true true 165 -22 60
+
+circle312
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 75 -22 60
+Circle -1 true false 83 -14 44
+Circle -16777216 true false 99 -4 12
+Circle -7500403 true true 165 -22 60
+Circle -1 true false 173 -14 44
+Circle -16777216 true false 189 -4 12
+
+circle312a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 75 -22 60
+Circle -1 true false 83 -14 44
+Circle -16777216 true false 99 -4 12
+Circle -7500403 true true 165 -22 60
+Circle -1 true false 173 -14 44
+Circle -16777216 true false 189 -4 12
+
+circle312ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 75 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 83 -14 44
+Circle -16777216 true false 99 -4 12
+Circle -7500403 true true 165 -22 60
+Circle -1 true false 173 -14 44
+Circle -16777216 true false 189 -4 12
+
+circle312abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 83 -14 44
+Circle -16777216 true false 99 -4 12
+Circle -7500403 true true 165 -22 60
+Circle -1 true false 173 -14 44
+Circle -16777216 true false 189 -4 12
+
+circle312ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 -22 60
+Circle -1 true false 83 -14 44
+Circle -16777216 true false 99 -4 12
+Circle -7500403 true true 165 -22 60
+Circle -1 true false 173 -14 44
+Circle -16777216 true false 189 -4 12
+
+circle312b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 75 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 83 -14 44
+Circle -16777216 true false 99 -4 12
+Circle -7500403 true true 165 -22 60
+Circle -1 true false 173 -14 44
+Circle -16777216 true false 189 -4 12
+
+circle312bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 83 -14 44
+Circle -16777216 true false 99 -4 12
+Circle -7500403 true true 165 -22 60
+Circle -1 true false 173 -14 44
+Circle -16777216 true false 189 -4 12
+
+circle312c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 -22 60
+Circle -1 true false 83 -14 44
+Circle -16777216 true false 99 -4 12
+Circle -7500403 true true 165 -22 60
+Circle -1 true false 173 -14 44
+Circle -16777216 true false 189 -4 12
+
+circle313
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 75 -22 60
+Circle -1 true false 83 -14 44
+Circle -16777216 true false 92 -11 26
+Circle -7500403 true true 165 -22 60
+Circle -1 true false 173 -14 44
+Circle -16777216 true false 182 -11 26
+
+circle313a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 75 -22 60
+Circle -1 true false 83 -14 44
+Circle -16777216 true false 92 -11 26
+Circle -7500403 true true 165 -22 60
+Circle -1 true false 173 -14 44
+Circle -16777216 true false 182 -11 26
+
+circle313ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 75 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 83 -14 44
+Circle -16777216 true false 92 -11 26
+Circle -7500403 true true 165 -22 60
+Circle -1 true false 173 -14 44
+Circle -16777216 true false 182 -11 26
+
+circle313abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 83 -14 44
+Circle -16777216 true false 92 -11 26
+Circle -7500403 true true 165 -22 60
+Circle -1 true false 173 -14 44
+Circle -16777216 true false 182 -11 26
+
+circle313ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 83 -14 44
+Circle -16777216 true false 92 -11 26
+Circle -7500403 true true 165 -22 60
+Circle -1 true false 173 -14 44
+Circle -16777216 true false 182 -11 26
+
+circle313b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 75 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 83 -14 44
+Circle -16777216 true false 92 -11 26
+Circle -7500403 true true 165 -22 60
+Circle -1 true false 173 -14 44
+Circle -16777216 true false 182 -11 26
+
+circle313bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 83 -14 44
+Circle -16777216 true false 92 -11 26
+Circle -7500403 true true 165 -22 60
+Circle -1 true false 173 -14 44
+Circle -16777216 true false 182 -11 26
+
+circle313c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 -22 60
+Circle -1 true false 83 -14 44
+Circle -16777216 true false 92 -11 26
+Circle -7500403 true true 165 -22 60
+Circle -1 true false 173 -14 44
+Circle -16777216 true false 182 -11 26
+
+circle321
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 30 8 60
+Circle -7500403 true true 210 8 60
+
+circle321a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 30 8 60
+Circle -7500403 true true 210 8 60
+
+circle321ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 30 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 210 8 60
+
+circle321abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 210 8 60
+
+circle321ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 8 60
+Circle -7500403 true true 210 8 60
+
+circle321b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 30 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 210 8 60
+
+circle321bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 210 8 60
+
+circle321c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 8 60
+Circle -7500403 true true 210 8 60
+
+circle322
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 30 8 60
+Circle -1 true false 38 16 44
+Circle -16777216 true false 49 28 12
+Circle -7500403 true true 210 8 60
+Circle -1 true false 218 16 44
+Circle -16777216 true false 239 27 12
+
+circle322a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 30 8 60
+Circle -1 true false 38 16 44
+Circle -16777216 true false 49 28 12
+Circle -7500403 true true 210 8 60
+Circle -1 true false 218 16 44
+Circle -16777216 true false 239 27 12
+
+circle322ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 30 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 38 16 44
+Circle -16777216 true false 49 28 12
+Circle -7500403 true true 210 8 60
+Circle -1 true false 218 16 44
+Circle -16777216 true false 239 27 12
+
+circle322abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 38 16 44
+Circle -16777216 true false 49 28 12
+Circle -7500403 true true 210 8 60
+Circle -1 true false 218 16 44
+Circle -16777216 true false 239 27 12
+
+circle322ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 8 60
+Circle -1 true false 38 16 44
+Circle -16777216 true false 49 28 12
+Circle -7500403 true true 210 8 60
+Circle -1 true false 218 16 44
+Circle -16777216 true false 239 27 12
+
+circle322b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 30 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 38 16 44
+Circle -16777216 true false 49 28 12
+Circle -7500403 true true 210 8 60
+Circle -1 true false 218 16 44
+Circle -16777216 true false 239 27 12
+
+circle322bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 38 16 44
+Circle -16777216 true false 49 28 12
+Circle -7500403 true true 210 8 60
+Circle -1 true false 218 16 44
+Circle -16777216 true false 239 27 12
+
+circle322c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 8 60
+Circle -1 true false 38 16 44
+Circle -16777216 true false 49 28 12
+Circle -7500403 true true 210 8 60
+Circle -1 true false 218 16 44
+Circle -16777216 true false 239 27 12
+
+circle323
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 30 8 60
+Circle -1 true false 38 16 44
+Circle -16777216 true false 42 21 26
+Circle -7500403 true true 210 8 60
+Circle -1 true false 218 16 44
+Circle -16777216 true false 232 20 26
+
+circle323a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 30 8 60
+Circle -1 true false 38 16 44
+Circle -16777216 true false 42 21 26
+Circle -7500403 true true 210 8 60
+Circle -1 true false 218 16 44
+Circle -16777216 true false 232 20 26
+
+circle323ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 30 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 38 16 44
+Circle -16777216 true false 42 21 26
+Circle -7500403 true true 210 8 60
+Circle -1 true false 218 16 44
+Circle -16777216 true false 232 20 26
+
+circle323abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 38 16 44
+Circle -16777216 true false 42 21 26
+Circle -7500403 true true 210 8 60
+Circle -1 true false 218 16 44
+Circle -16777216 true false 232 20 26
+
+circle323ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 8 60
+Circle -1 true false 38 16 44
+Circle -16777216 true false 42 21 26
+Circle -7500403 true true 210 8 60
+Circle -1 true false 218 16 44
+Circle -16777216 true false 232 20 26
+
+circle323b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 30 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 38 16 44
+Circle -16777216 true false 42 21 26
+Circle -7500403 true true 210 8 60
+Circle -1 true false 218 16 44
+Circle -16777216 true false 232 20 26
+
+circle323bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 38 16 44
+Circle -16777216 true false 42 21 26
+Circle -7500403 true true 210 8 60
+Circle -1 true false 218 16 44
+Circle -16777216 true false 232 20 26
+
+circle323c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 8 60
+Circle -1 true false 38 16 44
+Circle -16777216 true false 42 21 26
+Circle -7500403 true true 210 8 60
+Circle -1 true false 218 16 44
+Circle -16777216 true false 232 20 26
+
+circle331
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 0 38 60
+Circle -7500403 true true 240 38 60
+
+circle331a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 0 38 60
+Circle -7500403 true true 240 38 60
+
+circle331ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 0 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 240 38 60
+
+circle331abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 0 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 240 38 60
+
+circle331ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 0 38 60
+Circle -7500403 true true 240 38 60
+
+circle331b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 0 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 240 38 60
+
+circle331bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 0 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 240 38 60
+
+circle331c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 0 38 60
+Circle -7500403 true true 240 38 60
+
+circle332
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 0 38 60
+Circle -1 true false 8 46 44
+Circle -16777216 true false 18 60 12
+Circle -7500403 true true 240 38 60
+Circle -1 true false 248 46 44
+Circle -16777216 true false 270 60 12
+
+circle332a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 0 38 60
+Circle -1 true false 8 46 44
+Circle -16777216 true false 18 60 12
+Circle -7500403 true true 240 38 60
+Circle -1 true false 248 46 44
+Circle -16777216 true false 270 60 12
+
+circle332ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 0 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 8 46 44
+Circle -16777216 true false 18 60 12
+Circle -7500403 true true 240 38 60
+Circle -1 true false 248 46 44
+Circle -16777216 true false 270 60 12
+
+circle332abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 0 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 8 46 44
+Circle -16777216 true false 18 60 12
+Circle -7500403 true true 240 38 60
+Circle -1 true false 248 46 44
+Circle -16777216 true false 270 60 12
+
+circle332ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 0 38 60
+Circle -1 true false 8 46 44
+Circle -16777216 true false 18 60 12
+Circle -7500403 true true 240 38 60
+Circle -1 true false 248 46 44
+Circle -16777216 true false 270 60 12
+
+circle332b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 0 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 8 46 44
+Circle -16777216 true false 18 60 12
+Circle -7500403 true true 240 38 60
+Circle -1 true false 248 46 44
+Circle -16777216 true false 270 60 12
+
+circle332bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 0 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 8 46 44
+Circle -16777216 true false 18 60 12
+Circle -7500403 true true 240 38 60
+Circle -1 true false 248 46 44
+Circle -16777216 true false 270 60 12
+
+circle332c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 0 38 60
+Circle -1 true false 8 46 44
+Circle -16777216 true false 18 60 12
+Circle -7500403 true true 240 38 60
+Circle -1 true false 248 46 44
+Circle -16777216 true false 270 60 12
+
+circle333
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 0 38 60
+Circle -1 true false 8 46 44
+Circle -16777216 true false 11 53 26
+Circle -7500403 true true 240 38 60
+Circle -1 true false 248 46 44
+Circle -16777216 true false 263 53 26
+
+circle333a
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 0 38 60
+Circle -1 true false 8 46 44
+Circle -16777216 true false 11 53 26
+Circle -7500403 true true 240 38 60
+Circle -1 true false 248 46 44
+Circle -16777216 true false 263 53 26
+
+circle333ab
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 0 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 8 46 44
+Circle -16777216 true false 11 53 26
+Circle -7500403 true true 240 38 60
+Circle -1 true false 248 46 44
+Circle -16777216 true false 263 53 26
+
+circle333abc
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 0 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 8 46 44
+Circle -16777216 true false 11 53 26
+Circle -7500403 true true 240 38 60
+Circle -1 true false 248 46 44
+Circle -16777216 true false 263 53 26
+
+circle333ac
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 0 38 60
+Circle -1 true false 8 46 44
+Circle -16777216 true false 11 53 26
+Circle -7500403 true true 240 38 60
+Circle -1 true false 248 46 44
+Circle -16777216 true false 263 53 26
+
+circle333b
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 0 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 8 46 44
+Circle -16777216 true false 11 53 26
+Circle -7500403 true true 240 38 60
+Circle -1 true false 248 46 44
+Circle -16777216 true false 263 53 26
+
+circle333bc
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 0 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 8 46 44
+Circle -16777216 true false 11 53 26
+Circle -7500403 true true 240 38 60
+Circle -1 true false 248 46 44
+Circle -16777216 true false 263 53 26
+
+circle333c
+true
+0
+Circle -7500403 true true 45 45 210
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 0 38 60
+Circle -1 true false 8 46 44
+Circle -16777216 true false 11 53 26
+Circle -7500403 true true 240 38 60
+Circle -1 true false 248 46 44
+Circle -16777216 true false 263 53 26
+
+test
+true
+0
+Circle -7500403 true true 45 45 210
+Circle -7500403 true true 75 -22 60
+Circle -1 true false 83 -14 44
+Circle -16777216 true false 99 -4 12
+Circle -7500403 true true 165 -22 60
+Circle -1 true false 173 -14 44
+Circle -16777216 true false 189 -4 12
+Polygon -7500403 true true 150 60 135 30 150 45 165 30
+Polygon -7500403 true true 120 240 120 270 135 255 150 270 165 255 180 270 180 240
+Polygon -7500403 true true 75 105 45 75 30 60 45 60 45 45 60 75 75 90
+Polygon -7500403 true true 225 240 240 240 255 240 270 225 240 225 225 210 210 225
+Polygon -7500403 true true 225 105 255 75 270 60 255 60 255 45 240 75 225 90
+Polygon -7500403 true true 75 240 60 240 45 240 30 225 60 225 75 210 90 225
+Rectangle -13791810 true false 75 105 225 135
+Rectangle -1184463 true false 105 150 195 180
+Rectangle -2674135 true false 135 195 165 225
+
+triangle111
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+
+triangle111a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+
+triangle111ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle111abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle111ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+
+triangle111b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle111bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle111c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+
+triangle112
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+Circle -1 true false 81 21 18
+Circle -1 true false 201 21 18
+Circle -16777216 true false 86 24 6
+Circle -16777216 true false 207 24 6
+
+triangle112a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+Circle -1 true false 81 21 18
+Circle -1 true false 201 21 18
+Circle -16777216 true false 86 24 6
+Circle -16777216 true false 207 24 6
+
+triangle112ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 81 21 18
+Circle -1 true false 201 21 18
+Circle -16777216 true false 86 24 6
+Circle -16777216 true false 207 24 6
+
+triangle112abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 81 21 18
+Circle -1 true false 201 21 18
+Circle -16777216 true false 86 24 6
+Circle -16777216 true false 207 24 6
+
+triangle112ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+Circle -1 true false 81 21 18
+Circle -1 true false 201 21 18
+Circle -16777216 true false 86 24 6
+Circle -16777216 true false 207 24 6
+
+triangle112b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 81 21 18
+Circle -1 true false 201 21 18
+Circle -16777216 true false 86 24 6
+Circle -16777216 true false 207 24 6
+
+triangle112bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 81 21 18
+Circle -1 true false 201 21 18
+Circle -16777216 true false 86 24 6
+Circle -16777216 true false 207 24 6
+
+triangle112c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+Circle -1 true false 81 21 18
+Circle -1 true false 201 21 18
+Circle -16777216 true false 86 24 6
+Circle -16777216 true false 207 24 6
+
+triangle113
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+Circle -1 true false 81 21 18
+Circle -1 true false 201 21 18
+Circle -16777216 true false 84 22 10
+Circle -16777216 true false 205 22 10
+
+triangle113a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+Circle -1 true false 81 21 18
+Circle -1 true false 201 21 18
+Circle -16777216 true false 84 22 10
+Circle -16777216 true false 205 22 10
+
+triangle113ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 81 21 18
+Circle -1 true false 201 21 18
+Circle -16777216 true false 84 22 10
+Circle -16777216 true false 205 22 10
+
+triangle113abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 81 21 18
+Circle -1 true false 201 21 18
+Circle -16777216 true false 84 22 10
+Circle -16777216 true false 205 22 10
+
+triangle113ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+Circle -1 true false 81 21 18
+Circle -1 true false 201 21 18
+Circle -16777216 true false 84 22 10
+Circle -16777216 true false 205 22 10
+
+triangle113b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 81 21 18
+Circle -1 true false 201 21 18
+Circle -16777216 true false 84 22 10
+Circle -16777216 true false 205 22 10
+
+triangle113bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 81 21 18
+Circle -1 true false 201 21 18
+Circle -16777216 true false 84 22 10
+Circle -16777216 true false 205 22 10
+
+triangle113c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 75 15 30
+Circle -7500403 true true 195 15 30
+Circle -1 true false 81 21 18
+Circle -1 true false 201 21 18
+Circle -16777216 true false 84 22 10
+Circle -16777216 true false 205 22 10
+
+triangle121
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+
+triangle121a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+
+triangle121ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle121abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle121ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+
+triangle121b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle121bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle121c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+
+triangle122
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+Circle -1 true false 66 51 18
+Circle -1 true false 216 51 18
+Circle -16777216 true false 70 55 6
+Circle -16777216 true false 223 55 6
+
+triangle122a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+Circle -1 true false 66 51 18
+Circle -1 true false 216 51 18
+Circle -16777216 true false 70 55 6
+Circle -16777216 true false 223 55 6
+
+triangle122ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 66 51 18
+Circle -1 true false 216 51 18
+Circle -16777216 true false 70 55 6
+Circle -16777216 true false 223 55 6
+
+triangle122abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 66 51 18
+Circle -1 true false 216 51 18
+Circle -16777216 true false 70 55 6
+Circle -16777216 true false 223 55 6
+
+triangle122ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+Circle -1 true false 66 51 18
+Circle -1 true false 216 51 18
+Circle -16777216 true false 70 55 6
+Circle -16777216 true false 223 55 6
+
+triangle122b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 66 51 18
+Circle -1 true false 216 51 18
+Circle -16777216 true false 70 55 6
+Circle -16777216 true false 223 55 6
+
+triangle122bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 66 51 18
+Circle -1 true false 216 51 18
+Circle -16777216 true false 70 55 6
+Circle -16777216 true false 223 55 6
+
+triangle122c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+Circle -1 true false 66 51 18
+Circle -1 true false 216 51 18
+Circle -16777216 true false 70 55 6
+Circle -16777216 true false 223 55 6
+
+triangle123
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+Circle -1 true false 66 51 18
+Circle -1 true false 216 51 18
+Circle -16777216 true false 68 53 10
+Circle -16777216 true false 221 53 10
+
+triangle123a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+Circle -1 true false 66 51 18
+Circle -1 true false 216 51 18
+Circle -16777216 true false 68 53 10
+Circle -16777216 true false 221 53 10
+
+triangle123ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 66 51 18
+Circle -1 true false 216 51 18
+Circle -16777216 true false 68 53 10
+Circle -16777216 true false 221 53 10
+
+triangle123abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 66 51 18
+Circle -1 true false 216 51 18
+Circle -16777216 true false 68 53 10
+Circle -16777216 true false 221 53 10
+
+triangle123ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+Circle -1 true false 66 51 18
+Circle -1 true false 216 51 18
+Circle -16777216 true false 68 53 10
+Circle -16777216 true false 221 53 10
+
+triangle123b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 66 51 18
+Circle -1 true false 216 51 18
+Circle -16777216 true false 68 53 10
+Circle -16777216 true false 221 53 10
+
+triangle123bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 66 51 18
+Circle -1 true false 216 51 18
+Circle -16777216 true false 68 53 10
+Circle -16777216 true false 221 53 10
+
+triangle123c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 45 30
+Circle -7500403 true true 210 45 30
+Circle -1 true false 66 51 18
+Circle -1 true false 216 51 18
+Circle -16777216 true false 68 53 10
+Circle -16777216 true false 221 53 10
+
+triangle131
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+
+triangle131a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+
+triangle131ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle131abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle131ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+
+triangle131b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle131bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle131c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+
+triangle132
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+Circle -1 true false 54 81 18
+Circle -1 true false 228 81 18
+Circle -16777216 true false 58 86 6
+Circle -16777216 true false 236 86 6
+
+triangle132a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+Circle -1 true false 54 81 18
+Circle -1 true false 228 81 18
+Circle -16777216 true false 58 86 6
+Circle -16777216 true false 236 86 6
+
+triangle132ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 54 81 18
+Circle -1 true false 228 81 18
+Circle -16777216 true false 58 86 6
+Circle -16777216 true false 236 86 6
+
+triangle132abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 54 81 18
+Circle -1 true false 228 81 18
+Circle -16777216 true false 58 86 6
+Circle -16777216 true false 236 86 6
+
+triangle132ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+Circle -1 true false 54 81 18
+Circle -1 true false 228 81 18
+Circle -16777216 true false 58 86 6
+Circle -16777216 true false 236 86 6
+
+triangle132b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 54 81 18
+Circle -1 true false 228 81 18
+Circle -16777216 true false 58 86 6
+Circle -16777216 true false 236 86 6
+
+triangle132bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 54 81 18
+Circle -1 true false 228 81 18
+Circle -16777216 true false 58 86 6
+Circle -16777216 true false 236 86 6
+
+triangle132c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+Circle -1 true false 54 81 18
+Circle -1 true false 228 81 18
+Circle -16777216 true false 58 86 6
+Circle -16777216 true false 236 86 6
+
+triangle133
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240 150 0
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+Circle -1 true false 54 81 18
+Circle -1 true false 228 81 18
+Circle -16777216 true false 56 84 10
+Circle -16777216 true false 234 84 10
+
+triangle133a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240 150 0
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+Circle -1 true false 54 81 18
+Circle -1 true false 228 81 18
+Circle -16777216 true false 56 84 10
+Circle -16777216 true false 234 84 10
+Circle -1184463 true false 120 60 60
+
+triangle133ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240 150 0
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+Circle -1 true false 54 81 18
+Circle -1 true false 228 81 18
+Circle -16777216 true false 56 84 10
+Circle -16777216 true false 234 84 10
+Circle -1184463 true false 120 60 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle133abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240 150 0
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+Circle -1 true false 54 81 18
+Circle -1 true false 228 81 18
+Circle -16777216 true false 56 84 10
+Circle -16777216 true false 234 84 10
+Circle -1184463 true false 120 60 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Polygon -13791810 true false 75 195 225 195 180 225 120 225 75 195
+
+triangle133ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240 150 0
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+Circle -1 true false 54 81 18
+Circle -1 true false 228 81 18
+Circle -16777216 true false 56 84 10
+Circle -16777216 true false 234 84 10
+Circle -1184463 true false 120 60 60
+Polygon -13791810 true false 75 195 225 195 180 225 120 225 75 195
+
+triangle133b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240 150 0
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+Circle -1 true false 54 81 18
+Circle -1 true false 228 81 18
+Circle -16777216 true false 56 84 10
+Circle -16777216 true false 234 84 10
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle133bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240 150 0
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+Circle -1 true false 54 81 18
+Circle -1 true false 228 81 18
+Circle -16777216 true false 56 84 10
+Circle -16777216 true false 234 84 10
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Polygon -13791810 true false 75 195 225 195 180 225 120 225 75 195
+
+triangle133c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240 150 0
+Circle -7500403 true true 48 75 30
+Circle -7500403 true true 222 75 30
+Circle -1 true false 54 81 18
+Circle -1 true false 228 81 18
+Circle -16777216 true false 56 84 10
+Circle -16777216 true false 234 84 10
+Polygon -13791810 true false 75 195 225 195 180 225 120 225 75 195
+
+triangle211
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+
+triangle211a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+
+triangle211ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle211abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle211ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+
+triangle211b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle211bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle211c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+
+triangle212
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+Circle -1 true false 78 11 24
+Circle -16777216 true false 85 15 8
+Circle -1 true false 197 11 24
+Circle -16777216 true false 205 15 8
+
+triangle212a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+Circle -1 true false 78 11 24
+Circle -16777216 true false 85 15 8
+Circle -1 true false 197 11 24
+Circle -16777216 true false 205 15 8
+
+triangle212ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 78 11 24
+Circle -16777216 true false 85 15 8
+Circle -1 true false 197 11 24
+Circle -16777216 true false 205 15 8
+
+triangle212abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 78 11 24
+Circle -16777216 true false 85 15 8
+Circle -1 true false 197 11 24
+Circle -16777216 true false 205 15 8
+
+triangle212ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+Circle -1 true false 78 11 24
+Circle -16777216 true false 85 15 8
+Circle -1 true false 197 11 24
+Circle -16777216 true false 205 15 8
+
+triangle212b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 78 11 24
+Circle -16777216 true false 85 15 8
+Circle -1 true false 197 11 24
+Circle -16777216 true false 205 15 8
+
+triangle212bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 78 11 24
+Circle -16777216 true false 85 15 8
+Circle -1 true false 197 11 24
+Circle -16777216 true false 205 15 8
+
+triangle212c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+Circle -1 true false 78 11 24
+Circle -16777216 true false 85 15 8
+Circle -1 true false 197 11 24
+Circle -16777216 true false 205 15 8
+
+triangle213
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+Circle -1 true false 78 11 24
+Circle -16777216 true false 83 13 13
+Circle -1 true false 197 11 24
+Circle -16777216 true false 202 13 13
+
+triangle213a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+Circle -1 true false 78 11 24
+Circle -16777216 true false 83 13 13
+Circle -1 true false 197 11 24
+Circle -16777216 true false 202 13 13
+
+triangle213ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 78 11 24
+Circle -16777216 true false 83 13 13
+Circle -1 true false 197 11 24
+Circle -16777216 true false 202 13 13
+
+triangle213abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 78 11 24
+Circle -16777216 true false 83 13 13
+Circle -1 true false 197 11 24
+Circle -16777216 true false 202 13 13
+
+triangle213ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+Circle -1 true false 78 11 24
+Circle -16777216 true false 83 13 13
+Circle -1 true false 197 11 24
+Circle -16777216 true false 202 13 13
+
+triangle213b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 78 11 24
+Circle -16777216 true false 83 13 13
+Circle -1 true false 197 11 24
+Circle -16777216 true false 202 13 13
+
+triangle213bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 78 11 24
+Circle -16777216 true false 83 13 13
+Circle -1 true false 197 11 24
+Circle -16777216 true false 202 13 13
+
+triangle213c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 69 2 42
+Circle -7500403 true true 188 2 42
+Circle -1 true false 78 11 24
+Circle -16777216 true false 83 13 13
+Circle -1 true false 197 11 24
+Circle -16777216 true false 202 13 13
+
+triangle221
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+
+triangle221a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+
+triangle221ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle221abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle221ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+
+triangle221b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle221bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle221c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+
+triangle222
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+Circle -1 true false 63 33 24
+Circle -16777216 true false 68 38 8
+Circle -1 true false 213 32 24
+Circle -16777216 true false 223 37 8
+
+triangle222a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+Circle -1 true false 63 33 24
+Circle -16777216 true false 68 38 8
+Circle -1 true false 213 32 24
+Circle -16777216 true false 223 37 8
+
+triangle222ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 63 33 24
+Circle -16777216 true false 68 38 8
+Circle -1 true false 213 32 24
+Circle -16777216 true false 223 37 8
+
+triangle222abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 63 33 24
+Circle -16777216 true false 68 38 8
+Circle -1 true false 213 32 24
+Circle -16777216 true false 223 37 8
+
+triangle222ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+Circle -1 true false 63 33 24
+Circle -16777216 true false 68 38 8
+Circle -1 true false 213 32 24
+Circle -16777216 true false 223 37 8
+
+triangle222b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 63 33 24
+Circle -16777216 true false 68 38 8
+Circle -1 true false 213 32 24
+Circle -16777216 true false 223 37 8
+
+triangle222bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 63 33 24
+Circle -16777216 true false 68 38 8
+Circle -1 true false 213 32 24
+Circle -16777216 true false 223 37 8
+
+triangle222c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+Circle -1 true false 63 33 24
+Circle -16777216 true false 68 38 8
+Circle -1 true false 213 32 24
+Circle -16777216 true false 223 37 8
+
+triangle223
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+Circle -1 true false 63 33 24
+Circle -16777216 true false 66 36 13
+Circle -1 true false 213 32 24
+Circle -16777216 true false 221 35 13
+
+triangle223a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+Circle -1 true false 63 33 24
+Circle -16777216 true false 66 36 13
+Circle -1 true false 213 32 24
+Circle -16777216 true false 221 35 13
+
+triangle223ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 63 33 24
+Circle -16777216 true false 66 36 13
+Circle -1 true false 213 32 24
+Circle -16777216 true false 221 35 13
+
+triangle223abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 63 33 24
+Circle -16777216 true false 66 36 13
+Circle -1 true false 213 32 24
+Circle -16777216 true false 221 35 13
+
+triangle223ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+Circle -1 true false 63 33 24
+Circle -16777216 true false 66 36 13
+Circle -1 true false 213 32 24
+Circle -16777216 true false 221 35 13
+
+triangle223b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 63 33 24
+Circle -16777216 true false 66 36 13
+Circle -1 true false 213 32 24
+Circle -16777216 true false 221 35 13
+
+triangle223bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 63 33 24
+Circle -16777216 true false 66 36 13
+Circle -1 true false 213 32 24
+Circle -16777216 true false 221 35 13
+
+triangle223c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 54 24 42
+Circle -7500403 true true 204 24 42
+Circle -1 true false 63 33 24
+Circle -16777216 true false 66 36 13
+Circle -1 true false 213 32 24
+Circle -16777216 true false 221 35 13
+
+triangle231
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+
+triangle231a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+
+triangle231ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle231abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle231ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+
+triangle231b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle231bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+
+triangle231c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+
+triangle232
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+Circle -1 true false 48 78 24
+Circle -16777216 true false 52 84 8
+Circle -1 true false 228 77 24
+Circle -16777216 true false 239 83 8
+
+triangle232a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+Circle -1 true false 48 78 24
+Circle -16777216 true false 52 84 8
+Circle -1 true false 228 77 24
+Circle -16777216 true false 239 83 8
+
+triangle232ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 48 78 24
+Circle -16777216 true false 52 84 8
+Circle -1 true false 228 77 24
+Circle -16777216 true false 239 83 8
+
+triangle232abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 48 78 24
+Circle -16777216 true false 52 84 8
+Circle -1 true false 228 77 24
+Circle -16777216 true false 239 83 8
+
+triangle232ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+Circle -1 true false 48 78 24
+Circle -16777216 true false 52 84 8
+Circle -1 true false 228 77 24
+Circle -16777216 true false 239 83 8
+
+triangle232b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 48 78 24
+Circle -16777216 true false 52 84 8
+Circle -1 true false 228 77 24
+Circle -16777216 true false 239 83 8
+
+triangle232bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 48 78 24
+Circle -16777216 true false 52 84 8
+Circle -1 true false 228 77 24
+Circle -16777216 true false 239 83 8
+
+triangle232c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+Circle -1 true false 48 78 24
+Circle -16777216 true false 52 84 8
+Circle -1 true false 228 77 24
+Circle -16777216 true false 239 83 8
+
+triangle233
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+Circle -1 true false 48 78 24
+Circle -16777216 true false 50 82 13
+Circle -1 true false 228 77 24
+Circle -16777216 true false 237 81 13
+
+triangle233a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+Circle -1 true false 48 78 24
+Circle -16777216 true false 50 82 13
+Circle -1 true false 228 77 24
+Circle -16777216 true false 237 81 13
+
+triangle233ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 48 78 24
+Circle -16777216 true false 50 82 13
+Circle -1 true false 228 77 24
+Circle -16777216 true false 237 81 13
+
+triangle233abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 48 78 24
+Circle -16777216 true false 50 82 13
+Circle -1 true false 228 77 24
+Circle -16777216 true false 237 81 13
+
+triangle233ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+Circle -1 true false 48 78 24
+Circle -16777216 true false 50 82 13
+Circle -1 true false 228 77 24
+Circle -16777216 true false 237 81 13
+
+triangle233b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 48 78 24
+Circle -16777216 true false 50 82 13
+Circle -1 true false 228 77 24
+Circle -16777216 true false 237 81 13
+
+triangle233bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 48 78 24
+Circle -16777216 true false 50 82 13
+Circle -1 true false 228 77 24
+Circle -16777216 true false 237 81 13
+
+triangle233c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 39 69 42
+Circle -7500403 true true 219 68 42
+Circle -1 true false 48 78 24
+Circle -16777216 true false 50 82 13
+Circle -1 true false 228 77 24
+Circle -16777216 true false 237 81 13
+
+triangle311
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 60 -22 60
+Circle -7500403 true true 180 -22 60
+
+triangle311a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 60 -22 60
+Circle -7500403 true true 180 -22 60
+
+triangle311ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 60 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 180 -22 60
+
+triangle311abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 180 -22 60
+
+triangle311ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 -22 60
+Circle -7500403 true true 180 -22 60
+
+triangle311b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 60 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 180 -22 60
+
+triangle311bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 180 -22 60
+
+triangle311c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 -22 60
+Circle -7500403 true true 180 -22 60
+
+triangle312
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 60 -22 60
+Circle -1 true false 68 -14 44
+Circle -16777216 true false 84 -4 12
+Circle -7500403 true true 180 -22 60
+Circle -1 true false 188 -14 44
+Circle -16777216 true false 204 -4 12
+
+triangle312a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 60 -22 60
+Circle -1 true false 68 -14 44
+Circle -16777216 true false 84 -4 12
+Circle -7500403 true true 180 -22 60
+Circle -1 true false 188 -14 44
+Circle -16777216 true false 204 -4 12
+
+triangle312ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 60 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 68 -14 44
+Circle -16777216 true false 84 -4 12
+Circle -7500403 true true 180 -22 60
+Circle -1 true false 188 -14 44
+Circle -16777216 true false 204 -4 12
+
+triangle312abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 68 -14 44
+Circle -16777216 true false 84 -4 12
+Circle -7500403 true true 180 -22 60
+Circle -1 true false 188 -14 44
+Circle -16777216 true false 204 -4 12
+
+triangle312ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 -22 60
+Circle -1 true false 68 -14 44
+Circle -16777216 true false 84 -4 12
+Circle -7500403 true true 180 -22 60
+Circle -1 true false 188 -14 44
+Circle -16777216 true false 204 -4 12
+
+triangle312b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 60 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 68 -14 44
+Circle -16777216 true false 84 -4 12
+Circle -7500403 true true 180 -22 60
+Circle -1 true false 188 -14 44
+Circle -16777216 true false 204 -4 12
+
+triangle312bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 68 -14 44
+Circle -16777216 true false 84 -4 12
+Circle -7500403 true true 180 -22 60
+Circle -1 true false 188 -14 44
+Circle -16777216 true false 204 -4 12
+
+triangle312c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 -22 60
+Circle -1 true false 68 -14 44
+Circle -16777216 true false 84 -4 12
+Circle -7500403 true true 180 -22 60
+Circle -1 true false 188 -14 44
+Circle -16777216 true false 204 -4 12
+
+triangle313
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 60 -22 60
+Circle -1 true false 68 -14 44
+Circle -16777216 true false 77 -11 26
+Circle -7500403 true true 180 -22 60
+Circle -1 true false 188 -14 44
+Circle -16777216 true false 197 -11 26
+
+triangle313a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 60 -22 60
+Circle -1 true false 68 -14 44
+Circle -16777216 true false 77 -11 26
+Circle -7500403 true true 180 -22 60
+Circle -1 true false 188 -14 44
+Circle -16777216 true false 197 -11 26
+
+triangle313ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 60 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 68 -14 44
+Circle -16777216 true false 77 -11 26
+Circle -7500403 true true 180 -22 60
+Circle -1 true false 188 -14 44
+Circle -16777216 true false 197 -11 26
+
+triangle313abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 68 -14 44
+Circle -16777216 true false 77 -11 26
+Circle -7500403 true true 180 -22 60
+Circle -1 true false 188 -14 44
+Circle -16777216 true false 197 -11 26
+
+triangle313ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 -22 60
+Circle -1 true false 68 -14 44
+Circle -16777216 true false 77 -11 26
+Circle -7500403 true true 180 -22 60
+Circle -1 true false 188 -14 44
+Circle -16777216 true false 197 -11 26
+
+triangle313b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 60 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 68 -14 44
+Circle -16777216 true false 77 -11 26
+Circle -7500403 true true 180 -22 60
+Circle -1 true false 188 -14 44
+Circle -16777216 true false 197 -11 26
+
+triangle313bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 -22 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 68 -14 44
+Circle -16777216 true false 77 -11 26
+Circle -7500403 true true 180 -22 60
+Circle -1 true false 188 -14 44
+Circle -16777216 true false 197 -11 26
+
+triangle313c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 60 -22 60
+Circle -1 true false 68 -14 44
+Circle -16777216 true false 77 -11 26
+Circle -7500403 true true 180 -22 60
+Circle -1 true false 188 -14 44
+Circle -16777216 true false 197 -11 26
+
+triangle321
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240 150 0
+Circle -7500403 true true 45 8 60
+Circle -7500403 true true 195 8 60
+
+triangle321a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240 150 0
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 45 8 60
+Circle -7500403 true true 195 8 60
+
+triangle321ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240 150 0
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 45 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 195 8 60
+
+triangle321abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240 150 0
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 195 8 60
+
+triangle321ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240 150 0
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 8 60
+Circle -7500403 true true 195 8 60
+
+triangle321b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240 150 0
+Circle -7500403 true true 45 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 195 8 60
+
+triangle321bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240 150 0
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 195 8 60
+
+triangle321c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240 150 0
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 8 60
+Circle -7500403 true true 195 8 60
+
+triangle322
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 45 8 60
+Circle -1 true false 53 16 44
+Circle -16777216 true false 64 28 12
+Circle -7500403 true true 195 8 60
+Circle -1 true false 203 16 44
+Circle -16777216 true false 224 27 12
+
+triangle322a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 45 8 60
+Circle -1 true false 53 16 44
+Circle -16777216 true false 64 28 12
+Circle -7500403 true true 195 8 60
+Circle -1 true false 203 16 44
+Circle -16777216 true false 224 27 12
+
+triangle322ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 45 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 53 16 44
+Circle -16777216 true false 64 28 12
+Circle -7500403 true true 195 8 60
+Circle -1 true false 203 16 44
+Circle -16777216 true false 224 27 12
+
+triangle322abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 53 16 44
+Circle -16777216 true false 64 28 12
+Circle -7500403 true true 195 8 60
+Circle -1 true false 203 16 44
+Circle -16777216 true false 224 27 12
+
+triangle322ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 8 60
+Circle -1 true false 53 16 44
+Circle -16777216 true false 64 28 12
+Circle -7500403 true true 195 8 60
+Circle -1 true false 203 16 44
+Circle -16777216 true false 224 27 12
+
+triangle322b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 45 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 53 16 44
+Circle -16777216 true false 64 28 12
+Circle -7500403 true true 195 8 60
+Circle -1 true false 203 16 44
+Circle -16777216 true false 224 27 12
+
+triangle322bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 53 16 44
+Circle -16777216 true false 64 28 12
+Circle -7500403 true true 195 8 60
+Circle -1 true false 203 16 44
+Circle -16777216 true false 224 27 12
+
+triangle322c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 8 60
+Circle -1 true false 53 16 44
+Circle -16777216 true false 64 28 12
+Circle -7500403 true true 195 8 60
+Circle -1 true false 203 16 44
+Circle -16777216 true false 224 27 12
+
+triangle323
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 45 8 60
+Circle -1 true false 53 16 44
+Circle -16777216 true false 57 21 26
+Circle -7500403 true true 195 8 60
+Circle -1 true false 203 16 44
+Circle -16777216 true false 217 20 26
+
+triangle323a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 45 8 60
+Circle -1 true false 53 16 44
+Circle -16777216 true false 57 21 26
+Circle -7500403 true true 195 8 60
+Circle -1 true false 203 16 44
+Circle -16777216 true false 217 20 26
+
+triangle323ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 45 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 53 16 44
+Circle -16777216 true false 57 21 26
+Circle -7500403 true true 195 8 60
+Circle -1 true false 203 16 44
+Circle -16777216 true false 217 20 26
+
+triangle323abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 53 16 44
+Circle -16777216 true false 57 21 26
+Circle -7500403 true true 195 8 60
+Circle -1 true false 203 16 44
+Circle -16777216 true false 217 20 26
+
+triangle323ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 8 60
+Circle -1 true false 53 16 44
+Circle -16777216 true false 57 21 26
+Circle -7500403 true true 195 8 60
+Circle -1 true false 203 16 44
+Circle -16777216 true false 217 20 26
+
+triangle323b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 45 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 53 16 44
+Circle -16777216 true false 57 21 26
+Circle -7500403 true true 195 8 60
+Circle -1 true false 203 16 44
+Circle -16777216 true false 217 20 26
+
+triangle323bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 8 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 53 16 44
+Circle -16777216 true false 57 21 26
+Circle -7500403 true true 195 8 60
+Circle -1 true false 203 16 44
+Circle -16777216 true false 217 20 26
+
+triangle323c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 45 8 60
+Circle -1 true false 53 16 44
+Circle -16777216 true false 57 21 26
+Circle -7500403 true true 195 8 60
+Circle -1 true false 203 16 44
+Circle -16777216 true false 217 20 26
+
+triangle331
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 30 38 60
+Circle -7500403 true true 210 38 60
+
+triangle331a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 30 38 60
+Circle -7500403 true true 210 38 60
+
+triangle331ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 30 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 210 38 60
+
+triangle331abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 210 38 60
+
+triangle331ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 38 60
+Circle -7500403 true true 210 38 60
+
+triangle331b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 30 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 210 38 60
+
+triangle331bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -7500403 true true 210 38 60
+
+triangle331c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 38 60
+Circle -7500403 true true 210 38 60
+
+triangle332
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 30 38 60
+Circle -1 true false 38 46 44
+Circle -16777216 true false 48 60 12
+Circle -7500403 true true 210 38 60
+Circle -1 true false 218 46 44
+Circle -16777216 true false 240 60 12
+
+triangle332a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 30 38 60
+Circle -1 true false 38 46 44
+Circle -16777216 true false 48 60 12
+Circle -7500403 true true 210 38 60
+Circle -1 true false 218 46 44
+Circle -16777216 true false 240 60 12
+
+triangle332ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 30 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 38 46 44
+Circle -16777216 true false 48 60 12
+Circle -7500403 true true 210 38 60
+Circle -1 true false 218 46 44
+Circle -16777216 true false 240 60 12
+
+triangle332abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 38 46 44
+Circle -16777216 true false 48 60 12
+Circle -7500403 true true 210 38 60
+Circle -1 true false 218 46 44
+Circle -16777216 true false 240 60 12
+
+triangle332ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 38 60
+Circle -1 true false 38 46 44
+Circle -16777216 true false 48 60 12
+Circle -7500403 true true 210 38 60
+Circle -1 true false 218 46 44
+Circle -16777216 true false 240 60 12
+
+triangle332b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 30 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 38 46 44
+Circle -16777216 true false 48 60 12
+Circle -7500403 true true 210 38 60
+Circle -1 true false 218 46 44
+Circle -16777216 true false 240 60 12
+
+triangle332bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 38 46 44
+Circle -16777216 true false 48 60 12
+Circle -7500403 true true 210 38 60
+Circle -1 true false 218 46 44
+Circle -16777216 true false 240 60 12
+
+triangle332c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 38 60
+Circle -1 true false 38 46 44
+Circle -16777216 true false 48 60 12
+Circle -7500403 true true 210 38 60
+Circle -1 true false 218 46 44
+Circle -16777216 true false 240 60 12
+
+triangle333
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 30 38 60
+Circle -1 true false 38 46 44
+Circle -16777216 true false 41 53 26
+Circle -7500403 true true 210 38 60
+Circle -1 true false 218 46 44
+Circle -16777216 true false 233 53 26
+
+triangle333a
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 30 38 60
+Circle -1 true false 38 46 44
+Circle -16777216 true false 41 53 26
+Circle -7500403 true true 210 38 60
+Circle -1 true false 218 46 44
+Circle -16777216 true false 233 53 26
+
+triangle333ab
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Circle -7500403 true true 30 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 38 46 44
+Circle -16777216 true false 41 53 26
+Circle -7500403 true true 210 38 60
+Circle -1 true false 218 46 44
+Circle -16777216 true false 233 53 26
+
+triangle333abc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 38 46 44
+Circle -16777216 true false 41 53 26
+Circle -7500403 true true 210 38 60
+Circle -1 true false 218 46 44
+Circle -16777216 true false 233 53 26
+
+triangle333ac
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -1184463 true false 120 60 58
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 38 60
+Circle -1 true false 38 46 44
+Circle -16777216 true false 41 53 26
+Circle -7500403 true true 210 38 60
+Circle -1 true false 218 46 44
+Circle -16777216 true false 233 53 26
+
+triangle333b
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Circle -7500403 true true 30 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 38 46 44
+Circle -16777216 true false 41 53 26
+Circle -7500403 true true 210 38 60
+Circle -1 true false 218 46 44
+Circle -16777216 true false 233 53 26
+
+triangle333bc
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 38 60
+Polygon -2674135 true false 90 135 60 180 240 180 210 135
+Circle -1 true false 38 46 44
+Circle -16777216 true false 41 53 26
+Circle -7500403 true true 210 38 60
+Circle -1 true false 218 46 44
+Circle -16777216 true false 233 53 26
+
+triangle333c
+true
+0
+Polygon -7500403 true true 150 0 0 240 300 240
+Polygon -13791810 true false 150 195 225 195 180 225 150 225 120 225 75 195
+Circle -7500403 true true 30 38 60
+Circle -1 true false 38 46 44
+Circle -16777216 true false 41 53 26
+Circle -7500403 true true 210 38 60
+Circle -1 true false 218 46 44
+Circle -16777216 true false 233 53 26
 @#$#@#$#@
 NetLogo 6.1.1
 @#$#@#$#@
@@ -2240,7 +6937,7 @@ ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
       <value value="&quot;baseline&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="genotype-reader">
-      <value value="&quot;status&quot;"/>
+      <value value="&quot;sta7us&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="deterioration-rate">
       <value value="-0.01"/>
@@ -2258,7 +6955,7 @@ ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
       <value value="10"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="plant-seasonality">
-      <value value="50"/>
+      <value value="0.5"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="plant-quality">
       <value value="0.5"/>
@@ -2292,93 +6989,6 @@ ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
     </enumeratedValueSet>
   </experiment>
   <experiment name="WORLD-TEST" repetitions="1" runMetricsEveryStep="true">
-    <setup>clear-all
-
-; give simulation-id specific configuration: sDOB17 means simulation of WORLD-D, Baboons seed population, run B (instead of A), plant-minimum-neighbors = 1 and plant-maximum-neighbors = 7
-ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
-  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "A" plant-minimum-neighbors plant-maximum-neighbors )
-][
-  let min-holder plant-minimum-neighbors
-  let max-holder plant-maximum-neighbors
-  set plant-minimum-neighbors max-holder - 1
-  set plant-maximum-neighbors min-holder
-  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "B" plant-minimum-neighbors plant-maximum-neighbors )
-]
-
-setup simulation-id</setup>
-    <go>go</go>
-    <timeLimit steps="100"/>
-    <exitCondition>not any? anima1s</exitCondition>
-    <enumeratedValueSet variable="path-to-experiment">
-      <value value="&quot;../results/&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="model-structure">
-      <value value="&quot;baseline&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="genotype-reader">
-      <value value="&quot;sta7us&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="deterioration-rate">
-      <value value="-0.001"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="output-results?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="selection-on?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-annual-cycle">
-      <value value="1000"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-daily-cycle">
-      <value value="10"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-seasonality">
-      <value value="50"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-quality">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-minimum-neighbors">
-      <value value="0"/>
-      <value value="1"/>
-      <value value="2"/>
-      <value value="3"/>
-      <value value="4"/>
-      <value value="5"/>
-      <value value="6"/>
-      <value value="7"/>
-      <value value="8"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-maximum-neighbors">
-      <value value="1"/>
-      <value value="2"/>
-      <value value="3"/>
-      <value value="4"/>
-      <value value="5"/>
-      <value value="6"/>
-      <value value="7"/>
-      <value value="8"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="population">
-      <value value="&quot;p-20-04-01-02&quot;"/>
-    </enumeratedValueSet>
-  </experiment>
-  <experiment name="WORLD-TEST1" repetitions="1" runMetricsEveryStep="true">
-    <setup>clear-all
-
-; give simulation-id specific configuration: sDOB17 means simulation of WORLD-D, Baboons seed population, run B (instead of A), plant-minimum-neighbors = 1 and plant-maximum-neighbors = 7
-ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
-  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "A" plant-minimum-neighbors plant-maximum-neighbors )
-][
-  let min-holder plant-minimum-neighbors
-  let max-holder plant-maximum-neighbors
-  set plant-minimum-neighbors max-holder - 1
-  set plant-maximum-neighbors min-holder
-  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "B" plant-minimum-neighbors plant-maximum-neighbors )
-]
-
-setup simulation-id</setup>
     <go>go</go>
     <final>crt 1 [ record-simulation die ]</final>
     <timeLimit steps="100"/>
@@ -2408,19 +7018,210 @@ setup simulation-id</setup>
       <value value="10"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="plant-seasonality">
-      <value value="50"/>
+      <value value="0.5"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="plant-quality">
       <value value="0.5"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="plant-minimum-neighbors">
-      <value value="2"/>
+      <value value="4"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="plant-maximum-neighbors">
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="population">
+      <value value="&quot;test&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype">
+      <value value="&quot;test&quot;"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="WORLD-X" repetitions="1" runMetricsEveryStep="true">
+    <setup>; give simulation-id specific configuration: sDOB17 means simulation of WORLD-D, Baboons seed population, run B (instead of A), plant-minimum-neighbors = 1 and plant-maximum-neighbors = 7
+ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
+  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "A" plant-minimum-neighbors plant-maximum-neighbors )
+][
+  let min-holder plant-minimum-neighbors
+  let max-holder plant-maximum-neighbors
+  set plant-minimum-neighbors max-holder - 1
+  set plant-maximum-neighbors min-holder
+  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "B" plant-minimum-neighbors plant-maximum-neighbors )
+]
+
+setup simulation-id</setup>
+    <go>go</go>
+    <final>crt 1 [ record-simulation die ]</final>
+    <timeLimit steps="101"/>
+    <exitCondition>not any? anima1s or median [generation.number] of anima1s &gt; 100</exitCondition>
+    <enumeratedValueSet variable="path-to-experiment">
+      <value value="&quot;../results/&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="model-structure">
+      <value value="&quot;baseline&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-reader">
+      <value value="&quot;sta7us&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="deterioration-rate">
+      <value value="-0.01"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="output-results?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="selection-on?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-annual-cycle">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-daily-cycle">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-seasonality">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-quality">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
       <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-maximum-neighbors">
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="population">
+      <value value="&quot;adam-and-eve&quot;"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="WORLD-TEST-2" repetitions="1" sequentialRunOrder="false" runMetricsEveryStep="false">
+    <setup>setup
+
+; give simulation-id specific configuration: sDOB17 means simulation of WORLD-D, Baboons seed population, run B (instead of A), plant-minimum-neighbors = 1 and plant-maximum-neighbors = 7
+ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
+  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "A" plant-minimum-neighbors plant-maximum-neighbors )
+][
+  let min-holder plant-minimum-neighbors
+  let max-holder plant-maximum-neighbors
+  set plant-minimum-neighbors max-holder - 1
+  set plant-maximum-neighbors min-holder
+  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "B" plant-minimum-neighbors plant-maximum-neighbors )
+]</setup>
+    <go>go</go>
+    <final>print behaviorspace-run-number
+save-verification-to "verification.csv"
+crt 1 [ record-simulation die ]</final>
+    <timeLimit steps="15"/>
+    <exitCondition>not any? anima1s</exitCondition>
+    <enumeratedValueSet variable="path-to-experiment">
+      <value value="&quot;../results/&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="model-structure">
+      <value value="&quot;baseline&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-reader">
+      <value value="&quot;sta7us&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="deterioration-rate">
+      <value value="-0.01"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="output-results?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="selection-on?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-annual-cycle">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-daily-cycle">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-seasonality">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-quality">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-maximum-neighbors">
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="population">
+      <value value="&quot;adam-and-eve&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype">
+      <value value="&quot;adam-and-eve&quot;"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="SIMULTATION-EXPERIMENT" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <exitCondition>not any? anima1s or median [generation-number] of anima1s &gt;= 10</exitCondition>
+    <enumeratedValueSet variable="path-to-experiment">
+      <value value="&quot;../results/&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="model-structure">
+      <value value="&quot;baseline&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-reader">
+      <value value="&quot;sta7us&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="deterioration-rate">
+      <value value="-0.01"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="output-results?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="selection-on?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-annual-cycle">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-daily-cycle">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-seasonality">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-quality">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-maximum-neighbors">
+      <value value="8"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="population">
       <value value="&quot;Chimpanzees&quot;"/>
+      <value value="&quot;Geladas&quot;"/>
+      <value value="&quot;Olives&quot;"/>
+      <value value="&quot;Hamadryas&quot;"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>
