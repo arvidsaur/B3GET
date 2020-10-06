@@ -1,0 +1,349 @@
+;-----------------------------------------------------------------------------
+;                                                                dP          
+;                                                                88          
+; .d8888b. .d8888b. 88d8b.d8b. 88d8b.d8b. .d8888b. 88d888b. .d888b88 .d8888b. 
+; 88'  `"" 88'  `88 88'`88'`88 88'`88'`88 88'  `88 88'  `88 88'  `88 Y8ooooo. 
+; 88.  ... 88.  .88 88  88  88 88  88  88 88.  .88 88    88 88.  .88       88 
+; `88888P' `88888P' dP  dP  dP dP  dP  dP `88888P8 dP    dP `88888P8 `88888P' 
+;                                                                            
+; © 2020 K N Crouse
+;-----------------------------------------------------------------------------                                                                          
+
+to command
+  
+  clear-output
+  
+  (ifelse 
+    ( useful-commands = "help-me" ) [ output-help-me ]
+    ( useful-commands = "meta-report" ) [ output-meta-report ]
+    ( useful-commands = "verify-code" ) [ output-verification command-input ]
+    ( useful-commands = "check-runtime" ) [ output-runtime ]  
+    ( useful-commands = "simulation-report" ) [ output-simulation-report ]
+    ( useful-commands = "genotype-reader" ) [ output-genotype-reader command-input ]
+    ( useful-commands = "model-structure" ) [ output-model-structure command-input ]
+    ( useful-commands = "import-world" ) [ output-import-world command-input ]
+    ( useful-commands = "reset-plants" ) [ output-reset-plants ]
+    ( useful-commands = "clear-population" ) [ output-clear-pop ]
+    ( useful-commands = "view-genotype" ) [ output-genotype ]
+    ( useful-commands = "view-decisions" ) [ output-decisions ]
+    ( useful-commands = "view-actions") [ output-actions ]
+    ( useful-commands = "add-allele" ) [ output-add-allele ]
+    ( useful-commands = "delete-allele" ) [ output-delete-allele command-input ]
+
+    [])
+
+end
+
+to output-help-me
+  
+  output-header " HELP ME: a user guide for commands"
+  output-print " Select a command option from the useful-commands dropdown menu and"
+  output-print " click ▷ to activate the command. A description of each command is listed "
+  output-print " below. Commands that are denoted below by [ ] require an input to be written"
+  output-print " in command-input. By default, command-input contains an example allele"
+  output-print " for the add-allele and delete-allele commands."
+  output-print ""
+  output-print " > SIMULATION"
+  output-print ""
+  output-print "  meta-report : prints a summary of user activities"
+  output-print "  verify-code : prints a summary of verification code checks"
+  output-print "  check-runtime : prints a summary of simulation operations"    
+  output-print "  simulation-report : prints a summary of current simulation"
+  output-print "  genotype-reader : set the genotype file format of simulation"
+  output-print "  model-structure : set the model structure for the simulation"
+  output-print ""
+  output-print " > WORLD"
+  output-print ""
+  output-print "  setup-plants : replenishes the world with plants"
+  output-print "  import-world [ file ] : import world file from experiment folder"
+  output-print ""
+  output-print " > ORGANISMS"
+  output-print ""
+  output-print "  clear-population: removes all organisms from the world"
+  output-print "  view-genotype [ meta.id ] : prints the genotype of an organism"
+  output-print "  view-decisions [ meta.id ] : shows the current decisions of an organism"
+  output-print "  view-actions [ meta.id ] : shows the actions taken by an organism"
+  output-print "  add-allele [ code ] : add mutation to population"
+  output-print "  delete-allele [ code ] : delete allele from everywhere in the population"
+  output-print ""
+  
+end
+
+to output-header [ header-title ]
+  clear-output
+  output-print " ---------------------------------------------------------------------------"
+  output-print ( word " " header-title )
+  output-print " ---------------------------------------------------------------------------"
+  update-metafile "commands" header-title 
+end
+
+;-----------------------------------------------------------------------------       
+; META REPORT
+;-----------------------------------------------------------------------------       
+
+to output-meta-report
+  output-header (word "META REPORT :  "  date-and-time )
+  
+  let metafile but-first csv:from-file "../data/metafile.csv"
+  let how-many-rows length metafile
+  let last-40-rows ifelse-value ( how-many-rows > 40 ) [ sublist metafile ( how-many-rows - 41 ) ( how-many-rows - 1 ) ] [ metafile ]
+  
+  let i 0  
+  foreach last-40-rows [ x -> 
+    if ( i < 40 ) [ output-print (word " " item 0 x "  " item 9 x  ) ]
+    set i i + 1 ]
+  
+end
+
+;-----------------------------------------------------------------------------       
+; VERIFY CODE
+;-----------------------------------------------------------------------------     
+
+to output-verification [ input ]
+
+  if (useful-commands = "verify-code" and not is-boolean? read-from-string command-input ) [
+    output-header " CODE VERIFICATION :  ALL  "
+    output-all-verification
+    set observation-notes (word "Printout code verification. " observation-notes ) ]
+  
+  if (useful-commands = "verify-code" and read-from-string command-input = true ) [
+    output-header " CODE VERIFICATION : TRUE ONLY  "
+    output-true-verification
+    set observation-notes (word "Printout code verification, TRUE only. " observation-notes ) ]
+  
+  if (useful-commands = "verify-code" and read-from-string command-input = false ) [
+    output-header " CODE VERIFICATION : FALSE ONLY   "
+    output-false-verification
+    set observation-notes (word "Printout code verification, FALSE only. " observation-notes ) ]
+  
+end
+
+;-----------------------------------------------------------------------------       
+; CHECK RUNTIME
+;-----------------------------------------------------------------------------     
+
+to output-runtime
+    output-header "CHECK RUNTIME :   "
+    profiler:reset
+    profiler:start
+    repeat how-many-ticks? [ go ]
+    output-print profiler:report 
+    profiler:stop
+    set observation-notes (word "Printout runtime check." observation-notes )  
+end
+
+;-----------------------------------------------------------------------------       
+; SIMULATION REPORT
+;-----------------------------------------------------------------------------     
+
+to output-simulation-report
+  output-header ( word " SIMULATION REPORT : " )
+  output-print ( word "  simulation-id:  " simulation-id )
+  output-print ( word "  model-version:  " model-version )
+  output-print ( word "  model-structure:  " model-structure )
+  output-print ( word "  genotype-reader:  " genotype-reader )
+  output-print ( word "  deterioration-rate:  " deterioration-rate )
+  output-print ( word "  maximum-visual-range:  " maximum-visual-range )
+  output-print ( word "  base-litter-size:  " base-litter-size )
+end
+  
+;-----------------------------------------------------------------------------       
+; GENOTYPE READER
+;-----------------------------------------------------------------------------     
+
+to output-genotype-reader [ input ]
+  output-header ( word " GENOTYPE READER : " )
+
+  let genotype-list [ "sta7us" "g8tes" ] ; g8tes not working
+  ifelse ( member? input genotype-list ) [
+    ifelse ( genotype-reader = input ) [
+      set command-input one-of remove input genotype-list
+      output-print ( word " The genotype reader is currently set to \"" genotype-reader "\"." ) 
+      output-print ( word " Would you like to set the genotype reader to \"" command-input "\"?" ) 
+      output-print ( word " If so click ▷." ) 
+    ][
+      set genotype-reader input
+      output-print ( word " The genotype reader is currently set to \"" genotype-reader "\"." ) 
+    ]
+  ][
+    set command-input first genotype-list
+    output-print ( word " The genotype reader is currently set to \"" genotype-reader "\"." ) 
+    output-print ( word " Would you like to set the genotype reader to \"" command-input "\"?" ) 
+    output-print ( word " If so click ▷." )]
+  
+end
+
+;-----------------------------------------------------------------------------       
+; MODEL STRUCTURE
+;-----------------------------------------------------------------------------    
+
+to output-model-structure [ input ]
+  output-header ( word " MODEL STRUCTURE : " )
+  let structure-list [ "aspatial" "free-lunch" "ideal-form" "no-evolution" "no-plants" "reaper" "show-fertility" "stork" "uninvadable" ]
+  
+  if ( member? input structure-list ) [
+    ifelse ( not member? input model-structure ) 
+    [ set model-structure lput input model-structure ]
+    [ set model-structure remove input model-structure ]
+  ]
+  
+  output-print " "
+  output-print "  Current rules:"
+  output-print " "
+  foreach model-structure [ s -> output-print (word "  " s ) ]
+  output-print " "
+  output-print "  Unused rules:"
+  output-print " "
+  foreach structure-list [ l -> if ( not member? l model-structure ) [ output-print (word "  " l )]]
+  
+end
+
+;-----------------------------------------------------------------------------       
+; RESET PLANTS
+;-----------------------------------------------------------------------------   
+
+to output-reset-plants
+  output-header " RESET PLANTS :   "
+  setup-patches
+  output-print " Plants reset."
+  set observation-notes (word "Plants were reset. " observation-notes )
+end
+
+;-----------------------------------------------------------------------------       
+; IMPORT WORLD
+;-----------------------------------------------------------------------------    
+
+to output-import-world [ input ]
+  output-header ( word " IMPORT WORLD : " )
+  import-world ( word path-to-experiment input )
+  ;    let old-path-to-experiment path-to-experiment
+  ;    let old-command-input command-input
+  ;    import-world ( word old-path-to-experiment "/" old-command-input ".csv" )
+  ;    set path-to-experiment old-path-to-experiment
+  ;    ask anima1s [ set generation-number 0 ]
+  ;    reset-ticks
+  ;    set simulation-id 0
+  ;    update-simulation
+  ;    set useful-commands "import-world"
+  ;    set observation-notes (word "Import world " old-command-input "." observation-notes ) 
+end
+
+;-----------------------------------------------------------------------------       
+; CLEAR POPULATION
+;-----------------------------------------------------------------------------   
+
+to output-clear-pop
+  output-header " CLEAR POPULATION :   "
+  ask anima1s [ die ]
+  output-print " Population cleared."
+  set observation-notes (word "Cleared current population. " observation-notes )
+end
+
+;-----------------------------------------------------------------------------       
+; VIEW GENOTYPE
+;-----------------------------------------------------------------------------   
+
+to output-genotype
+  let anima1-to-inspect one-of anima1s with [ self = subject ]
+  output-header (word " GENOTYPE : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [meta.id ] of anima1-to-inspect ) ] )
+  ifelse ( anima1-to-inspect = nobody ) [
+    set observation-notes (word "Organism " read-from-string command-input " not found.")
+    output-print (word " Organism " read-from-string command-input " not found.")
+  ][
+    foreach [chromosome.I] of anima1-to-inspect [ a ->
+      output-print (word " "reduce [ [itm nxt] -> (word itm " " nxt ) ] a ) ]
+    output-print ""
+    foreach [chromosome.II] of anima1-to-inspect [ a ->
+      output-print (word " "reduce [ [itm nxt] -> (word itm " " nxt ) ] a ) ]
+    set observation-notes (word "View genotype of organism " command-input ". " observation-notes )
+  ]
+end
+
+;-----------------------------------------------------------------------------       
+; VIEW DECISIONS
+;-----------------------------------------------------------------------------   
+
+to output-decisions
+  let anima1-to-inspect one-of anima1s with [ self = subject ]
+  output-header (word " DECISIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [meta.id ] of anima1-to-inspect ) ] )
+
+  ifelse ( anima1-to-inspect != nobody ) [
+    ask anima1-to-inspect [
+      foreach decision.vectors [ decision ->
+        output-print ( word " " decision )
+      ]
+    ]
+    ;set observation-notes (word "View current decisions of organism " command-input ". " observation-notes )
+  ][
+    ;set observation-notes (word "Organism " read-from-string command-input " not found.")
+    output-print (word " Organism not found.")
+  ]
+end
+
+;-----------------------------------------------------------------------------       
+; VIEW ACTIONS
+;-----------------------------------------------------------------------------   
+
+to output-actions
+  let anima1-to-inspect one-of anima1s with [ self = subject ]
+  output-header (word " ACTIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all" ] [ (word "organism " [meta.id ] of anima1-to-inspect ) ] )
+  
+  ifelse ( anima1-to-inspect != nobody ) [
+    ask anima1-to-inspect [
+      foreach actions.completed [ action ->
+        output-print ( word " " action )
+      ]
+    ]
+    ;set observation-notes (word "View current decisions of organism " command-input ". " observation-notes )
+  ][
+    let action-length length animal-actions-completed
+    foreach sublist animal-actions-completed ( action-length - 40 ) action-length [ a -> 
+      output-print (word "  " a ) ]
+  ]
+end
+
+;-----------------------------------------------------------------------------       
+; ADD ALLELE
+;-----------------------------------------------------------------------------   
+
+to output-add-allele
+  output-header (word " ADD NEW ALLELE : " )
+
+  ifelse ( is-list? read-from-string command-input and length read-from-string command-input > 4 ) [
+    ask anima1s [
+      set chromosome.I lput run-result command-input chromosome.I
+      set chromosome.II lput run-result command-input chromosome.II
+    ]
+    set observation-notes (word "Add mutation " command-input " to the population. " observation-notes ) 
+    output-print (word " Allele " command-input " was successfully added." )
+  ][
+    set observation-notes (word "Adding allele " command-input " was unsuccessful." )
+    output-print (word " Adding allele " command-input " was unsuccessful." )
+    output-print " Alleles should have the following structure:"
+    output-print ""
+    output-print (word " [ true \"am\" \"cf\" \"mate-with\" 0.009 ]" )
+  ]
+end
+
+;-----------------------------------------------------------------------------       
+; DELETE ALLELE
+;-----------------------------------------------------------------------------   
+
+to output-delete-allele [ input ]
+  output-header (word " DELETE ALLELE : " )
+  
+  ifelse ( is-list? read-from-string input ) [
+    ask anima1s [
+      foreach chromosome.I [ i ->
+        if ( i = read-from-string command-input ) [
+          set chromosome.I remove-item ( position i chromosome.I ) chromosome.I ]]
+      foreach chromosome.II [ ii ->
+        if ( ii = read-from-string command-input ) [
+          set chromosome.II remove-item ( position ii chromosome.II ) chromosome.II ]]]
+    
+    set observation-notes (word "Delete allele " read-from-string  command-input " from the population. " observation-notes ) 
+    output-print (word " Allele " read-from-string command-input " successfully deleted." )]
+  
+  [ output-print (word " Command input is not a list." )]
+  
+end

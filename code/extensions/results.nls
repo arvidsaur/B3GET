@@ -1,0 +1,1475 @@
+;----------------------------------------------------------------------------------------------     
+;
+;                                      dP   dP            
+;                                      88   88            
+;  88d888b. .d8888b. .d8888b. dP    dP 88 d8888P .d8888b. 
+;  88'  `88 88ooood8 Y8ooooo. 88    88 88   88   Y8ooooo. 
+;  88       88.  ...       88 88.  .88 88   88         88 
+;  dP       `88888P' `88888P' `88888P' dP   dP   `88888P' 
+; 
+; © 2020 K N Crouse
+;----------------------------------------------------------------------------------------------                                                      
+; 
+; READ ME: This B3GET extension contains all functions related to output results. Data collection 
+; can be turned ON or OFF with the OUTPUT-RESULTS? switch on the user interface. When ON is selected, 
+; the OUTPUT-RESULTS function is applied once every timestep. Agent state variables are accessible 
+; during data collection to record complete agent histories. This extension uses the IMPORT-EXPORT
+; extension to record data at the simulation, group, or individual level and the VERIFICATION
+; extension to run code verification checks. Modify the USER SETTINGS below for specific data
+; collection preferences.
+;
+;----------------------------------------------------------------------------------------------
+
+to-report verification-file-path report "verification.csv" end
+to-report simulation-file-path report (word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] simulation-id ".csv" ) end
+to-report agent-records-file-path report (word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "agent_records.csv" ) end
+to-report simulation-scan-file-path report "scan_simulation.csv" end
+  
+to output-results
+  
+  ; USER SETTINGS:
+  ; -------------
+  let verification? false          ; TRUE = runs periodic code verification checks set by the VERIFICATION-RATE
+  let verification-rate 0.001 
+  let record-simulation? false     ; TRUE = records the simulation ;
+  let record-group? false          ; TRUE = records every group upon its creation ;
+  let record-agent? false          ; TRUE = records every agent upon its death
+  let scan-interval 100        
+  let simulation-scans? false      ; TRUE = scans the simulation every SCAN-INTERVAL and records population-level phenomena ;
+  let group-scans? false           ; TRUE = scans all groups every SCAN-INTERVAL and records group-level phenomena
+  let agent-scans? false           ; TRUE = scans all agents every SCAN-INTERVAL and records individual-level phenomena
+  let focal-follows? false         ; TRUE = small chance to record an individual's entire life
+  
+  ;----------------------------------------------------------------------------------------------     
+  ; VERIFICATION : collect data on periodic code verification checks
+  ;----------------------------------------------------------------------------------------------
+  
+  if ( verification? = true and random-float 1.0 < verification-rate ) [ save-verification-to "verification.csv" ]
+  
+  ;----------------------------------------------------------------------------------------------     
+  ; RECORD : collect summary data of a simulation, group, or individual
+  ;----------------------------------------------------------------------------------------------
+  
+  if ( record-simulation? and ticks = 1 ) [ crt 1 [ record-simulation die ]]
+  ;if ( record-group? ) [ ask groups with [ age = 0 ] [ record-group ]]
+  if ( record-agent? ) [ ask anima1s with [ ticks.at.death > 0 and ticks = ( ticks.at.death + 1 ) and generation.number > 0 ] [ record-agent ] ]
+  
+  ;----------------------------------------------------------------------------------------------     
+  ; SCAN : collect data on the current state of simulations, groups, or individuals
+  ;----------------------------------------------------------------------------------------------
+  
+  ;  if ( ticks > 0 and ceiling (ticks / scan-interval) = (ticks / scan-interval) ) 
+  ;  [ 
+  ;    if ( simulation-scans? ) [ scan-simulation ]
+  ;    ;if ( group-scans? and any? groups ) [ ask groups [ scan-group ]]
+  ;    ;if ( agent-scans? and any? anima1s ) [ ask anima1s with [ generation.number > 0 ] [ scan-agent ]]
+  ;  ]
+  
+  ;----------------------------------------------------------------------------------------------     
+  ; FOCAL FOLLOW
+  ;----------------------------------------------------------------------------------------------
+  
+  ; There is a small chance to starting "following" an agent if they were born this timestep 
+  if ( focal-follows? = true and subject = nobody ) [ if ( any? anima1s with [ age.in.ticks = 0 and generation.number > 0 ] ) [ follow one-of anima1s with [ age.in.ticks = 0 and generation.number > 0 ] ]]
+  
+  ; If currently "following" an agent, take records of this subject
+  if ( focal-follows? = true and subject != nobody ) [ ask subject [ scan-focal ] ]
+  
+end
+
+;--------------------------------------------------------------------------------------------------------------------
+; OPERATIONS
+;--------------------------------------------------------------------------------------------------------------------
+
+to record-world
+  export-world ( word path-to-experiment "/w" but-first simulation-id "-" ticks ".csv")
+  set observation-notes (word "Simulation " simulation-id " save to w" but-first simulation-id "-" ticks ". " observation-notes )
+  update-metafile "world" (word "w" but-first simulation-id "-" ticks )
+end
+
+to record-simulation
+  export-turtle-to 
+  ( word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "simulation_records.csv" )
+  ( list
+    
+    ; parameter settings
+    "date-and-time" 
+    "model-version" 
+    "model-structure"
+    "genotype-reader"
+    "simulation-id"
+    "behaviorspace-experiment-name"
+    "population" 
+    "genotype"
+    "plant-annual-cycle" 
+    "plant-daily-cycle" 
+    "plant-seasonality" 
+    "plant-quality"
+    "plant-minimum-neighbors" 
+    "plant-maximum-neighbors" 
+    "world-width" 
+    "world-height"
+    "ticks"
+    "deterioration-rate" 
+    "selection-rate"
+    "output-results?" 
+    "selection-on?"
+    "path-to-experiment"
+    "useful-commands"
+    "command-input"
+    
+    ; validation
+    "dynamic-verification-true-count"
+    "dynamic-verification-false-count"
+    "foraging-gains-vs-generation-slope" ; calculated-from-agent-records
+    "foraging-gains-vs-generation-R-squared" ; calculated-from-agent-records
+    "mother-initiated-birth-vs-generation-slope" ; calculated-from-agent-records
+    "mother-initiated-birth-vs-generation-R-squared" ; calculated-from-agent-records
+    "mother-initiated-weaning-vs-generation-slope" ; calculated-from-agent-records
+    "mother-initiated-weaning-vs-generation-R-squared" ; calculated-from-agent-records
+    "hamiltons-rule-followed-count" ; calculated-from-agent-records
+    "hamiltons-rule-not-followed-count" ; calculated-from-agent-records
+    "hamiltons-rule-followed-vs-generation-slope" ; calculated-from-agent-records
+    "hamiltons-rule-followed-vs-generation-R-squared" ; calculated-from-agent-records
+    
+    ; plants
+    "plant-abundance-maximum"
+    "plant-abundance-minimum"
+    "plant-abundance-mean"
+    "plant-abundance-variance"
+    "plant-patchiness-maximum"
+    "plant-patchiness-minimum"
+    "plant-patchiness-mean"
+    "plant-patchiness-variance"
+    ; lotka-volterra
+    
+    ; population - separate by sex?
+    "generations-transpired" ; calculated-from-agent-records
+    "total-simulated-individuals" ; calculated-from-agent-records
+    "total-simulated-males" ; calculated-from-agent-records
+    "total-simulated-females" ; calculated-from-agent-records
+    "total-simulated-adults" ; calculated-from-agent-records
+    "population-size-maximum"
+    "population-size-minimum"
+    "population-size-mean"
+    "population-size-variance"
+    
+    
+    
+    
+    "gestation-length-maximum" ; calculated-from-agent-records
+    "gestation-length-minimum" ; calculated-from-agent-records
+    "gestation-length-mean" ; calculated-from-agent-records
+    "gestation-length-variance" ; calculated-from-agent-records
+    "lactation-length-maximum" ; calculated-from-agent-records
+    "lactation-length-minimum" ; calculated-from-agent-records
+    "lactation-length-mean" ; calculated-from-agent-records
+    "lactation-length-variance" ; calculated-from-agent-records
+    "juvenile-length-maximum" ; calculated-from-agent-records
+    "juvenile-length-minimum" ; calculated-from-agent-records
+    "juvenile-length-mean" ; calculated-from-agent-records
+    "juvenile-length-variance" ; calculated-from-agent-records
+    "first-reproduction-maximum" ; calculated-from-agent-records
+    "first-reproduction-minimum" ; calculated-from-agent-records
+    "first-reproduction-mean" ; calculated-from-agent-records
+    "first-reproduction-variance" ; calculated-from-agent-records
+    "post-reproduction-count" ; calculated-from-agent-records
+    "post-reproduction-maximum" ; calculated-from-agent-records
+    "post-reproduction-minimum" ; calculated-from-agent-records
+    "post-reproduction-mean" ; calculated-from-agent-records
+    "post-reproduction-variance" ; calculated-from-agent-records
+    "longevity-adult-maximum" ; calculated-from-agent-records
+    "longevity-adult-minimum" ; calculated-from-agent-records
+    "longevity-adult-mean" ; calculated-from-agent-records
+    "longevity-adult-variance" ; calculated-from-agent-records
+    
+    ; adult attributes
+    "male-adult-body-size-maximum" ; calculated-from-agent-records
+    "male-adult-body-size-minimum" ; calculated-from-agent-records
+    "male-adult-body-size-mean" ; calculated-from-agent-records
+    "male-adult-body-size-variance"
+    "female-adult-body-size-maximum"
+    "female-adult-body-size-minimum"
+    "female-adult-body-size-mean"
+    "female-adult-body-size-variance"
+    "male-adult-conception-chance-maximum"
+    "male-adult-conception-chance-minimum"
+    "male-adult-conception-chance-mean"
+    "male-adult-conception-chance-variance"
+    "female-adult-conception-chance-maximum"
+    "female-adult-conception-chance-minimum"
+    "female-adult-conception-chance-mean"
+    "female-adult-conception-chance-variance"
+    "male-adult-day-perception-cone-maximum"
+    "male-adult-day-perception-cone-minimum"
+    "male-adult-day-perception-cone-mean"
+    "male-adult-day-perception-cone-variance"
+    "female-adult-day-perception-cone-maximum"
+    "female-adult-day-perception-cone-minimum"
+    "female-adult-day-perception-cone-mean"
+    "female-adult-day-perception-cone-variance"
+    "female-adult-litter-size-maximum"
+    "female-adult-litter-size-minimum"
+    "female-adult-litter-size-mean" ; calculated-from-agent-records
+    "female-adult-litter-size-variance" ; calculated-from-agent-records
+    
+    ; emegent phenomena
+    "natal-group-size-maximum" ; calculated-from-agent-records
+    "natal-group-size-minimum"
+    "natal-group-size-mean"
+    "natal-group-size-variance"
+    "mother-initiated-birth-count" ; calculated-from-agent-records
+    "offspring-initiated-birth-count"
+    "mother-initiated-weaning"
+    "offspring-initiated-weaning" ; calculated-from-agent-records
+    "male-total-matings-maximum"
+    "male-total-matings-minimum" ; calculated-from-agent-records
+    "male-total-matings-mean" ; calculated-from-agent-records
+    "male-total-matings-variance" ; calculated-from-agent-records
+    "male-unique-female-matings-maximum" ; calculated-from-agent-records
+    "male-unique-female-matings-minimum"
+    "male-unique-female-matings-mean"
+    "male-unique-female-matings-variance"
+    "female-total-matings-maximum"
+    "female-total-matings-minimum"
+    "female-total-matings-mean"
+    "female-total-matings-variance"
+    "female-unique-male-matings-maximum"
+    "female-unique-male-matings-minimum"
+    "female-unique-male-matings-mean"
+    "female-unique-male-matings-variance"
+    "male-foraging-gains-per-tick-maximum"
+    "male-foraging-gains-per-tick-minimum"
+    "male-foraging-gains-per-tick-mean"
+    "male-foraging-gains-per-tick-variance"
+    "female-foraging-gains-per-tick-maximum"
+    "female-foraging-gains-per-tick-minimum"
+    "female-foraging-gains-per-tick-mean"
+    "female-foraging-gains-per-tick-variance"
+    "male-total-group-transfers-maximum"
+    "male-total-group-transfers-minimum"
+    "male-total-group-transfers-mean"
+    "male-total-group-transfers-variance"
+    "female-total-group-transfers-maximum"
+    "female-total-group-transfers-minimum"
+    "female-total-group-transfers-mean"
+    "female-total-group-transfers-variance"
+    "male-infantice-count-maximum"
+    "male-infantice-count-minimum"
+    "male-infantice-count-mean"
+    "male-infantice-count-variance"
+    "female-infantice-count-maximum"
+    "female-infantice-count-minimum"
+    "female-infantice-count-mean"
+    "female-infantice-count-variance" ; calculated-from-agent-records
+    
+  )
+end
+
+; validation
+to-report dynamic-verification-true-count report 0 end ; to do
+to-report dynamic-validation-false-count report 0 end ; to do
+to-report foraging-gains-vs-generation-slope report 0 end ; to do
+to-report foraging-gains-vs-generation-R-squared report 0 end ; to do
+to-report mother-initiated-birth-vs-generation-slope report 0 end ; to do
+to-report mother-initiated-birth-vs-generation-R-squared report 0 end ; to do
+to-report mother-initiated-weaning-vs-generation-slope report 0 end ; to do
+to-report mother-initiated-weaning-vs-generation-R-squared report 0 end ; to do
+to-report hamiltons-rule-followed-count report 0 end ; to do
+to-report hamiltons-rule-not-followed-count report 0 end ; to do
+to-report hamiltons-rule-followed-vs-generation-slope report 0 end ; to do
+to-report hamiltons-rule-followed-vs-generation-R-squared report 0 end ; to do
+  
+  ; plants
+to-report plant-abundance-maximum report max ( get-data simulation-scan-file-path "plant-abundance" ) end
+to-report plant-abundance-minimum report min ( get-data simulation-scan-file-path "plant-abundance" ) end
+to-report plant-abundance-mean report mean ( get-data simulation-scan-file-path "plant-abundance" ) end
+to-report plant-abundance-variance report variance ( get-data simulation-scan-file-path "plant-abundance" ) end
+to-report plant-patchiness-maximum report max ( get-data simulation-scan-file-path "plant-patchiness" ) end
+to-report plant-patchiness-minimum report min ( get-data simulation-scan-file-path "plant-patchiness" ) end 
+to-report plant-patchiness-mean report mean ( get-data simulation-scan-file-path "plant-patchiness" ) end
+to-report plant-patchiness-variance report variance ( get-data simulation-scan-file-path "plant-patchiness" ) end
+  ; lotka-volterra
+  
+  ; population
+to-report generations-transpired report 0 end ; to do
+to-report total-simulated-individuals report length ( get-data agent-records-file-path "meta.id" ) end
+to-report total-simulated-males report 0 end ; to do
+to-report total-simulated-females report 0 end ; to do
+to-report total-simulated-adults report 0 end ; to do
+to-report population-size-maximum report max ( get-data simulation-scan-file-path "population-size" ) end
+to-report population-size-minimum report min ( get-data simulation-scan-file-path "population-size" ) end
+to-report population-size-mean report mean ( get-data simulation-scan-file-path "population-size" ) end
+to-report population-size-variance report variance ( get-data simulation-scan-file-path "population-size" ) end
+to-report gestation-length-maximum report max ( get-data agent-records-file-path "gestation-length" ) end ; gestation-length
+to-report gestation-length-minimum report min ( get-data agent-records-file-path "gestation-length" ) end 
+to-report gestation-length-mean report mean ( get-data agent-records-file-path "gestation-length" ) end
+to-report gestation-length-variance report variance ( get-data agent-records-file-path "gestation-length" ) end
+to-report lactation-length-maximum report max ( get-data agent-records-file-path "lactation-length" ) end ; lactation-length
+to-report lactation-length-minimum report min ( get-data agent-records-file-path "lactation-length" ) end
+to-report lactation-length-mean report mean ( get-data agent-records-file-path "lactation-length" ) end
+to-report lactation-length-variance report variance ( get-data agent-records-file-path "lactation-length" ) end
+to-report juvenile-length-maximum report max ( get-data agent-records-file-path "juvenile-length" ) end ; juvenile-length
+to-report juvenile-length-minimum report min ( get-data agent-records-file-path "juvenile-length" ) end
+to-report juvenile-length-mean report mean ( get-data agent-records-file-path "juvenile-length" ) end
+to-report juvenile-length-variance report variance ( get-data agent-records-file-path "juvenile-length" ) end 
+to-report first-reproduction-maximum report max ( get-data agent-records-file-path "-length" ) end
+to-report first-reproduction-minimum report min ( get-data agent-records-file-path "-length" ) end
+to-report first-reproduction-mean report 0 end ; to do
+to-report first-reproduction-variance report 0 end ; to do
+to-report post-reproduction-count report 0 end ; to do
+to-report post-reproduction-maximum report 0 end ; to do
+to-report post-reproduction-minimum report 0 end ; to do
+to-report post-reproduction-mean report 0 end ; to do
+to-report post-reproduction-variance report 0 end ; to do
+to-report longevity-adult-maximum report 0 end ; to do
+to-report longevity-adult-minimum report 0 end ; to do
+to-report longevity-adult-mean report 0 end ; to do
+to-report longevity-adult-variance report 0 end ; to do
+  
+  ; adult attributes - redo all
+to-report male-adult-body-size-maximum report max ( get-data agent-records-file-path "body.size" ) end
+to-report male-adult-body-size-minimum report min ( get-data agent-records-file-path "body.size" ) end
+to-report male-adult-body-size-mean report mean ( get-data agent-records-file-path "body.size" ) end
+to-report male-adult-body-size-variance report variance ( get-data agent-records-file-path "body.size" ) end
+to-report female-adult-body-size-maximum report max ( get-data agent-records-file-path "body.size" ) end
+to-report female-adult-body-size-minimum report min ( get-data agent-records-file-path "body.size" ) end 
+to-report female-adult-body-size-mean report mean ( get-data agent-records-file-path "body.size" ) end
+to-report female-adult-body-size-variance report 0 end ; to do
+to-report male-adult-conception-chance-maximum report 0 end ; to do
+to-report male-adult-conception-chance-minimum report 0 end ; to do
+to-report male-adult-conception-chance-mean report 0 end ; to do
+to-report male-adult-conception-chance-variance report 0 end ; to do
+to-report female-adult-conception-chance-maximum report 0 end ; to do
+to-report female-adult-conception-chance-minimum report 0 end ; to do
+to-report female-adult-conception-chance-mean report 0 end ; to do
+to-report female-adult-conception-chance-variance report 0 end ; to do
+to-report male-adult-day-perception-cone-maximum report 0 end ; to do
+to-report male-adult-day-perception-cone-minimum report 0 end ; to do
+to-report male-adult-day-perception-cone-mean report 0 end ; to do
+to-report male-adult-day-perception-cone-variance report 0 end ; to do
+to-report female-adult-day-perception-cone-maximum report 0 end ; to do
+to-report female-adult-day-perception-cone-minimum report 0 end ; to do
+to-report female-adult-day-perception-cone-mean report 0 end ; to do
+to-report female-adult-day-perception-cone-variance report 0 end ; to do
+to-report female-adult-litter-size-maximum report 0 end ; to do
+to-report female-adult-litter-size-minimum report 0 end ; to do
+to-report female-adult-litter-size-mean report 0 end ; to do
+to-report female-adult-litter-size-variance report 0 end ; to do
+  
+  ; emegent phenomena
+to-report natal-group-size-maximum report max ( get-data agent-records-file-path "natal.group.size" ) end
+to-report natal-group-size-minimum report min ( get-data agent-records-file-path "natal.group.size" ) end
+to-report natal-group-size-mean report mean ( get-data agent-records-file-path "natal.group.size" ) end
+to-report natal-group-size-variance report variance ( get-data agent-records-file-path "natal.group.size" ) end
+to-report mother-initiated-birth-count report 0 end ; to do
+to-report offspring-initiated-birth-count report 0 end ; to do
+to-report mother-initiated-weaning report 0 end ; to do
+to-report offspring-initiated-weaning report 0 end ; to do
+to-report male-total-matings-maximum report 0 end ; to do
+to-report male-total-matings-minimum report 0 end ; to do
+to-report male-total-matings-mean report 0 end ; to do
+to-report male-total-matings-variance report 0 end ; to do
+to-report male-unique-female-matings-maximum report 0 end ; to do
+to-report male-unique-female-matings-minimum report 0 end ; to do
+to-report male-unique-female-matings-mean report 0 end ; to do
+to-report male-unique-female-matings-variance report 0 end ; to do
+to-report female-total-matings-maximum report 0 end ; to do
+to-report female-total-matings-minimum report 0 end ; to do
+to-report female-total-matings-mean report 0 end ; to do
+to-report female-total-matings-variance report 0 end ; to do
+to-report female-unique-male-matings-maximum report 0 end ; to do
+to-report female-unique-male-matings-minimum report 0 end ; to do
+to-report female-unique-male-matings-mean report 0 end ; to do
+to-report female-unique-male-matings-variance report 0 end ; to do
+to-report male-foraging-gains-per-tick-maximum report 0 end ; to do
+to-report male-foraging-gains-per-tick-minimum report 0 end ; to do
+to-report male-foraging-gains-per-tick-mean report 0 end ; to do
+to-report male-foraging-gains-per-tick-variance report 0 end ; to do
+to-report female-foraging-gains-per-tick-maximum report 0 end ; to do
+to-report female-foraging-gains-per-tick-minimum report 0 end ; to do
+to-report female-foraging-gains-per-tick-mean report 0 end ; to do
+to-report female-foraging-gains-per-tick-variance report 0 end ; to do
+to-report male-total-group-transfers-maximum report 0 end ; to do
+to-report male-total-group-transfers-minimum report 0 end ; to do
+to-report male-total-group-transfers-mean report 0 end ; to do
+to-report male-total-group-transfers-variance report 0 end ; to do
+to-report female-total-group-transfers-maximum report 0 end ; to do
+to-report female-total-group-transfers-minimum report 0 end ; to do
+to-report female-total-group-transfers-mean report 0 end ; to do
+to-report female-total-group-transfers-variance report 0 end ; to do
+to-report male-infantice-count-maximum report 0 end ; to do
+to-report male-infantice-count-minimum report 0 end ; to do
+to-report male-infantice-count-mean report 0 end ; to do
+to-report male-infantice-count-variance report 0 end ; to do
+to-report female-infantice-count-maximum report 0 end ; to do
+to-report female-infantice-count-minimum report 0 end ; to do
+to-report female-infantice-count-mean report 0 end ; to do
+to-report female-infantice-count-variance report 0 end ; to do
+  
+to scan-simulation
+  export-turtle-to 
+  simulation-file-path
+  (list 
+    
+    ; parameter settings
+    "date-and-time" 
+    "model-version" 
+    "model-structure"
+    "genotype-reader"
+    "simulation-id"
+    "behaviorspace-experiment-name"
+    "population" 
+    "genotype"
+    "plant-annual-cycle" 
+    "plant-daily-cycle" 
+    "plant-seasonality" 
+    "plant-quality"
+    "plant-minimum-neighbors" 
+    "plant-maximum-neighbors" 
+    "world-width" 
+    "world-height"
+    "ticks"
+    "deterioration-rate" 
+    "selection-rate"
+    "output-results?" 
+    "selection-on?"
+    "path-to-experiment"
+    "useful-commands"
+    "command-input"
+    
+    ; instantaneous record
+    "get-solar-status"
+    "plant-abundance"
+    "plant-patchiness"
+    "population-size"
+    
+  )
+end
+
+to-report plant-abundance report sum [ penergy.supply ] of patches end
+to-report plant-patchiness
+  let patch-diameter 5
+  let patch-list []
+  
+  let i 0
+  let j 0
+  let i-next patch-diameter
+  let j-next patch-diameter
+  
+  while [ j < world-height ] [
+    while [ i < world-width ] [
+      
+      set patch-list lput sum [ penergy.supply ] of patches with [ pxcor > i and pxcor <= i-next and pycor > j and pycor <= j-next ] patch-list
+      set i i-next
+      set i-next ifelse-value (( i + patch-diameter ) > world-width ) [ world-width ] [ i + patch-diameter ] ]
+    
+    set i 0
+    set i-next patch-diameter
+    set j j-next
+    set j-next ifelse-value (( j + patch-diameter ) > world-height ) [ world-height ] [ j + patch-diameter ] ]
+  
+  report ifelse-value ( mean patch-list = 0 ) [ 0 ] [ ( variance patch-list / mean patch-list ) ]
+end
+to-report population-size report count anima1s end
+  
+  
+to record-agent
+  export-turtle-to
+  agent-records-file-path
+  (list 
+    
+    ; parameter settings
+    "date-and-time" 
+    "model-version" 
+    "model-structure"
+    "genotype-reader"
+    "simulation-id"
+    "behaviorspace-experiment-name"
+    "population" 
+    "genotype"
+    "plant-annual-cycle" 
+    "plant-daily-cycle" 
+    "plant-seasonality" 
+    "plant-quality"
+    "plant-minimum-neighbors" 
+    "plant-maximum-neighbors" 
+    "world-width" 
+    "world-height"
+    "ticks"
+    "deterioration-rate" 
+    "selection-rate"
+    "output-results?" 
+    "selection-on?"
+    "path-to-experiment"
+    "useful-commands"
+    "command-input"
+    
+    ; agent info
+    "focal-subject"
+    "meta.id" 
+    "generation.number" 
+    "mother.identity" 
+    "father.identity"  
+    "natal.group.id" 
+    "natal.group.size" 
+    "biological.sex" 
+    "chromosome.I" 
+    "chromosome.II"
+    "identity.I"
+    "identity.II"
+    
+    
+    
+    "life.history"
+    female.fertility
+    group.identity
+    is.alive
+    yellow.signal
+    red.signal
+    blue.signal
+    living.chance
+    body.size
+    body.shade
+    energy.supply
+    
+    identity.I
+    identity.II
+    carried.items
+    
+    ;PHENOTYPE VARIABLES: hidden to all agents but self
+    bite.capacity
+    mutation.chance
+    sex.ratio
+    litter.size
+    conception.chance
+;    day.perception.angle
+;    night.perception.angle
+;    audio.perception.angle
+;    day.perception.range
+;    night.perception.range
+;    audio.perception.range
+;    vocal.range
+    yellow.chance
+    red.chance
+    blue.chance
+    birthing.chance
+    weaning.chance
+    infancy.chance
+    juvenility.chance
+    adulthood.chance
+    
+    x.magnitude
+    y.magnitude
+    
+    chromosome.I
+    chromosome.II
+    
+    my.environment
+    decision.vectors
+    actions.completed
+    
+    ;TRACKING VARIABLES: hidden to all agents
+    meta.id
+    age.in.ticks
+    generation.number
+    my.mother
+    mother.identity
+    father.identity
+    natal.group.id
+    natal.group.size
+    ticks.at.conception
+    ticks.at.birth
+    ticks.at.weaning
+    ticks.at.sexual.maturity
+    
+    ticks.at.death
+    adult.living.chance
+    adult.body.size
+    adult.body.shade
+    adult.energy.supply
+    adult.bite.capacity
+    adult.mutation.chance
+    adult.sex.ratio
+    adult.litter.size
+;    adult.conception.chance
+;    adult.day.perception.angle
+;    adult.night.perception.angle
+;    adult.audio.perception-angle
+;    adult.day.perception.range
+;    adult.night.perception.range
+;    adult.audio.perception.range
+;    adult.vocal.range
+    adult.yellow.chance
+    adult.red.chance
+    adult.blue.chance
+    distance.traveled
+    cells.occupied
+    mother.initiated.birth
+    mother.initiated.weaning
+    whole.related.help.cost
+    half.related.help.cost
+    fourth.related.help.cost
+    eighth.related.help.cost
+    foraging.gains
+    total.energy.cost
+    total.energy.gains
+    copulations.history
+    conceptions.history
+    group.transfers.history
+    infanticide.history
+    
+    
+    
+    
+    
+    
+    "age-at-death-in-years" 
+    "life-history-at-death" 
+    "fertility-at-death" 
+    "energy-at-death" 
+    "living-chance-at-death"
+    "ticks-at-conception" 
+    "ticks-at-birth" 
+    "ticks-at-weaning" 
+    "ticks-at-sexual-maturity"
+    "ticks-at-senescence" 
+    "ticks-at-death"
+    "adult-living-chance" 
+    "adult-body-size" 
+    "adult-body-shade"
+    "adult-mutation-chance" 
+    "adult-sex-ratio" 
+    "adult-litter-size"
+    "adult-conception-chance" 
+    "adult-day-perception-angle" 
+    "adult-night-perception-angle"
+    "adult-audio-perception-angle" 
+    "adult-day-perception-range" 
+    "adult-night-perception-range"
+    "adult-audio-perception-range" 
+    "adult-vocal-range" 
+    "adult-alpha-chance"
+    "adult-beta-chance" 
+    "adult-gamma-chance" 
+    "adult-body-size" 
+    "adult-body-shade" 
+    "adult-perception-range"
+    "adult-stomach-size"
+    "adult-mutation-chance" 
+    "adult-sex-ratio" 
+    "adult-litter-size" 
+    "adult-conception-chance"
+    "mother-initiated-birth"
+    "mother-initiated-weaning"
+    "lifetime-foraging-gains"
+    "lifetime-foraging-cost"
+    "lifetime-matings-count"
+    "lifetime-mates-count"
+    "lifetime-list-of-mates"
+    "lifetime-conceptions-count"
+    "lifetime-infanticide-count"
+    "lifetime-group-transfers"
+    "lifetime-distance-traveled"
+    "lifetime-cells-occupied"
+    "lifetime-whole-related-help-cost"
+    "lifetime-half-related-help-cost"
+    "lifetime-fourth-related-help-cost"
+    "lifetime-eighth-related-help-cost"
+  )
+end 
+
+
+;to record-group
+;  export-turtle-to 
+;  (word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "group_records.csv" ) 
+;  (list 
+;    "date-and-time" 
+;    "model-version" 
+;    "simulation-id" 
+;    "ticks" 
+;    "meta-id" 
+;    "color" 
+;    "xcor" 
+;    "ycor" 
+;    "my-creator" )
+;end
+
+
+;to scan-group
+;  export-turtle-to 
+;  (word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "group_scan.csv" )  
+;  (list 
+;    "date-and-time" 
+;    "model-version" 
+;    "model-structure"
+;    "genotype-reader"
+;    "simulation-id" 
+;    "sun-status"
+;    "ticks" 
+;    "meta-id" 
+;    "total-birth-count" ;
+;    "current-group-size" ;
+;    "adult-female-group-size" ;
+;    "population-density" ;
+;    "total-energy-gained" ;
+;    "gestatee-female-energy-gained" ;
+;    "gestatee-male-energy-gained" ;
+;    "infant-female-energy-gained" ;
+;    "infant-male-energy-gained" ;
+;    "juvenile-female-energy-gained" ;
+;    "juvenile-male-energy-gained" ;
+;    "adult-cycling-energy-gained" ;
+;    "adult-pregnant-energy-gained" ;
+;    "adult-lactating-energy-gained" ;
+;    "adult-male-energy-gained" ;
+;    "senescent-female-energy-gained" ; 
+;    "senescent-male-energy-gained" ;
+;    "distance-traveled" ) ;
+;end
+;
+;to scan-agent
+;  export-turtle-to 
+;  (word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "agent_scan.csv" ) 
+;  (list 
+;    "date-and-time" 
+;    "model-version" 
+;    "model-structure"
+;    "genotype-reader"
+;    "simulation-id" 
+;    "sun-status"
+;    "ticks" 
+;    "meta-id" 
+;    "color" 
+;    "heading" 
+;    "xcor" 
+;    "ycor" 
+;    "age" 
+;    "generation.number"
+;    "biological.sex" 
+;    "life.history" 
+;    "female.fertility" 
+;    "energy.supply"
+;    "group.identity" 
+;    "is.dead" 
+;    "alpha.signal" 
+;    "beta.signal" 
+;    "gamma.signal"
+;    "living.chance" 
+;    "body.size" 
+;    "body.shade" 
+;    "stomach.capacity"
+;    "mutation.chance"
+;    "sex.ratio" 
+;    "litter.size" 
+;    "conception.chance"
+;    "day.perception.angle" 
+;    "night.perception.angle" 
+;    "audio.perception.angle"
+;    "day.perception.range" 
+;    "night.perception.range" 
+;    "audio.perception.range" 
+;    "vocal.range"
+;    "alpha.chance" 
+;    "beta.chance" 
+;    "gamma.chance"
+;    "birthing.chance" 
+;    "weaning.chance" 
+;    "infancy.chance"
+;    "juvenility.chance" 
+;    "adulthood.chance" 
+;    "post.reproductive.chance"
+;    "x.magnitude" 
+;    "y.magnitude"
+;    "distance-traveled" ;
+;    "foraging-gains" ;
+;    "foraging-losses"  ;
+;    "helping-benefit" ;
+;    "helping-cost" ) ;
+;end
+
+to scan-focal
+  export-turtle-to 
+  (word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "focal_scan.csv" ) 
+  (list 
+    "date-and-time" 
+    "model-version" 
+    "model-structure"
+    "genotype-reader"
+    "simulation-id" 
+    "sun-status"
+    "ticks" 
+    "color" 
+    "heading" 
+    "xcor" 
+    "ycor" 
+    "meta.id" 
+    "age.in.ticks" 
+    "generation.number"
+    "biological.sex" 
+    "life.history" 
+    "female.fertility" 
+    "energy.supply"
+    "group.identity" 
+    "is.alive" 
+    "yellow.signal" 
+    "red.signal" 
+    "blue.signal"
+    "living.chance" 
+    "body.size" 
+    "body.shade" 
+    "bite.capacity" 
+    "mutation.chance"
+    "sex.ratio" 
+    "litter.size" 
+    "conception.chance"
+    "day.perception.angle" 
+    "night.perception.angle" 
+    "audio.perception.angle"
+    "day.perception.range" 
+    "night.perception.range" 
+    "audio.perception.range" 
+    "vocal.range"
+    "alpha.chance" 
+    "beta.chance" 
+    "gamma.chance"
+    "birthing.chance" 
+    "weaning.chance" 
+    "infancy.chance"
+    "juvenility.chance" 
+    "adulthood.chance" 
+    "post.reproductive.chance"
+    "x.magnitude" 
+    "y.magnitude"
+    "distance-traveled" ;
+    "foraging-gains"  ;
+    "foraging-losses"  ;
+    "helping-benefit"  ;
+    "helping-cost" ) ;
+  
+  
+  ;  
+  ;    ;PHENOTYPE VARIABLES: visible to all agents
+  ;  identity.I
+  ;  identity.II
+  ;  carried.items
+  
+  ;  ;PHENOTYPE VARIABLES: hidden to all agents but self
+  
+  ;  litter.size 
+  ;  conception.chance
+  ;  day.perception.angle
+  ;  night.perception.angle
+  ;  audio.perception.angle
+  ;  day.perception.range
+  ;  night.perception.range
+  ;  audio.perception.range
+  ;  vocal.range
+  ;  yellow.chance
+  ;  red.chance
+  ;  blue.chance
+  ;  birthing.chance
+  ;  weaning.chance
+  ;  infancy.chance
+  ;  juvenility.chance
+  ;  adulthood.chance
+  ;  post.reproductive.chance
+  ;  x.magnitude
+  ;  y.magnitude
+  ;
+  ;  chromosome.I
+  ;  chromosome.II
+  ;
+  ;  my.environment
+  ;  decision.vectors
+  ;  actions.completed
+  ;
+  ;  ;TRACKING VARIABLES: hidden to all agents
+  
+  ;  mother.identity
+  ;  father.identity
+  ;  natal.group.id
+  ;  natal.group.size
+  ;  ticks.at.conception
+  ;  ticks.at.birth
+  ;  ticks.at.weaning
+  ;  ticks.at.sexual.maturity
+  ;  ticks.at.senescence
+  ;  ticks.at.death
+  ;  adult.living.chance
+  ;  adult.body.size
+  ;  adult.body.shade
+  ;  adult.energy.supply
+  ;  adult.bite.capacity
+  ;  adult.mutation.chance
+  ;  adult.sex.ratio
+  ;  adult.litter.size
+  ;  adult.conception.chance
+  ;  adult.day.perception.angle
+  ;  adult.night.perception.angle
+  ;  adult.audio.perception-angle
+  ;  adult.day.perception.range
+  ;  adult.night.perception.range
+  ;  adult.audio.perception.range
+  ;  adult.vocal.range
+  ;  adult.yellow.chance
+  ;  adult.red.chance
+  ;  adult.blue.chance
+  ;  distance.traveled
+  ;  cells.occupied
+  ;  mother.initiated.birth
+  ;  mother.initiated.weaning
+  ;  whole.related.help.cost
+  ;  half.related.help.cost
+  ;  fourth.related.help.cost
+  ;  eighth.related.help.cost
+  ;  foraging.gains
+  ;  foraging.cost
+  ;  copulations.history
+  ;  conceptions.history
+  ;  group.transfers.list
+  ;  infanticide.list
+  
+  
+  
+  
+  
+end
+
+;--------------------------------------------------------------------------------------------------------------------
+; REPORTERS
+;--------------------------------------------------------------------------------------------------------------------
+
+to-report get-group-identity-from-color [ color-of-group ]
+  ifelse ( is-number? color-of-group ) [
+    report ( random 999 * 140 + color-of-group )
+  ][
+    report "error: input value is not a number"
+  ]
+end
+
+to set-random-identity-chromosomes [ length-of-chromosomes ]
+  ifelse ( is-number? length-of-chromosomes ) [
+    set identity.I ""
+    set identity.II ""
+    repeat length-of-chromosomes [ set identity.I (word identity.I one-of get-alphabet ) ]
+    repeat length-of-chromosomes [ set identity.II (word identity.II one-of get-alphabet ) ]
+  ][
+    print "error: input value is not a number"
+  ] 
+end
+  
+
+
+;:::: global :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+to-report maximum-generation-number report max [generation.number] of anima1s end
+  
+  ;to-report population-density report count turtles / ( world-width * world-height ) end
+  ;;to-report plant-abundance report precision ( sum [ energy.supply ] of plants ) 3 end
+  ;to-report mean-generation-number report ifelse-value (any? anima1s ) [ precision ( mean [ generation-number ] of anima1s ) 3 ] [ 0 ] end
+  ;to-report number-of-organisms report count anima1s with [ is.alive ] end
+  ;to-report number-of-females report count anima1s with [ biological.sex = "female" ] end
+  ;to-report number-of-males report count anima1s with [ biological.sex = "male" ] end
+  ;to-report number-of-gestatees report count anima1s with [ life.history = "gestatee" ] end
+  ;to-report number-of-infants report count anima1s with [ life.history = "infant" ] end
+  ;to-report number-of-juveniles report count anima1s with [ life.history = "juvenile" ] end
+  ;to-report number-of-adults report count anima1s with [ life.history = "adult" ] end
+  ;to-report number-of-senescents report count anima1s with [ life.history = "senescent" ] end
+  ;to-report number-of-cycling-females report count anima1s with [ female.fertility = "cycling" ] end
+  ;to-report number-of-pregnant-females report count anima1s with [ female.fertility = "pregnant" ] end
+  ;to-report number-of-lactating-females report count anima1s with [ female.fertility = "lactating" ] end
+  ;;to-report number-of-groups report count groups end
+  ;to-report number-of-dead-organisms report count anima1s with [ is.alive = false ] end
+  ;to-report median-living-chance report median [living.chance] of anima1s end
+  ;to-report median-natal-group-size report median [natal-group-size] of anima1s end
+  ;to-report median-age-at-birth report median [ticks-at-birth - ticks-at-conception] of anima1s with [ ticks-at-birth > 0 ] end
+  ;to-report median-age-at-weaning report median [ticks-at-weaning - ticks-at-conception] of anima1s with [ ticks-at-weaning > 0 ]  end
+  ;to-report median-age-at-sexial-maturity report median [ticks-at-sexual-maturity - ticks-at-conception] of anima1s with [ ticks-at-sexual-maturity > 0 ] end
+  ;to-report median-age-at-senescence report median [ticks-at-senescence - ticks-at-conception] of anima1s with [ ticks-at-senescence > 0 ] end
+  ;to-report median-age-at-death report median [ticks-at-death - ticks-at-conception] of anima1s with [ ticks-at-death > 0 ] end
+  ;to-report median-adult-living-chance report median [living.chance] of anima1s with [ life.history = "adult" ] end
+  ;to-report median-adult-body-size report median [body.size] of anima1s with [ life.history = "adult" ] end
+  ;to-report median-adult-body-shade report median [body.shade] of anima1s with [ life.history = "adult" ] end
+  ;to-report median-adult-mutation-chance report median [mutation.chance] of anima1s with [ life.history = "adult" ] end
+  ;to-report median-adult-sex-ratio report median [sex.ratio] of anima1s with [ life.history = "adult" ] end
+  ;to-report median-adult-litter-size report median [litter.size] of anima1s with [ life.history = "adult" ] end
+  ;to-report median-adult-conception-chance report median [conception.chance] of anima1s with [ life.history = "adult" ] end
+  ;to-report median-adult-day-perception-angle report median [day.perception.angle] of anima1s with [ life.history = "adult" ] end
+  ;to-report median-adult-night-perception-angle report median [night.perception.angle] of anima1s with [ life.history = "adult" ] end
+  ;to-report median-adult-audio-perception-angle report median [audio.perception.angle] of anima1s with [ life.history = "adult" ] end
+  ;to-report median-adult-day-perception-range report median [day.perception.range] of anima1s with [ life.history = "adult" ] end
+  ;to-report median-adult-night-perception-range report median [night.perception.range] of anima1s with [ life.history = "adult" ] end
+  ;to-report median-adult-audio-perception-range report median [audio.perception.range] of anima1s with [ life.history = "adult" ] end
+  ;to-report median-adult-vocal-range report median [vocal.range] of anima1s with [ life.history = "adult" ] end
+  ;to-report median-adult-alpha-chance report median [alpha.chance] of anima1s with [ life.history = "adult" ] end
+  ;to-report median-adult-beta-chance report median [beta.chance] of anima1s with [ life.history = "adult" ] end
+  ;to-report median-adult-gamma-chance report median [gamma.chance] of anima1s with [ life.history = "adult" ] end
+  ;to-report percent-mother-initiated-birth report count anima1s with [ mother-initiated-birth ] / ( count anima1s ) end
+  ;to-report percent-mother-initiated-weaning report count anima1s with [ mother-initiated-weaning ] / ( count anima1s ) end
+  ;to-report median-adult-distance-traveled report median [distance-traveled] of anima1s with [ life.history = "adult" ] end
+  ;to-report median-adult-foraging-gains report median [foraging-gains] of anima1s with [ life.history = "adult" ] end
+  ;to-report median-adult-foraging-losses report median [foraging-cost] of anima1s with [ life.history = "adult" ] end
+  ;to-report median-adult-male-unique-mates report median [length remove-duplicates matings-list] of anima1s with [ biological.sex = "male" ] end
+  ;to-report median-adult-female-unique-mates report median [length remove-duplicates matings-list] of anima1s with [ biological.sex = "female" ]  end
+  ;to-report median-adult-male-group-transfers report median [length group-transfers-list] of anima1s with [ biological.sex = "male" ] end
+  ;to-report median-adult-female-group-transfers report median [length group-transfers-list] of anima1s with [ biological.sex = "female" ] end
+  ;
+  ;  
+  ;to-report mean-plant-patchiness report ifelse-value ( file-exists? simulation-file-path ) [ mean get-data simulation-file-path "plant-patchiness" ] [ "N/A" ] end
+  ;to-report minimum-population-size report ifelse-value ( file-exists? simulation-file-path ) [ min get-data simulation-file-path "number-of-organisms"  ] [ "N/A" ] end
+  ;to-report maximum-population-size report ifelse-value ( file-exists? simulation-file-path ) [ max get-data simulation-file-path "number-of-organisms"  ] [ "N/A" ] end
+  ; 
+to-report mothers-initiated-birth-percentage 
+  report ifelse-value ( file-exists? agent-records-file-path ) 
+  [ length filter [ i -> i = true ] ( get-data agent-records-file-path "mother-initiated-birth" ) / length get-data agent-records-file-path "mother-initiated-birth" ] 
+  [ "N/A" ]
+end
+
+to-report mothers-initiated-weaning-percentage 
+  report ifelse-value ( file-exists? agent-records-file-path ) 
+  [ length filter [ i -> i = true ] get-data agent-records-file-path "mother-initiated-weaning" / length get-data agent-records-file-path "mother-initiated-weaning" ] 
+  [ "N/A" ]
+end
+
+to-report foraging-gains-to-cost ; for each unit of foraging cost, how much energy is gained through foraging?
+  let total-foraging-gains sum ( get-data agent-records-file-path "lifetime-foraging-gains" )
+  let total-foraging-cost sum ( get-data agent-records-file-path "lifetime-foraging-cost" )  
+  report total-foraging-gains / total-foraging-cost
+end
+
+to-report excessive-help-cost
+  let population-level-half-help-cost ifelse-value ( file-exists? agent-records-file-path ) [ sum get-data agent-records-file-path "half-related-help-cost" ] [ 0 ]
+  let population-level-fourth-help-cost ifelse-value ( file-exists? agent-records-file-path ) [ sum get-data agent-records-file-path "fourth-related-help-cost" ] [ 0 ]
+  let population-level-eighth-help-cost ifelse-value ( file-exists? agent-records-file-path ) [ sum get-data agent-records-file-path "eigth-related-help-cost" ] [ 0 ]
+  
+  report (( abs ( 2 * population-level-eighth-help-cost ) - population-level-fourth-help-cost ) + ( abs ( 2 * population-level-fourth-help-cost ) - population-level-half-help-cost ))
+end
+
+to-report predator-prey report false end
+  
+  
+  
+to-report get-data [ filename column-name ]
+  let list-to-return []
+  if ( file-exists? filename )
+  [
+    file-open filename
+    let file-header first csv:from-file filename
+    let index position column-name file-header
+    let simulation-id-index position "simulation-id" file-header
+    foreach ( but-first csv:from-file filename ) [ row ->
+      if ( item simulation-id-index row = simulation-id ) [
+        set list-to-return lput item index row list-to-return
+    ]]
+  ]
+  file-close
+  report list-to-return
+end
+
+;:::: groups :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+to-report current-group-size report group-size end  
+to-report group-members report anima1s with [ group.identity = [meta.id] of myself ] end
+to-report adult-female-group-size report count anima1s with [ group.identity = [meta.id] of myself and biological.sex = "female" and life.history = "adult" ] end
+  
+  ;:::: individuals ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+  
+  ;to-report age-at-death-in-years report precision ( age / plant-annual-cycle ) 3 end
+  ;to-report life-history-at-death report life.history end
+  ;to-report fertility-at-death report female.fertility end
+  ;to-report energy-at-death report energy.supply end
+  ;to-report living-chance-at-death report living.chance end
+  ;to-report focal-subject report self = subject end
+  ;to-report lifetime-foraging-gains report foraging-gains end
+  ;to-report lifetime-foraging-cost report foraging-cost end
+  ;to-report lifetime-matings-count report length matings-list end
+  ;to-report lifetime-mates-count report length remove-duplicates matings-list end
+  ;to-report lifetime-list-of-mates report matings-list end
+  ;to-report lifetime-conceptions-count report length conceptions-list end
+  ;to-report lifetime-infanticide-count report length infanticide-list end
+  ;to-report lifetime-group-transfers report length group-transfers-list end
+  ;to-report lifetime-distance-traveled report distance-traveled end
+  ;to-report lifetime-cells-occupied report length cells-occupied end
+  ;to-report lifetime-whole-related-help-cost report whole-related-help-cost end
+  ;to-report lifetime-half-related-help-cost report half-related-help-cost end
+  ;to-report lifetime-fourth-related-help-cost report fourth-related-help-cost end
+  ;to-report lifetime-eighth-related-help-cost report eighth-related-help-cost end
+  
+  ; GROUP REPORTERS
+  
+to-report group-size
+  report count anima1s with [ group.identity = [meta.id] of myself ]
+end
+
+; ANIMA1 REPORTERS
+
+to-report my-offspring
+  report ifelse-value ( biological.sex = "female" )
+  [ anima1s with [ my.mother = myself ]]
+  [ anima1s with [ father.identity = [meta.id] of myself ]]
+end
+
+;to-report current-group
+;  report ifelse-value (any? groups with [ meta-id = [group.identity] of myself ] and group.identity != 0 )
+;  [ one-of groups with [ meta-id = [group.identity] of myself ] ]
+;  [ nobody ]
+;end
+
+;to-report mother
+;  report ifelse-value (any? turtles with [ meta-id = [mother-identity] of myself ])
+;  [ one-of turtles with [ meta-id = [mother-identity] of myself ]]
+;  [ nobody ]
+;end
+;
+;to-report father
+;  report ifelse-value (any? turtles with [ meta-id = [father.identity] of myself ])
+;  [ one-of turtles with [ meta-id = [father.identity] of myself ]]
+;  [ nobody ]
+;end
+
+; --------------------------------------------------------------------------- ;
+;
+; DETERMINE GENETIC RELATEDNESS BETWEEN TWO INDIVIDUALS
+;
+; This routine determines the genetic relatedness between the caller and a
+; specified individual in the population. For example, consider these four
+; chromosomes.
+;
+; Locus         0 1 2 3 4 5 6 7 8 9
+;
+; Caller:   I:  y h m u n f q a x r
+;          II:  c j s w v i l f a p
+;
+; Target:   I:  j l h y m d u t v c
+;          II:  y u l x i s f p w a
+;
+; The first locus has one match, Caller I and Target II, and three non-matches,
+; Caller I and Target I (y and J), Caller II and Target I (c and j), and
+; Caller II to Target II (c y). This is considered a relatedness of
+; <m>1/(1+3) = 0.25</m>, at the first locus. This is repeated across all loci
+; and the average is returned.
+;
+; ENTRY:  'target' defines an individual to be compared the calling individual.
+;         'identity.I' and 'identity.II' carry the genetic information to be
+;          compared between caller and target.
+;         'identity.I' and 'identity.II' both contain exactly 10 loci.
+;
+; EXIT:   'relatedness-with' returns an estimate of the degree of relatedness, as
+;          fraction between 0 and 1.
+;
+; --------------------------------------------------------------------------- ;
+
+to-report relatedness-with [ target ]
+  let matching 0
+  let not-matching 0
+  let i 0
+  while [i < 10] [
+    
+    let allele-here-I item i identity.I
+    let allele-here-II item i identity.II
+    let target-allele-I item i [identity.I] of target
+    let target-allele-II item i [identity.II] of target
+    
+    ifelse (( allele-here-I = target-allele-I ) or ( allele-here-I = target-allele-II ))
+    [ set matching matching + 1 ] [ set not-matching not-matching + 1 ]
+    
+    ifelse (( allele-here-II = target-allele-I ) or ( allele-here-II = target-allele-II ))
+    [ set matching matching + 1 ] [ set not-matching not-matching + 1 ]
+    
+    set i i + 1 ]
+  
+  report matching / ( matching + not-matching )
+end
+
+
+to simulation-rsn
+  let r1 1
+  let r2 1
+  let s11 -1 ; throw out?
+  let s12 -.5
+  let s21 1
+  let s22 -1 ; throw out?
+  
+  let N1 0.4
+  let N2 0.1
+  let dt 1 / 365
+  
+  let t 0
+  
+  while [ t < ( 14 + dt / 2 ) ] [
+    print ( word t " " N1 " " N2 )
+    let dN1 ( r1 + s11 * N1 + s12 * N2 ) * N1 * dt
+    let dN2 ( r2 + s22 * N2 + s21 * N1 ) * N2 * dt
+    set N1 N1 + dN1
+    set N2 N2 + dN2 
+    set t t + dt 
+    
+    plotxy t N1
+    plotxy t N2
+    
+  ] 
+end
+
+; printout goodness of fit btween 1  and - inf 
+
+;TRIAL FITTING OF KNOWN DATA
+;
+;This routine accepts a set of data containing observations and predictions, and
+;computes how well the predictions match the observations. Various measures of
+;how well they match can be calculated in this routine, such as with
+;least-squares, least absolute value, or other measures. The goodness of fit is
+;presented in the form of
+;<m>R^2</m>.<https://en.wikipedia.org/wiki/Coefficient_of_determination/> That
+;is, it is presented as <m>1-F/E</m>, where <m>F</m> is the summed deviations of
+;the observations from the predictions, and <m>E</m> is summed deviations of the
+;observations from the expected value (mean) of the observations if there were no
+;functional relationship.
+;
+;ENTRY: The actual and predicted observations appear on the standard input file.
+;       The first two columns are the actual moose and wolf observed populations,
+;         the last two columns are the predicted moose and wolf populations.
+;
+;EXIT:  The standard output file contains a record of the input and the
+;         calculated goodness of fit.
+;
+;|Calculate goodness of fit
+;|
+;| Advancing y from 1 until end of file,       |Read the actual data and the
+;|   Accept  MA[y], WA[y], MS[y], and WS[y]    |simulated data.
+;|   Display MA[y], WA[y], MS[y], and WS[y]
+;|
+;| Set Mmu and Wmu to 0                        |Compute the mean of the actual
+;| Advancing i from 1 to y,                    |data.
+;|   Increase Mmu by MA[i] and Wmu by WA[i]
+;| Divide Mmu and Wmu by y
+;|
+;| Set totM, totW, resM, and resW to 0         |Compute the total absolute-value
+;| Advancing i from 1 to y,                    |deviation of the actual data from
+;|   Increase resM by (MA[i]-MS[i])^2          |the mean and from the simulated
+;|   Increase resW by (WA[i]-WS[i])^2          |data.
+;|   Increase totM by (MA[i]-Mmu)^2
+;|   Increase totW by (WA[i]-Wmu)^2
+;|
+;| Display "Moose:  " resM, totM, 1-resM/totM  |Display the results as a goodness-
+;| Display "Wolves: " resW, totW, 1-resW/totW  |of-fit measure.
+;
+;
+;
+; 
+
+
+
+
+
+;  ask anima1s [ set population-decisions (sentence population-decisions decision.vectors ) ]
+;  ask anima1s [ set population-allocations (sentence population-allocations energy.allocated ) ]
+;  ask anima1s [ set population-actions (sentence population-actions completed.actions ) ]
+
+
+;to collect-maintenance-data [ cost ]
+;  (ifelse
+;    ( relatedness-with myself = 1 ) [ ask myself [ set whole-related-help-cost whole-related-help-cost + cost ]]
+;    ( relatedness-with myself = 0.5 ) [ ask myself [ set half-related-help-cost half-related-help-cost + cost ]]
+;    ( relatedness-with myself = 0.25 ) [ ask myself [ set fourth-related-help-cost fourth-related-help-cost + cost ]]
+;    ( relatedness-with myself = 0.125 ) [ ask myself [ set eighth-related-help-cost eighth-related-help-cost + cost ]]
+;    [])
+;end
+;
+;to collect-eating-data [ energy-eaten cost-of-eating ]
+;  if (output-results?) [
+;
+;    set foraging-gains foraging-gains + energy-eaten
+;    set foraging-cost foraging-cost + cost-of-eating
+;
+;    ; group is tracking foraging performance of its members
+;    ask current-group [
+;      set total-energy-gained total-energy-gained + energy-eaten
+;      if ( [life.history] of myself = "gestatee" and [biological.sex] of myself = "female" ) [ set gestatee-female-energy-gained gestatee-female-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "gestatee" and [biological.sex] of myself = "male" ) [ set gestatee-male-energy-gained gestatee-male-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "infant" and [biological.sex] of myself = "female" ) [ set infant-female-energy-gained infant-female-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "infant" and [biological.sex] of myself = "male" ) [ set infant-male-energy-gained infant-male-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "juvenile" and [biological.sex] of myself = "female" ) [ set juvenile-female-energy-gained juvenile-female-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "juvenile" and [biological.sex] of myself = "male" ) [ set juvenile-male-energy-gained juvenile-male-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "adult" and [biological.sex] of myself = "female" and [female.fertility] of myself = "cycling" ) [ set adult-cycling-energy-gained adult-cycling-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "adult" and [biological.sex] of myself = "female" and [female.fertility] of myself = "pregnant" ) [ set adult-pregnant-energy-gained adult-pregnant-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "adult" and [biological.sex] of myself = "female" and [female.fertility] of myself = "lactating" ) [ set adult-lactating-energy-gained adult-lactating-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "adult" and [biological.sex] of myself = "male" ) [ set adult-male-energy-gained adult-male-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "senescent" and [biological.sex] of myself = "female" ) [ set senescent-female-energy-gained senescent-female-energy-gained + energy-eaten ]
+;      if ( [life.history] of myself = "senescent" and [biological.sex] of myself = "male" ) [ set senescent-male-energy-gained senescent-male-energy-gained + energy-eaten ]
+;    ]
+;  ]
+;end
+;
+;
+;to collect-helping-data [ target cost ]
+;  ;  if ( output-results? and target != self ) [ ; Hamilton's Rule
+;  ;    let r relatedness-with target
+;  ;    ;print (word " me: " self " living.chance: " living.chance "  target: " target "   relatedness " relatedness-with target " ([living.chance] of target) " ([living.chance] of target)  "   value:"  value " update  " (get-updated-value [living.chance] of target ( value )) "  total: " (( get-updated-value [living.chance] of target ( value ) ) - [living.chance] of target ))
+;  ;    let B ( get-updated-value [living.chance] of target ( cost ) ) - [living.chance] of target ; how much target benefitted
+;  ;    let C living.chance - ( get-updated-value living.chance cost ) ; how much you *could have* benefitted by investing in yourself
+;  ;    set helping-benefit helping-benefit + r * B ; benefit to yourself based on relatedness to target
+;  ;    set helping-cost helping-cost + C ; cost of not helping yourself
+;  ;
+;  ;    if ( biological.sex = "female" and [biological.sex] of target = "female" and group.identity = [group.identity] of target ) [
+;  ;      set ingroup-female-female-help-cost ingroup-female-female-help-cost + cost
+;  ;    ]
+;  ;    if ( biological.sex = "male" and [biological.sex] of target = "male" and group.identity = [group.identity] of target ) [
+;  ;      set ingroup-male-male-help-cost ingroup-male-male-help-cost + cost
+;  ;    ]
+;  ;    if ( (( biological.sex = "female" and [biological.sex] of target = "male" ) or ( biological.sex = "male" and [biological.sex] of target = "female" )) and group.identity = [group.identity] of target ) [
+;  ;      set feingroup-male-male-help-cost feingroup-male-male-help-cost + cost
+;  ;    ]
+;  ;  ]
+;end
+;
+;
+;to collect-conception-data [ target ]
+;  if output-results? [
+;    set conceptions-list lput [meta-id] of target conceptions-list
+;    ask target [ set conceptions-list lput [meta-id] of myself conceptions-list ]]
+;end
+;
+;
+;to collect-mating-data [ target ]
+;  if output-results? [
+;    set matings-list lput [meta-id] of target matings-list
+;    ask target [ set matings-list lput [meta-id] of myself matings-list ]]
+;end
+
+
+
+
+;to setup-climate-table
+;;  set climate-table table:make
+;;
+;;  let i 0
+;;  let j -1
+;;  let k 0
+;;  let l 0
+;;
+;;  while [ i < 1.0 ] [
+;;    set j 0
+;;    while [ j < 8 ] [
+;;      set j -1
+;;      while [ k < 1 ] [
+;;        ;table:put climate-table ( i * j ) ( growth i j 0 )
+;;        set k k + 0.1
+;;      ]
+;;      set j j + 0.1
+;;    ]
+;;    set i i + 0.1
+;;  ]
+;end
+;
+;to-report get-climate-change [ x season ]
+;
+;  let x-floor floor ( x * 10 ) / 10
+;  let season-floor floor ( season * 10 ) / 10
+;
+;  report table:get climate-table ( x-floor * season-floor )
+;end
+
+
+
+
+
+
+
+;to-report growth [ x season density ]
+;
+;  let a-up ( ( season + 1 ) / 2 )
+;  let b-up ( plant-minimum-neighbors + plant-maximum-neighbors ) / 2
+;  let c-up ( b-up - plant-minimum-neighbors )
+;  let probability-up growth-probability a-up b-up c-up x
+;
+;  let y plant-seasonality * ( plant-daily-cycle / plant-annual-cycle ) * ( ( density ) * ( 2 * probability-up - 1 ) + ( ( ( season + 1 ) / 2 ) - density ) )
+;
+;  report y
+;end
+;
+;to-report growth-probability [ a b c x ]
+;  report ifelse-value ( c = 0 ) [ 0 ] [ ( a * e ^ ( - (( x - b ) ^ 2 ) / ( 2 * ( c ^ 2 ) )) ) ]
+;end
+
+
+;----------------------------------------------------------------------------------------------
+;
+; ALLOCATE-ENERGY
+;
+; This subroutine ...
+;
+; ENTRY:  'input-chromosome' is the chromosome to be copied.
+;         'mutation-chance-per-locus' defines the chance that a mutation will
+;         occur at each allele loci.
+;
+; EXIT:   'mutate-chromosome' returns a copy of the chromosome with
+;         modifications to a subset of the alleles.
+;
+;----------------------------------------------------------------------------------------------
+
+;to allocate-energy
+;
+;  set energy.allocated []
+;  foreach decision.vectors [ vector ->
+;
+;    let raw-value item 3 vector
+;    let energy-cost abs raw-value
+;
+;    let passes-energy-check ifelse-value ( model-structure = "free-lunch" ) [ true ] [ energy.supply > energy-cost ] ; FREE LUNCH always passes energy check
+;
+;    if ( not member? vector energy.allocated and passes-energy-check ) [
+;      set energy.allocated lput vector energy.allocated
+;      update-energy ( - energy-cost ) ]]
+;
+;end
+
+
+
+; old simulation scan variables
+;    "population-density" 
+;    
+;    "plant-patchiness"
+;    "number-of-organisms" 
+;    "mean-generation-number" 
+;    "number-of-females" 
+;    "number-of-males"
+;    "number-of-gestatees" 
+;    "number-of-infants"
+;    "number-of-juveniles" 
+;    "number-of-adults" 
+;    "number-of-senescents"
+;    "number-of-cycling-females" 
+;    "number-of-pregnant-females" 
+;    "number-of-lactating-females"
+;    "number-of-groups" 
+;    "number-of-living-organisms" 
+;    "number-of-dead-organisms"
+;    "median-living-chance" 
+;    "median-natal-group-size"
+;    "median-age-at-birth" 
+;    "median-age-at-weaning" 
+;    "median-age-at-sexial-maturity"
+;    "median-age-at-senescence" 
+;    "median-age-at-death" 
+;    "median-adult-living-chance"
+;    "median-adult-body-size" 
+;    "median-adult-body-shade" 
+;    "median-adult-mutation-chance" 
+;    "median-adult-sex-ratio"
+;    "median-adult-litter-size" 
+;    "median-adult-conception-chance" 
+;    "median-adult-day-perception-angle"
+;    "median-adult-night-perception-angle" 
+;    "median-adult-audio-perception-angle" 
+;    "median-adult-day-perception-range"
+;    "median-adult-night-perception-range" 
+;    "median-adult-audio-perception-range" 
+;    "median-adult-vocal-range"
+;    "median-adult-alpha-chance" 
+;    "median-adult-beta-chance" 
+;    "median-adult-gamma-chance"
+;    "percent-mother-initiated-birth" "percent-mother-initiated-weaning"
+;    "median-distance-traveled" "median-foraging-gains" "median-foraging-losses"
+;    "median-helping-benefit" "median-helping-cost" "median-male-unique-mates"  "median-female-unique-mates"
+;    "median-male-group-transfers" "median-female-group-transfers"

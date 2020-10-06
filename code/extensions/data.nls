@@ -1,0 +1,317 @@
+;----------------------------------------------------------------------------------------------
+;
+;        dP            dP            
+;        88            88            
+;  .d888b88 .d8888b. d8888P .d8888b. 
+;  88'  `88 88'  `88   88   88'  `88 
+;  88.  .88 88.  .88   88   88.  .88 
+;  `88888P8 `88888P8   dP   `88888P8 
+;
+; © 2020 K N Crouse
+;----------------------------------------------------------------------------------------------     
+; 
+; This extension contains all functions that allow users to create population and genotypes 
+; files and store metadata from a simulation. These files are stored in the data folder.
+;
+;----------------------------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------------------------
+; METAFILE
+;----------------------------------------------------------------------------------------------
+
+to setup-metafile
+  
+  if ( not file-exists? "../data/metafile.csv" and behaviorspace-run-number = 0 ) [
+    
+    file-open "../data/metafile.csv"
+    csv:to-file "../data/metafile.csv" (list (list
+      "date-and-time"
+      "path-to-experiment"
+      "model-version"
+      "model-structure"
+      "genotype-reader"
+      "simulation-id"
+      "ticks"
+      "file-type"
+      "file-name"
+      "observation-notes"
+      "population-input" 
+      "genotype-input"
+      "plant-annual-cycle" 
+      "plant-seasonality" 
+      "plant-minimum-neighbors" 
+      "plant-maximum-neighbors" 
+      "plant-daily-cycle" 
+      "plant-quality"
+      "world-width" 
+      "world-height"
+      "deterioration-rate" 
+      "output-results?" 
+      "selection-on?"
+      "useful-commands"
+      "command-input"
+    ))
+    
+    file-close ]
+end
+
+to update-metafile [ type-of-file name-of-file ]
+  
+  if ( behaviorspace-run-number = 0 ) [
+    
+    ; Save whatever is currently in the METAFILE or create new
+    if ( not file-exists? "../data/metafile.csv" ) [ setup-metafile ]
+    file-open "../data/metafile.csv"
+    let old-metafile csv:from-file "../data/metafile.csv"
+    
+    if observation-notes = "" [ set observation-notes "Metafile updated." ]
+    
+    ; Update METAFILE with a new row of FILE information
+    csv:to-file "../data/metafile.csv"
+    (lput
+      (list 
+        date-and-time
+        path-to-experiment
+        model-version
+        model-structure
+        genotype-reader
+        simulation-id
+        ticks
+        type-of-file
+        name-of-file
+        observation-notes
+        population 
+        genotype
+        plant-annual-cycle 
+        plant-seasonality
+        plant-minimum-neighbors 
+        plant-maximum-neighbors
+        plant-daily-cycle 
+        plant-quality
+        world-width 
+        world-height
+        deterioration-rate
+        output-results?
+        selection-on?
+        useful-commands
+        command-input 
+      )
+      
+      old-metafile )
+    
+    set observation-notes ""
+    file-close
+    
+  ]
+end
+
+;----------------------------------------------------------------------------------------------
+; POPULATION FILES
+;----------------------------------------------------------------------------------------------
+
+to-report generate-population-id
+  report ( word "p" random 99 one-of get-alphabet one-of get-alphabet one-of get-alphabet )
+end
+
+to import-population
+  output-header (word " IMPORT POPULATION : " population )
+  
+  let file-to-open ( word path-to-experiment population ".csv" ) ; first try accessing file in designated file path
+  if not file-exists? file-to-open [ set file-to-open ( word "../data/" population ".csv" ) ] ; then try the data folder
+  
+  ifelse file-exists? file-to-open [ ; check both locations
+    
+    import-turtles-from file-to-open
+    
+    ; create new meta.ids for everyone
+    let table-of-ids table:make
+    ask anima1s [
+      let new-id random 9999999
+      table:put table-of-ids meta.id  new-id
+      set meta.id  new-id ]
+    
+    ; update carried items list
+    ask anima1s [
+      if ( not is-list? carried.items ) [ set carried.items [] ]
+      foreach carried.items [ itm -> set carried.items remove itm ( lput one-of anima1s with [ meta.id  = ( table:get table-of-ids itm ) ] carried.items ) ] ]
+    
+    ; update mother identity
+    ask anima1s [
+      if ( my.mother = 0 or my.mother = "nobody" ) [ set my.mother nobody ]
+      if ( member? my.mother table:keys table-of-ids ) [ 
+        set my.mother one-of anima1s with [ table:get table-of-ids [my.mother] of myself = meta.id  ] ]]
+
+    ; general initialization of variables
+    ask anima1s [
+      
+      ; initialize lists
+      set receiving.history []
+      set carried.history []
+      set aid.history []
+      set harm.history []
+      set group.transfers.history []
+      set copulations.history []
+      set conceptions.history []
+      set cells.occupied []
+      set infanticide.history []
+      set decision.vectors []
+      set my.environment []
+      set actions.completed []
+      set label-color white
+      
+      ; compatibility with previous versions
+      if ( yellow.signal = 0 ) [ set yellow.signal false ]
+      if ( red.signal = 0 ) [ set red.signal false ]
+      if ( blue.signal = 0 ) [ set blue.signal false ]
+      if ( visual.angle = 0 ) [ set visual.angle 0.5 ]
+      if ( visual.range = 0 ) [ set visual.range 0.9 ]
+      if ( day.perception = 0 ) [ set day.perception 0.9 ]
+      if ( night.perception = 0 ) [ set night.perception 0.25 ]
+      if ( bite.capacity = 0 ) [ set bite.capacity 0.2 ]
+      if ( is.alive = 0 ) [ set is.alive true ]
+      if ( is.resting = 0 ) [ set is.resting false ]
+      
+      update-appearance
+    ]
+    
+    set observation-notes (word "Population file \"" population "\" imported. " observation-notes )
+    update-metafile "population" population
+    output-print " Population import successful."
+    
+  ][ set population "" ]
+  
+end
+
+to save-population
+  output-header (word " SAVE POPULATION : " population )
+
+  ifelse ( file-exists? (word path-to-experiment population ".csv") )
+  [ 
+    ; popup window options if population file already exists
+    let answer user-yes-or-no? 
+    (word "The population " population " already exists! "
+      "Would you like to: overwrite the existing file with current population [ YES ], "
+      "save current population to a different randomly generated file name [ NO ], "
+      "or forget the whole darn thing [ HALT ]?" )
+    ifelse ( answer ) [ file-delete (word path-to-experiment population ".csv") save-population ] [ set population generate-population-id save-population ]
+    
+  ][
+
+    ; list of turtle state variables to save
+    let turtle-list (list 
+      "breed" 
+      "meta.id" 
+      "age"
+      "color" 
+      "heading" 
+      "xcor" 
+      "ycor" 
+      "label" 
+      "label-color"
+      "shape" 
+      "hidden?" 
+      "size" 
+      "pen-size" 
+      "pen-mode"
+      "biological.sex" 
+      "life.history" 
+      "female.fertility" 
+      "group.identity"    
+      "is.alive" 
+      "yellow.signal" 
+      "red.signal" 
+      "blue.signal"
+      "living.chance" 
+      "body.size" 
+      "body.shade" 
+      "energy.supply" 
+      "identity.I" 
+      "identity.II"
+      "carried.items"
+      "bite.capacity" 
+      "mutation.chance" 
+      "sex.ratio" 
+      "litter.size" 
+      "conception.chance"
+      "visual.angle"
+      "visual.range"
+      "day.perception"
+      "night.perception"
+      "yellow.chance" 
+      "red.chance" 
+      "blue.chance"
+      "birthing.chance" 
+      "weaning.chance"
+      "infancy.chance"
+      "juvenility.chance" 
+      "adulthood.chance"
+      "x.magnitude"
+      "y.magnitude"
+      "chromosome.I" 
+      "chromosome.II" 
+      "my.mother"
+      
+    )
+    
+    ask turtles [ 
+      if ( is-anima1? self ) [ set my.mother ifelse-value ( my.mother != nobody ) [ [meta.id] of my.mother ] [ nobody ] ]
+      export-turtle-to (word path-to-experiment population ".csv") turtle-list 
+      if ( is-anima1? self ) [ set my.mother ifelse-value ( my.mother != nobody ) [ one-of anima1s with [ meta.id  = [my.mother] of myself ]] [ nobody ] ]
+    ]
+
+    set observation-notes (word "New population " population " saved. " observation-notes )
+    update-metafile "population" population
+    output-print " Population successfully saved."
+  ]
+end
+
+;----------------------------------------------------------------------------------------------
+; GENOTYPE FILES
+;----------------------------------------------------------------------------------------------
+
+to-report generate-genotype-id
+  report ( word "g" [meta.id] of one-of anima1s )
+end
+
+to import-genotype
+  output-header (word " IMPORT GENOTYPE : " genotype )
+  
+  let file-to-open ( word path-to-experiment genotype ".txt" ) ; first try accessing file in designated file path
+  if not file-exists? file-to-open [ set file-to-open ( word "../data/" genotype ".txt" ) ] ; then try the data folder
+
+  ifelse file-exists? file-to-open [  ; check in both places
+    
+    ask anima1s [
+      
+      set chromosome.I []
+      set chromosome.II []
+      
+      file-open file-to-open
+      let first-chromosome? true 
+      while [ not file-at-end? ] [
+        let row (csv:from-row file-read-line " ")
+        (ifelse 
+          ( row = [""] ) 
+          [ set first-chromosome? false ]
+          ( first-chromosome? ) 
+          [ set chromosome.I lput row chromosome.I ]
+          [ set chromosome.II lput row chromosome.II ])
+      ]
+      file-close
+    ]
+    
+    set observation-notes (word "Genotype file \"" genotype "\" imported. " observation-notes )
+    update-metafile "genotype" genotype
+    output-print " Genotype import successful."
+    
+  ] [ set genotype "" ]
+  
+end
+
+to save-genotype
+  output-header (word " SAVE GENOTYPE : organism " meta.id  )
+  ( csv:to-file ( word path-to-experiment genotype ".txt" ) (sentence chromosome.I [[]] chromosome.II ) " " )
+  set observation-notes (word "New genotype " genotype " saved. " observation-notes )
+  update-metafile "genotype" genotype
+  output-print " Genotype successfully saved."
+end
