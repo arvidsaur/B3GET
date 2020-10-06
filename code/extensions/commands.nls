@@ -19,14 +19,18 @@ to command
     ( useful-commands = "verify-code" ) [ output-verification command-input ]
     ( useful-commands = "check-runtime" ) [ output-runtime ]  
     ( useful-commands = "simulation-report" ) [ output-simulation-report ]
-    ( useful-commands = "genotype-reader" ) [ output-genotype-reader command-input ]
     ( useful-commands = "model-structure" ) [ output-model-structure command-input ]
-    ( useful-commands = "import-world" ) [ output-import-world command-input ]
     ( useful-commands = "reset-plants" ) [ output-reset-plants ]
     ( useful-commands = "clear-population" ) [ output-clear-pop ]
     ( useful-commands = "view-genotype" ) [ output-genotype ]
     ( useful-commands = "view-decisions" ) [ output-decisions ]
     ( useful-commands = "view-actions") [ output-actions ]
+    ( useful-commands = "view-history") [ output-history ]
+    ( useful-commands = "view-status") [ output-status ]
+    
+    ; not currently used
+    ( useful-commands = "import-world" ) [ output-import-world command-input ]
+    ( useful-commands = "genotype-reader" ) [ output-genotype-reader command-input ]
     ( useful-commands = "add-allele" ) [ output-add-allele ]
     ( useful-commands = "delete-allele" ) [ output-delete-allele command-input ]
 
@@ -39,9 +43,7 @@ to output-help-me
   output-header " HELP ME: a user guide for commands"
   output-print " Select a command option from the useful-commands dropdown menu and"
   output-print " click ▷ to activate the command. A description of each command is listed "
-  output-print " below. Commands that are denoted below by [ ] require an input to be written"
-  output-print " in command-input. By default, command-input contains an example allele"
-  output-print " for the add-allele and delete-allele commands."
+  output-print " below. "
   output-print ""
   output-print " > SIMULATION"
   output-print ""
@@ -49,22 +51,24 @@ to output-help-me
   output-print "  verify-code : prints a summary of verification code checks"
   output-print "  check-runtime : prints a summary of simulation operations"    
   output-print "  simulation-report : prints a summary of current simulation"
-  output-print "  genotype-reader : set the genotype file format of simulation"
-  output-print "  model-structure : set the model structure for the simulation"
+  ;output-print "  genotype-reader : set the genotype file format of simulation"
+  output-print "  model-structure [ ] : set the model structure for the simulation"
   output-print ""
   output-print " > WORLD"
   output-print ""
   output-print "  setup-plants : replenishes the world with plants"
-  output-print "  import-world [ file ] : import world file from experiment folder"
-  output-print ""
-  output-print " > ORGANISMS"
-  output-print ""
   output-print "  clear-population: removes all organisms from the world"
-  output-print "  view-genotype [ meta.id ] : prints the genotype of an organism"
-  output-print "  view-decisions [ meta.id ] : shows the current decisions of an organism"
-  output-print "  view-actions [ meta.id ] : shows the actions taken by an organism"
-  output-print "  add-allele [ code ] : add mutation to population"
-  output-print "  delete-allele [ code ] : delete allele from everywhere in the population"
+  ;output-print "  import-world [ file ] : import world file from experiment folder"
+  output-print ""
+  output-print " > DATA"
+  output-print ""
+  output-print "  view-genotype : prints the genotype of an organism or population"
+  output-print "  view-decisions : shows the decisions of an organism or population"
+  output-print "  view-actions : shows the actions of an organism or population"
+  output-print "  view-history : summarizes history of an organism or population"
+  output-print "  view-status : shows current status of an organism or population"
+  ;output-print "  add-allele [ code ] : add mutation to population"
+  ;output-print "  delete-allele [ code ] : delete allele from everywhere in the population"
   output-print ""
   
 end
@@ -74,7 +78,7 @@ to output-header [ header-title ]
   output-print " ---------------------------------------------------------------------------"
   output-print ( word " " header-title )
   output-print " ---------------------------------------------------------------------------"
-  update-metafile "commands" header-title 
+  ;update-metafile "commands" header-title 
 end
 
 ;-----------------------------------------------------------------------------       
@@ -86,7 +90,7 @@ to output-meta-report
   
   let metafile but-first csv:from-file "../data/metafile.csv"
   let how-many-rows length metafile
-  let last-40-rows ifelse-value ( how-many-rows > 40 ) [ sublist metafile ( how-many-rows - 41 ) ( how-many-rows - 1 ) ] [ metafile ]
+  let last-40-rows ifelse-value ( how-many-rows > 40 ) [ sublist metafile ( how-many-rows - 40 ) ( how-many-rows ) ] [ metafile ]
   
   let i 0  
   foreach last-40-rows [ x -> 
@@ -100,22 +104,21 @@ end
 ;-----------------------------------------------------------------------------     
 
 to output-verification [ input ]
-
-  if (useful-commands = "verify-code" and not is-boolean? read-from-string command-input ) [
-    output-header " CODE VERIFICATION :  ALL  "
-    output-all-verification
-    set observation-notes (word "Printout code verification. " observation-notes ) ]
   
-  if (useful-commands = "verify-code" and read-from-string command-input = true ) [
-    output-header " CODE VERIFICATION : TRUE ONLY  "
-    output-true-verification
-    set observation-notes (word "Printout code verification, TRUE only. " observation-notes ) ]
-  
-  if (useful-commands = "verify-code" and read-from-string command-input = false ) [
-    output-header " CODE VERIFICATION : FALSE ONLY   "
-    output-false-verification
-    set observation-notes (word "Printout code verification, FALSE only. " observation-notes ) ]
-  
+  if ( useful-commands = "verify-code" ) [
+    
+    ( ifelse
+      
+      ( command-input = "true" ) [
+        output-header " CODE VERIFICATION : TRUE ONLY  "
+        output-true-verification ]
+      
+      ( command-input = "false" ) [
+        output-header " CODE VERIFICATION : FALSE ONLY   "
+        output-false-verification ]
+      
+      [ output-header " CODE VERIFICATION :  ALL  "
+        output-all-verification ]) ]
 end
 
 ;-----------------------------------------------------------------------------       
@@ -129,7 +132,7 @@ to output-runtime
     repeat how-many-ticks? [ go ]
     output-print profiler:report 
     profiler:stop
-    set observation-notes (word "Printout runtime check." observation-notes )  
+    ;set observation-notes (word "Printout runtime check." observation-notes )  
 end
 
 ;-----------------------------------------------------------------------------       
@@ -141,7 +144,7 @@ to output-simulation-report
   output-print ( word "  simulation-id:  " simulation-id )
   output-print ( word "  model-version:  " model-version )
   output-print ( word "  model-structure:  " model-structure )
-  output-print ( word "  genotype-reader:  " genotype-reader )
+  ;output-print ( word "  genotype-reader:  " genotype-reader )
   output-print ( word "  deterioration-rate:  " deterioration-rate )
   output-print ( word "  maximum-visual-range:  " maximum-visual-range )
   output-print ( word "  base-litter-size:  " base-litter-size )
@@ -206,7 +209,7 @@ to output-reset-plants
   output-header " RESET PLANTS :   "
   setup-patches
   output-print " Plants reset."
-  set observation-notes (word "Plants were reset. " observation-notes )
+  ;set observation-notes (word "Plants were reset. " observation-notes )
 end
 
 ;-----------------------------------------------------------------------------       
@@ -236,7 +239,7 @@ to output-clear-pop
   output-header " CLEAR POPULATION :   "
   ask anima1s [ die ]
   output-print " Population cleared."
-  set observation-notes (word "Cleared current population. " observation-notes )
+  ;set observation-notes (word "Cleared current population. " observation-notes )
 end
 
 ;-----------------------------------------------------------------------------       
@@ -247,7 +250,7 @@ to output-genotype
   let anima1-to-inspect one-of anima1s with [ self = subject ]
   output-header (word " GENOTYPE : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [meta.id ] of anima1-to-inspect ) ] )
   ifelse ( anima1-to-inspect = nobody ) [
-    set observation-notes (word "Organism " read-from-string command-input " not found.")
+    ;set observation-notes (word "Organism " read-from-string command-input " not found.")
     output-print (word " Organism " read-from-string command-input " not found.")
   ][
     foreach [chromosome.I] of anima1-to-inspect [ a ->
@@ -255,7 +258,7 @@ to output-genotype
     output-print ""
     foreach [chromosome.II] of anima1-to-inspect [ a ->
       output-print (word " "reduce [ [itm nxt] -> (word itm " " nxt ) ] a ) ]
-    set observation-notes (word "View genotype of organism " command-input ". " observation-notes )
+    ;set observation-notes (word "View genotype of organism " command-input ". " observation-notes )
   ]
 end
 
@@ -265,19 +268,17 @@ end
 
 to output-decisions
   let anima1-to-inspect one-of anima1s with [ self = subject ]
-  output-header (word " DECISIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [meta.id ] of anima1-to-inspect ) ] )
-
-  ifelse ( anima1-to-inspect != nobody ) [
-    ask anima1-to-inspect [
-      foreach decision.vectors [ decision ->
-        output-print ( word " " decision )
-      ]
-    ]
-    ;set observation-notes (word "View current decisions of organism " command-input ". " observation-notes )
-  ][
-    ;set observation-notes (word "Organism " read-from-string command-input " not found.")
-    output-print (word " Organism not found.")
-  ]
+  output-header (word " DECISIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [meta.id ] of anima1-to-inspect ) ] )
+  
+  ifelse ( anima1-to-inspect != nobody ) 
+  
+  [ ask anima1-to-inspect [
+    foreach decision.vectors [ decision ->
+      output-print ( word " " decision )]]]
+  
+  [let decision-length length all-decisions-made
+    foreach sublist all-decisions-made ( decision-length - 40 ) decision-length [ d -> 
+      output-print (word "  " d ) ]]
 end
 
 ;-----------------------------------------------------------------------------       
@@ -286,20 +287,111 @@ end
 
 to output-actions
   let anima1-to-inspect one-of anima1s with [ self = subject ]
-  output-header (word " ACTIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all" ] [ (word "organism " [meta.id ] of anima1-to-inspect ) ] )
+  output-header (word " ACTIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [meta.id ] of anima1-to-inspect ) ] )
   
-  ifelse ( anima1-to-inspect != nobody ) [
-    ask anima1-to-inspect [
-      foreach actions.completed [ action ->
-        output-print ( word " " action )
-      ]
-    ]
-    ;set observation-notes (word "View current decisions of organism " command-input ". " observation-notes )
-  ][
-    let action-length length animal-actions-completed
-    foreach sublist animal-actions-completed ( action-length - 40 ) action-length [ a -> 
-      output-print (word "  " a ) ]
+  ifelse ( anima1-to-inspect != nobody ) 
+  
+  [ ask anima1-to-inspect [
+    foreach actions.completed [ action ->
+      output-print ( word " " action ) ]]]
+  
+  [ let action-length length all-actions-completed
+    foreach sublist all-actions-completed ( action-length - 40 ) action-length [ a -> 
+      output-print (word "  " a ) ]]
+end
+
+;-----------------------------------------------------------------------------       
+; VIEW HISTORY
+;-----------------------------------------------------------------------------   
+
+to output-history
+  let anima1-to-inspect one-of anima1s with [ self = subject ]
+  output-header (word " HISTORY : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [meta.id ] of anima1-to-inspect ) ] )
+  
+  output-print ( word " Total energy gained: "
+    ifelse-value ( anima1-to-inspect != nobody ) 
+    [ [ precision total.energy.gains 2 ] of subject ] 
+    [ ( word precision ( sum [ total.energy.gains ] of anima1s with [ biological.sex = "female"] ) 2 " (females) " precision ( sum [ total.energy.gains ] of anima1s with [ biological.sex = "male"] ) 2 " (males) " ) ] )
+  
+  output-print ( word " Total energy cost: "
+    ifelse-value ( anima1-to-inspect != nobody ) 
+    [ [ precision total.energy.cost 2 ] of subject ] 
+    [ ( word precision ( sum [ total.energy.cost ] of anima1s with [ biological.sex = "female"] ) 2 " (females) " precision ( sum [ total.energy.cost ] of anima1s with [ biological.sex = "male"]) 2 " (males) " ) ] )
+  
+  output-print ( word " Total energy gained by foraging: "
+    ifelse-value ( anima1-to-inspect != nobody ) 
+    [ [ precision foraging.gains 2 ] of subject ] 
+    [ ( word precision ( sum [ foraging.gains ] of anima1s with [ biological.sex = "female"] ) 2 " (females) " precision ( sum [ foraging.gains ] of anima1s with [ biological.sex = "male"]) 2 " (males) " ) ] )
+  
+  output-print ( word " Number of helpful behaviors: "
+    ifelse-value ( anima1-to-inspect != nobody ) 
+    [ [ length aid.history ] of subject ] 
+    [ ( word sum [ length aid.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length aid.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
+  
+  output-print ( word " Number of aggressive behaviors: "
+    ifelse-value ( anima1-to-inspect != nobody ) 
+    [ [ length harm.history ] of subject ] 
+    [ ( word sum [ length harm.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length harm.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
+  
+  output-print ( word " Number of infanticides: "
+    ifelse-value ( anima1-to-inspect != nobody ) 
+    [ [ length infanticide.history ] of subject ] 
+    [ ( word sum [ length infanticide.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length infanticide.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
+  
+  output-print ( word " Number of copulations: "
+    ifelse-value ( anima1-to-inspect != nobody ) 
+    [ [ length copulations.history ] of subject ] 
+    [ ( word sum [ length copulations.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length copulations.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
+  
+  output-print ( word " Number of conceptions: "
+    ifelse-value ( anima1-to-inspect != nobody ) 
+    [ [ length conceptions.history ] of subject ] 
+    [ ( word sum [ length conceptions.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length conceptions.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
+  
+  output-print ( word " Number of group transfers: "
+    ifelse-value ( anima1-to-inspect != nobody ) 
+    [ [ length group.transfers.history ] of subject ] 
+    [ ( word sum [ length group.transfers.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length group.transfers.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
+  
+end
+
+;-----------------------------------------------------------------------------       
+; VIEW STATUS
+;-----------------------------------------------------------------------------   
+
+to output-status
+  let anima1-to-inspect one-of anima1s with [ self = subject ]
+  output-header (word " STATUS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [ meta.id ] of anima1-to-inspect ) ] )
+  
+  output-print ( word " Number of individuals: " count anima1s )
+  output-print ( word " Number of females: " count anima1s with [ biological.sex = "female" ] )
+  output-print ( word " Number of males: " count anima1s with [ biological.sex = "male" ] )
+  
+  let group-list []
+  let group-size-list []
+  let females-in-group []
+  let males-in-group []
+  let juveniles-in-group []
+  let infants-in-group []
+  let gestatees-in-group []
+  
+  ask anima1s [ if ( not member? group.identity group-list ) [ set group-list lput group.identity group-list ]]
+  foreach group-list [ g -> 
+    set group-size-list lput ( count anima1s with [ group.identity = g ] ) group-size-list 
+    set females-in-group lput ( count anima1s with [ group.identity = g and biological.sex = "female" and life.history = "adult"] ) females-in-group 
+    set males-in-group lput ( count anima1s with [ group.identity = g and biological.sex = "male" and life.history = "adult" ] ) males-in-group 
+    set juveniles-in-group lput ( count anima1s with [ group.identity = g and life.history = "juvenile" ] ) juveniles-in-group
+    set infants-in-group lput ( count anima1s with [ group.identity = g and life.history = "infant" ] ) infants-in-group
+    set gestatees-in-group lput ( count anima1s with [ group.identity = g and life.history = "gestatee" ] ) gestatees-in-group
   ]
+  
+  output-print ( word " Number of groups: " length group-list )
+  output-print ( word " Average group size: " precision mean group-size-list 2 )
+  output-print ( word " Average number of adult females per group: " precision mean females-in-group 2 )
+  output-print ( word " Average number of adult males per group: " precision mean males-in-group 2 )
+  output-print ( word " Average number of juveniles per group: " precision mean juveniles-in-group 2 )
+  output-print ( word " Average number of infants per group: " precision mean infants-in-group 2 )
+  output-print ( word " Average number of gestatees per group: " precision mean gestatees-in-group 2 )
 end
 
 ;-----------------------------------------------------------------------------       
@@ -314,10 +406,10 @@ to output-add-allele
       set chromosome.I lput run-result command-input chromosome.I
       set chromosome.II lput run-result command-input chromosome.II
     ]
-    set observation-notes (word "Add mutation " command-input " to the population. " observation-notes ) 
+    ;t observation-notes (word "Add mutation " command-input " to the population. " observation-notes ) 
     output-print (word " Allele " command-input " was successfully added." )
   ][
-    set observation-notes (word "Adding allele " command-input " was unsuccessful." )
+    ;set observation-notes (word "Adding allele " command-input " was unsuccessful." )
     output-print (word " Adding allele " command-input " was unsuccessful." )
     output-print " Alleles should have the following structure:"
     output-print ""
@@ -341,7 +433,7 @@ to output-delete-allele [ input ]
         if ( ii = read-from-string command-input ) [
           set chromosome.II remove-item ( position ii chromosome.II ) chromosome.II ]]]
     
-    set observation-notes (word "Delete allele " read-from-string  command-input " from the population. " observation-notes ) 
+   ; set observation-notes (word "Delete allele " read-from-string  command-input " from the population. " observation-notes ) 
     output-print (word " Allele " read-from-string command-input " successfully deleted." )]
   
   [ output-print (word " Command input is not a list." )]

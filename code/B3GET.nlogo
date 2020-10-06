@@ -18,7 +18,6 @@ __includes [
   "extensions/selection.nls"
   "extensions/verification.nls"
   "extensions/sta7us.nls"
-  "extensions/results.nls"
 ]
 
 breed [ anima1s anima1 ]
@@ -143,8 +142,8 @@ globals [
   plant-abundance-record
   plant-patchiness-record
   animal-graveyard
-  animal-decisions-made
-  animal-actions-completed
+  all-decisions-made
+  all-actions-completed
 ]
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -159,7 +158,7 @@ globals [
 ;--------------------------------------------------------------------------------------------------------------------
 
 to setup-button
-  if ( simulation-id != 0 ) [ record-world ]
+  ;if ( simulation-id != 0 ) [ record-world ]
   setup
 end
 
@@ -211,13 +210,14 @@ end
 ;--------------------------------------------------------------------------------------------------------------------
 
 to setup-parameters
-  set model-version "~1.1.0"
+  set model-version "1.1.0"
   set deterioration-rate -0.01
-  set maximum-visual-range 6
+  set maximum-visual-range 5
   set base-litter-size 10
   set model-structure []
   set verification-results []
-  set animal-actions-completed []
+  set all-decisions-made []
+  set all-actions-completed []
 end
 
 to setup-patches
@@ -291,7 +291,7 @@ to go
   if selection-on? [ artificial-selection ]
 
   ; SIMULATION OUTPUT
-  if output-results? [ output-results ]
+  ;if output-results? [ output-results ]
   ; prints out current status of the simulation every 100 timesteps
   if ( ticks > 0 and ceiling (ticks / 100) = (ticks / 100) and any? anima1s ) [
     let print-text (word "Simulation " simulation-id " is now at " precision (ticks / plant-annual-cycle) 3 " years, "
@@ -504,6 +504,9 @@ to make-decisions
 
   set decision.vectors reduced-decisions
 
+;  foreach decision.vectors [ d ->
+;    set all-decisions-made lput ( sentence ticks d ) all-decisions-made ]
+
 end
 
 to do-actions
@@ -611,7 +614,7 @@ end
 to complete-action [ target action cost outcome ]
   let completed-action ( list self target action ( precision cost 10 ) outcome )
   set actions.completed lput completed-action actions.completed
-  set animal-actions-completed lput (sentence ticks but-last completed-action) animal-actions-completed
+  ;set all-actions-completed lput (sentence ticks but-last completed-action) all-actions-completed
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -846,6 +849,12 @@ to give-birth
     ask my-offspring with [ life.history = "gestatee" ] [ update-to-infant ]
     set birthing.chance 0
   ]
+end
+
+to-report my-offspring
+  report ifelse-value ( biological.sex = "female" )
+  [ anima1s with [ my.mother = myself ]]
+  [ anima1s with [ father.identity = [meta.id] of myself ]]
 end
 
 to update-to-infant
@@ -1105,6 +1114,28 @@ to aid [ target cost ]
     if ( relatedness-with-target <= 0.375 and relatedness-with-target > 0.1875 ) [ set fourth.related.help.cost fourth.related.help.cost + cost ]
     if ( relatedness-with-target <= 0.1875  ) [ set eighth.related.help.cost eighth.related.help.cost + cost ]
   ]
+end
+
+to-report relatedness-with [ target ]
+  let matching 0
+  let not-matching 0
+  let i 0
+  while [i < 10] [
+
+    let allele-here-I item i identity.I
+    let allele-here-II item i identity.II
+    let target-allele-I item i [identity.I] of target
+    let target-allele-II item i [identity.II] of target
+
+    ifelse (( allele-here-I = target-allele-I ) or ( allele-here-I = target-allele-II ))
+    [ set matching matching + 1 ] [ set not-matching not-matching + 1 ]
+
+    ifelse (( allele-here-II = target-allele-I ) or ( allele-here-II = target-allele-II ))
+    [ set matching matching + 1 ] [ set not-matching not-matching + 1 ]
+
+    set i i + 1 ]
+
+  report matching / ( matching + not-matching )
 end
 
 to hurt [ target cost ]
@@ -1466,7 +1497,7 @@ INPUTBOX
 387
 79
 path-to-experiment
-../results/verification-populations/
+../results/
 1
 0
 String
@@ -1577,7 +1608,7 @@ plant-seasonality
 plant-seasonality
 0
 1
-0.0
+1.0
 .05
 1
 NIL
@@ -1705,7 +1736,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "--------" "meta-report" "verify-code" "check-runtime" "simulation-report" "model-structure" "reset-plants" "clear-population" "view-genotype" "view-decisions" "view-actions" "view-history" "view-status"
-5
+12
 
 BUTTON
 1037
@@ -1784,7 +1815,7 @@ plant-quality
 plant-quality
 .01
 1
-0.99
+1.0
 .01
 1
 NIL
@@ -1818,7 +1849,7 @@ INPUTBOX
 1092
 322
 command-input
-NIL
+no-plants
 1
 0
 String (commands)
@@ -1857,19 +1888,18 @@ B3GET should come with the following file and [folder] structure. These extensio
 ------ [ extensions ]
 --------- commands.nls
 --------- data.nls
---------- files.nls
 --------- sta7us.nls
 --------- import-export.nls
 --------- selection.nls
 --------- verification.nls
---------- g3notype.nls
 --- [data]
 ------ genotype.txt
 ------ population.csv
+--- [results]
 --- [docs]
 ------ B3GET-ODD-protocol.pdf
 
-B3GET starts with PATH-TO-EXPERIMENT set to [../data/], which means that any data or files generated during simulation will be saved in the [data] folder. Initially, POPULATION is set to [population] and GENOTYPE is set to [genotype], which are files included during download. With these settings, you can just click SETUP and GO to start your first simulation! Please refer to the descriptions of the controls below to perform more complex tasks.
+B3GET starts with PATH-TO-EXPERIMENT set to [../results/], which means that any files generated during simulation will be saved in the [results] folder. Initially, POPULATION is set to [population] and GENOTYPE is set to [genotype], which are files included during download. With these settings, you can just click SETUP and GO to start your first simulation! Please refer to the descriptions of the controls below to perform more complex tasks.
 
 ### PRIMARY CONTROLS
 
@@ -1880,7 +1910,7 @@ GO ONCE: runs exactly one tick, or timestep, of the simulation.
 COLLECT-DATA?: 'ON' collects data on the animals (see "data" extension).
 SELECTION-ON?: 'ON' artificially culls the animal population (see "selection" extension).
 SAVE: records the current simulation state and documentation-notes in an external file.
-DOCUMENTATION-NOTES: write notes to yourself here and click 'save' to save them.
+OBSERVATION-NOTES: write notes to yourself here and click 'save' to save them.
 
 ### VIEW INFORMATION
 
@@ -1935,12 +1965,10 @@ OUPUT: many controls output some text, which shows up in this window.
 Detailed information on what each extension does can be found in those files. Here is a brief list of all extensions and briefly what they do:
 
 COMMANDS: controls the extra commands to use during experimentation.
-DATA: controls how data is collected during simulation runs.
-FILES: controls how files are created and data is stored within them.
+DATA: controls how files are created and data is stored within them.
 IMPORT-EXPORT: controls for importing and exporting populations of agents.
 SELECTION: controls for artificial selection of agents during simulation.
 STA7US: a simple genotype file reader.
-G8TES: a more complex genotype file reader.
 VERIFICATION: the verification code for this model.
 
 ### NEW EXPERIMENT
@@ -6912,319 +6940,6 @@ set grass? true
 repeat 75 [ go ]
 @#$#@#$#@
 @#$#@#$#@
-<experiments>
-  <experiment name="WORLD-A" repetitions="1" runMetricsEveryStep="true">
-    <setup>setup
-
-; give simulation-id specific configuration: sDOB17 means simulation of WORLD-D, Baboons seed population, run B (instead of A), plant-minimum-neighbors = 1 and plant-maximum-neighbors = 7
-ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
-  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "A" plant-minimum-neighbors plant-maximum-neighbors )
-][
-  let min-holder plant-minimum-neighbors
-  let max-holder plant-maximum-neighbors
-  set plant-minimum-neighbors max-holder - 1
-  set plant-maximum-neighbors min-holder
-  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "B" plant-minimum-neighbors plant-maximum-neighbors )
-]</setup>
-    <go>go</go>
-    <final>crt 1 [ record-simulation die ]</final>
-    <timeLimit steps="101"/>
-    <exitCondition>not any? anima1s or median [generation-number] of anima1s &gt; 100</exitCondition>
-    <enumeratedValueSet variable="path-to-experiment">
-      <value value="&quot;../results/&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="model-structure">
-      <value value="&quot;baseline&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="genotype-reader">
-      <value value="&quot;sta7us&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="deterioration-rate">
-      <value value="-0.01"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="output-results?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="selection-on?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-annual-cycle">
-      <value value="1000"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-daily-cycle">
-      <value value="10"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-seasonality">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-quality">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-minimum-neighbors">
-      <value value="0"/>
-      <value value="1"/>
-      <value value="2"/>
-      <value value="3"/>
-      <value value="4"/>
-      <value value="5"/>
-      <value value="6"/>
-      <value value="7"/>
-      <value value="8"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-maximum-neighbors">
-      <value value="1"/>
-      <value value="2"/>
-      <value value="3"/>
-      <value value="4"/>
-      <value value="5"/>
-      <value value="6"/>
-      <value value="7"/>
-      <value value="8"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="population">
-      <value value="&quot;Chimpanzees&quot;"/>
-      <value value="&quot;Geladas&quot;"/>
-      <value value="&quot;Olives&quot;"/>
-      <value value="&quot;Hamadryas&quot;"/>
-    </enumeratedValueSet>
-  </experiment>
-  <experiment name="WORLD-TEST" repetitions="1" runMetricsEveryStep="true">
-    <go>go</go>
-    <final>crt 1 [ record-simulation die ]</final>
-    <timeLimit steps="100"/>
-    <exitCondition>not any? anima1s</exitCondition>
-    <enumeratedValueSet variable="path-to-experiment">
-      <value value="&quot;../results/&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="model-structure">
-      <value value="&quot;baseline&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="genotype-reader">
-      <value value="&quot;sta7us&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="deterioration-rate">
-      <value value="-0.01"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="output-results?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="selection-on?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-annual-cycle">
-      <value value="1000"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-daily-cycle">
-      <value value="10"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-seasonality">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-quality">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-minimum-neighbors">
-      <value value="4"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-maximum-neighbors">
-      <value value="8"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="population">
-      <value value="&quot;test&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="genotype">
-      <value value="&quot;test&quot;"/>
-    </enumeratedValueSet>
-  </experiment>
-  <experiment name="WORLD-X" repetitions="1" runMetricsEveryStep="true">
-    <setup>; give simulation-id specific configuration: sDOB17 means simulation of WORLD-D, Baboons seed population, run B (instead of A), plant-minimum-neighbors = 1 and plant-maximum-neighbors = 7
-ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
-  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "A" plant-minimum-neighbors plant-maximum-neighbors )
-][
-  let min-holder plant-minimum-neighbors
-  let max-holder plant-maximum-neighbors
-  set plant-minimum-neighbors max-holder - 1
-  set plant-maximum-neighbors min-holder
-  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "B" plant-minimum-neighbors plant-maximum-neighbors )
-]
-
-setup simulation-id</setup>
-    <go>go</go>
-    <final>crt 1 [ record-simulation die ]</final>
-    <timeLimit steps="101"/>
-    <exitCondition>not any? anima1s or median [generation.number] of anima1s &gt; 100</exitCondition>
-    <enumeratedValueSet variable="path-to-experiment">
-      <value value="&quot;../results/&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="model-structure">
-      <value value="&quot;baseline&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="genotype-reader">
-      <value value="&quot;sta7us&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="deterioration-rate">
-      <value value="-0.01"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="output-results?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="selection-on?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-annual-cycle">
-      <value value="1000"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-daily-cycle">
-      <value value="10"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-seasonality">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-quality">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-minimum-neighbors">
-      <value value="0"/>
-      <value value="1"/>
-      <value value="2"/>
-      <value value="3"/>
-      <value value="4"/>
-      <value value="5"/>
-      <value value="6"/>
-      <value value="7"/>
-      <value value="8"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-maximum-neighbors">
-      <value value="1"/>
-      <value value="2"/>
-      <value value="3"/>
-      <value value="4"/>
-      <value value="5"/>
-      <value value="6"/>
-      <value value="7"/>
-      <value value="8"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="population">
-      <value value="&quot;adam-and-eve&quot;"/>
-    </enumeratedValueSet>
-  </experiment>
-  <experiment name="WORLD-TEST-2" repetitions="1" sequentialRunOrder="false" runMetricsEveryStep="false">
-    <setup>setup
-
-; give simulation-id specific configuration: sDOB17 means simulation of WORLD-D, Baboons seed population, run B (instead of A), plant-minimum-neighbors = 1 and plant-maximum-neighbors = 7
-ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
-  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "A" plant-minimum-neighbors plant-maximum-neighbors )
-][
-  let min-holder plant-minimum-neighbors
-  let max-holder plant-maximum-neighbors
-  set plant-minimum-neighbors max-holder - 1
-  set plant-maximum-neighbors min-holder
-  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "B" plant-minimum-neighbors plant-maximum-neighbors )
-]</setup>
-    <go>go</go>
-    <final>print behaviorspace-run-number
-save-verification-to "verification.csv"
-crt 1 [ record-simulation die ]</final>
-    <timeLimit steps="15"/>
-    <exitCondition>not any? anima1s</exitCondition>
-    <enumeratedValueSet variable="path-to-experiment">
-      <value value="&quot;../results/&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="model-structure">
-      <value value="&quot;baseline&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="genotype-reader">
-      <value value="&quot;sta7us&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="deterioration-rate">
-      <value value="-0.01"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="output-results?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="selection-on?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-annual-cycle">
-      <value value="1000"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-daily-cycle">
-      <value value="10"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-seasonality">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-quality">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-minimum-neighbors">
-      <value value="0"/>
-      <value value="1"/>
-      <value value="2"/>
-      <value value="3"/>
-      <value value="4"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-maximum-neighbors">
-      <value value="5"/>
-      <value value="6"/>
-      <value value="7"/>
-      <value value="8"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="population">
-      <value value="&quot;adam-and-eve&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="genotype">
-      <value value="&quot;adam-and-eve&quot;"/>
-    </enumeratedValueSet>
-  </experiment>
-  <experiment name="SIMULTATION-EXPERIMENT" repetitions="1" runMetricsEveryStep="true">
-    <setup>setup</setup>
-    <go>go</go>
-    <exitCondition>not any? anima1s or median [generation-number] of anima1s &gt;= 10</exitCondition>
-    <enumeratedValueSet variable="path-to-experiment">
-      <value value="&quot;../results/&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="model-structure">
-      <value value="&quot;baseline&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="genotype-reader">
-      <value value="&quot;sta7us&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="deterioration-rate">
-      <value value="-0.01"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="output-results?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="selection-on?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-annual-cycle">
-      <value value="1000"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-daily-cycle">
-      <value value="10"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-seasonality">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-quality">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-minimum-neighbors">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="plant-maximum-neighbors">
-      <value value="8"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="population">
-      <value value="&quot;Chimpanzees&quot;"/>
-      <value value="&quot;Geladas&quot;"/>
-      <value value="&quot;Olives&quot;"/>
-      <value value="&quot;Hamadryas&quot;"/>
-    </enumeratedValueSet>
-  </experiment>
-</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default
