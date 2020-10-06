@@ -62,7 +62,7 @@ to output-help-me
   output-print "  clear-population: removes all organisms from the world"
   output-print "  view-genotype [ meta.id ] : prints the genotype of an organism"
   output-print "  view-decisions [ meta.id ] : shows the current decisions of an organism"
-  output-print "  view-decisions [ meta.id ] : shows the actions taken by an organism"
+  output-print "  view-actions [ meta.id ] : shows the actions taken by an organism"
   output-print "  add-allele [ code ] : add mutation to population"
   output-print "  delete-allele [ code ] : delete allele from everywhere in the population"
   output-print ""
@@ -86,11 +86,11 @@ to output-meta-report
   
   let metafile but-first csv:from-file "../data/metafile.csv"
   let how-many-rows length metafile
-  let last-29-rows ifelse-value ( how-many-rows > 29 ) [ sublist metafile ( how-many-rows - 30 ) ( how-many-rows - 1 ) ] [ metafile ]
+  let last-40-rows ifelse-value ( how-many-rows > 40 ) [ sublist metafile ( how-many-rows - 41 ) ( how-many-rows - 1 ) ] [ metafile ]
   
   let i 0  
-  foreach last-29-rows [ x -> 
-    if ( i < 29 ) [ output-print (word " " item 0 x "  " item 9 x  ) ]
+  foreach last-40-rows [ x -> 
+    if ( i < 40 ) [ output-print (word " " item 0 x "  " item 9 x  ) ]
     set i i + 1 ]
   
 end
@@ -244,7 +244,7 @@ end
 ;-----------------------------------------------------------------------------   
 
 to output-genotype
-  let anima1-to-inspect one-of anima1s with [ read-from-string command-input = meta.id  ]
+  let anima1-to-inspect one-of anima1s with [ self = subject ]
   output-header (word " GENOTYPE : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [meta.id ] of anima1-to-inspect ) ] )
   ifelse ( anima1-to-inspect = nobody ) [
     set observation-notes (word "Organism " read-from-string command-input " not found.")
@@ -264,19 +264,19 @@ end
 ;-----------------------------------------------------------------------------   
 
 to output-decisions
-  let anima1-to-inspect one-of anima1s with [ read-from-string command-input = meta.id  ]
+  let anima1-to-inspect one-of anima1s with [ self = subject ]
   output-header (word " DECISIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [meta.id ] of anima1-to-inspect ) ] )
 
-  ifelse ( any? anima1s with [ meta.id  = read-from-string command-input ] ) [
-    ask one-of anima1s with [ meta.id  = read-from-string command-input ] [
+  ifelse ( anima1-to-inspect != nobody ) [
+    ask anima1-to-inspect [
       foreach decision.vectors [ decision ->
-        output-print (word " " decision )
+        output-print ( word " " decision )
       ]
     ]
-    set observation-notes (word "View current decisions of organism " command-input ". " observation-notes )
+    ;set observation-notes (word "View current decisions of organism " command-input ". " observation-notes )
   ][
-    set observation-notes (word "Organism " read-from-string command-input " not found.")
-    output-print (word " Organism " read-from-string command-input " not found.")
+    ;set observation-notes (word "Organism " read-from-string command-input " not found.")
+    output-print (word " Organism not found.")
   ]
 end
 
@@ -285,19 +285,20 @@ end
 ;-----------------------------------------------------------------------------   
 
 to output-actions
-  let anima1-to-inspect one-of anima1s with [ read-from-string command-input = meta.id  ]
-  output-header (word " ACTIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [meta.id ] of anima1-to-inspect ) ] )
+  let anima1-to-inspect one-of anima1s with [ self = subject ]
+  output-header (word " ACTIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all" ] [ (word "organism " [meta.id ] of anima1-to-inspect ) ] )
   
-  ifelse ( any? anima1s with [ meta.id  = read-from-string command-input ] ) [
-    ask one-of anima1s with [ meta.id  = read-from-string command-input ] [
-      foreach actions.completed [ decision ->
-        output-print (word " " decision )
+  ifelse ( anima1-to-inspect != nobody ) [
+    ask anima1-to-inspect [
+      foreach actions.completed [ action ->
+        output-print ( word " " action )
       ]
     ]
-    set observation-notes (word "View current decisions of organism " command-input ". " observation-notes )
+    ;set observation-notes (word "View current decisions of organism " command-input ". " observation-notes )
   ][
-    set observation-notes (word "Organism " read-from-string command-input " not found.")
-    output-print (word " Organism " read-from-string command-input " not found.")
+    let action-length length animal-actions-completed
+    foreach sublist animal-actions-completed ( action-length - 40 ) action-length [ a -> 
+      output-print (word "  " a ) ]
   ]
 end
 

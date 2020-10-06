@@ -27,7 +27,7 @@ anima1s-own [
 
   meta.id
 
-  ;PHENOTYPE VARIABLES: visible to all agents
+  ; PHENOTYPE VARIABLES: visible to all agents
   biological.sex
   life.history
   female.fertility
@@ -44,7 +44,7 @@ anima1s-own [
   identity.II
   carried.items
 
-  ;PHENOTYPE VARIABLES: hidden to all agents but self
+  ; PHENOTYPE VARIABLES: hidden to all agents but self
   living.chance
   energy.supply
   bite.capacity
@@ -74,7 +74,7 @@ anima1s-own [
   decision.vectors
   actions.completed
 
-  ;TRACKING VARIABLES: hidden to all agents
+  ; TRACKING VARIABLES: hidden to all agents
   age.in.ticks
   generation.number
   my.mother
@@ -114,10 +114,14 @@ anima1s-own [
   foraging.gains
   total.energy.gains
   total.energy.cost
-  matings.list
-  conceptions.list
-  group.transfers.list
-  infanticide.list
+  receiving.history
+  carried.history
+  aid.history
+  harm.history
+  copulations.history
+  conceptions.history
+  group.transfers.history
+  infanticide.history
 ]
 
 patches-own [
@@ -134,10 +138,13 @@ globals [
   maximum-visual-range
   base-litter-size
 
-  ; TRACKING VARIABLS
-  population-decisions
-  population-allocations
-  population-actions
+  ; TRACKING VARIABLES
+  verification-results
+  plant-abundance-record
+  plant-patchiness-record
+  animal-graveyard
+  animal-decisions-made
+  animal-actions-completed
 ]
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -206,9 +213,11 @@ end
 to setup-parameters
   set model-version "~1.1.0"
   set deterioration-rate -0.01
-  set maximum-visual-range 5
+  set maximum-visual-range 6
   set base-litter-size 10
   set model-structure []
+  set verification-results []
+  set animal-actions-completed []
 end
 
 to setup-patches
@@ -217,7 +226,6 @@ to setup-patches
     set pmeta.id random 9999999
     update-patch-color ]
   ;repeat 100 [ update-patches ask patches [ set penergy.supply penergy.supply + 10 / plant-annual-cycle if penergy.supply > pterminal.energy [ set penergy.supply pterminal.energy ] update-patch-color ] ]
-
 end
 
 to setup ; [ new-simulation-id ]
@@ -313,6 +321,10 @@ end
 to-report generate-simulation-id
   let alphabet get-alphabet
   report ( word "s" random 99 one-of alphabet one-of alphabet one-of alphabet )
+end
+
+to-report get-lower-alphabet
+  report [ "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o" "p" "q" "r" "s" "t" "u" "v" "w" "x" "y" "z" ]
 end
 
 to-report get-alphabet
@@ -597,7 +609,9 @@ to-report get-action-cost-of [ target action-name ]
 end
 
 to complete-action [ target action cost outcome ]
-  set actions.completed lput ( list self target action cost outcome ) actions.completed
+  let completed-action ( list self target action ( precision cost 10 ) outcome )
+  set actions.completed lput completed-action actions.completed
+  set animal-actions-completed lput (sentence ticks but-last completed-action) animal-actions-completed
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -878,7 +892,7 @@ to update-to-juvenile
   complete-action self "update-to-juvenile" 0 0
   let my-meta-id meta.id
   set label "j"
-  ask anima1s with [ member? my-meta-id infanticide.list ] [ set infanticide.list remove my-meta-id remove-duplicates infanticide.list ]
+  ask anima1s with [ member? my-meta-id infanticide.history ] [ set infanticide.history remove my-meta-id remove-duplicates infanticide.history ]
 end
 
 to check-adulthood [ cost ]
@@ -1004,7 +1018,7 @@ to join-group [ group-id ]
   if ( group.identity != group-id ) [
     set group.identity group-id
     set label "="
-    set group.transfers.list lput group.identity group.transfers.list
+    set group.transfers.history lput group.identity group.transfers.history
     complete-action self "join-group" 0 group-id ]
 end
 
@@ -1055,6 +1069,7 @@ to carry [ target ]
     ask anima1s with [ member? target carried.items ] [ set carried.items remove-item ( position target remove-duplicates carried.items ) remove-duplicates carried.items ]
     set carried.items lput target carried.items
     ask target [ move-to myself ]
+    set carried.history lput [meta.id] of target carried.history
     set label "^"
     complete-action target "carry" 0 0 ]
 end
@@ -1081,6 +1096,7 @@ to aid [ target cost ]
   if ( is-anima1? target and [ is.alive ] of target = true ) [
     complete-action target "aid" cost 0
     ask target [ living-chance cost ]
+    set aid.history lput [meta.id] of target aid.history
     set label "+"
     ; recording kin selection
     let relatedness-with-target relatedness-with target
@@ -1106,27 +1122,31 @@ to harm [ target cost ]
   if ( is-anima1? target and [ is.alive ] of target = true ) [
     complete-action target "harm" cost 0
     ask target [ living-chance ( - cost ) ]
+    set harm.history lput [meta.id] of target harm.history
     set label "-"
-    if ( [ life.history ] of target = "infant" ) [ set infanticide.list lput [meta.id] of target infanticide.list ]
+    if ( [ life.history ] of target = "infant" ) [ set infanticide.history lput [meta.id] of target infanticide.history ]
   ]
 end
 
 to mate-with [ target cost ]
   if ( is-anima1? target and [ is.alive ] of target = true and life.history = "adult" and ( biological.sex = "male" or ( biological.sex = "female" and female.fertility = "cycling" ))) [
-    let target-cost get-action-cost-of target "mate-with"
-    ifelse ( target-cost >= 0 ) ; target has already paid cost to mate-with self
-    [ let net-cost ( cost + target-cost )
-      if ( net-cost > 0 and not member? "stork" model-structure ) [ ; STORK calls conceive-with from an alternative source
-        complete-action target "mate-with" cost net-cost
-        set matings.list lput [meta.id] of target matings.list
-        ask target [ set matings.list lput [meta.id] of myself matings.list ]
-        ifelse ( biological.sex = "female" )
-        [ ask target [ set label "!" ]
-          conceive-with target net-cost ]
-        [ set label "!" ; signals successful mating event
-          ask target [ conceive-with myself net-cost ]]]]
-    [ complete-action target "mate-with" cost "" ]
-  ]
+    complete-action target "mate-with" cost 0
+    if ( cost > 0 )
+    [ let target-cost get-action-cost-of target "mate-with"
+      let probability ( cost + target-cost ) / cost
+      if ( random-float 1.0 <= probability ) [ copulate-with target ( cost + target-cost ) ]
+  ]]
+end
+
+to copulate-with [ target net-cost ]
+  complete-action target "copulate-with" net-cost 0
+  set copulations.history lput [meta.id] of target copulations.history
+  ask target [ set copulations.history lput [meta.id] of myself copulations.history ]
+  ifelse ( biological.sex = "female" )
+  [ ask target [ set label "!" ]
+    conceive-with target net-cost ]
+  [ set label "!" ; signals successful mating event
+    ask target [ conceive-with myself net-cost ]]
 end
 
 to conceive-with [ target net-mate-cost ] ; FEMALE PROCEDURE
@@ -1139,8 +1159,8 @@ to conceive-with [ target net-mate-cost ] ; FEMALE PROCEDURE
       hatch-anima1s my-litter-size [ initialize-from-parents myself target ]
       set female.fertility "pregnant"
       complete-action target "conceive-with" net-mate-cost my-litter-size
-      set conceptions.list lput [meta.id] of target conceptions.list
-      ask target [ set conceptions.list lput [meta.id] of myself conceptions.list ]
+      set conceptions.history lput [meta.id] of target conceptions.history
+      ask target [ set conceptions.history lput [meta.id] of myself conceptions.history ]
     ]
   ]
 end
@@ -1201,10 +1221,13 @@ to initialize-from-parents [ m f ]
   set distance.traveled 0
   set cells.occupied []
   set natal.group.size count anima1s with [ group.identity = [group.identity] of myself ]
-  set matings.list []
-  set conceptions.list []
-  set group.transfers.list []
-  set infanticide.list []
+  set receiving.history []
+  set aid.history []
+  set harm.history []
+  set copulations.history []
+  set conceptions.history []
+  set group.transfers.history []
+  set infanticide.history []
   ifelse ( member? "ideal-form" model-structure ) [ set-phenotype-to-ideal-form ] [ set-phenotype-to-initialized-form ]
 end
 
@@ -1322,33 +1345,45 @@ to-report mutate-chromosome [ input-chromosome mutation-chance-per-locus ]
   foreach input-chromosome [ allele ->
     let updated-alleles (list allele)
 
-    if ( first allele = true and random-float 1.0 < mutation-chance-per-locus ) [
+    let first-allele first allele
 
-      let choice random 5
+    if ( ( first-allele != "[0]"
+      or first-allele = true ) ; this line is for capatibility with older genotype files that have a boolean in first position
+      and random-float 1.0 < mutation-chance-per-locus ) [
+
+      let choice ( ifelse-value
+        ( first-allele = "[1]" ) [ 1 ]
+        ( first-allele = "[2]" ) [ one-of [ 1 2 ] ]
+        ( first-allele = "[3]" ) [ one-of [ 1 2 3 ] ]
+        ( first-allele = "[4]" ) [ one-of [ 1 2 3 4 5 ] ]
+        ( first-allele = "[5]" ) [ one-of [ 1 2 3 4 5 6 7 ] ]
+        [ one-of [ 1 2 3 4 5 6 7 ] ] ) ; when first-allele is true
 
       (ifelse
 
-        ; delete allele
-        ( choice = 0 ) [
-          set updated-alleles [] ]
-
-        ; duplicate allele
-        ( choice = 1 ) [
-          set updated-alleles (list allele allele) ]
-
         ; mutate allele
-        ( choice >= 2 ) [
+        ( choice < 6 ) [
           let new-allele []
           let random-index random ( length allele - 1 ) + 1 ; excludes first codon from mutation
           let index 0
           foreach allele [ codon ->
             ( ifelse
-              ( choice = 2 and random-index = index and not member? "uninvadable" model-structure ) [ set new-allele lput get-mutation codon new-allele ] ; mutate codon
-              ( choice = 3 and random-index = index ) [ repeat 2 [ set new-allele lput codon new-allele ] ] ; duplicate codon
-              ( choice = 4 and random-index = index ) [  ] ; delete codon
+              ( choice = 1 and random-index = index and not member? "uninvadable" model-structure ) [ set new-allele lput get-mutation codon "numbers" new-allele ] ; mutate codon, numbers only
+              ( choice = 2 and random-index = index and not member? "uninvadable" model-structure ) [ set new-allele lput get-mutation codon "letters" new-allele ] ; mutate codon, letters only
+              ( choice = 3 and random-index = index and not member? "uninvadable" model-structure ) [ set new-allele lput get-mutation codon "both" new-allele ] ; mutate codon, both numbers and letters
+              ( choice = 4 and random-index = index ) [ repeat 2 [ set new-allele lput codon new-allele ] ] ; duplicate codon
+              ( choice = 5 and random-index = index ) [  ] ; delete codon
               [ set new-allele lput codon new-allele ])
             set index index + 1 ]
           set updated-alleles ( list new-allele ) ]
+
+        ; duplicate allele
+        ( choice = 6 ) [
+          set updated-alleles (list allele allele) ]
+
+        ; delete allele
+        ( choice = 7 ) [
+          set updated-alleles [] ]
 
         [])]
 
@@ -1358,12 +1393,10 @@ to-report mutate-chromosome [ input-chromosome mutation-chance-per-locus ]
   report ouput-chromosome
 end
 
-to-report get-mutation [ unmutated-codon ]
-  report (ifelse-value
-    ( is-number? unmutated-codon ) [ get-updated-value unmutated-codon ( one-of [ 1 -1 ] ) ] ; number mutations always result in slight increase or decrease of origional value
-    [( ifelse-value
-      ( genotype-reader = "sta7us" ) [ sta7us-get-mutation unmutated-codon ]
-      [ sta7us-get-mutation unmutated-codon ] ) ]) ; default
+to-report get-mutation [ unmutated-codon type-of-mutation ]
+  report ( ifelse-value
+      ( genotype-reader = "sta7us" ) [ sta7us-get-mutation unmutated-codon type-of-mutation]
+      [ sta7us-get-mutation unmutated-codon type-of-mutation ] ); default
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -1433,7 +1466,7 @@ INPUTBOX
 387
 79
 path-to-experiment
-../results/test2/
+../results/verification-populations/
 1
 0
 String
@@ -1503,7 +1536,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-6.0
+0.0
 .1
 1
 NIL
@@ -1544,7 +1577,7 @@ plant-seasonality
 plant-seasonality
 0
 1
-1.0
+0.0
 .05
 1
 NIL
@@ -1604,7 +1637,7 @@ String
 
 INPUTBOX
 1103
-304
+305
 1226
 373
 genotype
@@ -1672,7 +1705,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "--------" "meta-report" "verify-code" "check-runtime" "simulation-report" "genotype-reader" "model-structure" "reset-plants" "import-world" "clear-population" "view-genotype" "view-decisions" "view-actions" "add-allele" "delete-allele"
-14
+2
 
 BUTTON
 1037
@@ -1692,9 +1725,9 @@ NIL
 1
 
 BUTTON
-1231
+1232
 304
-1286
+1287
 373
 ⟳
 reset-genotype-button
@@ -1751,7 +1784,7 @@ plant-quality
 plant-quality
 .01
 1
-1.0
+0.99
 .01
 1
 NIL
@@ -1775,7 +1808,7 @@ SWITCH
 79
 selection-on?
 selection-on?
-0
+1
 1
 -1000
 
@@ -1785,7 +1818,7 @@ INPUTBOX
 1092
 322
 command-input
-true
+false
 1
 0
 String (commands)
@@ -1829,7 +1862,7 @@ B3GET should come with the following file and [folder] structure. These extensio
 --------- import-export.nls
 --------- selection.nls
 --------- verification.nls
---------- g8tes.nls
+--------- g3notype.nls
 --- [data]
 ------ genotype.txt
 ------ population.csv

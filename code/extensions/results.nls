@@ -121,16 +121,16 @@ to record-simulation
     ; validation
     "dynamic-verification-true-count"
     "dynamic-verification-false-count"
-    "foraging-gains-vs-generation-slope"
-    "foraging-gains-vs-generation-R-squared"
-    "mother-initiated-birth-vs-generation-slope"
-    "mother-initiated-birth-vs-generation-R-squared"
-    "mother-initiated-weaning-vs-generation-slope"
-    "mother-initiated-weaning-vs-generation-R-squared"
-    "hamiltons-rule-followed-count"
-    "hamiltons-rule-not-followed-count"
-    "hamiltons-rule-followed-vs-generation-slope"
-    "hamiltons-rule-followed-vs-generation-R-squared"
+    "foraging-gains-vs-generation-slope" ; calculated-from-agent-records
+    "foraging-gains-vs-generation-R-squared" ; calculated-from-agent-records
+    "mother-initiated-birth-vs-generation-slope" ; calculated-from-agent-records
+    "mother-initiated-birth-vs-generation-R-squared" ; calculated-from-agent-records
+    "mother-initiated-weaning-vs-generation-slope" ; calculated-from-agent-records
+    "mother-initiated-weaning-vs-generation-R-squared" ; calculated-from-agent-records
+    "hamiltons-rule-followed-count" ; calculated-from-agent-records
+    "hamiltons-rule-not-followed-count" ; calculated-from-agent-records
+    "hamiltons-rule-followed-vs-generation-slope" ; calculated-from-agent-records
+    "hamiltons-rule-followed-vs-generation-R-squared" ; calculated-from-agent-records
     
     ; plants
     "plant-abundance-maximum"
@@ -144,45 +144,49 @@ to record-simulation
     ; lotka-volterra
     
     ; population - separate by sex?
-    "generations-transpired"
-    "total-simulated-individuals"
-    "total-simulated-males"
-    "total-simulated-females"
-    "total-simulated-adults"
+    "generations-transpired" ; calculated-from-agent-records
+    "total-simulated-individuals" ; calculated-from-agent-records
+    "total-simulated-males" ; calculated-from-agent-records
+    "total-simulated-females" ; calculated-from-agent-records
+    "total-simulated-adults" ; calculated-from-agent-records
     "population-size-maximum"
     "population-size-minimum"
     "population-size-mean"
     "population-size-variance"
-    "gestation-length-maximum"
-    "gestation-length-minimum"
-    "gestation-length-mean"
-    "gestation-length-variance"
-    "lactation-length-maximum"
-    "lactation-length-minimum"
-    "lactation-length-mean"
-    "lactation-length-variance"
-    "juvenile-length-maximum"
-    "juvenile-length-minimum"
-    "juvenile-length-mean"
-    "juvenile-length-variance"
-    "first-reproduction-maximum"
-    "first-reproduction-minimum"
-    "first-reproduction-mean"
-    "first-reproduction-variance"
-    "post-reproduction-count"
-    "post-reproduction-maximum"
-    "post-reproduction-minimum"
-    "post-reproduction-mean"
-    "post-reproduction-variance"
-    "longevity-adult-maximum"
-    "longevity-adult-minimum"
-    "longevity-adult-mean"
-    "longevity-adult-variance"
+    
+    
+    
+    
+    "gestation-length-maximum" ; calculated-from-agent-records
+    "gestation-length-minimum" ; calculated-from-agent-records
+    "gestation-length-mean" ; calculated-from-agent-records
+    "gestation-length-variance" ; calculated-from-agent-records
+    "lactation-length-maximum" ; calculated-from-agent-records
+    "lactation-length-minimum" ; calculated-from-agent-records
+    "lactation-length-mean" ; calculated-from-agent-records
+    "lactation-length-variance" ; calculated-from-agent-records
+    "juvenile-length-maximum" ; calculated-from-agent-records
+    "juvenile-length-minimum" ; calculated-from-agent-records
+    "juvenile-length-mean" ; calculated-from-agent-records
+    "juvenile-length-variance" ; calculated-from-agent-records
+    "first-reproduction-maximum" ; calculated-from-agent-records
+    "first-reproduction-minimum" ; calculated-from-agent-records
+    "first-reproduction-mean" ; calculated-from-agent-records
+    "first-reproduction-variance" ; calculated-from-agent-records
+    "post-reproduction-count" ; calculated-from-agent-records
+    "post-reproduction-maximum" ; calculated-from-agent-records
+    "post-reproduction-minimum" ; calculated-from-agent-records
+    "post-reproduction-mean" ; calculated-from-agent-records
+    "post-reproduction-variance" ; calculated-from-agent-records
+    "longevity-adult-maximum" ; calculated-from-agent-records
+    "longevity-adult-minimum" ; calculated-from-agent-records
+    "longevity-adult-mean" ; calculated-from-agent-records
+    "longevity-adult-variance" ; calculated-from-agent-records
     
     ; adult attributes
-    "male-adult-body-size-maximum"
-    "male-adult-body-size-minimum"
-    "male-adult-body-size-mean"
+    "male-adult-body-size-maximum" ; calculated-from-agent-records
+    "male-adult-body-size-minimum" ; calculated-from-agent-records
+    "male-adult-body-size-mean" ; calculated-from-agent-records
     "male-adult-body-size-variance"
     "female-adult-body-size-maximum"
     "female-adult-body-size-minimum"
@@ -206,23 +210,23 @@ to record-simulation
     "female-adult-day-perception-cone-variance"
     "female-adult-litter-size-maximum"
     "female-adult-litter-size-minimum"
-    "female-adult-litter-size-mean"
-    "female-adult-litter-size-variance"
+    "female-adult-litter-size-mean" ; calculated-from-agent-records
+    "female-adult-litter-size-variance" ; calculated-from-agent-records
     
     ; emegent phenomena
-    "natal-group-size-maximum"
+    "natal-group-size-maximum" ; calculated-from-agent-records
     "natal-group-size-minimum"
     "natal-group-size-mean"
     "natal-group-size-variance"
-    "mother-initiated-birth-count"
+    "mother-initiated-birth-count" ; calculated-from-agent-records
     "offspring-initiated-birth-count"
     "mother-initiated-weaning"
-    "offspring-initiated-weaning"
+    "offspring-initiated-weaning" ; calculated-from-agent-records
     "male-total-matings-maximum"
-    "male-total-matings-minimum"
-    "male-total-matings-mean"
-    "male-total-matings-variance"
-    "male-unique-female-matings-maximum"
+    "male-total-matings-minimum" ; calculated-from-agent-records
+    "male-total-matings-mean" ; calculated-from-agent-records
+    "male-total-matings-variance" ; calculated-from-agent-records
+    "male-unique-female-matings-maximum" ; calculated-from-agent-records
     "male-unique-female-matings-minimum"
     "male-unique-female-matings-mean"
     "male-unique-female-matings-variance"
@@ -257,7 +261,7 @@ to record-simulation
     "female-infantice-count-maximum"
     "female-infantice-count-minimum"
     "female-infantice-count-mean"
-    "female-infantice-count-variance"
+    "female-infantice-count-variance" ; calculated-from-agent-records
     
   )
 end
@@ -610,10 +614,10 @@ to record-agent
     foraging.gains
     total.energy.cost
     total.energy.gains
-    matings.list
-    conceptions.list
-    group.transfers.list
-    infanticide.list
+    copulations.history
+    conceptions.history
+    group.transfers.history
+    infanticide.history
     
     
     
@@ -921,8 +925,8 @@ to scan-focal
   ;  eighth.related.help.cost
   ;  foraging.gains
   ;  foraging.cost
-  ;  matings.list
-  ;  conceptions.list
+  ;  copulations.history
+  ;  conceptions.history
   ;  group.transfers.list
   ;  infanticide.list
   

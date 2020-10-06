@@ -103,7 +103,6 @@ to output-false-verification
       [ if (item i item 3 new-tape = false) [ set j j + 1 output-print (word " " j ". " item i item 3 new-tape " " item i item 2 new-tape " " item i item 1 new-tape " : " item i item 0 new-tape ) ]])
     set i i + 1
   ]
-  
 end
 
 ;---------------------------------------------------------------------------------------------------------------------------------
@@ -146,7 +145,9 @@ to-report generate-verification-tape
   ;  let count-alive-agents 0
   ;  let count-all-agents 0
   
-  repeat how-many-ticks? [ go ]
+  repeat how-many-ticks? [
+    go
+  ]
   
   ;    ask anima1s [ foreach decision.vectors [ v ->
   ;      set population-decisions lput v population-decisions ]]
@@ -1900,6 +1901,8 @@ to-report generate-verification-tape
   set verification lput "runtime" verification
   set function lput "mutate-chromosome" function
   set boolean lput ( profiler:calls "mutate-chromosome" = action-count-for "mutate-chromosome" ) boolean
+  
+  set verification-results ( sentence verification-results boolean )
   
   report (list header verification function boolean )
   profiler:stop 

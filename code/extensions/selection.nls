@@ -26,52 +26,81 @@
 ;-------------------------------------------------------------------------------------------------
 
 to artificial-selection
-
-  ; MUTATE GENOTYPES
-  if ( ticks = 0 ) [ ask anima1s [ mutate-chromosomes 0.1 ]] ; increases the genetic variation of the initial population
   
-  ; RESET SIMULATION
-  if ( criteria-met-for-restarting-simulation ) [
+  if ( any? anima1s ) [
     
-    if ( not is-number? read-from-string last genotype ) [ set genotype ( word genotype "-0" ) ]
-    let selected-anima1 max-one-of anima1s with [ generation.number > read-from-string last genotype ] [ generation.number ]
-    ifelse ( selected-anima1 != nobody ) 
-    [ set genotype ( word but-last genotype ( read-from-string last genotype + 1 ) ) ; set new genotype name up one more number increment
-      ask selected-anima1 [ save-genotype ]]
-    [ 
-      ;set genotype ( word genotype "x" )
-      ;ask one-of anima1s [ save-genotype ]
+    ; MUTATE GENOTYPES
+    if ( ticks = 0 ) [ ask anima1s [ mutate-chromosomes 0.1 ]] ; increases the genetic variation of the initial population
+    
+    let number-list [ "1" "2" "3" "4" "5" "6" "7" "8" "9" "0" ]
+    if ( genotype = "" or not member? last genotype number-list ) [
+      set genotype ( word genotype "-0" )
+      ask one-of anima1s [ save-genotype ]]
+    
+    ; RESET SIMULATION
+    if ( restart-simulation? ) [
+      
+      let selected-anima1 max-one-of anima1s [ generation.number ]
+      if ( [generation.number] of selected-anima1 > read-from-string last genotype  ) [
+        set genotype ( word but-last genotype ( read-from-string last genotype + 1 ) ) ; set new genotype name up one more number increment
+        ask selected-anima1 [ save-genotype ]]
+      
+      let old-population-name population
+      set population next-population-file-name
+      save-population
+      set population old-population-name
+      
+      setup
     ]
-    setup
-    
   ]
-  
 end
 
-to-report criteria-met-for-restarting-simulation
+to-report restart-simulation?
   let criteria-met false
   
-  if ( count anima1s < 50 and count anima1s >= 1 )[ set criteria-met true ]
+  if ( count anima1s < 65 and count anima1s >= 1 )[ set criteria-met true ]
   if ( not any? anima1s with [ biological.sex = "female" ] or not any? anima1s with [ biological.sex = "male" ] ) [ set criteria-met true ]
   ;if ( sum [ total.energy.gains ] of anima1s < sum [ total.energy.cost] of anima1s ) [ set criteria-met true ]
   
   report criteria-met
 end
 
-to-report get-next-available-file-name [ file-name file-designation ]
-  let new-number 1
-  while [file-exists? (word path-to-experiment file-name new-number file-designation ) ][ set new-number new-number + 1 ]
-  report (word file-name new-number )
+to-report next-population-file-name
+  let the-alphabet get-alphabet
+  let alphabet-length length the-alphabet
+  let base-file-name ( word population "-" last genotype "-" )
+  let new-letter-code "A"
+  let pre-letter-code ""
+  let current-letter "A"
+  let post-letter-code ""
+  while [ file-exists? ( word path-to-experiment base-file-name new-letter-code ".csv" ) ]
+  [ 
+    let position-of-current-letter position current-letter the-alphabet
+    
+    ifelse ( position-of-current-letter + 1 >= alphabet-length )[
+      
+      ifelse ( length pre-letter-code = 0 ) [
+        
+        let this-letter-code ( word "AA" post-letter-code )
+        set pre-letter-code but-last this-letter-code
+        set current-letter last this-letter-code
+        set post-letter-code ""
+        
+      ][
+        set current-letter last pre-letter-code
+        set pre-letter-code but-last pre-letter-code
+        set post-letter-code ( word "A" post-letter-code )
+      ]
+    ][
+      set current-letter ( item ( position-of-current-letter + 1 ) the-alphabet )
+      let this-letter-code ( word pre-letter-code current-letter post-letter-code )
+      set pre-letter-code but-last this-letter-code
+      set current-letter last this-letter-code
+      set post-letter-code ""
+    ]
+    
+    set new-letter-code ( word pre-letter-code current-letter post-letter-code )
+  ]
+  report ( word base-file-name new-letter-code )
 end
 
-;to output-successful-population
-;  let file-name get-next-available-file-name (word (get-file-string genotype-file-number) "_o" ) ".csv"
-;  export-world file-name
-;  printout-genotype-of ( n-of 1 primates ) file-name
-;end
-;
-;to restart-unsuccessful-population
-;  let file-name get-next-available-file-name (word (get-file-string genotype-file-number) "_x" ) ".csv"
-;  export-world file-name
-;  setup-world
-;end

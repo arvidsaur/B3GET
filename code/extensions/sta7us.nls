@@ -127,7 +127,7 @@ to-report sta7us-get-decisions [ my-environment ]
   
   foreach (sentence chromosome.I chromosome.II) [ g ->
     
-    if ( length g = 5 and is-boolean? first g and is-string? item 1 g and is-string? item 2 g and is-string? item 3 g and is-number? item 4 g ) [ ; checks that allele correctly organized
+    if ( length g = 5 and is-string? item 1 g and is-string? item 2 g and is-string? item 3 g and is-number? item 4 g ) [ ; checks that allele correctly organized
       let gene-ego item 1 g
       let gene-other item 2 g
       let gene-action item 3 g
@@ -164,10 +164,11 @@ end
 ; CALLER: anima1
 ;----------------------------------------------------------------------------------------------
 
-to-report sta7us-get-mutation [ original-codon ]
+to-report sta7us-get-mutation [ original-codon type-of-mutation ] ; numbers, letters, both
   report ( ifelse-value 
-    ( member? original-codon action-code-list ) [ one-of action-code-list ] 
-    [ generate-status ] ) ; perhaps expand to include add, delete, duplicate, mutate
+    ( is-number? original-codon and ( type-of-mutation = "numbers" or type-of-mutation = "both" ) ) [ get-updated-value original-codon ( one-of [ 1 -1 ] ) ]
+    ( member? original-codon action-code-list and ( type-of-mutation = "letters" or type-of-mutation = "both" ) ) [ one-of action-code-list ]
+    [ ifelse-value ( type-of-mutation = "letters" or type-of-mutation = "both" ) [ generate-status ] [ original-codon ]] ) 
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -302,13 +303,11 @@ end
 to-report action-code-list
   report [ 
     "living-chance" "body-size" "body-shade" 
-    "day-perception" "night-perception"
-    "visual-angle" "visual-range" 
+    "day-perception" "night-perception" "visual-angle" "visual-range" 
     "conception-chance" "bite-capacity" "mutation-chance" "sex-ratio" "litter-size" 
     "turn-right" "turn-left" "go-forward" "set-heading" "hide" "rest" "set-heading-random"
     "yellow-signal-on" "red-signal--on" "blue-signal-on" 
-    "check-infancy" "check-birth" "check-juvenility" 
-    "check-weaning" "check-adulthood" 
+    "check-infancy" "check-birth" "check-juvenility" "check-weaning" "check-adulthood" 
     "move-toward" "move-away-from" "supply-to" "demand-from" "eat"
     "join" "leave" "recruit" "kick-out"
     "pick-up" "put-down" "cling-to" "squirm-from"

@@ -143,13 +143,17 @@ to import-population
 
     ; general initialization of variables
     ask anima1s [
-
+      
       ; initialize lists
-      set group.transfers.list []
-      set matings.list []
-      set conceptions.list []
+      set receiving.history []
+      set carried.history []
+      set aid.history []
+      set harm.history []
+      set group.transfers.history []
+      set copulations.history []
+      set conceptions.history []
       set cells.occupied []
-      set infanticide.list []
+      set infanticide.history []
       set decision.vectors []
       set my.environment []
       set actions.completed []
@@ -266,7 +270,7 @@ end
 ;----------------------------------------------------------------------------------------------
 
 to-report generate-genotype-id
-  report ( word "g" [meta.id ] of one-of anima1s )
+  report ( word "g" [meta.id] of one-of anima1s )
 end
 
 to import-genotype
