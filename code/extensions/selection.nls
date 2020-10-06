@@ -1,0 +1,106 @@
+;-------------------------------------------------------------------------------------------------                                                                                                                                                   
+;
+;                    dP                     dP   oo                   
+;                    88                     88                        
+;  .d8888b. .d8888b. 88 .d8888b. .d8888b. d8888P dP .d8888b. 88d888b. 
+;  Y8ooooo. 88ooood8 88 88ooood8 88'  `""   88   88 88'  `88 88'  `88 
+;        88 88.  ... 88 88.  ... 88.  ...   88   88 88.  .88 88    88 
+;  `88888P' `88888P' dP `88888P' `88888P'   dP   dP `88888P' dP    dP 
+;
+; © 2020 K N Crouse
+;-------------------------------------------------------------------------------------------------
+; 
+; This extension contains all functions that allow users to apply artificial selection
+; on organismal populations. Selection can be turned ON or OFF with the SELECTION-ON? 
+; switch on the user interface. When ON is selected, the ARTIFICIAL-SELECTION function is 
+; applied once every timestep and artificially selects for a population that can better
+; persist in its environment.
+;
+;-------------------------------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------------------------------
+; ARTIFICIAL-SELECTION
+;
+; Operation that allows an override of B3GET to artificially select for populations that are
+; better able to survive in the environmental conditions set by the model parameters.
+;-------------------------------------------------------------------------------------------------
+
+to artificial-selection
+  
+  if ( any? anima1s ) [
+    
+    ; MUTATE GENOTYPES
+    if ( ticks = 0 ) [ ask anima1s [ mutate-chromosomes 0.1 ]] ; increases the genetic variation of the initial population
+    
+    let number-list [ "1" "2" "3" "4" "5" "6" "7" "8" "9" "0" ]
+    if ( genotype = "" or not member? last genotype number-list ) [
+      set genotype ( word genotype "-0" )
+      ask one-of anima1s [ save-genotype ]]
+    
+    ; RESET SIMULATION
+    if ( restart-simulation? ) [
+      
+      let selected-anima1 max-one-of anima1s [ generation.number ]
+      if ( [generation.number] of selected-anima1 > read-from-string last genotype  ) [
+        set genotype ( word but-last genotype ( read-from-string last genotype + 1 ) ) ; set new genotype name up one more number increment
+        ask selected-anima1 [ save-genotype ]]
+      
+      let old-population-name population
+      set population next-population-file-name
+      save-population
+      set population old-population-name
+      
+      setup
+    ]
+  ]
+end
+
+to-report restart-simulation?
+  let criteria-met false
+  
+  if ( count anima1s < 65 and count anima1s >= 1 )[ set criteria-met true ]
+  if ( not any? anima1s with [ biological.sex = "female" ] or not any? anima1s with [ biological.sex = "male" ] ) [ set criteria-met true ]
+  ;if ( sum [ total.energy.gains ] of anima1s < sum [ total.energy.cost] of anima1s ) [ set criteria-met true ]
+  
+  report criteria-met
+end
+
+to-report next-population-file-name
+  let the-alphabet get-alphabet
+  let alphabet-length length the-alphabet
+  let base-file-name ( word population "-" last genotype "-" )
+  let new-letter-code "A"
+  let pre-letter-code ""
+  let current-letter "A"
+  let post-letter-code ""
+  while [ file-exists? ( word path-to-experiment base-file-name new-letter-code ".csv" ) ]
+  [ 
+    let position-of-current-letter position current-letter the-alphabet
+    
+    ifelse ( position-of-current-letter + 1 >= alphabet-length )[
+      
+      ifelse ( length pre-letter-code = 0 ) [
+        
+        let this-letter-code ( word "AA" post-letter-code )
+        set pre-letter-code but-last this-letter-code
+        set current-letter last this-letter-code
+        set post-letter-code ""
+        
+      ][
+        set current-letter last pre-letter-code
+        set pre-letter-code but-last pre-letter-code
+        set post-letter-code ( word "A" post-letter-code )
+      ]
+    ][
+      set current-letter ( item ( position-of-current-letter + 1 ) the-alphabet )
+      let this-letter-code ( word pre-letter-code current-letter post-letter-code )
+      set pre-letter-code but-last this-letter-code
+      set current-letter last this-letter-code
+      set post-letter-code ""
+    ]
+    
+    set new-letter-code ( word pre-letter-code current-letter post-letter-code )
+  ]
+  report ( word base-file-name new-letter-code )
+end
+

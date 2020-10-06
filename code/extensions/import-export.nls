@@ -87,13 +87,13 @@ to export-turtle-to [ filename variables-to-record ]
       ; converts list of lists into savable csv format
       if ( is-list? value and is-list? first value ) [ set value csv:to-string value ]
       ; convert list of turtles to list of savable ids
-      if ( is-list? value and is-turtle? first value ) [ foreach value [ trtl -> set value remove trtl value if ( is-turtle? trtl ) [ set value lput [meta-id] of trtl value ]] ]
+      if ( is-list? value and is-turtle? first value ) [ foreach value [ trtl -> set value remove trtl value if ( is-turtle? trtl ) [ set value lput [meta.id] of trtl value ]] ]
       set data-list (sentence data-list (list value ) ) ] 
     ; if there is an error, record nothing in csv file
     [ set data-list (sentence data-list "" ) ]  
   ]
   
-  csv:to-file filename (sentence (list new-header ) body (list data-list) )
+  csv:to-file filename ( sentence (list new-header ) body (list data-list) )
   file-close
   
 end

@@ -68,9 +68,9 @@
 ; LFH   2019-09-XX   target's life.history
 ; FER   2019-09-XX   target's fertility
 ; GRP   2019-09-XX   target's group.identity
-; AON   2019-09-XX   target's signal alpha is on?
-; BON   2019-09-XX   target's signal beta is on?
-; CON   2019-09-XX   target's signal gamma is on?
+; AON   2019-09-XX   target's yellow signal is on?
+; BON   2019-09-XX   target's red signal is on?
+; CON   2019-09-XX   target's blue signal is on?
 ; SIG   2019-09-XX   target's current signal state ( i.e. "abc" or "a" or "bc" )
 ; EGO   2019-09-XX   target is ego?
 ; DSE   2019-09-XX   target's distance to myself
@@ -98,7 +98,7 @@
 ; ESR   2019-09-XX   ego's sex.ratio
 ; ELS   2019-09-XX   ego's litter.size
 ; ECC   2019-09-XX   ego's conception.chance
-; EST   2019-09-XX   ego's stomach.size
+; EST   2019-09-XX   ego's bite.capacity
 ; EMC   2019-09-XX   ego's mutation.chance
 ; EPC   2019-09-XX   ego's day.perception.range
 ; ENP   2019-09-XX   ego's night.perception.range
@@ -112,11 +112,11 @@
 ; EIC   2019-09-XX   ego's infancy.chance
 ; EJC   2019-09-XX   ego's juvenility.chance
 ; EAC   2019-09-XX   ego's adulthood.chance
-; ESC   2019-09-XX   ego's senescency.chance
+; ESC   2019-09-XX   ego's post.reproductive.chane
 ; ELC   2019-09-XX   ego's living.chance
-; ASC   2019-09-XX   ego's alpha.chance
-; BSC   2019-09-XX   ego's beta.chance
-; CSC   2019-09-XX   ego's gamma.chance
+; ASC   2019-09-XX   ego's yellow.chance
+; BSC   2019-09-XX   ego's red.chance
+; CSC   2019-09-XX   ego's blue.chance
 ;
 ; THN   2019-09-XX   if [TRUE] --> 
 ; TNT   2019-09-XX   if [FALSE] -->
@@ -141,9 +141,9 @@
 ; GFD   2019-08-26   --> go-forward      
 ; HED   2020-XX-XX   --> get-heading 
 ; HID   2020-XX-XX   --> hide  
-; SAC   2019-08-26   --> signal-alpha-on               
-; SBC   2019-08-26   --> signal-beta-on               
-; SCC   2019-08-26   --> signal-gamma-on               
+; SAC   2019-08-26   --> yellow-signal-on               
+; SBC   2019-08-26   --> red-signal-on               
+; SCC   2019-08-26   --> blue-signal-on               
 ; CKI   2019-08-26   --> check-infancy             
 ; CKB   2019-08-26   --> check-birth               
 ; CKJ   2019-08-26   --> check-juvenility         
@@ -181,11 +181,11 @@
 ;----------------------------------------------------------------------------------------------
 
 to-report g8tes-get-decisions [ environment ]
-  report get-iterative-decisions self environment [] true ( sentence chromosome.I chromosome.II ) no-turtles []
+  report get-iterative-decisions self environment [] true ( sentence chromosome.I chromosome.II ) [] []
 end
 
 ;---------------------------------------------------------------------------------------------- 
-; INTERATIVE 'HELPER' FUNCTION
+; INTERATIVE 'HELPER' FUNCTION 
 ;----------------------------------------------------------------------------------------------
  
 to-report get-iterative-decisions [ me old-environment old-gates old-boolean old-feed old-targets old-vectors ]
@@ -204,32 +204,20 @@ to-report get-iterative-decisions [ me old-environment old-gates old-boolean old
     if ( self = subject ) [ print allele ]
     
     ;---------------------------------------------------------------------------------------------- 
-    ; ALLELE CODE IS EMPTY ---> CREATE DECISION VECTORS ; fix for non-agentset
+    ; ALLELE CODE IS EMPTY ---> CREATE DECISION VECTORS 
     ;----------------------------------------------------------------------------------------------
     
     ifelse ( length allele = 0 ) [
-
-      ask old-targets [ ; passed through new call to iterative function ; fix here
-        let new-target self
+      
+      foreach old-targets [ new-target -> ; passed through new call to iterative function
+                                          ;let new-target self
         
         foreach old-vectors [ v ->
           let new-action g8tes-get-action item 0 v
           let new-weight item 1 v
-
-          let distance-to-target ifelse-value ( distance new-target > 1 ) [ distance new-target ] [ 1 ]
-          let vector-doesnt-exist true
-          foreach decision-vectors [ d ->
-            let decision-target item 1 d
-            let decision-action item 2 d
-            
-            if ( decision-target = new-target ) and ( decision-action = new-action ) [
-              set vector-doesnt-exist false
-              set decision-vectors remove-item position v decision-vectors decision-vectors
-              let new-vector replace-item 3 d ( item 3 d + precision ( new-weight / ( distance-to-target ^ 2 )) 5 )
-              set decision-vectors lput new-vector decision-vectors ]]
           
-          if vector-doesnt-exist [
-            set decision-vectors lput (list meself new-target new-action precision ( new-weight / ( distance-to-target ^ 2 )) 5 ) decision-vectors ]
+          let distance-to-target ifelse-value ( distance new-target > 1 ) [ distance new-target ] [ 1 ]
+          set decision-vectors lput (list meself new-target new-action precision ( new-weight / ( distance-to-target ^ 2 )) 5 ) decision-vectors
           
     ]]]
     
@@ -294,37 +282,57 @@ to-report get-iterative-decisions [ me old-environment old-gates old-boolean old
         
         ifelse ( member? first section-of-code action-codons ) [ ; this halts if code that is action is not in action-codons
           
+          ;          if ( old-boolean ) [
+          ;            
+          ;            let new-action item 0 section-of-code
+          ;            let new-weight item 1 section-of-code
+          ;            ;set new-targets old-targets
+          ;
+          ;            foreach old-targets [ old-target -> ;;
+          ;              
+          ;              set decision-vectors ( sentence decision-vectors ( get-iterative-decisions me old-environment [] new-boolean (list first new-feed ) (list old-target) (lput (list new-action new-weight ) old-vectors)))
+          ;              
+          ;          ]]
+          
           if ( old-boolean ) [
-            
             let new-action item 0 section-of-code
             let new-weight item 1 section-of-code
-            set new-targets old-targets
-
-            ask old-targets [ ; fix here
-              
-              set decision-vectors ( sentence decision-vectors ( get-iterative-decisions me old-environment [] new-boolean (list first new-feed ) new-targets (lput (list new-action new-weight ) old-vectors)))
-          ]]
-          
+            set decision-vectors ( sentence decision-vectors ( get-iterative-decisions me old-environment [] old-boolean (list first new-feed ) old-targets (lput (list new-action new-weight ) old-vectors)))
+          ]
           ; settings for continuing iteration 
           set new-boolean true ; really?
           set new-feed ( but-first new-feed )
-          set new-targets no-turtles ; fix here
+          set new-targets []
           set new-vectors []
         ]
         
         ;---------------------------------------------------------------------------------------------- 
-        ;  (READ CODE) ---> CODE is an "ENVIRONMENT FILTER" ---> FILTER AGENTS and MOVE ON
+        ; (READ CODE) ---> CODE is an "ENVIRONMENT FILTER" ---> FILTER AGENTS and MOVE ON
         ;----------------------------------------------------------------------------------------------
         
         [
           
-          set new-targets old-environment with [ read-section section-of-code ]
+          foreach old-environment [ obj ->
+            if ( [ read-section section-of-code ] of obj ) [
+              set new-targets lput obj new-targets ]
+          ]
+          
+          ;set new-targets old-environment with [ read-section section-of-code ] ; fix
           
           foreach old-gates [ gate ->
             
             if ( gate = "ANY" ) [ set new-targets new-targets ]
             
-            if ( gate = "NNN" ) [ set new-targets new-targets with [ member? self old-targets ] ]
+            if ( gate = "NNN" ) [ 
+              let new-new-targets []
+              foreach new-targets [ obj ->
+                if ( [ member? self old-targets ] of obj ) [
+                  set new-new-targets lput obj new-new-targets
+                ] 
+              ]
+              set new-targets new-new-targets
+              ;new-targets with [ member? self old-targets ] 
+            ]
             
             if ( gate = "UUU" ) [ set new-targets old-environment with [ member? self new-targets and member? self old-targets ] ]
             
@@ -334,7 +342,9 @@ to-report get-iterative-decisions [ me old-environment old-gates old-boolean old
             
             if ( gate = "ALL" ) [ set new-targets old-environment ]
             
-            set new-boolean any? new-targets ]
+            set new-boolean not empty? new-targets 
+          
+          ]
           
       ]]
       
@@ -372,9 +382,9 @@ to-report g8tes-get-action [ action-code ]
     ( action-code = "MAF" ) [ "move-away-from" ]
     ( action-code = "HED" ) [ "set-heading" ]
     ( action-code = "HID" ) [ "hide" ]
-    ( action-code = "SAC" ) [ "signal-alpha-on" ]
-    ( action-code = "SBC" ) [ "signal-beta-on" ]
-    ( action-code = "SCC" ) [ "signal-gamma-on" ]
+    ( action-code = "SAC" ) [ "yellow-signal-on" ]
+    ( action-code = "SBC" ) [ "red-signal-on" ]
+    ( action-code = "SCC" ) [ "blue-signal-on" ]
     ( action-code = "CKI" ) [ "check-infancy" ]
     ( action-code = "CKB" ) [ "check-birth" ]
     ( action-code = "CKJ" ) [ "check-juvenility" ]
@@ -423,34 +433,34 @@ to-report read-code [ code ]
     ( is-number? code ) [ code ]
     
     ; what EGO can see about ANYONE
-    ( code = "MID" ) [ meta-id ] ;
-    ( code = "SIZ" ) [ size ] ;
-    ( code = "COL" ) [ round color ] ;
+    ( code = "MID" and is-anima1? self ) [ meta.id ]
+    ( code = "SIZ" and is-anima1? self ) [ size ]
+    ( code = "COL" ) [ ifelse-value ( is-patch? self ) [ round pcolor ] [ round color ] ] ; color for patch and agent
     ( code = "SEX" and is-anima1? self ) [ biological.sex ]
     ( code = "SHD" and is-anima1? self ) [ body.shade ]
     ( code = "LFH" and is-anima1? self ) [ life.history ] 
     ( code = "FER" and is-anima1? self ) [ female.fertility ]  
     ( code = "GRP" and is-anima1? self ) [ group.identity ]  
-    ( code = "AON" and is-anima1? self ) [ alpha.signal ]
-    ( code = "BON" and is-anima1? self ) [ beta.signal ]
-    ( code = "CON" and is-anima1? self ) [ gamma.signal ]
-    ( code = "SIG" and is-anima1? self ) [ (word ifelse-value ( alpha.signal ) [ "a" ] [ "" ] ifelse-value ( beta.signal ) [ "b" ] [ "" ] ifelse-value ( alpha.signal ) [ "c" ] [ "" ]) ]
+    ( code = "AON" and is-anima1? self ) [ yellow.signal ]
+    ( code = "BON" and is-anima1? self ) [ red.signal ]
+    ( code = "CON" and is-anima1? self ) [ blue.signal ]
+    ( code = "SIG" and is-anima1? self ) [ (word ifelse-value ( yellow.signal ) [ "a" ] [ "" ] ifelse-value ( red.signal ) [ "b" ] [ "" ] ifelse-value ( blue.signal ) [ "c" ] [ "" ]) ]
 
     ; what EGO can see about OTHERS
     ( code = "EGO" ) [ self = myself ] 
-    ( code = "DSE" ) [ distance myself ] ;
+    ( code = "DSE" ) [ distance myself ]
     ( code = "ISA" ) [ is-anima1? self ]
-    ;( code = "ISP" ) [ is-plant? self ] ;
+    ( code = "ISP" ) [ is-patch? self ]
     ( code = "DED" and is-anima1? self ) [ is.alive = false ]
     ( code = "CRD" and is-anima1? self ) [ member? self [carried.items] of myself ]
     ( code = "CRG" and is-anima1? self ) [ member? myself carried.items ]
     ( code = "MYO" and is-anima1? self and biological.sex = "female" ) [ member? self [my-offspring] of myself ]
-    ( code = "MOM" and is-anima1? self ) [ [mother] of myself = self ]
+    ( code = "MOM" and is-anima1? self ) [ [my.mother] of myself = self ]
     ;( code = "REL" and is-anima1? self ) [ get-degree-relatedness-with myself ]
 
     ; what only EGO can see about ITSELF ( can't access information unless self = myself )
     ; currently carried by someone else?
-    ( code = "EMI" and self = myself ) [ [meta-id] of myself ]
+    ( code = "EMI" and self = myself ) [ [meta.id] of myself ]
     ( code = "ESZ" and self = myself ) [ [size] of myself ]
     ( code = "ECL" and self = myself ) [ round [color] of myself ]
     ( code = "ESX" and self = myself ) [ [biological.sex] of myself ]
@@ -463,25 +473,24 @@ to-report read-code [ code ]
     ( code = "ESR" and self = myself ) [ [sex.ratio ] of myself ]
     ( code = "ELS" and self = myself ) [ [litter.size] of myself ]
     ( code = "ECC" and self = myself ) [ [conception.chance] of myself ]
-    ( code = "EST" and self = myself ) [ [stomach.size] of myself ]
+    ( code = "EST" and self = myself ) [ [bite.capacity] of myself ]
     ( code = "EMC" and self = myself ) [ [mutation.chance] of myself ]
-    ( code = "EPC" and self = myself ) [ [day.perception.range] of myself ]
-    ( code = "ENP" and self = myself ) [ [night.perception.range] of myself ]
-    ( code = "EAP" and self = myself ) [ [audio.perception.range] of myself ]
-    ( code = "EDA" and self = myself ) [ [day.perception.angle] of myself ]
-    ( code = "ENA" and self = myself ) [ [night.perception.angle] of myself ]
-    ( code = "EAA" and self = myself ) [ [audio.perception.angle] of myself ]
-    ( code = "EVR" and self = myself ) [ [vocal.range] of myself ]
+;    ( code = "EPC" and self = myself ) [ [day.perception.range] of myself ]
+;    ( code = "ENP" and self = myself ) [ [night.perception.range] of myself ]
+;    ( code = "EAP" and self = myself ) [ [audio.perception.range] of myself ]
+;    ( code = "EDA" and self = myself ) [ [day.perception.angle] of myself ]
+;    ( code = "ENA" and self = myself ) [ [night.perception.angle] of myself ]
+;    ( code = "EAA" and self = myself ) [ [audio.perception.angle] of myself ]
+;    ( code = "EVR" and self = myself ) [ [vocal.range] of myself ]
     ( code = "EBC" and self = myself ) [ [birthing.chance] of myself ]
     ( code = "EWC" and self = myself ) [ [weaning.chance] of myself ]
     ( code = "EIC" and self = myself ) [ [infancy.chance] of myself ]
     ( code = "EJC" and self = myself ) [ [juvenility.chance] of myself ]
     ( code = "EAC" and self = myself ) [ [adulthood.chance] of myself ]
-    ( code = "ESC" and self = myself ) [ [senescency.chance] of myself ]
     ( code = "ELC" and self = myself ) [ [living.chance] of myself ]
-    ( code = "ESA" and self = myself ) [ [alpha.chance] of myself ]
-    ( code = "ESB" and self = myself ) [ [beta.chance] of myself ]
-    ( code = "ESC" and self = myself ) [ [gamma.chance] of myself ]
+    ( code = "ESA" and self = myself ) [ [yellow.chance] of myself ]
+    ( code = "ESB" and self = myself ) [ [red.chance] of myself ]
+    ( code = "ESC" and self = myself ) [ [blue.chance] of myself ]
 
     ; PRIMITIVES
     ( code = "TRU" ) [ true ]

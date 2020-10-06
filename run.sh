@@ -3,5 +3,5 @@
 #PBS -m abe 
 #PBS -M crou0048@umn.edu 
 #PBS -N test_1
-#PBS -q amd2tb
-Desktop/NetLogo\ 6.1.1-64/NetLogo\ 6.1.1/netlogo-headless-10G.sh --model Desktop/B3GET/code/B3GET.nlogo --experiment WORLD-TEST1
+#PBS -q mesabi
+Desktop/NetLogo\ 6.1.1-64/NetLogo\ 6.1.1/netlogo-headless.sh --model Desktop/B3GET/code/B3GET.nlogo --experiment WORLD-TEST

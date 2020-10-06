@@ -27,7 +27,7 @@
 ; 2019-09-XX    h    is healthier than myself
 ; 2019-09-XX    i    is an infant
 ; 2019-09-XX    j    is a juvenile
-; 2019-09-XX    k    is kin (relatedness > 0.2)
+; 2019-09-XX    k    is kin (relatedness > 0.2) ; target is 0.25 or more related
 ; 2019-09-XX    l    is lactating
 ; 2019-09-XX    m    is a male
 ; 2019-09-XX    n    is a group member
@@ -35,7 +35,7 @@
 ; 2019-09-XX    p    is pregnant
 ; 2019-09-XX    q    is not kin (relatedness <= 0.2)
 ; 2019-09-XX    r    is smaller than myself
-; 2019-09-XX    s    is senescent
+; 2019-09-XX    s    is resting
 ; 2019-09-XX    t    is neither carrying or carried by myself
 ; 2019-09-XX    u    is a stranger (none-group member)
 ; 2019-09-XX    v    is alive
@@ -44,47 +44,43 @@
 ; 2019-09-XX    y    is carried by myself
 ; 2019-09-XX    z    is an anima1 (not a plant)
 ; 2019-09-XX    +    is carrying myself
-; 2019-09-XX    α    has alpha signal on
-; 2019-09-XX    å    has alpha signal off
-; 2019-09-XX    β    has beta signal on
-; 2019-09-XX    ß    has beta signal off
-; 2019-09-XX    ɣ    has gamma signal on
-; 2019-09-XX    œ    has gamma signal off
+; 2019-09-XX    α    has yellow signal on
+; 2019-09-XX    å    has yellow signal off
+; 2019-09-XX    β    has red signal on
+; 2019-09-XX    ß    has red signal off
+; 2019-09-XX    ɣ    has blue signal on
+; 2019-09-XX    œ    has blue signal off
 ; 2019-09-XX    *    is observed during the day
 ; 2019-09-XX    -    is observed during the night
-; 2019-09-XX    #    has color shade between # = 0 [dark] and # = 9 [light]
-; 2019-09-XX    $    has more energy than myself
-; 2019-09-XX    ~    has less energy than myself
+; 2019-09-XX    #    has color closest to #
 ;         
-; 2019-08-26   --> maintain-body  
-; 2019-08-26   --> body-size             
-; 2019-08-26   --> body-shade            
-; 2019-08-26   --> day-perception           
-; 2019-08-26   --> night-perception        
-; 2019-08-26   --> audio-perception        
-; 2019-08-26   --> day-perception-angle  
-; 2019-08-26   --> night-perception-angle   
-; 2019-08-26   --> audio-perception-angle 
-; 2019-08-26   --> vocal-range    
-; 2019-08-26   --> conception-chance     
-; 2020-04-XX   --> stomach-size   
-; 2019-08-26   --> mutation-chance              
-; 2019-08-26   --> sex-ratio                
-; 2019-08-26   --> litter-size                
-; 2019-08-26   --> turn-right       
-; 2019-08-26   --> turn-left             
-; 2019-08-26   --> go-forward 
+; 2019-08-26   --> living.chance
+; 2019-08-26   --> body-size
+; 2019-08-26   --> body-shade
+; XXXX-XX-XX   --> visual-angle
+; XXXX-XX-XX   --> visual-range
+; 2019-08-26   --> day-perception
+; 2019-08-26   --> night-perception
+; 2019-08-26   --> conception-chance
+; 2020-04-XX   --> bite-capacity
+; 2019-08-26   --> mutation-chance
+; 2019-08-26   --> sex-ratio
+; 2019-08-26   --> litter-size
+; 2019-08-26   --> turn-right
+; 2019-08-26   --> turn-left
+; 2019-08-26   --> go-forward
 ; 2020-XX-XX   --> set-heading 
+; 2020-XX-XX   --> set-heading-random
 ; 2020-XX-XX   --> hide
-; 2019-08-26   --> signal-a-on       
-; 2019-08-26   --> signal-b-on           
-; 2019-08-26   --> signal-c-on              
-; 2019-08-26   --> check-infancy          
-; 2019-08-26   --> check-birth            
-; 2019-08-26   --> check-juvenility       
+; XXXX-XX-XX   --> rest
+; 2019-08-26   --> yellow-signal-on
+; 2019-08-26   --> red-signal-on
+; 2019-08-26   --> blue-signal-on
+; 2019-08-26   --> check-infancy
+; 2019-08-26   --> check-birth
+; 2019-08-26   --> check-juvenility
 ; 2019-08-26   --> check-weaning
-; 2019-08-26   --> check-adulthood           
-; 2019-08-26   --> check-senescence         
+; 2019-08-26   --> check-adulthood   
 ;
 ; 2020-04-01   --> move-toward 
 ; 2020-04-01   --> move-away-from
@@ -100,7 +96,7 @@
 ; 2020-04-XX   --> cling-to  
 ; 2020-04-XX   --> squirm-from 
 ; 2019-09-XX   --> help  
-; 2019-09-XX   --> attack 
+; 2019-09-XX   --> hurt 
 ; 2019-10-16   --> mate-with 
 ; 
 ;----------------------------------------------------------------------------------------------
@@ -125,17 +121,13 @@ to-report sta7us-get-decisions [ my-environment ]
 
   let status-table table:make
   foreach my-environment [ obj ->
-    if ( is-patch? obj ) [ table:put status-table ( [pmeta-id] of obj ) ( status-of obj ) ]
-    if ( is-turtle? obj ) [ table:put status-table ( [meta-id] of obj ) ( status-of obj ) ]
+    if ( is-patch? obj ) [ table:put status-table ( [pmeta.id] of obj ) ( status-of obj ) ]
+    if ( is-anima1? obj ) [ table:put status-table ( [meta.id] of obj ) ( status-of obj ) ]
   ]
-
-  ;print my-environment
   
   foreach (sentence chromosome.I chromosome.II) [ g ->
     
-    ;print g
-    
-    if ( length g = 5 and is-boolean? first g and is-string? item 1 g and is-string? item 2 g and is-string? item 3 g and is-number? item 4 g ) [ ; checks that allele correctly organized
+    if ( length g = 5 and is-string? item 1 g and is-string? item 2 g and is-string? item 3 g and is-number? item 4 g ) [ ; checks that allele correctly organized
       let gene-ego item 1 g
       let gene-other item 2 g
       let gene-action item 3 g
@@ -143,29 +135,20 @@ to-report sta7us-get-decisions [ my-environment ]
       
       ; Check that first CODON matches self
       if first-string-is-part-of-last? ( gene-ego ) ( ego-status ) [
-
+        
         ; Consider status-of others in the environment
         foreach my-environment [ other-guy ->
-          let other-status table:get status-table ifelse-value ( is-patch? other-guy ) [ [pmeta-id] of other-guy ] [ [meta-id] of other-guy ]
-
+          let other-status table:get status-table ifelse-value ( is-patch? other-guy ) [ [pmeta.id] of other-guy ] [ [meta.id] of other-guy ]
+          
           ; Check that second CODON matches other
           if first-string-is-part-of-last? ( gene-other ) ( other-status ) [
             
             let distance-to-target distance other-guy
             set distance-to-target ifelse-value ( distance-to-target > 1 ) [ distance-to-target ] [ 1 ]
-            ;let vector-doesnt-exist true
-            ;            foreach decision-vectors [ v ->
-            ;              
-            ;              if ( item 1 v = other-guy ) and ( item 2 v = ( sta7us-get-action gene-action ) ) [
-            ;                set vector-doesnt-exist false
-            ;                set decision-vectors remove-item position v decision-vectors decision-vectors
-            ;                let new-vector replace-item 3 v ( item 3 v + precision ( gene-weight / ( distance-to-target ^ 2 )) 5 )
-            ;                set decision-vectors lput new-vector decision-vectors ]]
+            set decision-vectors lput (list meself other-guy ( sta7us-get-action gene-action ) precision ( gene-weight / ( distance-to-target ^ 2 )) 5 false ) decision-vectors 
             
-            ;if vector-doesnt-exist [
-            set decision-vectors lput (list meself other-guy ( gene-action ) precision ( gene-weight / ( distance-to-target ^ 2 )) 5 false ) decision-vectors 
-            ;]
-        ]]
+          ]
+        ]
       ]
     ]
   ]
@@ -181,10 +164,11 @@ end
 ; CALLER: anima1
 ;----------------------------------------------------------------------------------------------
 
-to-report sta7us-get-mutation [ original-codon ]
+to-report sta7us-get-mutation [ original-codon type-of-mutation ] ; numbers, letters, both
   report ( ifelse-value 
-    ( member? original-codon action-code-list ) [ one-of action-code-list ] 
-    [ generate-status ] ) ; expand to include add, delete, duplicate, mutate
+    ( is-number? original-codon and ( type-of-mutation = "numbers" or type-of-mutation = "both" ) ) [ get-updated-value original-codon ( one-of [ 1 -1 ] ) ]
+    ( member? original-codon action-code-list and ( type-of-mutation = "letters" or type-of-mutation = "both" ) ) [ one-of action-code-list ]
+    [ ifelse-value ( type-of-mutation = "letters" or type-of-mutation = "both" ) [ generate-status ] [ original-codon ]] ) 
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -195,46 +179,43 @@ to-report sta7us-get-action [ action-code ]
 
   report
   (ifelse-value
-    ( action-code = "MNT" or action-code = "maintain-body" ) [ "maintain-body" ]
+    ( action-code = "MNT" or action-code = "maintain-body" or action-code = "living-chance" ) [ "living-chance" ]
     ( action-code = "GRW" or action-code = "body-size" ) [ "body-size" ]
     ( action-code = "BSD" or action-code = "body-shade" ) [ "body-shade" ]
-    ( action-code = "DPR" or action-code = "IPR" or action-code = "day-perception" or action-code = "day-perception-range" ) [ "day-perception-range" ]
-    ( action-code = "NPR" or action-code = "night-perception" or action-code = "night-perception-range" ) [ "night-perception-range" ]
-    ( action-code = "APR" or action-code = "audio-perception" or action-code = "audio-perception-range" ) [ "audio-perception-range" ]
-    ( action-code = "DPA" or action-code = "day-perception-angle" ) [ "day-perception-angle" ]
-    ( action-code = "NPA" or action-code = "night-perception-angle" ) [ "night-perception-angle" ]
-    ( action-code = "APA" or action-code = "audio-perception-angle" ) [ "audio-perception-angle" ]
-    ( action-code = "VCR" or action-code = "vocal-range" ) [ "vocal-range" ]
+    ( action-code = "DPR" or action-code = "IPR" or action-code = "day-perception-range" or action-code = "visual-range" ) [ "visual-range" ]
+    ( action-code = "DPA" or action-code = "day-perception-angle" or action-code = "visual-angle" ) [ "visual-angle" ]
+    ( action-code = "NPR" or action-code = "night-perception-range" or action-code = "day-perception" ) [ "day-perception" ]
+    ( action-code = "NPA" or action-code = "night-perception-angle" or action-code = "night-perception" ) [ "night-perception" ]
+    ( action-code = "APR" or action-code = "audio-perception" or action-code = "audio-perception-range" ) [ "audio-perception-range" ] ; not used
+    ( action-code = "APA" or action-code = "audio-perception-angle" ) [ "audio-perception-angle" ] ; not used
+    ( action-code = "VCR" or action-code = "vocal-range" ) [ "vocal-range" ] ; not used
     ( action-code = "ICC" or action-code = "conception-chance" ) [ "conception-chance" ]
-    ( action-code = "STM" or action-code = "stomach-size" ) [ "stomach-size" ]   
+    ( action-code = "STM" or action-code = "stomach-size" ) [ "bite-capacity" ]   
     ( action-code = "MTR" or action-code = "mutation-rate" or  action-code = "MTC" or action-code = "mutation-chance") [ "mutation-chance" ]
     ( action-code = "SXR" or action-code = "sex-ratio" ) [ "sex-ratio" ]
     ( action-code = "LTS" or action-code = "litter-size" ) [ "litter-size" ]
-    ( action-code = "LEV" or action-code = "leave-group" ) [ "leave-group" ]
     ( action-code = "TRT" or action-code = "turn-right" ) [ "turn-right" ]
     ( action-code = "TLF" or action-code = "turn-left" ) [ "turn-left" ]
     ( action-code = "GFD" or action-code = "go-forward" ) [ "go-forward" ]
     ( action-code = "MOV" or action-code = "move-toward" ) [ "move-toward" ]
+    ( action-code = "move-away-from" ) [ "move-away-from" ]
     ( action-code = "HED" or action-code = "set-heading" ) [ "set-heading" ]
+    ( action-code = "set-heading-random" ) [ "set-heading-random" ]
     ( action-code = "HID" or action-code = "hide" ) [ "hide" ]
-    ( action-code = "SAC" or action-code = "signal-a-chance" or action-code = "SAO" or action-code = "signal-a-on" or action-code = "signal-alpha-on" ) [ "signal-alpha-on" ]
-    ( action-code = "SBC" or action-code = "signal-b-chance" or action-code = "SBO" or action-code = "signal-b-on" or action-code = "signal-beta-on") [ "signal-beta-on" ]
-    ( action-code = "SCC" or action-code = "signal-c-chance" or action-code = "SCO" or action-code = "signal-c-on" or action-code = "signal-gamma-on" ) [ "signal-gamma-on" ]
-    ( action-code = "INC" or action-code = "infancy-chance" ) [ "infancy-chance" ]
-    ( action-code = "CKI" or action-code = "check-infancy" ) [ "check-infancy" ]
-    ( action-code = "GVB" or action-code = "birthing-chance" ) [ "birthing-chance" ]
-    ( action-code = "CKB" or action-code = "check-birth" ) [ "check-birth" ]
-    ( action-code = "JVC" or action-code = "juvenile-chance" ) [ "juvenile-chance" ]
-    ( action-code = "CKJ" or action-code = "check-juvenility" ) [ "check-juvenility" ]
-    ( action-code = "WEN" or action-code = "weaning-chance" ) [ "weaning-chance" ]
-    ( action-code = "CKW" or action-code = "check-weaning" ) [ "check-weaning" ]
-    ( action-code = "ADC" or action-code = "adult-chance" ) [ "adult-chance" ]
-    ( action-code = "CKA" or action-code = "check-adulthood" ) [ "check-adulthood" ]
-    ( action-code = "SNC" or action-code = "senescent-chance" ) [ "senescent-chance" ]
-    ( action-code = "CKS" or action-code = "check-senescence" ) [ "check-senescence" ]
-    ( action-code = "DSC" or action-code = "digest-stomach" ) [ "digest-stomach" ] ; obsolete
-    ( action-code = "FAT" or action-code = "reserve-energy" ) [ "reserve-energy" ] ; obsolete
-    ( action-code = "BRN" or action-code = "burn-reserves" ) [ "burn-reserves" ] ; obsolete
+    ( action-code = "rest" ) [ "rest" ]
+    ( action-code = "SAC" or action-code = "signal-a-chance" or action-code = "SAO" or action-code = "signal-a-on" or action-code = "signal-alpha-on" or action-code = "yellow-signal-on" ) [ "yellow-signal-on" ]
+    ( action-code = "SBC" or action-code = "signal-b-chance" or action-code = "SBO" or action-code = "signal-b-on" or action-code = "signal-beta-on" or action-code = "red-signal-on" ) [ "red-signal-on" ]
+    ( action-code = "SCC" or action-code = "signal-c-chance" or action-code = "SCO" or action-code = "signal-c-on" or action-code = "signal-gamma-on" or action-code = "blue-signal-on" ) [ "blue-signal-on" ]
+    ( action-code = "INC" or action-code = "infancy-chance" or action-code = "CKI" or action-code = "check-infancy" ) [ "check-infancy" ]
+    ( action-code = "GVB" or action-code = "birthing-chance" or action-code = "CKB" or action-code = "check-birth" ) [ "check-birth" ]
+    ( action-code = "JVC" or action-code = "juvenile-chance" or action-code = "CKJ" or action-code = "check-juvenility" ) [ "check-juvenility" ]
+    ( action-code = "WEN" or action-code = "weaning-chance" or action-code = "CKW" or action-code = "check-weaning" ) [ "check-weaning" ]
+    ( action-code = "ADC" or action-code = "adult-chance" or action-code = "CKA" or action-code = "check-adulthood" ) [ "check-adulthood" ]
+    ( action-code = "SNC" or action-code = "senescent-chance" ) [ "senescent-chance" ] ; not used
+    ( action-code = "CKS" or action-code = "check-senescence" ) [ "check-senescence" ] ; not used
+    ( action-code = "DSC" or action-code = "digest-stomach" ) [ "digest-stomach" ] ; not used
+    ( action-code = "FAT" or action-code = "reserve-energy" ) [ "reserve-energy" ] ; not used
+    ( action-code = "BRN" or action-code = "burn-reserves" ) [ "burn-reserves" ] ; not used
     ( action-code = "GFT" or action-code = "supply-to" ) [ "supply-to" ]
     ( action-code = "RFT" or action-code = "demand-from" ) [ "demand-from" ]
     ( action-code = "EAT" or action-code = "eat") [ "eat" ]
@@ -245,11 +226,11 @@ to-report sta7us-get-action [ action-code ]
     ( action-code = "ATK" or action-code = "attack" ) [ "attack" ]
     ( action-code = "HLP" or action-code = "help") [ "help" ]
     ( action-code = "JNG" or action-code = "join-group-of" or action-code = "join" ) [ "join" ]
-    ( action-code = "LEV" or action-code = "leave" ) [ "leave" ]
+    ( action-code = "LEV" or action-code = "leave-group" or action-code = "LEV" or action-code = "leave" ) [ "leave" ]
     ( action-code = "RCT" or action-code = "recruit" ) [ "recruit" ]
-    ( action-code = "KCK" or action-code = "kick-out" ) [ "kick-out" ]
+    ( action-code = "KCK" or action-code = "kick-out" or action-code = "expel" ) [ "expel" ]
     ( action-code = "MAT" or action-code = "mate-with") [ "mate-with" ]
-    [ "" ])
+    [ action-code ])
   
 end
 
@@ -270,10 +251,24 @@ to-report status-of [ target ]
     let target-kin ifelse-value ( relatedness-with target > 0.2 ) [ "k" ] [ "q" ]
     let target-group ifelse-value ( [group.identity] of target = group.identity ) [ "n" ] [ "u" ] 
     let target-carry ifelse-value ( member? target carried.items ) [ "y" ] [ ifelse-value ( member? self [carried.items] of target ) [ "+" ] [ "t" ] ]
-    let target-signal (word ifelse-value [alpha.signal] of target [ "α" ][ "å" ] ifelse-value [beta.signal] of target [ "β" ][ "ß" ] ifelse-value [gamma.signal] of target [ "ɣ" ][ "œ" ] )
-    let target-energy ifelse-value ( [energy.supply] of target > energy.supply ) [ "$" ] [ "~" ]
+    let target-signal (word ifelse-value [yellow.signal] of target [ "α" ][ "å" ] ifelse-value [red.signal] of target [ "β" ][ "ß" ] ifelse-value [blue.signal] of target [ "ɣ" ][ "œ" ] )
+    let target-rest ifelse-value ( is.resting = true ) [ "s" ] [ "" ]
     let target-color (word "" round [color] of target "")
-    set status-report (word status-report target-self target-alive target-kind target-sex target-life-history target-fertility target-size target-health target-kin target-group target-carry target-signal target-color ) ]
+    set status-report (word status-report 
+      target-kind 
+      target-self 
+      target-alive 
+      target-sex 
+      target-life-history
+      ifelse-value ( target = self or model-structure = "show-fertility" ) [ target-fertility ] [ "" ]
+      target-size 
+      target-health 
+      target-kin 
+      target-group 
+      target-carry 
+      target-signal
+      target-rest 
+      target-color ) ]
     
   if ( is-patch? target ) [ ; PATCHES
     let target-kind "d" 
@@ -307,18 +302,16 @@ end
 
 to-report action-code-list
   report [ 
-    "maintain-body" "body-size" "body-shade" 
-    "day-perception" "night-perception" "audio-perception" 
-    "day-perception-angle" "night-perception-angle" "audio-perception-angle" "vocal-range" 
-    "conception-chance" "stomach-size" "mutation-chance" "sex-ratio" "litter-size" 
-    "turn-right" "turn-left" "go-forward" "set-heading" "hide" 
-    "signal-alpha-on" "signal-beta-on" "signal-gamma-on" 
-    "check-infancy" "check-birth" "check-juvenility" 
-    "check-weaning" "check-adulthood" "check-senescence"
+    "living-chance" "body-size" "body-shade" 
+    "day-perception" "night-perception" "visual-angle" "visual-range" 
+    "conception-chance" "bite-capacity" "mutation-chance" "sex-ratio" "litter-size" 
+    "turn-right" "turn-left" "go-forward" "set-heading" "hide" "rest" "set-heading-random"
+    "yellow-signal-on" "red-signal--on" "blue-signal-on" 
+    "check-infancy" "check-birth" "check-juvenility" "check-weaning" "check-adulthood" 
     "move-toward" "move-away-from" "supply-to" "demand-from" "eat"
     "join" "leave" "recruit" "kick-out"
     "pick-up" "put-down" "cling-to" "squirm-from"
-    "help" "attack" "mate-with" ]
+    "help" "hurt" "mate-with" ]
 end
 
 to-report generate-status
