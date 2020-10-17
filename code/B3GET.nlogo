@@ -17,7 +17,9 @@ __includes [
   "extensions/import-export.nls"
   "extensions/selection.nls"
   "extensions/verification.nls"
-  "extensions/sta7us.nls"
+  "extensions/sta2us.nls"
+  "extensions/results.nls"
+  "extensions/g3notype.nls"
 ]
 
 breed [ anima1s anima1 ]
