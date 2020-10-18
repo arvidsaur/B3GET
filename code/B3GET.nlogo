@@ -1,4 +1,3 @@
-;-----------------------------------------------------------------------------------
 ;
 ;   888888ba  d8888b.  .88888.   88888888b d888888P
 ;   88    `8b     `88 d8'   `88  88           88
@@ -465,7 +464,7 @@ to consider-environment
 
   foreach carried.items [ c -> if ( [my.mother] of c = self ) [
     set my.environment lput c my.environment ; mothers can see their gestatees, infants and juveniles
-    ask c [ set my.environment lput myself my.environment ] ]]  ; gestatees, infants and juveniles can see their mothers
+    ask c [ if ( not member? myself my.environment ) [ set my.environment lput myself my.environment ] ]]]  ; gestatees, infants and juveniles can see their mothers
 
   set my.environment remove-duplicates lput self my.environment ; self is always in environment
   set actions.completed []
@@ -1435,11 +1434,11 @@ end
 GRAPHICS-WINDOW
 6
 86
-836
-917
+838
+919
 -1
 -1
-8.22
+8.24
 1
 10
 1
@@ -1499,7 +1498,7 @@ INPUTBOX
 387
 79
 path-to-experiment
-../results/
+../results/visual-verification/
 1
 0
 String
@@ -1610,7 +1609,7 @@ plant-seasonality
 plant-seasonality
 0
 1
-1.0
+0.0
 .05
 1
 NIL
@@ -1663,7 +1662,7 @@ INPUTBOX
 1226
 299
 population
-population
+hide-and-seek
 1
 0
 String
@@ -1674,7 +1673,7 @@ INPUTBOX
 1226
 373
 genotype
-genotype
+hide-and-seek
 1
 0
 String
@@ -1738,7 +1737,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "--------" "meta-report" "verify-code" "check-runtime" "simulation-report" "model-structure" "reset-plants" "clear-population" "view-genotype" "view-decisions" "view-actions" "view-history" "view-status"
-12
+6
 
 BUTTON
 1037
