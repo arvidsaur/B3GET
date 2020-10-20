@@ -1,3 +1,4 @@
+;-----------------------------------------------------------------------------------
 ;
 ;   888888ba  d8888b.  .88888.   88888888b d888888P
 ;   88    `8b     `88 d8'   `88  88           88
@@ -211,7 +212,7 @@ end
 ;--------------------------------------------------------------------------------------------------------------------
 
 to setup-parameters
-  set model-version "1.1.0"
+  set model-version "1.2.0-Beta"
   set deterioration-rate -0.01
   set maximum-visual-range 5
   set base-litter-size 10
@@ -312,11 +313,11 @@ end
 to-report get-solar-status report ifelse-value ( ( cos (( 360 / plant-daily-cycle ) * ticks)) > 0 ) [ "DAY" ] [ "NIGHT" ] end
 
 to-report get-updated-value [ current-value update-value ]
-  let report-value ifelse-value ( current-value < 0.00001 ) [ 0.00001 ] [ ifelse-value ( current-value > 0.99999 ) [ 0.99999 ] [ current-value ] ]
+  let report-value ifelse-value ( current-value < 0.0000000001 ) [ 0.0000000001 ] [ ifelse-value ( current-value > 0.9999999999 ) [ 0.9999999999 ] [ current-value ] ]
   ifelse update-value < 0
   [ set report-value ( report-value ^ (1 + abs update-value) ) ]
   [ set report-value ( report-value ^ (1 / ( 1 + update-value) )) ]
-  report report-value
+  report precision report-value 10
 end
 
 to-report generate-simulation-id
@@ -338,7 +339,7 @@ end
 
 to update-patches
 
-  let season ( cos (( 360 / plant-annual-cycle ) * ticks))
+  let season ( cos (( 360 / plant-annual-cycle ) * ticks ))
   let density ( sum [penergy.supply] of patches ) / count patches
 
   ask patches [
@@ -550,7 +551,7 @@ to do-actions
 
       ( ifelse ; these actions can be performed resting or not resting
         action = "rest" [ rest cost ]
-        action = "living-chance" [ living-chance cost ] ; should these have distance checkers too?
+        action = "living-chance" [ living-chance cost ]
         action = "body-size" [ body-size cost ]
         action = "body-shade" [ body-shade cost ]
         action = "visual-range" [ visual-range cost ]
@@ -597,7 +598,7 @@ to-report check-energy [ vector ]
   report passes-energy-check
 end
 
-to-report get-action-cost-of [ target action-name ]
+to-report get-action-cost-of [ target action-name ] ; This can only be called for certain actions, as specified within the code below, and include actions where no further action beyond paying for it is needed
 
   ; ask target to complete actions from incomplete related decisions
   let not-done-decisions filter [ vector -> item 1 vector = self and item 2 vector = action-name and item 4 vector = false ] [decision.vectors] of target
@@ -613,7 +614,7 @@ to-report get-action-cost-of [ target action-name ]
 end
 
 to complete-action [ target action cost outcome ]
-  let completed-action ( list self target action ( precision cost 10 ) outcome )
+  let completed-action ( list self target action cost outcome )
   set actions.completed lput completed-action actions.completed
   ;set all-actions-completed lput (sentence ticks but-last completed-action) all-actions-completed
 end
@@ -780,6 +781,7 @@ end
 to rest [ cost ]
   if ( cost > 0 ) [ set is.resting true ]
   if ( cost < 0 ) [ set is.resting false ]
+  complete-action self "rest" cost is.resting
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -1498,7 +1500,7 @@ INPUTBOX
 387
 79
 path-to-experiment
-../results/visual-verification/
+../data/
 1
 0
 String
@@ -1662,7 +1664,7 @@ INPUTBOX
 1226
 299
 population
-hide-and-seek
+population
 1
 0
 String
@@ -1673,7 +1675,7 @@ INPUTBOX
 1226
 373
 genotype
-hide-and-seek
+genotype
 1
 0
 String
@@ -1737,7 +1739,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "--------" "meta-report" "verify-code" "check-runtime" "simulation-report" "model-structure" "reset-plants" "clear-population" "view-genotype" "view-decisions" "view-actions" "view-history" "view-status"
-6
+3
 
 BUTTON
 1037

@@ -151,18 +151,18 @@ to-report generate-verification-tape
   ; GO
   ;--------------------------------------------------------------------------------------------------------------------
   
-  set header lput "The runtime of GO subroutine is less than 10 milliseconds per timestep per agent?" header 
-  set verification lput "runtime" verification 
+  set header lput "The runtime of GO subroutine is less than 10 milliseconds per timestep per agent?" header
+  set verification lput "runtime" verification
   set function lput "go" function
-  set boolean lput ( ifelse-value ( count anima1s = 0 ) [ false ] [ ( profiler:inclusive-time "go" / count anima1s ) < 10 ] ) boolean 
+  set boolean lput ( ifelse-value ( count anima1s = 0 ) [ false ] [ ( profiler:inclusive-time "go" / count anima1s ) < 10 ] ) boolean
   
-  set header lput "The runtime of GO subroutine is less than 500 milliseconds per timestep?" header 
-  set verification lput "runtime" verification 
+  set header lput "The runtime of GO subroutine is less than 500 milliseconds per timestep?" header
+  set verification lput "runtime" verification
   set function lput "go" function
-  set boolean lput ( ( profiler:inclusive-time "go" / how-many-ticks? ) < 500 ) boolean 
+  set boolean lput ( ( profiler:inclusive-time "go" / how-many-ticks? ) < 500 ) boolean
   
-  set header lput "All agents are designated as one of the life history options?" header 
-  set verification lput "dynamic" verification 
+  set header lput "All agents are designated as one of the life history options?" header
+  set verification lput "dynamic" verification
   set function lput "go" function
   set boolean lput ( not any? anima1s with [ life.history != "gestatee" and life.history != "infant" and life.history != "juvenile" and life.history != "adult" ] ) boolean
   
@@ -226,12 +226,10 @@ to-report generate-verification-tape
   set function lput "update-plants" function
   set boolean lput ( profiler:calls "update-plants" = how-many-ticks? ) boolean   
   
-  ;  set header lput "All patches either are within PLANT-MINIMUM-NEIGHBORS and PLANT-MAXIMUM-NEIGHBORS or they are not?" header 
-  ;  set verification lput "dynamic" verification 
-  ;  set function lput "update-plants" function
-  ;  let count-plants-with-incorrect-neighbors count patches with [ ( count neighbors with [ any? plants-here ] ) < plant-minimum-neighbors or ( count neighbors with [ any? plants-here ] ) > plant-maximum-neighbors ]
-  ;  let count-plants-with-correct-neighbors count patches with [ ( count neighbors with [ any? plants-here ] ) >= plant-minimum-neighbors and ( count neighbors with [ any? plants-here ] ) <= plant-maximum-neighbors ]
-  ;  set boolean lput ( count-plants-with-incorrect-neighbors + count-plants-with-correct-neighbors = count patches ) boolean
+  set header lput "No plants have an energy supply that exceeds their terminal energy?" header 
+  set verification lput "dynamic" verification 
+  set function lput "update-plants" function
+  set boolean lput ( false ) boolean   
   
   ;--------------------------------------------------------------------------------------------------------------------
   ; DETERIORATE
@@ -260,6 +258,11 @@ to-report generate-verification-tape
   set function lput "update-appearance" function
   set boolean lput ( profiler:calls "update-appearance" = count-all-agents ) boolean   
   
+  set header lput "Agents have a size between 0 and 1?" header 
+  set verification lput "dynamic" verification 
+  set function lput "update-appearance" function
+  set boolean lput ( false ) boolean  
+  
   ;--------------------------------------------------------------------------------------------------------------------
   ; GET-SHAPE
   ;--------------------------------------------------------------------------------------------------------------------
@@ -278,36 +281,61 @@ to-report generate-verification-tape
   ; CONSIDER-ENVIRONMENT
   ; --------------------------------------------------------------------------------------------------------------------
   
-  ;  set header lput "Agent calls to CONSIDER-ENVIRONMENT same number as agent count?" header 
-  ;  set verification lput "runtime" verification 
-  ;  set function lput "consider-environment" function
-  ;  set boolean lput ( profiler:calls "consider-environment" = count-alive-agents ) boolean
+  set header lput "Agent calls to CONSIDER-ENVIRONMENT same number as agent count?" header 
+  set verification lput "runtime" verification 
+  set function lput "consider-environment" function
+  set boolean lput ( profiler:calls "consider-environment" = count-alive-agents ) boolean
   
-  ;  set header lput "The my.environment of agents is an agentset?" header 
-  ;  set verification lput "dynamic" verification 
-  ;  set function lput "consider-environment" function
-  ;  set boolean lput ( not any? anima1s with [ not is-agentset? my.environment ] ) boolean
-  ;  
-  ;  set header lput "Not any agents with no DAY PERCEPTION RANGE who can see their environment during the day?" header 
-  ;  set verification lput "dynamic" verification 
-  ;  set function lput "consider-environment" function
-  ;  set boolean lput ( ifelse-value ( get-solar-status = "DAY" ) [ any? anima1s with [ life.history != "gestatee" and day.perception.range = 0 and is-agentset? my.environment and count my.environment > 1 ] ] [ true ] ) boolean
-  ;  
-  ;  set header lput "Not any agents with no NIGHT PERCEPTION RANGE who can see their environment during the night?" header 
-  ;  set verification lput "dynamic" verification 
-  ;  set function lput "consider-environment" function
-  ;  set boolean lput ( ifelse-value ( get-solar-status = "NIGHT" ) [ any? anima1s with [ life.history != "gestatee" and night.perception.range = 0 and is-agentset? my.environment and count my.environment > 1 ] ] [ true ] ) boolean
-  ;  
-  ;  set header lput "Not any agents with no DAY PERCEPTION ANGLE who can see their environment during the day?" header 
-  ;  set verification lput "dynamic" verification 
-  ;  set function lput "consider-environment" function
-  ;  set boolean lput ( ifelse-value ( get-solar-status = "DAY" ) [ any? anima1s with [ life.history != "gestatee" and day.perception.angle = 0 and is-agentset? my.environment and count my.environment > 1 ] ] [ true ] ) boolean
-  ;  
-  ;  set header lput "Not any agents with no NIGHT PERCEPTION ANGLE who can see their environment during the night?" header 
-  ;  set verification lput "dynamic" verification 
-  ;  set function lput "consider-environment" function
-  ;  set boolean lput ( ifelse-value ( get-solar-status = "NIGHT" ) [ any? anima1s with [ life.history != "gestatee" and night.perception.angle = 0 and is-agentset? my.environment and count my.environment > 1 ] ] [ true ] ) boolean
+  set header lput "The my.environment of agents does not contain breed = turtles?" header 
+  set verification lput "dynamic" verification 
+  set function lput "consider-environment" function
+  set boolean lput ( false ) boolean
   
+  set header lput "Not any agents with no DAY PERCEPTION who can see their environment during the day?" header 
+  set verification lput "dynamic" verification 
+  set function lput "consider-environment" function
+  set boolean lput ( ifelse-value ( get-solar-status = "DAY" ) [ any? anima1s with [ life.history != "gestatee" and day.perception = 0 and is-list? my.environment and length my.environment > 1 ] ] [ true ] ) boolean
+  
+  set header lput "Not any agents with no NIGHT PERCEPTION who can see their environment during the night?" header 
+  set verification lput "dynamic" verification 
+  set function lput "consider-environment" function
+  set boolean lput ( ifelse-value ( get-solar-status = "NIGHT" ) [ any? anima1s with [ life.history != "gestatee" and night.perception = 0 and is-list? my.environment and length my.environment > 1 ] ] [ true ] ) boolean
+  
+  set header lput "Not any agents with no VISUAL RANGE who can see their environment?" header 
+  set verification lput "dynamic" verification 
+  set function lput "consider-environment" function
+  set boolean lput ( any? anima1s with [ life.history != "gestatee" and visual.range = 0 and is-list? my.environment and length my.environment > 1 ] ) boolean
+  
+  set header lput "Not any agents with no VISUAL ANGLE who can see their environment?" header 
+  set verification lput "dynamic" verification 
+  set function lput "consider-environment" function
+  set boolean lput ( any? anima1s with [ life.history != "gestatee" and visual.angle = 0 and is-list? my.environment and length my.environment > 1 ] ) boolean
+
+  set header lput "Agents do not have other agents in environment beyond their visual.range?" header 
+  set verification lput "dynamic" verification 
+  set function lput "consider-environment" function
+  set boolean lput ( false ) boolean
+  
+  set header lput "Gestatees can always see their mother?" header 
+  set verification lput "dynamic" verification 
+  set function lput "consider-environment" function
+  set boolean lput ( false ) boolean
+  
+  set header lput "Agents can see their carried items?" header 
+  set verification lput "dynamic" verification 
+  set function lput "consider-environment" function
+  set boolean lput ( false ) boolean
+  
+  set header lput "There are no duplicates in my.environment?" header 
+  set verification lput "dynamic" verification 
+  set function lput "consider-environment" function
+  set boolean lput ( false ) boolean
+  
+  set header lput "Dead agents do not have anything in environment?" header 
+  set verification lput "dynamic" verification 
+  set function lput "consider-environment" function
+  set boolean lput ( false ) boolean
+ 
   ; --------------------------------------------------------------------------------------------------------------------
   ; MAKE-DECISIONS
   ; --------------------------------------------------------------------------------------------------------------------
@@ -337,6 +365,16 @@ to-report generate-verification-tape
   ;  set function lput "consider-environment" function
   ;  set boolean lput ( not any? anima1s with [ life.history = "female" and any? my-targets with [ life.history = "gestatee" and not member? self [my-offspring] of myself ]] ) boolean 
   
+  ;  All decision vectors are unique in their ego-target-action-combo
+  ;When are actions, environment, decisions items erased after each turn?
+    ; 
+  ; 
+  ; 
+  ; 
+  ; Dead agents do not have anything in decisions, actions list
+  
+  
+  
   ; --------------------------------------------------------------------------------------------------------------------
   ; DO-ACTIONS
   ; --------------------------------------------------------------------------------------------------------------------
@@ -345,6 +383,12 @@ to-report generate-verification-tape
   ;  set verification lput "runtime" verification 
   ;  set function lput "act" function
   ;  set boolean lput ( profiler:calls "act" = count-alive-agents ) boolean 
+  
+  ;  No one is doing an action with energy of 0
+  ;There are no actions that can be completed with 0 cost
+  ;Not any inter-actions performed when the two individuals are more than their check-distance apart?
+  ;Somehow check that the true/false energy check in decision vectors is working
+  ;How does code keep agents from having negative energy?
   
   ; --------------------------------------------------------------------------------------------------------------------
   ; LIVING-CHANCE
@@ -866,6 +910,20 @@ to-report generate-verification-tape
   let mean-juvenile-travel-distance (ifelse-value ( any? anima1s with [ life.history = "juvenile" ]) [ mean [distance.traveled] of anima1s with [ life.history = "juvenile" ]] [0] )
   let mean-adult-travel-distance (ifelse-value ( any? anima1s with [ life.history = "adult" ]) [ mean [distance.traveled] of anima1s with [ life.history = "adult" ]] [0] )
   set boolean lput ( mean-infant-travel-distance <= mean-juvenile-travel-distance and mean-juvenile-travel-distance <= mean-adult-travel-distance ) boolean
+  
+  ;  Agents with go-ward action have travel distance greater than 0
+  
+  ; --------------------------------------------------------------------------------------------------------------------
+  ; HIDE
+  ; --------------------------------------------------------------------------------------------------------------------
+  
+  ;  Agents who are hidden aren’t in anyone’s my.environment
+  
+  ; --------------------------------------------------------------------------------------------------------------------
+  ; REST
+  ; --------------------------------------------------------------------------------------------------------------------
+  
+  ;No one is resting and performing actions that are only done when not resting?
   
   ; --------------------------------------------------------------------------------------------------------------------
   ; SIGNALING
@@ -1410,6 +1468,8 @@ to-report generate-verification-tape
   set function lput "receive-from" function
   set boolean lput ( profiler:calls "receive-from" = action-count-for "receive-from" ) boolean
   
+  ;  If receive-from action then either supply-to, demand-from, or eat action also
+  
   ; --------------------------------------------------------------------------------------------------------------------
   ; JOIN
   ; --------------------------------------------------------------------------------------------------------------------
@@ -1603,6 +1663,8 @@ to-report generate-verification-tape
   set verification lput "dynamic" verification 
   set function lput "carry" function
   set boolean lput ( not any? anima1s with [ member? nobody carried.items ] ) boolean
+  
+  ;  Agent not in multiple inventories carried.items
   
   ; --------------------------------------------------------------------------------------------------------------------
   ; DROP
@@ -1842,6 +1904,8 @@ to-report generate-verification-tape
       or adult.sex.ratio > 0 or adult.litter.size > 0 
       or adult.conception.chance > 0 ) ] ) boolean
   
+  ;  Every agent has a group.identity
+  
   ; --------------------------------------------------------------------------------------------------------------------
   ; SETUP-CHROMOSOMES-FROM
   ; --------------------------------------------------------------------------------------------------------------------
@@ -1869,6 +1933,8 @@ to-report generate-verification-tape
   ;  let mean-relatedness-with-father ( ifelse-value ( any? anima1s with [ father != nobody ] ) [ mean [relatedness-with father] of anima1s with [ father != nobody ] ] [ 0 ] )
   ;  let sd-relatedness-with-father ( ifelse-value ( any? anima1s with [ father != nobody ] ) [ standard-deviation [relatedness-with father] of anima1s with [ father != nobody ] ] [ 0 ] )
   ;  set boolean lput ( abs ( mean-relatedness-with-father - 0.5 ) < sd-relatedness-with-father ) boolean
+  
+  ;  Mother and offspring half related, father half related to offspring, siblings half or forth related to each other, grandchildren forth related to grandparents (if alive)
   
   ; --------------------------------------------------------------------------------------------------------------------
   ; MUTATE-CHROMOSOMES
