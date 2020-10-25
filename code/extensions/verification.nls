@@ -289,7 +289,7 @@ to-report generate-verification-tape
   set header lput "The environment of agents does not contain turtles breed?" header 
   set verification lput "dynamic-check" verification 
   set function lput "consider-environment" function
-  set boolean lput ( not any? anima1s with [ not member? anima1s [breed] of my-targets ] ) boolean
+  set boolean lput ( not any? anima1s with [ length decision.vectors > 0 and not member? anima1s [breed] of my-targets ] ) boolean
   
   set header lput "Not any agents with no day.perception who can see their environment during the day?" header 
   set verification lput "dynamic-check" verification 
@@ -311,20 +311,20 @@ to-report generate-verification-tape
   set function lput "consider-environment" function
   set boolean lput ( not any? anima1s with [ life.history != "gestatee" and visual.angle = 0 and is-list? my.environment and length my.environment > 1 ] ) boolean
 
-  set header lput "Agents do not have other agents in environment beyond their visual.range?" header 
-  set verification lput "dynamic-check" verification 
-  set function lput "consider-environment" function
-  set boolean lput ( not any? anima1s with [ max [ distance myself ] of my-targets > visual.range ] ) boolean ; to do - doesn't take into account when agents have used timestep to move away from targets
+;  set header lput "Agents do not have other agents in environment beyond their visual.range?" header 
+;  set verification lput "dynamic-check" verification 
+;  set function lput "consider-environment" function
+;  set boolean lput ( not any? anima1s with [ length my.environment > 0 and max [ distance myself ] of my-targets > ( visual.range * maximum-visual-range ) ] ) boolean ; to do - doesn't take into account when agents have used timestep to move away from targets
   
   set header lput "Gestatees can always see their mother?" header 
   set verification lput "dynamic-check" verification 
   set function lput "consider-environment" function
-  set boolean lput ( not any? anima1s with [ life.history = "gestatee" and not member? my.mother my-targets ] ) boolean
+  set boolean lput ( not any? anima1s with [ life.history = "gestatee" and my.mother != nobody and not member? my.mother my.environment ] ) boolean
   
-  set header lput "Agents can see their carried items?" header 
-  set verification lput "dynamic-check" verification 
-  set function lput "consider-environment" function
-  set boolean lput ( not any? anima1s with [ any? my-targets with [ not member? self [carried.items] of myself ] ] ) boolean ; to do - logic going the wrong way
+;  set header lput "Agents can see their carried items?" header 
+;  set verification lput "dynamic-check" verification 
+;  set function lput "consider-environment" function
+;  set boolean lput ( not any? anima1s with [ any? my-targets with [ not member? self [carried.items] of myself ] ] ) boolean ; to do - logic going the wrong way
   
   set header lput "There are no duplicates in my.environment?" header 
   set verification lput "dynamic-check" verification 
@@ -358,7 +358,7 @@ to-report generate-verification-tape
   set header lput "No male agents can target a gestatee?" header
   set verification lput "dynamic-check" verification 
   set function lput "make-decisions" function
-  set boolean lput ( not any? anima1s with [ biological.sex = "male" and any? my-targets with [ life.history = "gestatee" ]] ) boolean
+  set boolean lput ( not any? anima1s with [ biological.sex = "male" and any? my-targets with [ life.history = "gestatee" and self != myself ]] ) boolean
   
   set header lput "No female agents can target a gestatee that isn't their own offspring?" header
   set verification lput "dynamic-check" verification 
@@ -390,10 +390,10 @@ to-report generate-verification-tape
   set function lput "do-actions" function
   set boolean lput ( length ( filter [ i -> i = 0 ] map [ j -> last j ] all-actions-completed ) > 0 ) boolean 
   
-  set header lput "Not any inter-actions performed when the two individuals are more than check-distance apart?" header
-  set verification lput "dynamic-check" verification 
-  set function lput "do-actions" function
-  set boolean lput ( false ) boolean ; to do - could return false if agents move away from each other after interaction
+;  set header lput "Not any inter-actions performed when the two individuals are more than check-distance apart?" header
+;  set verification lput "dynamic-check" verification 
+;  set function lput "do-actions" function
+;  set boolean lput ( false ) boolean ; to do - could return false if agents move away from each other after interaction
   
   set header lput "Dead agents have not completed any actions?" header
   set verification lput "dynamic-check" verification 
@@ -933,6 +933,9 @@ to-report generate-verification-tape
   set header lput "Calls to hide equal to number of actions?" header 
   set verification lput "runtime-boundaries" verification
   set function lput "hide" function
+  print "Calls to hide equal to number of actions?"
+  print profiler:calls "hide"
+  print action-count-for "hide"
   set boolean lput ( profiler:calls "hide" = action-count-for "hide" ) boolean 
   
   set header lput "Agents who are hidden aren’t in anyone’s my.environment?" header
@@ -963,88 +966,97 @@ to-report generate-verification-tape
   ; SIGNALING
   ; --------------------------------------------------------------------------------------------------------------------
   
-  set header lput "Calls to yellow-signal-on less than or equal to number of decisions?" header 
+  set header lput "Calls to yellow-signal less than or equal to number of decisions?" header 
   set verification lput "runtime-boundaries" verification 
-  set function lput "yellow-signal-on" function
-  set boolean lput ( profiler:calls "yellow-signal-on" <= decision-count-for "yellow-signal-on" ) boolean
+  set function lput "yellow-signal" function
+  set boolean lput ( profiler:calls "yellow-signal" <= decision-count-for "yellow-signal" ) boolean
   
-  set header lput "Calls to yellow-signal-on equal to number of actions?" header 
+  set header lput "Calls to yellow-signal equal to number of actions?" header 
   set verification lput "runtime-boundaries" verification
-  set function lput "yellow-signal-on" function
-  set boolean lput ( profiler:calls "yellow-signal-on" = action-count-for "yellow-signal-on" ) boolean
+  set function lput "yellow-signal" function
+  print "Calls to yellow-signal equal to number of actions?"
+  print profiler:calls "yellow-signal"
+  print action-count-for "yellow-signal"
+  set boolean lput ( profiler:calls "yellow-signal" = action-count-for "yellow-signal" ) boolean
   
-  set header lput "Calls to red-signal-on less than or equal to number of decisions?" header 
+  set header lput "Calls to red-signal less than or equal to number of decisions?" header 
   set verification lput "runtime-boundaries" verification 
-  set function lput "red-signal-on" function
-  set boolean lput ( profiler:calls "red-signal-on" <= decision-count-for "red-signal-on" ) boolean
+  set function lput "red-signal" function
+  set boolean lput ( profiler:calls "red-signal" <= decision-count-for "red-signal" ) boolean
   
-  set header lput "Calls to red-signal-on equal to number of actions?" header 
+  set header lput "Calls to red-signal equal to number of actions?" header 
   set verification lput "runtime-boundaries" verification
-  set function lput "red-signal-on" function
-  set boolean lput ( profiler:calls "red-signal-on" = action-count-for "red-signal-on" ) boolean
+  set function lput "red-signal" function
+  print "Calls to red-signal equal to number of actions?"
+  print profiler:calls "red-signal"
+  print action-count-for "red-signal"
+  set boolean lput ( profiler:calls "red-signal" = action-count-for "red-signal" ) boolean
   
-  set header lput "Calls to blue-signal-on less than or equal to number of decisions?" header 
+  set header lput "Calls to blue-signal less than or equal to number of decisions?" header 
   set verification lput "runtime-boundaries" verification 
-  set function lput "blue-signal-on" function
-  set boolean lput ( profiler:calls "blue-signal-on" <= decision-count-for "blue-signal-on" ) boolean
+  set function lput "blue-signal" function
+  set boolean lput ( profiler:calls "blue-signal" <= decision-count-for "blue-signal" ) boolean
   
-  set header lput "Calls to blue-signal-on equal to number of actions?" header 
+  set header lput "Calls to blue-signal equal to number of actions?" header 
   set verification lput "runtime-boundaries" verification
-  set function lput "blue-signal-on" function
-  set boolean lput ( profiler:calls "blue-signal-on" = action-count-for "blue-signal-on" ) boolean
+  set function lput "blue-signal" function
+  print "Calls to blue-signal equal to number of actions?"
+  print profiler:calls "blue-signal"
+  print action-count-for "blue-signal"
+  set boolean lput ( profiler:calls "blue-signal" = action-count-for "blue-signal" ) boolean
   
   set header lput "All agents have a yellow.chance between zero and one? " header 
   set verification lput "variable-boundaries" verification 
-  set function lput "yellow-signal-on" function
+  set function lput "yellow-signal" function
   set boolean lput ( not any? anima1s with [ yellow.chance < 0 or yellow.chance > 1 ] ) boolean
   
   set header lput "All agents have a red.chance between zero and one? " header 
   set verification lput "variable-boundaries" verification 
-  set function lput "red-signal-on" function
+  set function lput "red-signal" function
   set boolean lput ( not any? anima1s with [ red.chance < 0 or red.chance > 1 ] ) boolean
   
   set header lput "All agents have a blue.chance between zero and one? " header 
   set verification lput "variable-boundaries" verification 
-  set function lput "blue-signal-on" function
+  set function lput "blue-signal" function
   set boolean lput ( not any? anima1s with [ blue.chance < 0 or blue.chance > 1 ] ) boolean
   
-  set header lput "The yellow-signal-on action updates yellow.chance as expected?" header 
+  set header lput "The yellow-signal action updates yellow.chance as expected?" header 
   set verification lput "static-check" verification 
-  set function lput "yellow-signal-on" function
+  set function lput "yellow-signal" function
   set boolean-check false
   if ( any? anima1s ) [
     ask one-of anima1s [
       let saved-value yellow.chance
       let random-value one-of [ -1  1 ]
-      yellow-signal-on random-value
+      yellow-signal random-value
       let new-value yellow.chance
       set yellow.chance saved-value 
       set boolean-check updated-value-check saved-value random-value new-value ]]
   set boolean lput ( boolean-check ) boolean
   
-  set header lput "The red-signal-on action updates red.chance as expected?" header 
+  set header lput "The red-signal action updates red.chance as expected?" header 
   set verification lput "static-check" verification 
-  set function lput "red-signal-on" function
+  set function lput "red-signal" function
   set boolean-check false
   if ( any? anima1s ) [
     ask one-of anima1s [
       let saved-value red.chance
       let random-value one-of [ -1  1 ]
-      red-signal-on random-value
+      red-signal random-value
       let new-value red.chance
       set red.chance saved-value 
       set boolean-check updated-value-check saved-value random-value new-value ]]
   set boolean lput ( boolean-check ) boolean
   
-  set header lput "The blue-signal-on action updates blue.chance as expected?" header 
+  set header lput "The blue-signal action updates blue.chance as expected?" header 
   set verification lput "static-check" verification 
-  set function lput "blue-signal-on" function
+  set function lput "blue-signal" function
   set boolean-check false
   if ( any? anima1s ) [
     ask one-of anima1s [
       let saved-value blue.chance
       let random-value one-of [ -1  1 ]
-      blue-signal-on random-value
+      blue-signal random-value
       let new-value blue.chance
       set blue.chance saved-value 
       set boolean-check updated-value-check saved-value random-value new-value ]]
@@ -1062,6 +1074,9 @@ to-report generate-verification-tape
   set header lput "Calls to check-infancy equal to number of actions?" header 
   set verification lput "runtime-boundaries" verification
   set function lput "check-infancy" function
+  print "Calls to check-infancy equal to number of actions?"
+  print profiler:calls "check-infancy"
+  print action-count-for "check-infancy"
   set boolean lput ( profiler:calls "check-infancy" = action-count-for "check-infancy" ) boolean
   
   set header lput "All agents have infancy.chance between zero and one?" header
@@ -1106,6 +1121,9 @@ to-report generate-verification-tape
   set header lput "Calls to check-birth equal to number of actions?" header 
   set verification lput "runtime-boundaries" verification
   set function lput "check-birth" function
+  print "Calls to check-birth equal to number of actions?"
+  print profiler:calls "check-birth"
+  print action-count-for "check-birth"
   set boolean lput ( profiler:calls "check-birth" = action-count-for "check-birth" ) boolean
   
   set header lput "All agents have a birthing chance between zero and one? " header 

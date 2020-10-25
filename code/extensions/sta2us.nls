@@ -73,9 +73,9 @@
 ; 2020-XX-XX   --> set-heading-random
 ; 2020-XX-XX   --> hide
 ; XXXX-XX-XX   --> rest
-; 2019-08-26   --> yellow-signal-on
-; 2019-08-26   --> red-signal-on
-; 2019-08-26   --> blue-signal-on
+; 2019-08-26   --> yellow-signal
+; 2019-08-26   --> red-signal
+; 2019-08-26   --> blue-signal
 ; 2019-08-26   --> check-infancy
 ; 2019-08-26   --> check-birth
 ; 2019-08-26   --> check-juvenility
@@ -203,9 +203,9 @@ to-report sta7us-get-action [ action-code ]
     ( action-code = "set-heading-random" ) [ "set-heading-random" ]
     ( action-code = "HID" or action-code = "hide" ) [ "hide" ]
     ( action-code = "rest" ) [ "rest" ]
-    ( action-code = "SAC" or action-code = "signal-a-chance" or action-code = "SAO" or action-code = "signal-a-on" or action-code = "signal-alpha-on" or action-code = "yellow-signal-on" ) [ "yellow-signal-on" ]
-    ( action-code = "SBC" or action-code = "signal-b-chance" or action-code = "SBO" or action-code = "signal-b-on" or action-code = "signal-beta-on" or action-code = "red-signal-on" ) [ "red-signal-on" ]
-    ( action-code = "SCC" or action-code = "signal-c-chance" or action-code = "SCO" or action-code = "signal-c-on" or action-code = "signal-gamma-on" or action-code = "blue-signal-on" ) [ "blue-signal-on" ]
+    ( action-code = "SAC" or action-code = "signal-a-chance" or action-code = "SAO" or action-code = "signal-a-on" or action-code = "signal-alpha-on" or action-code = "yellow-signal-on" or action-code = "yellow-signal" ) [ "yellow-signal" ]
+    ( action-code = "SBC" or action-code = "signal-b-chance" or action-code = "SBO" or action-code = "signal-b-on" or action-code = "signal-beta-on" or action-code = "red-signal-on" or action-code = "red-signal" ) [ "red-signal" ]
+    ( action-code = "SCC" or action-code = "signal-c-chance" or action-code = "SCO" or action-code = "signal-c-on" or action-code = "signal-gamma-on" or action-code = "blue-signal-on" or action-code = "blue-signal") [ "blue-signal" ]
     ( action-code = "INC" or action-code = "infancy-chance" or action-code = "CKI" or action-code = "check-infancy" ) [ "check-infancy" ]
     ( action-code = "GVB" or action-code = "birthing-chance" or action-code = "CKB" or action-code = "check-birth" ) [ "check-birth" ]
     ( action-code = "JVC" or action-code = "juvenile-chance" or action-code = "CKJ" or action-code = "check-juvenility" ) [ "check-juvenility" ]
@@ -306,7 +306,7 @@ to-report action-code-list
     "day-perception" "night-perception" "visual-angle" "visual-range" 
     "conception-chance" "bite-capacity" "mutation-chance" "sex-ratio" "litter-size" 
     "turn-right" "turn-left" "go-forward" "set-heading" "hide" "rest" "set-heading-random"
-    "yellow-signal-on" "red-signal--on" "blue-signal-on" 
+    "yellow-signal" "red-signal" "blue-signal" 
     "check-infancy" "check-birth" "check-juvenility" "check-weaning" "check-adulthood" 
     "move-toward" "move-away-from" "supply-to" "demand-from" "eat"
     "join" "leave" "recruit" "kick-out"
