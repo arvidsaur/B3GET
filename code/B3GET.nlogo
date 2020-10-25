@@ -256,15 +256,20 @@ end
 
 to go
 
-  ; THE ENVIRONMENT
+  tick
+
+  ; UPDATE WORLD
+  set all-decisions-made filter [ vector -> item 0 vector > ( ticks - how-many-ticks? ) ] all-decisions-made
+  set all-actions-completed filter [ vector -> item 0 vector > ( ticks - how-many-ticks? ) ] all-actions-completed
+
+  ; UPDATE PLANTS
   ifelse ( member? "no-plants" model-structure )
   [ ask patches [ set pcolor brown + 1 ] ]
   [ update-patches ]
-
   ask patches [ set penergy.supply penergy.supply + 1 / plant-annual-cycle ]
   ask patches [ if penergy.supply > pterminal.energy [ set penergy.supply pterminal.energy ]]
 
-  ; AGENT UPDATES
+  ; UPDATE AGENTS
   ask anima1s [ set age.in.ticks age.in.ticks + 1 ] ; all individuals age at each time step
   ask anima1s [ deteriorate ] ; all individuals decay at every time step
   ask anima1s with [ is.alive ] [ update-appearance ]
@@ -303,21 +308,22 @@ to go
     print print-text
     if ( behaviorspace-run-number > 0 ) [ output-print print-text ] ]
 
-  tick
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
 ; GLOBAL
 ;--------------------------------------------------------------------------------------------------------------------
 
+to-report how-many-ticks? report 10 end
+
 to-report get-solar-status report ifelse-value ( ( cos (( 360 / plant-daily-cycle ) * ticks)) > 0 ) [ "DAY" ] [ "NIGHT" ] end
 
 to-report get-updated-value [ current-value update-value ]
-  let report-value ifelse-value ( current-value < 0.0000000001 ) [ 0.0000000001 ] [ ifelse-value ( current-value > 0.9999999999 ) [ 0.9999999999 ] [ current-value ] ]
+  let report-value ifelse-value ( current-value < 0.00001 ) [ 0.00001 ] [ ifelse-value ( current-value > 0.99999 ) [ 0.99999 ] [ current-value ] ]
   ifelse update-value < 0
   [ set report-value ( report-value ^ (1 + abs update-value) ) ]
   [ set report-value ( report-value ^ (1 / ( 1 + update-value) )) ]
-  report precision report-value 10
+  report precision report-value 5
 end
 
 to-report generate-simulation-id
@@ -395,6 +401,9 @@ to set-to-dead
   set is.alive false
   set ticks.at.death ticks
   set label "x"
+  set my.environment []
+  set decision.vectors []
+  set actions.completed []
 end
 
 to remove-from-simulation
@@ -506,8 +515,9 @@ to make-decisions
 
   set decision.vectors reduced-decisions
 
-;  foreach decision.vectors [ d ->
-;    set all-decisions-made lput ( sentence ticks d ) all-decisions-made ]
+  ; RECORD DECISIONS
+  foreach decision.vectors [ d ->
+    set all-decisions-made lput ( sentence ticks but-last d ) all-decisions-made ]
 
 end
 
@@ -616,7 +626,9 @@ end
 to complete-action [ target action cost outcome ]
   let completed-action ( list self target action cost outcome )
   set actions.completed lput completed-action actions.completed
-  ;set all-actions-completed lput (sentence ticks but-last completed-action) all-actions-completed
+
+  ; RECORD ACTIONS
+  set all-actions-completed lput ( sentence ticks but-last completed-action ) all-actions-completed
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -1570,7 +1582,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-0.0
+2.0
 .1
 1
 NIL
@@ -1611,7 +1623,7 @@ plant-seasonality
 plant-seasonality
 0
 1
-0.0
+0.5
 .05
 1
 NIL
@@ -1852,7 +1864,7 @@ INPUTBOX
 1092
 322
 command-input
-no-plants
+false
 1
 0
 String (commands)
@@ -1861,7 +1873,7 @@ OUTPUT
 849
 385
 1348
-918
+919
 10
 
 @#$#@#$#@

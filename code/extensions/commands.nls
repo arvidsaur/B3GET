@@ -11,31 +11,34 @@
 
 to command
   
-  clear-output
-  
-  (ifelse 
-    ( useful-commands = "help-me" ) [ output-help-me ]
-    ( useful-commands = "meta-report" ) [ output-meta-report ]
-    ( useful-commands = "verify-code" ) [ output-verification command-input ]
-    ( useful-commands = "check-runtime" ) [ output-runtime ]  
-    ( useful-commands = "simulation-report" ) [ output-simulation-report ]
-    ( useful-commands = "model-structure" ) [ output-model-structure command-input ]
-    ( useful-commands = "reset-plants" ) [ output-reset-plants ]
-    ( useful-commands = "clear-population" ) [ output-clear-pop ]
-    ( useful-commands = "view-genotype" ) [ output-genotype ]
-    ( useful-commands = "view-decisions" ) [ output-decisions ]
-    ( useful-commands = "view-actions") [ output-actions ]
-    ( useful-commands = "view-history") [ output-history ]
-    ( useful-commands = "view-status") [ output-status ]
+  if ( simulation-id != 0 ) [ ; commands only work when a simulation is active
     
-    ; not currently used
-    ( useful-commands = "import-world" ) [ output-import-world command-input ]
-    ( useful-commands = "genotype-reader" ) [ output-genotype-reader command-input ]
-    ( useful-commands = "add-allele" ) [ output-add-allele ]
-    ( useful-commands = "delete-allele" ) [ output-delete-allele command-input ]
-
-    [])
-
+    clear-output
+    
+    (ifelse 
+      ( useful-commands = "help-me" ) [ output-help-me ]
+      ( useful-commands = "meta-report" ) [ output-meta-report ]
+      ( useful-commands = "verify-code" ) [ output-verification command-input ]
+      ( useful-commands = "check-runtime" ) [ output-runtime ]  
+      ( useful-commands = "simulation-report" ) [ output-simulation-report ]
+      ( useful-commands = "model-structure" ) [ output-model-structure command-input ]
+      ( useful-commands = "reset-plants" ) [ output-reset-plants ]
+      ( useful-commands = "clear-population" ) [ output-clear-pop ]
+      ( useful-commands = "view-genotype" ) [ output-genotype ]
+      ( useful-commands = "view-decisions" ) [ output-decisions ]
+      ( useful-commands = "view-actions") [ output-actions ]
+      ( useful-commands = "view-history") [ output-history ]
+      ( useful-commands = "view-status") [ output-status ]
+      
+      ; not currently used
+      ( useful-commands = "import-world" ) [ output-import-world command-input ]
+      ( useful-commands = "genotype-reader" ) [ output-genotype-reader command-input ]
+      ( useful-commands = "add-allele" ) [ output-add-allele ]
+      ( useful-commands = "delete-allele" ) [ output-delete-allele command-input ]
+      
+      [])
+    
+  ]
 end
 
 to output-help-me
@@ -296,7 +299,7 @@ to output-actions
       output-print ( word " " action ) ]]]
   
   [ let action-length length all-actions-completed
-    foreach sublist all-actions-completed ( action-length - 40 ) action-length [ a -> 
+    foreach sublist all-actions-completed ( action-length - 40 ) action-length [ a -> ; must account for when list < 40 items
       output-print (word "  " a ) ]]
 end
 
