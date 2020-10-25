@@ -272,7 +272,7 @@ to go
   ; UPDATE AGENTS
   ask anima1s [ set age.in.ticks age.in.ticks + 1 ] ; all individuals age at each time step
   ask anima1s [ deteriorate ] ; all individuals decay at every time step
-  ask anima1s with [ is.alive ] [ update-appearance ]
+  ask anima1s [ update-appearance ]
   ask anima1s with [ not empty? carried.items ] [ foreach carried.items [ itm -> ask itm [ move-to myself ]]] ; update carried items to be with carrier
 
   ; AGENT MORTALITY
@@ -414,7 +414,7 @@ end
 
 to update-appearance
   set size body.size
-  set label " "
+  set label ifelse-value ( is.alive ) [ " " ] [ "x" ]
   set color round ( wrap-color group.identity + 5 - ( 10 ^ body.shade ))
   set shape get-shape
 end
@@ -424,7 +424,7 @@ to-report get-shape
   let eye_size ( ifelse-value ( visual.range < ( 1 / 3 ) ) [ "1" ] ( visual.range < ( 2 / 3 ) ) [ "2" ] [ "3" ] )
   let eye_spacing ( ifelse-value ( visual.angle < ( 1 / 3 ) ) [ "1" ] ( visual.angle < ( 2 / 3 ) ) [ "2" ] [ "3" ] )
   let current-perception ifelse-value ( get-solar-status = "DAY" ) [ day.perception ] [ night.perception ]
-  let eye_acuity ( ifelse-value ( is.resting ) [ "1" ] ( current-perception > 0.5 ) [ "3" ] ( current-perception > 0 ) [ "2" ] [ "1" ])
+  let eye_acuity ( ifelse-value ( is.resting or not is.alive ) [ "1" ] ( current-perception > 0.5 ) [ "3" ] ( current-perception > 0 ) [ "2" ] [ "1" ])
   let a_on ifelse-value yellow.signal [ "a" ] [ "" ]
   let b_on ifelse-value red.signal [ "b" ] [ "" ]
   let c_on ifelse-value blue.signal [ "c" ] [ "" ]
