@@ -933,9 +933,6 @@ to-report generate-verification-tape
   set header lput "Calls to hide equal to number of actions?" header 
   set verification lput "runtime-boundaries" verification
   set function lput "hide" function
-  print "Calls to hide equal to number of actions?"
-  print profiler:calls "hide"
-  print action-count-for "hide"
   set boolean lput ( profiler:calls "hide" = action-count-for "hide" ) boolean 
   
   set header lput "Agents who are hidden aren’t in anyone’s my.environment?" header
@@ -974,9 +971,6 @@ to-report generate-verification-tape
   set header lput "Calls to yellow-signal equal to number of actions?" header 
   set verification lput "runtime-boundaries" verification
   set function lput "yellow-signal" function
-  print "Calls to yellow-signal equal to number of actions?"
-  print profiler:calls "yellow-signal"
-  print action-count-for "yellow-signal"
   set boolean lput ( profiler:calls "yellow-signal" = action-count-for "yellow-signal" ) boolean
   
   set header lput "Calls to red-signal less than or equal to number of decisions?" header 
@@ -987,9 +981,6 @@ to-report generate-verification-tape
   set header lput "Calls to red-signal equal to number of actions?" header 
   set verification lput "runtime-boundaries" verification
   set function lput "red-signal" function
-  print "Calls to red-signal equal to number of actions?"
-  print profiler:calls "red-signal"
-  print action-count-for "red-signal"
   set boolean lput ( profiler:calls "red-signal" = action-count-for "red-signal" ) boolean
   
   set header lput "Calls to blue-signal less than or equal to number of decisions?" header 
@@ -1000,9 +991,6 @@ to-report generate-verification-tape
   set header lput "Calls to blue-signal equal to number of actions?" header 
   set verification lput "runtime-boundaries" verification
   set function lput "blue-signal" function
-  print "Calls to blue-signal equal to number of actions?"
-  print profiler:calls "blue-signal"
-  print action-count-for "blue-signal"
   set boolean lput ( profiler:calls "blue-signal" = action-count-for "blue-signal" ) boolean
   
   set header lput "All agents have a yellow.chance between zero and one? " header 
@@ -1074,9 +1062,6 @@ to-report generate-verification-tape
   set header lput "Calls to check-infancy equal to number of actions?" header 
   set verification lput "runtime-boundaries" verification
   set function lput "check-infancy" function
-  print "Calls to check-infancy equal to number of actions?"
-  print profiler:calls "check-infancy"
-  print action-count-for "check-infancy"
   set boolean lput ( profiler:calls "check-infancy" = action-count-for "check-infancy" ) boolean
   
   set header lput "All agents have infancy.chance between zero and one?" header
@@ -1088,12 +1073,7 @@ to-report generate-verification-tape
   set verification lput "dynamic-check" verification 
   set function lput "check-infancy" function
   set boolean lput ( (ifelse-value ( any? anima1s with [ life.history != "gestatee" ] ) [ mean [infancy.chance] of anima1s with [ life.history != "gestatee" ]] [0] ) > (ifelse-value ( any? anima1s with [ life.history = "gestatee" ] ) [ mean [infancy.chance] of anima1s with [ life.history = "gestatee"]] [0] )) boolean
-  
-  set header lput "Every agent who is a gestatee performs check-infancy?" header 
-  set verification lput "dynamic-check" verification 
-  set function lput "check-infancy" function
-  set boolean lput ( not any? anima1s with [ life.history = "gestatee" and not my-actions-include "check-infancy" ] ) boolean
-  
+
   set header lput "Infants do not check-infancy?" header 
   set verification lput "dynamic-check" verification 
   set function lput "check-infancy" function
@@ -1121,9 +1101,6 @@ to-report generate-verification-tape
   set header lput "Calls to check-birth equal to number of actions?" header 
   set verification lput "runtime-boundaries" verification
   set function lput "check-birth" function
-  print "Calls to check-birth equal to number of actions?"
-  print profiler:calls "check-birth"
-  print action-count-for "check-birth"
   set boolean lput ( profiler:calls "check-birth" = action-count-for "check-birth" ) boolean
   
   set header lput "All agents have a birthing chance between zero and one? " header 
@@ -1145,11 +1122,6 @@ to-report generate-verification-tape
   set verification lput "dynamic-check" verification 
   set function lput "check-birth" function
   set boolean lput ( count anima1s with [ female.fertility = "pregnant" ] > 0 ) boolean
-  
-  set header lput "Every agent who is pregnant checks birth?" header 
-  set verification lput "dynamic-check" verification 
-  set function lput "check-check" function
-  set boolean lput ( not any? anima1s with [ female.fertility = "pregnant" and not my-actions-include "check-birth" ] ) boolean
   
   set header lput "Infants do not check-birth?" header 
   set verification lput "dynamic-check" verification 
@@ -1207,11 +1179,6 @@ to-report generate-verification-tape
   set verification lput "dynamic-check" verification 
   set function lput "check-juvenility" function
   set boolean lput ( (ifelse-value ( any? anima1s with [ life.history != "adult" or life.history != "juvenile" ] ) [ mean [juvenility.chance] of anima1s with [ life.history != "adult" or life.history != "juvenile" ]] [0] ) >= (ifelse-value ( any? anima1s with [ life.history = "gestatee" or life.history = "infant" ] ) [ mean [juvenility.chance] of anima1s with [ life.history = "gestatee" or life.history = "infant" ]] [0] )) boolean
-  
-  set header lput "Every agent who is an infant checks juvenility?" header 
-  set verification lput "dynamic-check" verification 
-  set function lput "check-juvenility" function
-  set boolean lput ( not any? anima1s with [ life.history = "infant" and not my-actions-include "check-juvenility" ] ) boolean
   
   set header lput "Juveniles do not check-juvenility?" header 
   set verification lput "dynamic-check" verification 
@@ -1282,12 +1249,7 @@ to-report generate-verification-tape
   set verification lput "dynamic-check" verification 
   set function lput "check-weaning" function
   set boolean lput ( not any? anima1s with [ female.fertility != "lactating" and my-actions-include "check-weaning" ] ) boolean
-  
-  set header lput "Every agent who is lactating checks weaning?" header 
-  set verification lput "dynamic-check" verification 
-  set function lput "check-weaning" function
-  set boolean lput ( not any? anima1s with [ female.fertility = "lactating" and not my-actions-include "check-weaning" ] ) boolean
-  
+
   set header lput "Infants do not check-weaning?" header 
   set verification lput "dynamic-check" verification 
   set function lput "check-weaning" function
@@ -1349,11 +1311,6 @@ to-report generate-verification-tape
   set verification lput "dynamic-check" verification 
   set function lput "check-adulthood" function
   set boolean lput ( not any? anima1s with [ life.history = "adult" and my-actions-include "check-adulthood" ] ) boolean
-  
-  set header lput "Every agent who is a juvenile checks adulthood?" header 
-  set verification lput "dynamic-check" verification 
-  set function lput "check-adulthood" function
-  set boolean lput ( not any? anima1s with [ life.history = "juvenile" and not my-actions-include "check-adulthood" ] ) boolean
   
   ; --------------------------------------------------------------------------------------------------------------------
   ; UPDATE-TO-ADULT
@@ -1418,12 +1375,7 @@ to-report generate-verification-tape
   set verification lput "dynamic-check" verification 
   set function lput "supply-to" function
   set boolean lput ( not any? anima1s with [ ( female.fertility != "pregnant" and female.fertility != "lactating" ) and my-actions-include "supply-to" ] ) boolean
-  
-  set header lput "Every agent who is pregnant or lactating supplies to other agents?" header 
-  set verification lput "dynamic-check" verification 
-  set function lput "supply-to" function
-  set boolean lput ( not any? anima1s with [ ( life.history = "pregnant" or life.history = "lactating" ) and not my-actions-include "supply-to" ] ) boolean
-  
+
   set header lput "Infants do not supply-to?" header 
   set verification lput "dynamic-check" verification 
   set function lput "supply-to" function
@@ -1462,12 +1414,7 @@ to-report generate-verification-tape
   set verification lput "dynamic-check" verification 
   set function lput "demand-from" function
   set boolean lput ( not any? anima1s with [ ( life.history != "gestatee" and life.history != "infant" ) and my-actions-include "demand-from" ] ) boolean
-  
-  set header lput "Every agent who is gestatee or infant demands from other agents?" header 
-  set verification lput "dynamic-check" verification 
-  set function lput "demand-from" function
-  set boolean lput ( not any? anima1s with [ ( life.history = "gestatee" or life.history = "infant" ) and not my-actions-include "demand-from" ] ) boolean
-  
+
   set header lput "Juveniles do not demand-from?" header 
   set verification lput "dynamic-check" verification 
   set function lput "demand-from" function
@@ -1994,6 +1941,48 @@ to-report generate-verification-tape
   set verification lput "runtime-boundaries" verification
   set function lput "mutate-chromosome" function
   set boolean lput ( profiler:calls "mutate-chromosome" = action-count-for "mutate-chromosome" ) boolean
+  
+  
+  
+  ; to delete
+  
+  
+;  set header lput "Every agent who is a gestatee performs check-infancy?" header 
+;  set verification lput "dynamic-check" verification 
+;  set function lput "check-infancy" function
+;  set boolean lput ( not any? anima1s with [ life.history = "gestatee" and not my-actions-include "check-infancy" ] ) boolean
+;  
+;  set header lput "Every agent who is pregnant checks birth?" header 
+;  set verification lput "dynamic-check" verification 
+;  set function lput "check-check" function
+;  set boolean lput ( not any? anima1s with [ female.fertility = "pregnant" and not my-actions-include "check-birth" ] ) boolean
+;  
+;  set header lput "Every agent who is an infant checks juvenility?" header 
+;  set verification lput "dynamic-check" verification 
+;  set function lput "check-juvenility" function
+;  set boolean lput ( not any? anima1s with [ life.history = "infant" and not my-actions-include "check-juvenility" ] ) boolean
+;  
+;  set header lput "Every agent who is lactating checks weaning?" header 
+;  set verification lput "dynamic-check" verification 
+;  set function lput "check-weaning" function
+;  set boolean lput ( not any? anima1s with [ female.fertility = "lactating" and not my-actions-include "check-weaning" ] ) boolean
+;  
+;  set header lput "Every agent who is a juvenile checks adulthood?" header 
+;  set verification lput "dynamic-check" verification 
+;  set function lput "check-adulthood" function
+;  set boolean lput ( not any? anima1s with [ life.history = "juvenile" and not my-actions-include "check-adulthood" ] ) boolean
+;    
+;  set header lput "Every agent who is pregnant or lactating supplies to other agents?" header 
+;  set verification lput "dynamic-check" verification 
+;  set function lput "supply-to" function
+;  set boolean lput ( not any? anima1s with [ ( life.history = "pregnant" or life.history = "lactating" ) and not my-actions-include "supply-to" ] ) boolean
+;    
+;  set header lput "Every agent who is gestatee or infant demands from other agents?" header 
+;  set verification lput "dynamic-check" verification 
+;  set function lput "demand-from" function
+;  set boolean lput ( not any? anima1s with [ ( life.history = "gestatee" or life.history = "infant" ) and not my-actions-include "demand-from" ] ) boolean
+  
+  
   
   set verification-results ( sentence verification-results boolean )
   
