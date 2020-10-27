@@ -119,8 +119,8 @@ to record-simulation
     "command-input"
     
     ; validation
-    "dynamic-verification-true-count"
-    "dynamic-verification-false-count"
+    "dynamic-verification-true-count" ;
+    "dynamic-verification-false-count" ;
     "foraging-gains-vs-generation-slope"
     "foraging-gains-vs-generation-R-squared"
     "mother-initiated-birth-vs-generation-slope"
@@ -133,18 +133,18 @@ to record-simulation
     "hamiltons-rule-followed-vs-generation-R-squared"
     
     ; plants
-    "plant-abundance-maximum"
-    "plant-abundance-minimum"
-    "plant-abundance-mean"
-    "plant-abundance-variance"
-    "plant-patchiness-maximum"
-    "plant-patchiness-minimum"
-    "plant-patchiness-mean"
-    "plant-patchiness-variance"
+    "plant-abundance-maximum" ;
+    "plant-abundance-minimum" ;
+    "plant-abundance-mean" ;
+    "plant-abundance-variance" ;
+    "plant-patchiness-maximum" ;
+    "plant-patchiness-minimum" ;
+    "plant-patchiness-mean" ;
+    "plant-patchiness-variance" ;
     ; lotka-volterra
     
     ; population - separate by sex?
-    "generations-transpired"
+    "generations-transpired" ;
     "total-simulated-individuals"
     "total-simulated-males"
     "total-simulated-females"

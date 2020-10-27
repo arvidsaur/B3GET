@@ -53,6 +53,7 @@
 ; 2019-09-XX    *    is observed during the day
 ; 2019-09-XX    -    is observed during the night
 ; 2019-09-XX    #    has color closest to #
+; 2020-09-XX    .    is not resting
 ;         
 ; 2019-08-26   --> living.chance
 ; 2019-08-26   --> body-size
@@ -252,7 +253,7 @@ to-report status-of [ target ]
     let target-group ifelse-value ( [group.identity] of target = group.identity ) [ "n" ] [ "u" ] 
     let target-carry ifelse-value ( member? target carried.items ) [ "y" ] [ ifelse-value ( member? self [carried.items] of target ) [ "+" ] [ "t" ] ]
     let target-signal (word ifelse-value [yellow.signal] of target [ "α" ][ "å" ] ifelse-value [red.signal] of target [ "β" ][ "ß" ] ifelse-value [blue.signal] of target [ "ɣ" ][ "œ" ] )
-    let target-rest ifelse-value ( is.resting = true ) [ "s" ] [ "" ]
+    let target-rest ifelse-value ( is.resting = true ) [ "s" ] [ "." ]
     let target-color (word "" round [color] of target "")
     set status-report (word status-report 
       target-kind 
@@ -297,7 +298,7 @@ to-report status-code-list
     "v" "w" "x" "y" "z" "+" "α" 
     "å" "β" "ß" "ɣ" "œ" "*" "-" 
     "#" "$" "~" "1" "2" "3" "4" 
-    "5" "6" "7" "8" "9" "0" ]
+    "5" "6" "7" "8" "9" "0" "." ]
 end
 
 to-report action-code-list

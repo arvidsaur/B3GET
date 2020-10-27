@@ -287,9 +287,6 @@ to-report generate-verification-tape
   set header lput "Agent calls to consider-environment same number as agent count?" header
   set verification lput "runtime-boundaries" verification 
   set function lput "consider-environment" function
-  print profiler:calls "consider-environment"
-  print count-alive-agents
-  print count-all-agents
   set boolean lput ( profiler:calls "consider-environment" = count-alive-agents ) boolean
   
   set header lput "The environment of agents does not contain turtles breed?" header 
@@ -1949,3 +1946,5 @@ to-report my-targets
   let targets anima1s with [ member? self my-targets-list ]
   report targets
 end
+
+

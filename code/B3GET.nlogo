@@ -315,7 +315,7 @@ end
 ; GLOBAL
 ;--------------------------------------------------------------------------------------------------------------------
 
-to-report how-many-ticks? report 10 end
+to-report how-many-ticks? report 5 end
 
 to-report get-solar-status report ifelse-value ( ( cos (( 360 / plant-daily-cycle ) * ticks)) > 0 ) [ "DAY" ] [ "NIGHT" ] end
 
@@ -324,7 +324,7 @@ to-report get-updated-value [ current-value update-value ]
   ifelse update-value < 0
   [ set report-value ( report-value ^ (1 + abs update-value) ) ]
   [ set report-value ( report-value ^ (1 / ( 1 + update-value) )) ]
-  report precision report-value 5
+  report precision report-value 10
 end
 
 to-report generate-simulation-id
@@ -405,7 +405,7 @@ to set-to-dead
   set my.environment []
   set decision.vectors []
   set actions.completed []
-  print (word self " is dead")
+  ;print (word self " is dead")
 end
 
 to remove-from-simulation
@@ -455,31 +455,28 @@ end
 
 to consider-environment
 
-  if ( life.history != "gestatee" ) [
+  let sun-status get-solar-status
 
-    let sun-status get-solar-status
+  ; ASPATIAL WORLD
+  ifelse ( member? "aspatial" model-structure )
+  [ ask n-of 10 patches [ ask myself [ set my.environment lput myself my.environment ] ]]
 
-    ; ASPATIAL WORLD
-    ifelse ( member? "aspatial" model-structure )
-    [ ask n-of 10 patches [ ask myself [ set my.environment lput myself my.environment ] ]]
+  ; SPATIAL WORLD
+  [ ask patches in-cone ( maximum-visual-range * visual.range ) ( 360 * visual.angle ) [ ask myself [ set my.environment lput myself my.environment ] ]]
 
-    ; SPATIAL WORLD
-    [ ask patches in-cone ( maximum-visual-range * visual.range ) ( 360 * visual.angle ) [ ask myself [ set my.environment lput myself my.environment ] ]]
+  foreach my.environment [ p -> ask [anima1s-here] of p [ ; look at each patch in environment taken from above
+    if ( is-anima1? self and [life.history] of myself != "gestatee" )
+    ;[ if ( self = myself or self = my.mother) [ ask myself [ set my.environment lput myself my.environment ] ] ] ; gestatees can only see themselves and their mothers
+    [ if ( not hidden? or self = myself ) [ ask myself [ set my.environment lput myself my.environment ] ]]]] ; non-gestatees can see self and all non-hidden others in environment
 
-    foreach my.environment [ p -> ask [anima1s-here] of p [ ; look at each patch in environment taken from above
-      if ( is-anima1? self and [life.history] of myself != "gestatee" )
-      ;[ if ( self = myself or self = my.mother) [ ask myself [ set my.environment lput myself my.environment ] ] ] ; gestatees can only see themselves and their mothers
-      [ if ( not hidden? or self = myself ) [ ask myself [ set my.environment lput myself my.environment ] ]]]] ; non-gestatees can see self and all non-hidden others in environment
+  if ( not member? "aspatial" model-structure ) [
+    let complete-environment remove-duplicates my.environment
+    let complete-count length complete-environment
+    set my.environment up-to-n-of ( ( ifelse-value ( sun-status = "DAY" ) [ day.perception ] [ night.perception ] ) * complete-count ) complete-environment ]
 
-    if ( not member? "aspatial" model-structure ) [
-      let complete-environment remove-duplicates my.environment
-      let complete-count length complete-environment
-      set my.environment up-to-n-of ( ( ifelse-value ( sun-status = "DAY" ) [ day.perception ] [ night.perception ] ) * complete-count ) complete-environment ]
-
-    foreach carried.items [ c -> if ( [my.mother] of c = self ) [
-      set my.environment lput c my.environment ; mothers can see their carried offspring
-      ask c [ if ( is.alive and not member? myself my.environment ) [ set my.environment lput myself my.environment ] ]]]  ; carried offspring can see their mother
-  ]
+  foreach carried.items [ c -> if ( [my.mother] of c = self ) [
+    set my.environment lput c my.environment ; mothers can see their carried offspring
+    ask c [ if ( is.alive and not member? myself my.environment ) [ set my.environment lput myself my.environment ] ]]]  ; carried offspring can see their mother
 
   set my.environment remove-duplicates lput self my.environment ; self is always in environment
 
@@ -1286,7 +1283,7 @@ to initialize-from-parents [ m f ]
   set group.transfers.history []
   set infanticide.history []
   ifelse ( member? "ideal-form" model-structure ) [ set-phenotype-to-ideal-form ] [ set-phenotype-to-initialized-form ]
-  print (word self " is born")
+  ;print (word self " is conceived")
 end
 
 to set-phenotype-to-initialized-form
@@ -1524,7 +1521,7 @@ INPUTBOX
 387
 79
 path-to-experiment
-../data/
+../data/primate-species/
 1
 0
 String
@@ -1594,7 +1591,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-2.0
+0.0
 .1
 1
 NIL
@@ -1688,7 +1685,7 @@ INPUTBOX
 1226
 299
 population
-population
+Geladas
 1
 0
 String
@@ -1699,7 +1696,7 @@ INPUTBOX
 1226
 373
 genotype
-genotype
+geladas
 1
 0
 String
@@ -1763,7 +1760,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "--------" "meta-report" "verify-code" "check-runtime" "simulation-report" "model-structure" "reset-plants" "clear-population" "view-genotype" "view-decisions" "view-actions" "view-history" "view-status"
-3
+12
 
 BUTTON
 1037

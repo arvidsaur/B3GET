@@ -218,6 +218,7 @@ to save-population
       "female.fertility" 
       "group.identity"    
       "is.alive" 
+      "is.resting"
       "yellow.signal" 
       "red.signal" 
       "blue.signal"
