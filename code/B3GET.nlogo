@@ -267,8 +267,6 @@ to go
   ifelse ( member? "no-plants" model-structure )
   [ ask patches [ set pcolor brown + 1 ] ]
   [ update-patches ]
-  ask patches [ set penergy.supply penergy.supply + 1 / plant-annual-cycle ]
-  ask patches [ if penergy.supply > pterminal.energy [ set penergy.supply pterminal.energy ]]
 
   ; UPDATE AGENTS
   ask anima1s [ set age.in.ticks age.in.ticks + 1 ] ; all individuals age at each time step
@@ -320,7 +318,7 @@ to-report how-many-ticks? report 5 end
 to-report get-solar-status report ifelse-value ( ( cos (( 360 / plant-daily-cycle ) * ticks)) > 0 ) [ "DAY" ] [ "NIGHT" ] end
 
 to-report get-updated-value [ current-value update-value ]
-  let report-value ifelse-value ( current-value < 0.00001 ) [ 0.00001 ] [ ifelse-value ( current-value > 0.99999 ) [ 0.99999 ] [ current-value ] ]
+  let report-value ifelse-value ( current-value < 0.0000000001 ) [ 0.0000000001 ] [ ifelse-value ( current-value > 0.9999999999 ) [ 0.9999999999 ] [ current-value ] ]
   ifelse update-value < 0
   [ set report-value ( report-value ^ (1 + abs update-value) ) ]
   [ set report-value ( report-value ^ (1 / ( 1 + update-value) )) ]
@@ -347,35 +345,33 @@ end
 to update-patches
 
   let season ( cos (( 360 / plant-annual-cycle ) * ticks ))
-  let density ( sum [penergy.supply] of patches ) / count patches
+  let density ( sum [penergy.supply] of patches ) / ( count patches * plant-quality )
 
-  ask patches [
-    set pterminal.energy updated-plant-energy pterminal.energy ( sum [penergy.supply] of neighbors ) season density
-    update-patch-color ]
+  ask patches [ update-terminal-energy season density ]
+  ask patches [ set penergy.supply penergy.supply + plant-quality / plant-annual-cycle ]
+  ask patches [ if penergy.supply > pterminal.energy [ set penergy.supply pterminal.energy ]]
+  ask patches [ update-patch-color ]
 
 end
 
-to-report updated-plant-energy [ old-energy neighbor-energy season plant-density ]
+to update-terminal-energy [ plant-season plant-density ]
 
-  let energy-to-report old-energy
+  let seasonal-factor ( ( plant-seasonality * plant-season + 1 ) / 2 )
+  let optimal-neighbor-energy ( plant-minimum-neighbors + plant-maximum-neighbors ) / 2
+  let neighbor-energy-sd ( optimal-neighbor-energy - plant-minimum-neighbors )
+  let neighbor-energy ( ( sum [penergy.supply] of neighbors ) / plant-quality )
 
-  let seasonal ( ( plant-seasonality * season + 1 ) / 2 )
-  let a seasonal
-  let b ( plant-minimum-neighbors + plant-maximum-neighbors ) / 2
-  let c ( b - plant-minimum-neighbors )
-  let x ( neighbor-energy / plant-quality )
-  let probability-up ifelse-value ( c = 0 ) [ 0 ] [ ( a * e ^ ( - (( x - b ) ^ 2 ) / ( 2 * ( c ^ 2 ) )) ) ]
-  let y ( plant-daily-cycle / plant-annual-cycle ) * ( ( plant-density ) * ( 2 * probability-up - 1 ) + ( seasonal - plant-density ) )
-  set energy-to-report ( ( energy-to-report / plant-quality ) + ( random-float y ) * plant-quality ) * plant-quality
+  let probability-up ifelse-value ( neighbor-energy-sd = 0 ) [ 0 ] [ ( seasonal-factor * e ^ ( - (( neighbor-energy - optimal-neighbor-energy ) ^ 2 ) / ( 2 * ( neighbor-energy-sd ^ 2 ) )) ) ]
+  let y ( ( plant-daily-cycle * plant-quality ) / plant-annual-cycle ) * ( plant-density * ( 2 * probability-up - 1 ) + seasonal-factor - plant-density )
 
-  if energy-to-report >= plant-quality [ set energy-to-report plant-quality ]
-  if energy-to-report <= 0.000 [ set energy-to-report 0.000 ]
+  set pterminal.energy ( pterminal.energy + random-float y )
+  if pterminal.energy >= plant-quality [ set pterminal.energy plant-quality ]
+  if pterminal.energy <= 0.000 [ set pterminal.energy 0.000 ]
 
-  report energy-to-report
 end
 
 to update-patch-color
-  set pcolor scale-color green ( ( pterminal.energy + penergy.supply ) / 2 ) 1.5 -0.25
+  set pcolor scale-color green (( ( pterminal.energy + penergy.supply ) / 2 ) / plant-quality ) 1.5 -0.25
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -1521,7 +1517,7 @@ INPUTBOX
 387
 79
 path-to-experiment
-../data/primate-species/
+../data/
 1
 0
 String
@@ -1591,7 +1587,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-0.0
+5.0
 .1
 1
 NIL
@@ -1632,7 +1628,7 @@ plant-seasonality
 plant-seasonality
 0
 1
-0.5
+0.9
 .05
 1
 NIL
@@ -1662,7 +1658,7 @@ plant-daily-cycle
 plant-daily-cycle
 1
 100
-20.0
+10.0
 1
 1
 ticks
@@ -1685,7 +1681,7 @@ INPUTBOX
 1226
 299
 population
-Geladas
+NIL
 1
 0
 String
@@ -1696,7 +1692,7 @@ INPUTBOX
 1226
 373
 genotype
-geladas
+NIL
 1
 0
 String
@@ -1760,7 +1756,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "--------" "meta-report" "verify-code" "check-runtime" "simulation-report" "model-structure" "reset-plants" "clear-population" "view-genotype" "view-decisions" "view-actions" "view-history" "view-status"
-12
+8
 
 BUTTON
 1037
@@ -1837,10 +1833,10 @@ SLIDER
 151
 plant-quality
 plant-quality
-.01
-1
-1.0
-.01
+.1
+100
+10.0
+.1
 1
 NIL
 HORIZONTAL
