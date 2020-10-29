@@ -928,10 +928,10 @@ to-report generate-verification-tape
   set function lput "hide" function
   set boolean lput ( profiler:calls "hide" = action-count-for "hide" ) boolean 
   
-  set header lput "Agents who are hidden aren’t in anyone’s my.environment?" header
+  set header lput "Agents who are hidden aren’t in any other agent's my.environment?" header
   set verification lput "dynamic-check" verification 
   set function lput "hide" function
-  set boolean lput ( not any? anima1s with [ life.history != "gestatee" and hidden? and member? self ( reduce sentence [my.environment] of anima1s ) ] ) boolean 
+  set boolean lput ( not any? anima1s with [ life.history != "gestatee" and hidden? and member? self ( reduce sentence [my.environment] of other anima1s ) ] ) boolean 
   
   ; --------------------------------------------------------------------------------------------------------------------
   ; REST
@@ -1074,20 +1074,20 @@ to-report generate-verification-tape
   set function lput "check-infancy" function
   set boolean lput ( (ifelse-value ( any? anima1s with [ life.history != "gestatee" ] ) [ mean [infancy.chance] of anima1s with [ life.history != "gestatee" ]] [0] ) > (ifelse-value ( any? anima1s with [ life.history = "gestatee" ] ) [ mean [infancy.chance] of anima1s with [ life.history = "gestatee"]] [0] )) boolean
 
-  set header lput "Infants do not check-infancy?" header 
-  set verification lput "dynamic-check" verification 
-  set function lput "check-infancy" function
-  set boolean lput ( not any? anima1s with [ life.history = "infant" and my-actions-include "check-infancy" and ticks.at.birth <= ( ticks - how-many-ticks? ) ] ) boolean
-  
-  set header lput "Juveniles do not check-infancy?" header 
-  set verification lput "dynamic-check" verification 
-  set function lput "check-infancy" function
-  set boolean lput ( not any? anima1s with [ life.history = "juvenile" and my-actions-include "check-infancy" ] ) boolean
-  
-  set header lput "Adults do not check-infancy?" header 
-  set verification lput "dynamic-check" verification 
-  set function lput "check-infancy" function
-  set boolean lput ( not any? anima1s with [ life.history = "adult" and my-actions-include "check-infancy" ] ) boolean
+;  set header lput "Infants do not check-infancy?" header 
+;  set verification lput "dynamic-check" verification 
+;  set function lput "check-infancy" function
+;  set boolean lput ( not any? anima1s with [ life.history = "infant" and my-actions-include "check-infancy" and ticks.at.birth <= ( ticks - how-many-ticks? ) ] ) boolean
+;  
+;  set header lput "Juveniles do not check-infancy?" header 
+;  set verification lput "dynamic-check" verification 
+;  set function lput "check-infancy" function
+;  set boolean lput ( not any? anima1s with [ life.history = "juvenile" and my-actions-include "check-infancy" ] ) boolean
+;  
+;  set header lput "Adults do not check-infancy?" header 
+;  set verification lput "dynamic-check" verification 
+;  set function lput "check-infancy" function
+;  set boolean lput ( not any? anima1s with [ life.history = "adult" and my-actions-include "check-infancy" ] ) boolean
   
   ; --------------------------------------------------------------------------------------------------------------------
   ; CHECK-BIRTH
@@ -1180,20 +1180,20 @@ to-report generate-verification-tape
   set function lput "check-juvenility" function
   set boolean lput ( (ifelse-value ( any? anima1s with [ life.history != "adult" or life.history != "juvenile" ] ) [ mean [juvenility.chance] of anima1s with [ life.history != "adult" or life.history != "juvenile" ]] [0] ) >= (ifelse-value ( any? anima1s with [ life.history = "gestatee" or life.history = "infant" ] ) [ mean [juvenility.chance] of anima1s with [ life.history = "gestatee" or life.history = "infant" ]] [0] )) boolean
   
-  set header lput "Juveniles do not check-juvenility?" header 
-  set verification lput "dynamic-check" verification 
-  set function lput "check-juvenility" function
-  set boolean lput ( not any? anima1s with [ life.history = "juvenile" and my-actions-include "check-juvenility" and ticks.at.weaning <= ( ticks - how-many-ticks? )] ) boolean
-  
-  set header lput "Adults do not check-juvenility?" header 
-  set verification lput "dynamic-check" verification 
-  set function lput "check-juvenility" function
-  set boolean lput ( not any? anima1s with [ life.history = "adult" and my-actions-include "check-juvenility" ] ) boolean
-  
-  set header lput "Adult females do not check-juvenility?" header 
-  set verification lput "dynamic-check" verification 
-  set function lput "check-juvenility" function
-  set boolean lput ( not any? anima1s with [ life.history = "adult" and biological.sex = "female" and my-actions-include "check-juvenility" ] ) boolean
+;  set header lput "Juveniles do not check-juvenility?" header 
+;  set verification lput "dynamic-check" verification 
+;  set function lput "check-juvenility" function
+;  set boolean lput ( not any? anima1s with [ life.history = "juvenile" and my-actions-include "check-juvenility" and ticks.at.weaning <= ( ticks - how-many-ticks? )] ) boolean
+;  
+;  set header lput "Adults do not check-juvenility?" header 
+;  set verification lput "dynamic-check" verification 
+;  set function lput "check-juvenility" function
+;  set boolean lput ( not any? anima1s with [ life.history = "adult" and my-actions-include "check-juvenility" ] ) boolean
+;  
+;  set header lput "Adult females do not check-juvenility?" header 
+;  set verification lput "dynamic-check" verification 
+;  set function lput "check-juvenility" function
+;  set boolean lput ( not any? anima1s with [ life.history = "adult" and biological.sex = "female" and my-actions-include "check-juvenility" ] ) boolean
   
   ; --------------------------------------------------------------------------------------------------------------------
   ; CHECK-WEANING
@@ -1220,10 +1220,12 @@ to-report generate-verification-tape
   set function lput "check-weaning" function
   set boolean lput ( not any? anima1s with [ weaning.chance < 0 or weaning.chance > 1 ] ) boolean  
   
-  set header lput "All lactating females have infant offspring?" header 
-  set verification lput "dynamic-check" verification 
-  set function lput "check-weaning" function
-  set boolean lput ( ifelse-value any-lactating-females [ not any? anima1s with [ female.fertility = "lactating" and not any? my-offspring with [ life.history = "infant" ]] ] [ true ] ) boolean
+;  set header lput "All lactating females have infant offspring?" header 
+;  set verification lput "dynamic-check" verification 
+;  set function lput "check-weaning" function
+;  set boolean lput ( ifelse-value any-lactating-females [ not any? anima1s with [ female.fertility = "lactating" and not any? my-offspring with [ life.history = "infant" ]] ] [ true ] ) boolean
+  
+  ; all lactating females do not have gestatee?
   
   set header lput "All mothers of infants are lactating?" header 
   set verification lput "dynamic-check" verification 
@@ -1245,10 +1247,10 @@ to-report generate-verification-tape
   set function lput "check-weaning" function
   set boolean lput ( (ifelse-value ( any? anima1s with [ female.fertility = "lactating" ] ) [ mean [weaning.chance] of anima1s with [ female.fertility = "lactating" ]] [0] ) >= (ifelse-value ( any? anima1s with [ female.fertility != "lactating" ] ) [ mean [weaning.chance] of anima1s with [ female.fertility != "lactating" ]] [0] )) boolean
   
-  set header lput "Not any agents who are not lactating and check weaning?" header 
-  set verification lput "dynamic-check" verification 
-  set function lput "check-weaning" function
-  set boolean lput ( not any? anima1s with [ female.fertility != "lactating" and my-actions-include "check-weaning" ] ) boolean
+;  set header lput "Not any agents who are not lactating and check weaning?" header 
+;  set verification lput "dynamic-check" verification 
+;  set function lput "check-weaning" function
+;  set boolean lput ( not any? anima1s with [ female.fertility != "lactating" and my-actions-include "check-weaning" ] ) boolean
 
   set header lput "Infants do not check-weaning?" header 
   set verification lput "dynamic-check" verification 
@@ -1260,10 +1262,10 @@ to-report generate-verification-tape
   set function lput "check-weaning" function
   set boolean lput ( not any? anima1s with [ life.history = "juvenile" and my-actions-include "check-weaning" ] ) boolean
   
-  set header lput "Adult males do not check-weaning?" header 
-  set verification lput "dynamic-check" verification 
-  set function lput "check-weaning" function
-  set boolean lput ( not any? anima1s with [ life.history = "adult" and biological.sex = "male" and my-actions-include "check-weaning" ] ) boolean
+;  set header lput "Adult males do not check-weaning?" header 
+;  set verification lput "dynamic-check" verification 
+;  set function lput "check-weaning" function
+;  set boolean lput ( not any? anima1s with [ life.history = "adult" and biological.sex = "male" and my-actions-include "check-weaning" ] ) boolean
   
   ; --------------------------------------------------------------------------------------------------------------------
   ; WEAN-OFFSPRING
