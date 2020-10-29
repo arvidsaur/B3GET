@@ -322,7 +322,7 @@ to-report get-updated-value [ current-value update-value ]
   ifelse update-value < 0
   [ set report-value ( report-value ^ (1 + abs update-value) ) ]
   [ set report-value ( report-value ^ (1 / ( 1 + update-value) )) ]
-  report precision report-value 10
+  report report-value
 end
 
 to-report generate-simulation-id
@@ -718,6 +718,12 @@ to move-toward [ target cost ]
     ; deteremine x and y coordinate difference to target
     let ycor-difference ( ( ifelse-value ( is-patch? target ) [ [pycor] of target ] [ [ycor] of target ] ) - [ycor] of self )
     let xcor-difference ( ( ifelse-value ( is-patch? target ) [ [pxcor] of target ] [ [xcor] of target ] ) - [xcor] of self )
+
+    ; these lines check if agents are looking across a world border, which would not calculate the angle correctly
+    if ( ycor-difference > maximum-visual-range and ycor-difference > 0 ) [ set ycor-difference ycor-difference - 100 ]
+    if ( xcor-difference > maximum-visual-range and xcor-difference > 0 ) [ set xcor-difference xcor-difference - 100 ]
+    if ( abs ycor-difference > maximum-visual-range and ycor-difference < 0 ) [ set ycor-difference ycor-difference + 100 ]
+    if ( abs xcor-difference > maximum-visual-range and xcor-difference < 0 ) [ set xcor-difference xcor-difference + 100 ]
 
     if ( not ( ycor-difference = 0 and xcor-difference = 0 ) ) [
 
@@ -1587,7 +1593,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-5.0
+0.7
 .1
 1
 NIL
@@ -1602,7 +1608,7 @@ plant-maximum-neighbors
 plant-maximum-neighbors
 0
 8
-8.0
+4.0
 .1
 1
 NIL
@@ -1681,7 +1687,7 @@ INPUTBOX
 1226
 299
 population
-NIL
+population
 1
 0
 String
@@ -1692,7 +1698,7 @@ INPUTBOX
 1226
 373
 genotype
-NIL
+genotype
 1
 0
 String
@@ -1756,7 +1762,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "--------" "meta-report" "verify-code" "check-runtime" "simulation-report" "model-structure" "reset-plants" "clear-population" "view-genotype" "view-decisions" "view-actions" "view-history" "view-status"
-8
+4
 
 BUTTON
 1037
@@ -1834,8 +1840,8 @@ SLIDER
 plant-quality
 plant-quality
 .1
-100
-10.0
+10
+5.0
 .1
 1
 NIL
