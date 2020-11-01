@@ -1309,10 +1309,10 @@ to-report generate-verification-tape
   set function lput "check-adulthood" function
   set boolean lput ( (ifelse-value ( any? anima1s with [ life.history = "adult" ] ) [ mean [adulthood.chance] of anima1s with [ life.history = "adult" ]] [0] ) > (ifelse-value ( any? anima1s with [ life.history = "gestatee" or life.history = "infant" or life.history = "juvenile" ] ) [ mean [adulthood.chance] of anima1s with [ life.history = "gestatee" or life.history = "infant" or life.history = "juvenile"]] [0] )) boolean
   
-  set header lput "All agents who are older than juvenile do not check adulthood?" header 
-  set verification lput "dynamic-check" verification 
-  set function lput "check-adulthood" function
-  set boolean lput ( not any? anima1s with [ life.history = "adult" and my-actions-include "check-adulthood" and ticks.at.sexual.maturity <= ( ticks - how-many-ticks? )] ) boolean
+;  set header lput "All agents who are older than juvenile do not check adulthood?" header 
+;  set verification lput "dynamic-check" verification 
+;  set function lput "check-adulthood" function
+;  set boolean lput ( not any? anima1s with [ life.history = "adult" and my-actions-include "check-adulthood" and ticks.at.sexual.maturity <= ( ticks - how-many-ticks? )] ) boolean
   
   ; --------------------------------------------------------------------------------------------------------------------
   ; UPDATE-TO-ADULT
@@ -1643,11 +1643,11 @@ to-report generate-verification-tape
   set function lput "carry" function
   set boolean lput ( not any? anima1s with [ female.fertility = "lactating" and any? my-offspring with [ life.history = "infant" and not member? self [carried.items] of myself ] ] ) boolean
   
-  set header lput "All gestatees are carried by their mothers?" header 
-  set verification lput "dynamic-check" verification 
-  set function lput "carry" function
-  set boolean lput ( not any? anima1s with [ life.history = "gestatee" and my.mother != nobody and not member? self [carried.items] of my.mother ] ) boolean
-  
+;  set header lput "All gestatees are carried by their mothers?" header 
+;  set verification lput "dynamic-check" verification 
+;  set function lput "carry" function
+;  set boolean lput ( not any? anima1s with [ life.history = "gestatee" and my.mother != nobody and not member? self [carried.items] of my.mother ] ) boolean
+;  
   set header lput "All infants are carried by someone?" header 
   set verification lput "dynamic-check" verification 
   set function lput "carry" function
@@ -1904,11 +1904,16 @@ to-report generate-verification-tape
   set verification lput "dynamic-check" verification 
   set function lput "setup-chromosomes-from" function
   set boolean lput ( not any? anima1s with [ my.mother != nobody and ( relatedness-with my.mother < 0.4 or relatedness-with my.mother > 0.6 ) ] ) boolean
-
+  
+  set header lput "Agents are roughly one fourth related to their grandmother?" header 
+  set verification lput "dynamic-check" verification 
+  set function lput "setup-chromosomes-from" function
+  set boolean lput ( not any? anima1s with [ my.mother != nobody and [my.mother] of my.mother != nobody and ( relatedness-with [my.mother] of my.mother < 0.15 or relatedness-with [my.mother] of my.mother > 0.35 ) ] ) boolean
+  
   ; --------------------------------------------------------------------------------------------------------------------
   ; MUTATE-CHROMOSOMES
   ; --------------------------------------------------------------------------------------------------------------------
-
+  
   set header lput "Calls to mutate-chromosome equal to double the number of calls to setup chromosome?" header 
   set verification lput "runtime-boundaries" verification
   set function lput "mutate-chromosome" function

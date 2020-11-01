@@ -23,6 +23,7 @@
 to-report verification-file-path report "verification.csv" end
 to-report simulation-file-path report (word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] simulation-id ".csv" ) end
 to-report agent-records-file-path report (word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "agent_records.csv" ) end
+to-report all-simulations-file-path report (word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "simulations.csv" ) end
 to-report simulation-scan-file-path report "scan_simulation.csv" end
   
 to output-results
@@ -88,179 +89,245 @@ to record-world
 end
 
 to record-simulation
-  export-turtle-to 
-  ( word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "simulation_records.csv" )
-  ( list
+  
+  ifelse ( not file-exists? all-simulations-file-path and simulation-id != 0 ) [
     
-    ; parameter settings
-    "date-and-time" 
-    "model-version" 
-    "model-structure"
-    "genotype-reader"
-    "simulation-id"
-    "behaviorspace-experiment-name"
-    "population" 
-    "genotype"
-    "plant-annual-cycle" 
-    "plant-daily-cycle" 
-    "plant-seasonality" 
-    "plant-quality"
-    "plant-minimum-neighbors" 
-    "plant-maximum-neighbors" 
-    "world-width" 
-    "world-height"
-    "ticks"
-    "deterioration-rate" 
-    "selection-rate"
-    "output-results?" 
-    "selection-on?"
-    "path-to-experiment"
-    "useful-commands"
-    "command-input"
+    file-open all-simulations-file-path
     
-    ; validation
-    "dynamic-verification-true-count" ;
-    "dynamic-verification-false-count" ;
-    "foraging-gains-vs-generation-slope"
-    "foraging-gains-vs-generation-R-squared"
-    "mother-initiated-birth-vs-generation-slope"
-    "mother-initiated-birth-vs-generation-R-squared"
-    "mother-initiated-weaning-vs-generation-slope"
-    "mother-initiated-weaning-vs-generation-R-squared"
-    "hamiltons-rule-followed-count"
-    "hamiltons-rule-not-followed-count"
-    "hamiltons-rule-followed-vs-generation-slope"
-    "hamiltons-rule-followed-vs-generation-R-squared"
+    file-print csv:to-string (list (list
+      "date-and-time"
+      "path-to-experiment"
+      "model-version"
+      "model-structure"
+      "genotype-reader"
+      "simulation-id"
+      "ticks"
+      "behaviorspace-experiment-name"
+      "population" 
+      "genotype"
+      "plant-annual-cycle" 
+      "plant-daily-cycle" 
+      "plant-seasonality" 
+      "plant-quality"
+      "plant-minimum-neighbors" 
+      "plant-maximum-neighbors" 
+      "world-width" 
+      "world-height"
+      "deterioration-rate" 
+      "output-results?" 
+      "selection-on?" ))
     
-    ; plants
-    "plant-abundance-maximum" ;
-    "plant-abundance-minimum" ;
-    "plant-abundance-mean" ;
-    "plant-abundance-variance" ;
-    "plant-patchiness-maximum" ;
-    "plant-patchiness-minimum" ;
-    "plant-patchiness-mean" ;
-    "plant-patchiness-variance" ;
-    ; lotka-volterra
+    record-simulation
     
-    ; population - separate by sex?
-    "generations-transpired" ;
-    "total-simulated-individuals"
-    "total-simulated-males"
-    "total-simulated-females"
-    "total-simulated-adults"
-    "population-size-maximum"
-    "population-size-minimum"
-    "population-size-mean"
-    "population-size-variance"
-    "gestation-length-maximum"
-    "gestation-length-minimum"
-    "gestation-length-mean"
-    "gestation-length-variance"
-    "lactation-length-maximum"
-    "lactation-length-minimum"
-    "lactation-length-mean"
-    "lactation-length-variance"
-    "juvenile-length-maximum"
-    "juvenile-length-minimum"
-    "juvenile-length-mean"
-    "juvenile-length-variance"
-    "first-reproduction-maximum"
-    "first-reproduction-minimum"
-    "first-reproduction-mean"
-    "first-reproduction-variance"
-    "post-reproduction-count"
-    "post-reproduction-maximum"
-    "post-reproduction-minimum"
-    "post-reproduction-mean"
-    "post-reproduction-variance"
-    "longevity-adult-maximum"
-    "longevity-adult-minimum"
-    "longevity-adult-mean"
-    "longevity-adult-variance"
+  ][
     
-    ; adult attributes
-    "male-adult-body-size-maximum"
-    "male-adult-body-size-minimum"
-    "male-adult-body-size-mean"
-    "male-adult-body-size-variance"
-    "female-adult-body-size-maximum"
-    "female-adult-body-size-minimum"
-    "female-adult-body-size-mean"
-    "female-adult-body-size-variance"
-    "male-adult-conception-chance-maximum"
-    "male-adult-conception-chance-minimum"
-    "male-adult-conception-chance-mean"
-    "male-adult-conception-chance-variance"
-    "female-adult-conception-chance-maximum"
-    "female-adult-conception-chance-minimum"
-    "female-adult-conception-chance-mean"
-    "female-adult-conception-chance-variance"
-    "male-adult-day-perception-cone-maximum"
-    "male-adult-day-perception-cone-minimum"
-    "male-adult-day-perception-cone-mean"
-    "male-adult-day-perception-cone-variance"
-    "female-adult-day-perception-cone-maximum"
-    "female-adult-day-perception-cone-minimum"
-    "female-adult-day-perception-cone-mean"
-    "female-adult-day-perception-cone-variance"
-    "female-adult-litter-size-maximum"
-    "female-adult-litter-size-minimum"
-    "female-adult-litter-size-mean"
-    "female-adult-litter-size-variance"
+    file-open all-simulations-file-path
     
-    ; emegent phenomena
-    "natal-group-size-maximum"
-    "natal-group-size-minimum"
-    "natal-group-size-mean"
-    "natal-group-size-variance"
-    "mother-initiated-birth-count"
-    "offspring-initiated-birth-count"
-    "mother-initiated-weaning"
-    "offspring-initiated-weaning"
-    "male-total-matings-maximum"
-    "male-total-matings-minimum"
-    "male-total-matings-mean"
-    "male-total-matings-variance"
-    "male-unique-female-matings-maximum"
-    "male-unique-female-matings-minimum"
-    "male-unique-female-matings-mean"
-    "male-unique-female-matings-variance"
-    "female-total-matings-maximum"
-    "female-total-matings-minimum"
-    "female-total-matings-mean"
-    "female-total-matings-variance"
-    "female-unique-male-matings-maximum"
-    "female-unique-male-matings-minimum"
-    "female-unique-male-matings-mean"
-    "female-unique-male-matings-variance"
-    "male-foraging-gains-per-tick-maximum"
-    "male-foraging-gains-per-tick-minimum"
-    "male-foraging-gains-per-tick-mean"
-    "male-foraging-gains-per-tick-variance"
-    "female-foraging-gains-per-tick-maximum"
-    "female-foraging-gains-per-tick-minimum"
-    "female-foraging-gains-per-tick-mean"
-    "female-foraging-gains-per-tick-variance"
-    "male-total-group-transfers-maximum"
-    "male-total-group-transfers-minimum"
-    "male-total-group-transfers-mean"
-    "male-total-group-transfers-variance"
-    "female-total-group-transfers-maximum"
-    "female-total-group-transfers-minimum"
-    "female-total-group-transfers-mean"
-    "female-total-group-transfers-variance"
-    "male-infantice-count-maximum"
-    "male-infantice-count-minimum"
-    "male-infantice-count-mean"
-    "male-infantice-count-variance"
-    "female-infantice-count-maximum"
-    "female-infantice-count-minimum"
-    "female-infantice-count-mean"
-    "female-infantice-count-variance"
-    
-  )
+    file-print csv:to-string (list (list
+      date-and-time
+      path-to-experiment
+      model-version
+      model-structure
+      genotype-reader
+      simulation-id
+      ticks
+      behaviorspace-experiment-name
+      population
+      genotype
+      plant-annual-cycle 
+      plant-daily-cycle 
+      plant-seasonality
+      plant-quality
+      plant-minimum-neighbors
+      plant-maximum-neighbors
+      world-width
+      world-height
+      deterioration-rate
+      output-results?
+      selection-on?
+      
+    ))]
+  
+  file-close 
+  
 end
+
+
+
+;to record-simulation
+;  export-turtle-to 
+;  ( word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "simulation_records.csv" )
+;  ( list
+;    
+;    ; parameter settings
+;    "date-and-time" 
+;    "model-version" 
+;    "model-structure"
+;    "genotype-reader"
+;    "simulation-id"
+;    "behaviorspace-experiment-name"
+;    "population" 
+;    "genotype"
+;    "plant-annual-cycle" 
+;    "plant-daily-cycle" 
+;    "plant-seasonality" 
+;    "plant-quality"
+;    "plant-minimum-neighbors" 
+;    "plant-maximum-neighbors" 
+;    "world-width" 
+;    "world-height"
+;    "ticks"
+;    "deterioration-rate" 
+;    "selection-rate"
+;    "output-results?" 
+;    "selection-on?"
+;    "path-to-experiment"
+;    "useful-commands"
+;    "command-input"
+;    
+;    ; validation
+;    "dynamic-verification-true-count" ;
+;    "dynamic-verification-false-count" ;
+;    "foraging-gains-vs-generation-slope"
+;    "foraging-gains-vs-generation-R-squared"
+;    "mother-initiated-birth-vs-generation-slope"
+;    "mother-initiated-birth-vs-generation-R-squared"
+;    "mother-initiated-weaning-vs-generation-slope"
+;    "mother-initiated-weaning-vs-generation-R-squared"
+;    "hamiltons-rule-followed-count"
+;    "hamiltons-rule-not-followed-count"
+;    "hamiltons-rule-followed-vs-generation-slope"
+;    "hamiltons-rule-followed-vs-generation-R-squared"
+;    
+;    ; plants
+;    "plant-abundance-maximum" ;
+;    "plant-abundance-minimum" ;
+;    "plant-abundance-mean" ;
+;    "plant-abundance-variance" ;
+;    "plant-patchiness-maximum" ;
+;    "plant-patchiness-minimum" ;
+;    "plant-patchiness-mean" ;
+;    "plant-patchiness-variance" ;
+;    ; lotka-volterra
+;    
+;    ; population - separate by sex?
+;    "generations-transpired" ;
+;    "total-simulated-individuals"
+;    "total-simulated-males"
+;    "total-simulated-females"
+;    "total-simulated-adults"
+;    "population-size-maximum"
+;    "population-size-minimum"
+;    "population-size-mean"
+;    "population-size-variance"
+;    "gestation-length-maximum"
+;    "gestation-length-minimum"
+;    "gestation-length-mean"
+;    "gestation-length-variance"
+;    "lactation-length-maximum"
+;    "lactation-length-minimum"
+;    "lactation-length-mean"
+;    "lactation-length-variance"
+;    "juvenile-length-maximum"
+;    "juvenile-length-minimum"
+;    "juvenile-length-mean"
+;    "juvenile-length-variance"
+;    "first-reproduction-maximum"
+;    "first-reproduction-minimum"
+;    "first-reproduction-mean"
+;    "first-reproduction-variance"
+;    "post-reproduction-count"
+;    "post-reproduction-maximum"
+;    "post-reproduction-minimum"
+;    "post-reproduction-mean"
+;    "post-reproduction-variance"
+;    "longevity-adult-maximum"
+;    "longevity-adult-minimum"
+;    "longevity-adult-mean"
+;    "longevity-adult-variance"
+;    
+;    ; adult attributes
+;    "male-adult-body-size-maximum"
+;    "male-adult-body-size-minimum"
+;    "male-adult-body-size-mean"
+;    "male-adult-body-size-variance"
+;    "female-adult-body-size-maximum"
+;    "female-adult-body-size-minimum"
+;    "female-adult-body-size-mean"
+;    "female-adult-body-size-variance"
+;    "male-adult-conception-chance-maximum"
+;    "male-adult-conception-chance-minimum"
+;    "male-adult-conception-chance-mean"
+;    "male-adult-conception-chance-variance"
+;    "female-adult-conception-chance-maximum"
+;    "female-adult-conception-chance-minimum"
+;    "female-adult-conception-chance-mean"
+;    "female-adult-conception-chance-variance"
+;    "male-adult-day-perception-cone-maximum"
+;    "male-adult-day-perception-cone-minimum"
+;    "male-adult-day-perception-cone-mean"
+;    "male-adult-day-perception-cone-variance"
+;    "female-adult-day-perception-cone-maximum"
+;    "female-adult-day-perception-cone-minimum"
+;    "female-adult-day-perception-cone-mean"
+;    "female-adult-day-perception-cone-variance"
+;    "female-adult-litter-size-maximum"
+;    "female-adult-litter-size-minimum"
+;    "female-adult-litter-size-mean"
+;    "female-adult-litter-size-variance"
+;    
+;    ; emegent phenomena
+;    "natal-group-size-maximum"
+;    "natal-group-size-minimum"
+;    "natal-group-size-mean"
+;    "natal-group-size-variance"
+;    "mother-initiated-birth-count"
+;    "offspring-initiated-birth-count"
+;    "mother-initiated-weaning"
+;    "offspring-initiated-weaning"
+;    "male-total-matings-maximum"
+;    "male-total-matings-minimum"
+;    "male-total-matings-mean"
+;    "male-total-matings-variance"
+;    "male-unique-female-matings-maximum"
+;    "male-unique-female-matings-minimum"
+;    "male-unique-female-matings-mean"
+;    "male-unique-female-matings-variance"
+;    "female-total-matings-maximum"
+;    "female-total-matings-minimum"
+;    "female-total-matings-mean"
+;    "female-total-matings-variance"
+;    "female-unique-male-matings-maximum"
+;    "female-unique-male-matings-minimum"
+;    "female-unique-male-matings-mean"
+;    "female-unique-male-matings-variance"
+;    "male-foraging-gains-per-tick-maximum"
+;    "male-foraging-gains-per-tick-minimum"
+;    "male-foraging-gains-per-tick-mean"
+;    "male-foraging-gains-per-tick-variance"
+;    "female-foraging-gains-per-tick-maximum"
+;    "female-foraging-gains-per-tick-minimum"
+;    "female-foraging-gains-per-tick-mean"
+;    "female-foraging-gains-per-tick-variance"
+;    "male-total-group-transfers-maximum"
+;    "male-total-group-transfers-minimum"
+;    "male-total-group-transfers-mean"
+;    "male-total-group-transfers-variance"
+;    "female-total-group-transfers-maximum"
+;    "female-total-group-transfers-minimum"
+;    "female-total-group-transfers-mean"
+;    "female-total-group-transfers-variance"
+;    "male-infantice-count-maximum"
+;    "male-infantice-count-minimum"
+;    "male-infantice-count-mean"
+;    "male-infantice-count-variance"
+;    "female-infantice-count-maximum"
+;    "female-infantice-count-minimum"
+;    "female-infantice-count-mean"
+;    "female-infantice-count-variance"
+;    
+;  )
+;end
 
 ; validation
 to-report dynamic-verification-true-count report 0 end ; to do
