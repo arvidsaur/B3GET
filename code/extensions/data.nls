@@ -49,7 +49,6 @@ to setup-metafile
       "output-results?" 
       "selection-on?"
       "useful-commands"
-      "command-input"
     ))
     
     file-close ]
@@ -94,7 +93,6 @@ to update-metafile [ type-of-file name-of-file ]
         output-results?
         selection-on?
         useful-commands
-        command-input 
       )
       
       old-metafile )

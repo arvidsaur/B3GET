@@ -18,10 +18,10 @@ to command
     (ifelse 
       ( useful-commands = "help-me" ) [ output-help-me ]
       ( useful-commands = "meta-report" ) [ output-meta-report ]
-      ( useful-commands = "verify-code" ) [ output-verification command-input ]
+      ( useful-commands = "verify-code" ) [ output-verification ]
       ( useful-commands = "check-runtime" ) [ output-runtime ]  
       ( useful-commands = "simulation-report" ) [ output-simulation-report ]
-      ( useful-commands = "model-structure" ) [ output-model-structure command-input ]
+      ( useful-commands = "model-structure" ) [ output-model-structure ]
       ( useful-commands = "reset-plants" ) [ output-reset-plants ]
       ( useful-commands = "clear-population" ) [ output-clear-pop ]
       ( useful-commands = "view-genotype" ) [ output-genotype ]
@@ -31,10 +31,10 @@ to command
       ( useful-commands = "view-status") [ output-status ]
       
       ; not currently used
-      ( useful-commands = "import-world" ) [ output-import-world command-input ]
-      ( useful-commands = "genotype-reader" ) [ output-genotype-reader command-input ]
-      ( useful-commands = "add-allele" ) [ output-add-allele ]
-      ( useful-commands = "delete-allele" ) [ output-delete-allele command-input ]
+;      ( useful-commands = "import-world" ) [ output-import-world command-input ]
+;      ( useful-commands = "genotype-reader" ) [ output-genotype-reader command-input ]
+;      ( useful-commands = "add-allele" ) [ output-add-allele ]
+;      ( useful-commands = "delete-allele" ) [ output-delete-allele command-input ]
       
       [])
     
@@ -106,17 +106,19 @@ end
 ; VERIFY CODE
 ;-----------------------------------------------------------------------------     
 
-to output-verification [ input ]
+to output-verification
   
   if ( useful-commands = "verify-code" ) [
     
+    let user-verification-choice user-one-of "Which verification items would you like to see?" [ "true" "false" "both" ]
+    
     ( ifelse
       
-      ( command-input = "true" ) [
+      ( user-verification-choice = "true" ) [
         output-header " CODE VERIFICATION : TRUE ONLY  "
         output-true-verification ]
       
-      ( command-input = "false" ) [
+      ( user-verification-choice = "false" ) [
         output-header " CODE VERIFICATION : FALSE ONLY   "
         output-false-verification ]
       
@@ -160,22 +162,22 @@ end
 to output-genotype-reader [ input ]
   output-header ( word " GENOTYPE READER : " )
 
-  let genotype-list [ "sta7us" "g8tes" ] ; g8tes not working
-  ifelse ( member? input genotype-list ) [
-    ifelse ( genotype-reader = input ) [
-      set command-input one-of remove input genotype-list
-      output-print ( word " The genotype reader is currently set to \"" genotype-reader "\"." ) 
-      output-print ( word " Would you like to set the genotype reader to \"" command-input "\"?" ) 
-      output-print ( word " If so click ▷." ) 
-    ][
-      set genotype-reader input
-      output-print ( word " The genotype reader is currently set to \"" genotype-reader "\"." ) 
-    ]
-  ][
-    set command-input first genotype-list
-    output-print ( word " The genotype reader is currently set to \"" genotype-reader "\"." ) 
-    output-print ( word " Would you like to set the genotype reader to \"" command-input "\"?" ) 
-    output-print ( word " If so click ▷." )]
+;  let genotype-list [ "sta7us" "g8tes" ] ; g8tes not working
+;  ifelse ( member? input genotype-list ) [
+;    ifelse ( genotype-reader = input ) [
+;      set command-input one-of remove input genotype-list
+;      output-print ( word " The genotype reader is currently set to \"" genotype-reader "\"." ) 
+;      output-print ( word " Would you like to set the genotype reader to \"" command-input "\"?" ) 
+;      output-print ( word " If so click ▷." ) 
+;    ][
+;      set genotype-reader input
+;      output-print ( word " The genotype reader is currently set to \"" genotype-reader "\"." ) 
+;    ]
+;  ][
+;    set command-input first genotype-list
+;    output-print ( word " The genotype reader is currently set to \"" genotype-reader "\"." ) 
+;    output-print ( word " Would you like to set the genotype reader to \"" command-input "\"?" ) 
+;    output-print ( word " If so click ▷." )]
   
 end
 
@@ -183,15 +185,14 @@ end
 ; MODEL STRUCTURE
 ;-----------------------------------------------------------------------------    
 
-to output-model-structure [ input ]
+to output-model-structure
   output-header ( word " MODEL STRUCTURE : " )
   let structure-list [ "aspatial" "free-lunch" "ideal-form" "no-evolution" "no-plants" "reaper" "show-fertility" "stork" "uninvadable" ]
+  let structure-choice user-one-of "Which structural rule would you like to add or remove?" structure-list
   
-  if ( member? input structure-list ) [
-    ifelse ( not member? input model-structure ) 
-    [ set model-structure lput input model-structure ]
-    [ set model-structure remove input model-structure ]
-  ]
+    ifelse ( not member? structure-choice model-structure ) 
+    [ set model-structure lput structure-choice model-structure ]
+    [ set model-structure remove structure-choice model-structure ]
   
   output-print " "
   output-print "  Current rules:"
@@ -254,7 +255,7 @@ to output-genotype
   output-header (word " GENOTYPE : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [meta.id ] of anima1-to-inspect ) ] )
   ifelse ( anima1-to-inspect = nobody ) [
     ;set observation-notes (word "Organism " read-from-string command-input " not found.")
-    output-print (word " Organism " read-from-string command-input " not found.")
+    ;output-print (word " Organism " read-from-string command-input " not found.")
   ][
     foreach [chromosome.I] of anima1-to-inspect [ a ->
       output-print (word " "reduce [ [itm nxt] -> (word itm " " nxt ) ] a ) ]
@@ -279,8 +280,7 @@ to output-decisions
     foreach decision.vectors [ decision ->
       output-print ( word " " decision )]]]
   
-  [let decision-length length all-decisions-made
-    foreach sublist all-decisions-made ( decision-length - 40 ) decision-length [ d -> 
+  [ foreach all-decisions-made [ d -> 
       output-print (word "  " d ) ]]
 end
 
@@ -295,12 +295,14 @@ to output-actions
   ifelse ( anima1-to-inspect != nobody ) 
   
   [ ask anima1-to-inspect [
-    foreach actions.completed [ action ->
-      output-print ( word " " action ) ]]]
+    foreach actions.completed [ action -> output-print-action action ]]]
   
-  [ let action-length length all-actions-completed
-    foreach sublist all-actions-completed ( action-length - 40 ) action-length [ a -> ; must account for when list < 40 items
-      output-print (word "  " a ) ]]
+  [ foreach all-actions-completed [ action -> output-print-action action ]]
+  
+end
+
+to output-print-action [ action ]
+  output-print ( word " At " item 0 action " timesteps " item 1 action " performed " item 3 action " on " item 2 action " for " item 4 action " energy." )
 end
 
 ;-----------------------------------------------------------------------------       
@@ -404,20 +406,20 @@ end
 to output-add-allele
   output-header (word " ADD NEW ALLELE : " )
 
-  ifelse ( is-list? read-from-string command-input and length read-from-string command-input > 4 ) [
-    ask anima1s [
-      set chromosome.I lput run-result command-input chromosome.I
-      set chromosome.II lput run-result command-input chromosome.II
-    ]
-    ;t observation-notes (word "Add mutation " command-input " to the population. " observation-notes ) 
-    output-print (word " Allele " command-input " was successfully added." )
-  ][
-    ;set observation-notes (word "Adding allele " command-input " was unsuccessful." )
-    output-print (word " Adding allele " command-input " was unsuccessful." )
-    output-print " Alleles should have the following structure:"
-    output-print ""
-    output-print (word " [ true \"am\" \"cf\" \"mate-with\" 0.009 ]" )
-  ]
+;  ifelse ( is-list? read-from-string command-input and length read-from-string command-input > 4 ) [
+;    ask anima1s [
+;      set chromosome.I lput run-result command-input chromosome.I
+;      set chromosome.II lput run-result command-input chromosome.II
+;    ]
+;    ;t observation-notes (word "Add mutation " command-input " to the population. " observation-notes ) 
+;    output-print (word " Allele " command-input " was successfully added." )
+;  ][
+;    ;set observation-notes (word "Adding allele " command-input " was unsuccessful." )
+;    output-print (word " Adding allele " command-input " was unsuccessful." )
+;    output-print " Alleles should have the following structure:"
+;    output-print ""
+;    output-print (word " [ true \"am\" \"cf\" \"mate-with\" 0.009 ]" )
+;  ]
 end
 
 ;-----------------------------------------------------------------------------       
@@ -427,18 +429,18 @@ end
 to output-delete-allele [ input ]
   output-header (word " DELETE ALLELE : " )
   
-  ifelse ( is-list? read-from-string input ) [
-    ask anima1s [
-      foreach chromosome.I [ i ->
-        if ( i = read-from-string command-input ) [
-          set chromosome.I remove-item ( position i chromosome.I ) chromosome.I ]]
-      foreach chromosome.II [ ii ->
-        if ( ii = read-from-string command-input ) [
-          set chromosome.II remove-item ( position ii chromosome.II ) chromosome.II ]]]
-    
-   ; set observation-notes (word "Delete allele " read-from-string  command-input " from the population. " observation-notes ) 
-    output-print (word " Allele " read-from-string command-input " successfully deleted." )]
-  
-  [ output-print (word " Command input is not a list." )]
+;  ifelse ( is-list? read-from-string input ) [
+;    ask anima1s [
+;      foreach chromosome.I [ i ->
+;        if ( i = read-from-string command-input ) [
+;          set chromosome.I remove-item ( position i chromosome.I ) chromosome.I ]]
+;      foreach chromosome.II [ ii ->
+;        if ( ii = read-from-string command-input ) [
+;          set chromosome.II remove-item ( position ii chromosome.II ) chromosome.II ]]]
+;    
+;   ; set observation-notes (word "Delete allele " read-from-string  command-input " from the population. " observation-notes ) 
+;    output-print (word " Allele " read-from-string command-input " successfully deleted." )]
+;  
+;  [ output-print (word " Command input is not a list." )]
   
 end

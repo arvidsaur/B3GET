@@ -237,9 +237,10 @@ to setup ; [ new-simulation-id ]
   reset-ticks
   set simulation-id generate-simulation-id ; new-simulation-id
   setup-parameters
+  setup-patches
+  if ( path-to-experiment = "" ) [ set path-to-experiment "../results/" ]
   import-population
   import-genotype
-  setup-patches
   clear-output
 end
 
@@ -256,56 +257,62 @@ end
 
 to go
 
-  tick
+  ifelse ( simulation-id != 0 )[
 
-  ; UPDATE WORLD
-  set all-decisions-made filter [ vector -> item 0 vector > ( ticks - how-many-ticks? ) ] all-decisions-made
-  set all-actions-completed filter [ vector -> item 0 vector > ( ticks - how-many-ticks? ) ] all-actions-completed
-  ask anima1s [ set my.environment [] set decision.vectors [] set actions.completed [] ]
+    tick
 
-  ; UPDATE PLANTS
-  ifelse ( member? "no-plants" model-structure )
-  [ ask patches [ set pcolor brown + 1 ] ]
-  [ update-patches ]
+    ; UPDATE WORLD
+    set all-decisions-made filter [ vector -> item 0 vector > ( ticks - how-many-ticks? ) ] all-decisions-made
+    set all-actions-completed filter [ vector -> item 0 vector > ( ticks - how-many-ticks? ) ] all-actions-completed
+    ask anima1s [ set my.environment [] set decision.vectors [] set actions.completed [] ]
 
-  ; UPDATE AGENTS
-  ask anima1s [ set age.in.ticks age.in.ticks + 1 ] ; all individuals age at each time step
-  ask anima1s [ deteriorate ] ; all individuals decay at every time step
-  ask anima1s [ update-appearance ]
-  ask anima1s with [ not empty? carried.items ] [ foreach carried.items [ itm -> ask itm [ move-to myself ]]] ; update carried items to be with carrier
+    ; UPDATE PLANTS
+    ifelse ( member? "no-plants" model-structure )
+    [ ask patches [ set pcolor brown + 1 ] ]
+    [ update-patches ]
 
-  ; AGENT MORTALITY
-  ifelse ( member? "reaper" model-structure  )
-  [ if (( count anima1s with [ is.alive ] - 100 ) > 0 ) [ ask n-of ( count anima1s with [ is.alive ] - 100 ) anima1s [ set-to-dead ]]
-    ask anima1s with [ is.alive = false ] [ check-mortality ]] ; this organization ensures that 100 individuals stay alive at all times
-  [ ask anima1s [ check-mortality ] ]
+    ; UPDATE AGENTS
+    ask anima1s [ set age.in.ticks age.in.ticks + 1 ] ; all individuals age at each time step
+    ask anima1s [ deteriorate ] ; all individuals decay at every time step
+    ask anima1s [ update-appearance ]
+    ask anima1s with [ not empty? carried.items ] [ foreach carried.items [ itm -> ask itm [ move-to myself ]]] ; update carried items to be with carrier
 
-  ; AGENT REPRODUCTION
-  if ( member? "stork" model-structure and count anima1s with [ is.alive ] < 100 ) ; random mating
-  [ repeat ( 100 - count anima1s with [ is.alive ]) [
-    if ( ( count anima1s with [ biological.sex = "male" and life.history = "adult" and is.alive ] > 0 )                                        ; if there is at least one adult male
-      and ( count anima1s with [ biological.sex = "female" and life.history = "adult" and female.fertility = "cycling" and is.alive ] > 0 ) )  ; and one adult cycling female left in the simulation,
-    [ ask one-of anima1s with [ biological.sex = "female" and life.history = "adult" and female.fertility = "cycling" and is.alive ]           ; randomly select one adult male and one cycling female,
-      [ conceive-with ( one-of anima1s with [ biological.sex = "male" and life.history = "adult" and is.alive ] ) 999999 ]]]]                  ; and the female spontaneously conceives a new offspring from their alleles
+    ; AGENT MORTALITY
+    ifelse ( member? "reaper" model-structure  )
+    [ if (( count anima1s with [ is.alive ] - 100 ) > 0 ) [ ask n-of ( count anima1s with [ is.alive ] - 100 ) anima1s [ set-to-dead ]]
+      ask anima1s with [ is.alive = false ] [ check-mortality ]] ; this organization ensures that 100 individuals stay alive at all times
+    [ ask anima1s [ check-mortality ] ]
 
-  ; AGENT AGENCY
-  ask anima1s with [ is.alive ] [ consider-environment ]
-  ask anima1s with [ is.alive ] [ make-decisions ]
-  ask anima1s with [ is.alive ] [ do-actions ]
+    ; AGENT REPRODUCTION
+    if ( member? "stork" model-structure and count anima1s with [ is.alive ] < 100 ) ; random mating
+    [ repeat ( 100 - count anima1s with [ is.alive ]) [
+      if ( ( count anima1s with [ biological.sex = "male" and life.history = "adult" and is.alive ] > 0 )                                        ; if there is at least one adult male
+        and ( count anima1s with [ biological.sex = "female" and life.history = "adult" and female.fertility = "cycling" and is.alive ] > 0 ) )  ; and one adult cycling female left in the simulation,
+      [ ask one-of anima1s with [ biological.sex = "female" and life.history = "adult" and female.fertility = "cycling" and is.alive ]           ; randomly select one adult male and one cycling female,
+        [ conceive-with ( one-of anima1s with [ biological.sex = "male" and life.history = "adult" and is.alive ] ) 999999 ]]]]                  ; and the female spontaneously conceives a new offspring from their alleles
 
-  ; ARTIFICAL SELECTION
-  if selection-on? [ artificial-selection ]
+    ; AGENT AGENCY
+    ask anima1s with [ is.alive ] [ consider-environment ]
+    ask anima1s with [ is.alive ] [ make-decisions ]
+    ask anima1s with [ is.alive ] [ do-actions ]
 
-  ; SIMULATION OUTPUT
-  ;if output-results? [ output-results ]
-  ; prints out current status of the simulation every 100 timesteps
-  if ( ticks > 0 and ceiling (ticks / 100) = (ticks / 100) and any? anima1s ) [
-    let print-text (word "Simulation " simulation-id " is now at " precision (ticks / plant-annual-cycle) 3 " years, "
-      precision sum [penergy.supply] of patches 3 " plant units, "
-      precision mean [generation.number] of anima1s 3 " generations, and contains "
-      count anima1s with [ is.alive ] " living organisms.")
-    print print-text
-    if ( behaviorspace-run-number > 0 ) [ output-print print-text ] ]
+    ; ARTIFICAL SELECTION
+    if selection-on? [ artificial-selection ]
+
+    ; SIMULATION OUTPUT
+    ;if output-results? [ output-results ]
+    ; prints out current status of the simulation every 100 timesteps
+    if ( ticks > 0 and ceiling (ticks / 100) = (ticks / 100) and any? anima1s ) [
+      let print-text (word "Simulation " simulation-id " is now at " precision (ticks / plant-annual-cycle) 3 " years, "
+        precision sum [penergy.supply] of patches 3 " plant units, "
+        precision mean [generation.number] of anima1s 3 " generations, and contains "
+        count anima1s with [ is.alive ] " living organisms.")
+      print print-text
+      if ( behaviorspace-run-number > 0 ) [ output-print print-text ] ]
+
+  ][
+    if ( "setup" = user-one-of "Remember to click setup first!" [ "setup" "ok" ] ) [ setup ]
+  ]
 
 end
 
@@ -1523,7 +1530,7 @@ INPUTBOX
 387
 79
 path-to-experiment
-../data/
+../results/
 1
 0
 String
@@ -1549,7 +1556,7 @@ INPUTBOX
 849
 10
 1092
-254
+144
 observation-notes
 NIL
 1
@@ -1593,7 +1600,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-0.7
+4.0
 .1
 1
 NIL
@@ -1608,7 +1615,7 @@ plant-maximum-neighbors
 plant-maximum-neighbors
 0
 8
-4.0
+8.0
 .1
 1
 NIL
@@ -1634,7 +1641,7 @@ plant-seasonality
 plant-seasonality
 0
 1
-0.9
+0.5
 .05
 1
 NIL
@@ -1687,7 +1694,7 @@ INPUTBOX
 1226
 299
 population
-population
+p72TNU
 1
 0
 String
@@ -1698,7 +1705,7 @@ INPUTBOX
 1226
 373
 genotype
-genotype
+g2873527
 1
 0
 String
@@ -1762,7 +1769,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "--------" "meta-report" "verify-code" "check-runtime" "simulation-report" "model-structure" "reset-plants" "clear-population" "view-genotype" "view-decisions" "view-actions" "view-history" "view-status"
-4
+11
 
 BUTTON
 1037
@@ -1841,7 +1848,7 @@ plant-quality
 plant-quality
 .1
 10
-5.0
+3.0
 .1
 1
 NIL
@@ -1868,17 +1875,6 @@ selection-on?
 1
 1
 -1000
-
-INPUTBOX
-849
-262
-1092
-322
-command-input
-false
-1
-0
-String (commands)
 
 OUTPUT
 849
