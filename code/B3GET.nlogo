@@ -1556,7 +1556,7 @@ INPUTBOX
 849
 10
 1092
-144
+319
 observation-notes
 NIL
 1
@@ -1600,7 +1600,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-4.0
+7.0
 .1
 1
 NIL
@@ -1769,7 +1769,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "--------" "meta-report" "verify-code" "check-runtime" "simulation-report" "model-structure" "reset-plants" "clear-population" "view-genotype" "view-decisions" "view-actions" "view-history" "view-status"
-11
+8
 
 BUTTON
 1037
@@ -6962,6 +6962,77 @@ set grass? true
 repeat 75 [ go ]
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="World A: baseline" repetitions="1" runMetricsEveryStep="false">
+    <setup>setup
+
+; give simulation-id specific configuration: sDOB17 means 
+; simulation of WORLD-D, Baboons seed population, 
+; run B (instead of A), plant-minimum-neighbors = 1 and 
+; plant-maximum-neighbors = 7
+ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
+  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "A" plant-minimum-neighbors plant-maximum-neighbors )
+][
+  let min-holder plant-minimum-neighbors
+  let max-holder plant-maximum-neighbors
+  set plant-minimum-neighbors max-holder - 1
+  set plant-maximum-neighbors min-holder
+  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "B" plant-minimum-neighbors plant-maximum-neighbors )
+]</setup>
+    <go>go</go>
+    <final>record-simulation</final>
+    <timeLimit steps="10"/>
+    <exitCondition>not any? anima1s or median [generation.number] of anima1s &gt; 100</exitCondition>
+    <enumeratedValueSet variable="path-to-experiment">
+      <value value="&quot;../results/&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-annual-cycle">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-daily-cycle">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-seasonality">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-quality">
+      <value value="3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-maximum-neighbors">
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="population">
+      <value value="&quot;p72TNU&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype">
+      <value value="&quot;g2873527&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="output-results?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="selection-on?">
+      <value value="false"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default
