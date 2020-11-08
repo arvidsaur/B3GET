@@ -280,7 +280,7 @@ to output-decisions
     foreach decision.vectors [ decision ->
       output-print ( word " " decision )]]]
   
-  [ foreach all-decisions-made [ d -> 
+  [ foreach recent-decisions-made [ d -> 
       output-print (word "  " d ) ]]
 end
 
@@ -297,7 +297,7 @@ to output-actions
   [ ask anima1-to-inspect [
     foreach actions.completed [ action -> output-print-action action ]]]
   
-  [ foreach all-actions-completed [ action -> output-print-action action ]]
+  [ foreach recent-actions-completed [ action -> output-print-action action ]]
   
 end
 

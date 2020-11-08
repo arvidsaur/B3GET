@@ -105,24 +105,6 @@ to output-false-verification
   ]
 end
 
-;---------------------------------------------------------------------------------------------------------------------------------
-; SAVE to FILE FUNCTIONS
-;---------------------------------------------------------------------------------------------------------------------------------
-
-to save-verification-to [ file-name ]
-  
-  let new-tape generate-verification-tape
-  
-  let existing-file []
-  ifelse ( file-exists? (word path-to-experiment "/" file-name ) )
-  [ file-open (word path-to-experiment "/" file-name ) set existing-file csv:from-file (word path-to-experiment "/" file-name ) ]
-  [ set existing-file (sentence but-last new-tape ) ]
-  let updated-file lput ( last new-tape ) existing-file
-  csv:to-file (word path-to-experiment "/" file-name ) updated-file
-  file-close
-  
-end
-
 ;--------------------------------------------------------------------------------------------------------------------------------------------------
 ; GENERATE TAPE
 ;--------------------------------------------------------------------------------------------------------------------------------------------------
@@ -140,10 +122,7 @@ to-report generate-verification-tape
     set count-alive-agents count-alive-agents + count anima1s with [ is.alive ]
     set count-all-agents count-all-agents + count anima1s
     
-    
-    go
-    
-  ]
+    go ]
   
   let header (list "date-and-time" "model-version" "simulation-id" "ticks" )
   let verification (list "" "" "" "" )
@@ -366,7 +345,7 @@ to-report generate-verification-tape
   set header lput "All decision.vectors are unique in their combination of non-numeric values?" header
   set verification lput "dynamic-check" verification 
   set function lput "make-decisions" function
-  let decisions-list map [ i -> but-first but-last i ] all-decisions-made
+  let decisions-list map [ i -> but-first but-last i ] recent-decisions-made
   set boolean lput ( length remove-duplicates decisions-list = length remove-duplicates decisions-list ) boolean
 
   ; --------------------------------------------------------------------------------------------------------------------
@@ -386,7 +365,7 @@ to-report generate-verification-tape
   set header lput "There are no actions that can be completed with 0 cost?" header
   set verification lput "dynamic-check" verification 
   set function lput "do-actions" function
-  set boolean lput ( length ( filter [ i -> i = 0 ] map [ j -> last j ] all-actions-completed ) > 0 ) boolean 
+  set boolean lput ( length ( filter [ i -> i = 0 ] map [ j -> last j ] recent-actions-completed ) > 0 ) boolean 
 
   set header lput "Dead agents have not completed any actions?" header
   set verification lput "dynamic-check" verification 
@@ -1928,7 +1907,7 @@ to-report generate-verification-tape
 end
 
 to-report my-actions-include [ input ]
-  report length filter [ vector -> item 1 vector = self and item 3 vector = input ] all-actions-completed > 0 
+  report length filter [ vector -> item 1 vector = self and item 3 vector = input ] recent-actions-completed > 0 
 end
 
 to-report last-actions-include [ input ]
@@ -1936,11 +1915,11 @@ to-report last-actions-include [ input ]
 end
 
 to-report decision-count-for [ input ]
-  report length filter [ vector -> item 3 vector = input ] all-decisions-made
+  report length filter [ vector -> item 3 vector = input ] recent-decisions-made
 end
 
 to-report action-count-for [ input ]
-  report length filter [ vector -> item 3 vector = input ] all-actions-completed
+  report length filter [ vector -> item 3 vector = input ] recent-actions-completed
 end
 
 to-report updated-value-check [ saved-value random-value new-value ]
@@ -1948,7 +1927,7 @@ to-report updated-value-check [ saved-value random-value new-value ]
 end
 
 to-report my-targets
-  let my-decisions filter [ vector -> item 1 vector = self ] all-decisions-made
+  let my-decisions filter [ vector -> item 1 vector = self ] recent-decisions-made
   let my-targets-list remove-duplicates map [ i -> item 2 i ] my-decisions
   let targets anima1s with [ member? self my-targets-list ]
   report targets

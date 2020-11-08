@@ -9,7 +9,7 @@
 ;
 ;-----------------------------------------------------------------------------------
 
-extensions [ csv profiler table ]
+extensions [ time csv profiler table stats ]
 
 __includes [
   "extensions/commands.nls"
@@ -46,6 +46,7 @@ anima1s-own [
   carried.items
 
   ; PHENOTYPE VARIABLES: hidden to all agents but self
+  fully.decayed
   living.chance
   energy.supply
   bite.capacity
@@ -140,12 +141,13 @@ globals [
   base-litter-size
 
   ; TRACKING VARIABLES
+  start-date-and-time
   verification-results
   plant-abundance-record
   plant-patchiness-record
-  animal-graveyard
-  all-decisions-made
-  all-actions-completed
+  population-size-record
+  recent-decisions-made
+  recent-actions-completed
 ]
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -165,14 +167,16 @@ to setup-button
 end
 
 to go-button
-  go
+  ifelse ( simulation-id != 0 )
+  [ go ]
+  [ let user-setup-response false
+    set user-setup-response user-yes-or-no? "Would you like to start a new simulation?"
+    ifelse ( user-setup-response ) [ setup ] [ stop ] ]
 end
 
 to save-button
-  ifelse ( simulation-id = 0 )
-  [ set simulation-id generate-simulation-id ]
-  [ set observation-notes (word simulation-id ": " observation-notes )
-    update-metafile "simulation" simulation-id ]
+  if ( simulation-id = 0 ) [ set simulation-id generate-simulation-id ]
+  update-metafile "simulation" simulation-id
 end
 
 to reset-population-button
@@ -180,7 +184,7 @@ to reset-population-button
 end
 
 to export-population-button
-  save-population
+  if ( any? anima1s ) [ save-population ]
 end
 
 to import-population-button
@@ -192,7 +196,7 @@ to reset-genotype-button
 end
 
 to export-genotype-button
-  ask anima1s with [ read-from-string but-first genotype = meta.id ] [ save-genotype ]
+  if ( subject != nobody ) [ ask one-of anima1s with [ subject = self ] [ save-genotype ]]
 end
 
 to import-genotype-button
@@ -213,13 +217,16 @@ end
 
 to setup-parameters
   set model-version "1.2.0-Beta"
-  set deterioration-rate -0.01
+  set deterioration-rate -0.1
   set maximum-visual-range 5
   set base-litter-size 10
   set model-structure []
   set verification-results []
-  set all-decisions-made []
-  set all-actions-completed []
+  set plant-abundance-record []
+  set plant-patchiness-record []
+  set population-size-record []
+  set recent-decisions-made []
+  set recent-actions-completed []
 end
 
 to setup-patches
@@ -227,12 +234,12 @@ to setup-patches
     set pterminal.energy random-float plant-quality
     set pmeta.id random 9999999
     update-patch-color ]
-  ;repeat 100 [ update-patches ask patches [ set penergy.supply penergy.supply + 10 / plant-annual-cycle if penergy.supply > pterminal.energy [ set penergy.supply pterminal.energy ] update-patch-color ] ]
+  reset-ticks
 end
 
 to setup ; [ new-simulation-id ]
-  ; save world file of old simulation before starting new simulation under following conditions
-  ;if ( simulation-id != 0 and behaviorspace-run-number = 0 and output-results? = true ) [ record-world ]
+         ; save world file of old simulation before starting new simulation under following conditions
+         ;if ( simulation-id != 0 and behaviorspace-run-number = 0 and output-results? = true ) [ record-world ]
   clear-all
   reset-ticks
   set simulation-id generate-simulation-id ; new-simulation-id
@@ -257,62 +264,60 @@ end
 
 to go
 
-  ifelse ( simulation-id != 0 )[
+  tick
 
-    tick
+  ; UPDATE WORLD
+  if ( start-date-and-time = 0 ) [ set start-date-and-time date-and-time reset-timer if ( model-structure = [] ) [ set model-structure [ "baseline" ] ] ]
+  set recent-decisions-made filter [ vector -> item 0 vector > ( ticks - how-many-ticks? ) ] recent-decisions-made
+  set recent-actions-completed filter [ vector -> item 0 vector > ( ticks - how-many-ticks? ) ] recent-actions-completed
+  ask anima1s with [ is.alive ] [ set my.environment [] set decision.vectors [] set actions.completed [] ]
 
-    ; UPDATE WORLD
-    set all-decisions-made filter [ vector -> item 0 vector > ( ticks - how-many-ticks? ) ] all-decisions-made
-    set all-actions-completed filter [ vector -> item 0 vector > ( ticks - how-many-ticks? ) ] all-actions-completed
-    ask anima1s [ set my.environment [] set decision.vectors [] set actions.completed [] ]
+  ; UPDATE PLANTS
+  ifelse ( member? "no-plants" model-structure )
+  [ ask patches [ set pcolor brown + 1 ] ]
+  [ update-patches ]
 
-    ; UPDATE PLANTS
-    ifelse ( member? "no-plants" model-structure )
-    [ ask patches [ set pcolor brown + 1 ] ]
-    [ update-patches ]
+  ; UPDATE AGENTS
+  ask anima1s with [ not fully.decayed ] [ set age.in.ticks age.in.ticks + 1 ] ; all individuals age at each time step
+  ask anima1s with [ not fully.decayed ]  [ deteriorate ] ; all individuals decay at every time step
+  ask anima1s with [ not fully.decayed ]  [ update-appearance ]
+  ask anima1s with [ not fully.decayed and not empty? carried.items ] [ foreach carried.items [ itm -> ask itm [ move-to myself ]]] ; update carried items to be with carrier
 
-    ; UPDATE AGENTS
-    ask anima1s [ set age.in.ticks age.in.ticks + 1 ] ; all individuals age at each time step
-    ask anima1s [ deteriorate ] ; all individuals decay at every time step
-    ask anima1s [ update-appearance ]
-    ask anima1s with [ not empty? carried.items ] [ foreach carried.items [ itm -> ask itm [ move-to myself ]]] ; update carried items to be with carrier
+  ; AGENT MORTALITY
+  ifelse ( member? "reaper" model-structure  )
+  [ if (( count anima1s with [ is.alive ] - 100 ) > 0 ) [ ask n-of ( count anima1s with [ is.alive ] - 100 ) anima1s [ set-to-dead ]]
+    ask anima1s with [ not fully.decayed and is.alive = false ] [ check-mortality ]] ; this organization ensures that 100 individuals stay alive at all times
+  [ ask anima1s with [ not fully.decayed ] [ check-mortality ] ]
 
-    ; AGENT MORTALITY
-    ifelse ( member? "reaper" model-structure  )
-    [ if (( count anima1s with [ is.alive ] - 100 ) > 0 ) [ ask n-of ( count anima1s with [ is.alive ] - 100 ) anima1s [ set-to-dead ]]
-      ask anima1s with [ is.alive = false ] [ check-mortality ]] ; this organization ensures that 100 individuals stay alive at all times
-    [ ask anima1s [ check-mortality ] ]
+  ; AGENT REPRODUCTION
+  if ( member? "stork" model-structure and count anima1s with [ is.alive ] < 100 ) ; random mating
+  [ repeat ( 100 - count anima1s with [ is.alive ]) [
+    if ( ( count anima1s with [ biological.sex = "male" and life.history = "adult" and is.alive ] > 0 )                                        ; if there is at least one adult male
+      and ( count anima1s with [ biological.sex = "female" and life.history = "adult" and female.fertility = "cycling" and is.alive ] > 0 ) )  ; and one adult cycling female left in the simulation,
+    [ ask one-of anima1s with [ biological.sex = "female" and life.history = "adult" and female.fertility = "cycling" and is.alive ]           ; randomly select one adult male and one cycling female,
+      [ conceive-with ( one-of anima1s with [ biological.sex = "male" and life.history = "adult" and is.alive ] ) 999999 ]]]]                  ; and the female spontaneously conceives a new offspring from their alleles
 
-    ; AGENT REPRODUCTION
-    if ( member? "stork" model-structure and count anima1s with [ is.alive ] < 100 ) ; random mating
-    [ repeat ( 100 - count anima1s with [ is.alive ]) [
-      if ( ( count anima1s with [ biological.sex = "male" and life.history = "adult" and is.alive ] > 0 )                                        ; if there is at least one adult male
-        and ( count anima1s with [ biological.sex = "female" and life.history = "adult" and female.fertility = "cycling" and is.alive ] > 0 ) )  ; and one adult cycling female left in the simulation,
-      [ ask one-of anima1s with [ biological.sex = "female" and life.history = "adult" and female.fertility = "cycling" and is.alive ]           ; randomly select one adult male and one cycling female,
-        [ conceive-with ( one-of anima1s with [ biological.sex = "male" and life.history = "adult" and is.alive ] ) 999999 ]]]]                  ; and the female spontaneously conceives a new offspring from their alleles
+  ; AGENT AGENCY
+  ask anima1s with [ is.alive ] [ consider-environment ]
+  ask anima1s with [ is.alive ] [ make-decisions ]
+  ask anima1s with [ is.alive ] [ do-actions ]
 
-    ; AGENT AGENCY
-    ask anima1s with [ is.alive ] [ consider-environment ]
-    ask anima1s with [ is.alive ] [ make-decisions ]
-    ask anima1s with [ is.alive ] [ do-actions ]
+  ; ARTIFICAL SELECTION
+  if selection-on? [ artificial-selection ]
 
-    ; ARTIFICAL SELECTION
-    if selection-on? [ artificial-selection ]
-
-    ; SIMULATION OUTPUT
-    ;if output-results? [ output-results ]
-    ; prints out current status of the simulation every 100 timesteps
-    if ( ticks > 0 and ceiling (ticks / 100) = (ticks / 100) and any? anima1s ) [
-      let print-text (word "Simulation " simulation-id " is now at " precision (ticks / plant-annual-cycle) 3 " years, "
-        precision sum [penergy.supply] of patches 3 " plant units, "
-        precision mean [generation.number] of anima1s 3 " generations, and contains "
-        count anima1s with [ is.alive ] " living organisms.")
-      print print-text
-      if ( behaviorspace-run-number > 0 ) [ output-print print-text ] ]
-
-  ][
-    if ( "setup" = user-one-of "Remember to click setup first!" [ "setup" "ok" ] ) [ setup ]
-  ]
+  ; SIMULATION OUTPUT
+  ;if output-results? [ output-results ]
+  ; prints out current status of the simulation every 100 timesteps
+  if ( ticks > 0 and ceiling (ticks / 100) = (ticks / 100) and any? anima1s with [ is.alive ] ) [
+    set plant-abundance-record lput sum [penergy.supply] of patches plant-abundance-record
+    set plant-patchiness-record lput plant-patchiness plant-patchiness-record
+    set population-size-record lput count anima1s with [ is.alive ] population-size-record
+    let print-text (word "Simulation " simulation-id " is now at " precision (ticks / plant-annual-cycle) 3 " years, "
+      precision sum [penergy.supply] of patches 3 " plant units, "
+      precision mean [generation.number] of anima1s with [ is.alive ] 3 " generations, and contains "
+      count anima1s with [ is.alive ] " living organisms.")
+    print print-text
+    if ( behaviorspace-run-number > 0 ) [ output-print print-text ] ]
 
 end
 
@@ -320,29 +325,31 @@ end
 ; GLOBAL
 ;--------------------------------------------------------------------------------------------------------------------
 
-to-report how-many-ticks? report 5 end
+to-report how-many-ticks? report 10 end
 
 to-report get-solar-status report ifelse-value ( ( cos (( 360 / plant-daily-cycle ) * ticks)) > 0 ) [ "DAY" ] [ "NIGHT" ] end
 
 to-report get-updated-value [ current-value update-value ]
-  let report-value ifelse-value ( current-value < 0.0000000001 ) [ 0.0000000001 ] [ ifelse-value ( current-value > 0.9999999999 ) [ 0.9999999999 ] [ current-value ] ]
+  let report-value ifelse-value ( current-value < 0.00001 ) [ 0.00001 ] [ ifelse-value ( current-value > 0.99999 ) [ 0.99999 ] [ current-value ] ]
   ifelse update-value < 0
   [ set report-value ( report-value ^ (1 + abs update-value) ) ]
   [ set report-value ( report-value ^ (1 / ( 1 + update-value) )) ]
   report report-value
 end
 
-to-report generate-simulation-id
-  let alphabet get-alphabet
-  report ( word "s" random 99 one-of alphabet one-of alphabet one-of alphabet )
-end
+to-report generate-simulation-id report ( word "s" generate-timestamp ) end
 
-to-report get-lower-alphabet
-  report [ "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o" "p" "q" "r" "s" "t" "u" "v" "w" "x" "y" "z" ]
-end
+to-report generate-timestamp
+  let string-to-report ""
+  let time-difference time:difference-between (time:create "1970-01-01 00:00:00.0") (time:create "") "seconds"
+  let hex-list [ "0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F" ]
 
-to-report get-alphabet
-  report [ "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z" ]
+  while [ time-difference > 0 ] [
+    let unix-remainder floor remainder time-difference 16
+    set string-to-report ( word item unix-remainder hex-list string-to-report )
+    set time-difference floor ( time-difference / 16 ) ]
+
+  report string-to-report
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -392,13 +399,14 @@ end
 
 to check-mortality
   if ( random-float 1.0 > living.chance ) [
-    ifelse ( is.alive = false )
-
-    ; SECOND DEATH: remove agent from the simulation
-    [ remove-from-simulation ]
+    ifelse ( is.alive = true )
 
     ; FIRST DEATH: set anima1 to is.alive false
-    [ set-to-dead ]]
+    [ set-to-dead ]
+
+    ; SECOND DEATH: remove agent from the simulation
+    [ remove-from-simulation ]]
+
 end
 
 to set-to-dead
@@ -414,7 +422,10 @@ end
 to remove-from-simulation
   if ( ticks.at.death = 0 ) [ set ticks.at.death ticks ]
   ask anima1s with [ member? myself carried.items ] [ set carried.items remove myself remove-duplicates carried.items ]
-  die
+  set hidden? true
+  ;die
+  set fully.decayed true
+  set label " "
 end
 
 to update-appearance
@@ -489,7 +500,7 @@ to make-decisions
 
   ; Get decisions from selected genotype reader
   set decision.vectors ( ifelse-value
-    ( genotype-reader = "sta7us" ) [ sta7us-get-decisions my.environment ]
+    ( genotype-reader = "sta2us" ) [ sta7us-get-decisions my.environment ]
     [ sta7us-get-decisions my.environment ] ) ; default
 
   ;REDUCE DECISIONS TO ONE PER TARGET-ACTION COMBO
@@ -521,7 +532,7 @@ to make-decisions
 
   ; RECORD DECISIONS
   foreach decision.vectors [ d ->
-    set all-decisions-made lput ( sentence ticks but-last d ) all-decisions-made ]
+    set recent-decisions-made lput ( sentence ticks but-last d ) recent-decisions-made ]
 
 end
 
@@ -547,8 +558,6 @@ to do-actions
         action = "set-heading" [ set-heading cost ]
         action = "set-heading-random" [ set-heading-random cost ]
         action = "hide" [ hide cost ]
-        action = "supply-to" [ if ( check-distance target ) [ supply-to target cost ]]
-        action = "demand-from" [ if ( check-distance target ) [ demand-from target cost ]]
         action = "eat" [ if ( check-distance target ) [ eat target cost ]]
         action = "join" [ join target cost ]
         action = "leave" [ leave target cost ]
@@ -585,6 +594,8 @@ to do-actions
         action = "check-juvenility" [ check-juvenility cost ]
         action = "check-weaning" [ check-weaning cost ]
         action = "check-adulthood" [ check-adulthood cost ]
+        action = "supply-to" [ if ( check-distance target ) [ supply-to target cost ]]
+        action = "demand-from" [ if ( check-distance target ) [ demand-from target cost ]]
         [])
     ]
   ]
@@ -632,7 +643,7 @@ to complete-action [ target action cost ]
   set actions.completed lput completed-action actions.completed
 
   ; RECORD ACTIONS
-  set all-actions-completed lput ( sentence ticks completed-action ) all-actions-completed
+  set recent-actions-completed lput ( sentence ticks completed-action ) recent-actions-completed
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -726,7 +737,7 @@ to move-toward [ target cost ]
     let ycor-difference ( ( ifelse-value ( is-patch? target ) [ [pycor] of target ] [ [ycor] of target ] ) - [ycor] of self )
     let xcor-difference ( ( ifelse-value ( is-patch? target ) [ [pxcor] of target ] [ [xcor] of target ] ) - [xcor] of self )
 
-    ; these lines check if agents are looking across a world border, which would not calculate the angle correctly
+    ; these lines check if agent is looking at target across one of the edges of the world, which would not calculate the angle correctly
     if ( ycor-difference > maximum-visual-range and ycor-difference > 0 ) [ set ycor-difference ycor-difference - 100 ]
     if ( xcor-difference > maximum-visual-range and xcor-difference > 0 ) [ set xcor-difference xcor-difference - 100 ]
     if ( abs ycor-difference > maximum-visual-range and ycor-difference < 0 ) [ set ycor-difference ycor-difference + 100 ]
@@ -963,6 +974,30 @@ to update-to-adult
   set label "a"
 end
 
+;to-report my-offspring
+;  report ifelse-value ( biological.sex = "female" )
+;  [ anima1s with [ my.mother = myself ]]
+;  [ anima1s with [ father.identity = [meta.id] of myself ]]
+;end
+
+;to-report current-group
+;  report ifelse-value (any? groups with [ meta-id = [group.identity] of myself ] and group.identity != 0 )
+;  [ one-of groups with [ meta-id = [group.identity] of myself ] ]
+;  [ nobody ]
+;end
+
+;to-report mother
+;  report ifelse-value (any? turtles with [ meta-id = [mother-identity] of myself ])
+;  [ one-of turtles with [ meta-id = [mother-identity] of myself ]]
+;  [ nobody ]
+;end
+;
+;to-report father
+;  report ifelse-value (any? turtles with [ meta-id = [father.identity] of myself ])
+;  [ one-of turtles with [ meta-id = [father.identity] of myself ]]
+;  [ nobody ]
+;end
+
 ;--------------------------------------------------------------------------------------------------------------------
 ; ENERGY
 ;--------------------------------------------------------------------------------------------------------------------
@@ -1147,6 +1182,38 @@ to aid [ target cost ]
   ]
 end
 
+; --------------------------------------------------------------------------- ;
+;
+; DETERMINE GENETIC RELATEDNESS BETWEEN TWO INDIVIDUALS
+;
+; This routine determines the genetic relatedness between the caller and a
+; specified individual in the population. For example, consider these four
+; chromosomes.
+;
+; Locus         0 1 2 3 4 5 6 7 8 9
+;
+; Caller:   I:  y h m u n f q a x r
+;          II:  c j s w v i l f a p
+;
+; Target:   I:  j l h y m d u t v c
+;          II:  y u l x i s f p w a
+;
+; The first locus has one match, Caller I and Target II, and three non-matches,
+; Caller I and Target I (y and J), Caller II and Target I (c and j), and
+; Caller II to Target II (c y). This is considered a relatedness of
+; <m>1/(1+3) = 0.25</m>, at the first locus. This is repeated across all loci
+; and the average is returned.
+;
+; ENTRY:  'target' defines an individual to be compared the calling individual.
+;         'identity.I' and 'identity.II' carry the genetic information to be
+;          compared between caller and target.
+;         'identity.I' and 'identity.II' both contain exactly 10 loci.
+;
+; EXIT:   'relatedness-with' returns an estimate of the degree of relatedness, as
+;          fraction between 0 and 1.
+;
+; --------------------------------------------------------------------------- ;
+
 to-report relatedness-with [ target ]
   let matching 0
   let not-matching 0
@@ -1231,8 +1298,9 @@ end
 to initialize-from-parents [ m f ]
   set meta.id random 9999999
   set is.alive true
+  set fully.decayed false
   set biological.sex ifelse-value ( random-float 1.0 < mean (list [sex.ratio] of m [sex.ratio] of f) ) ["male"] ["female"]
-  set generation.number ( max (list [generation.number] of m [generation.number] of f ) + 1 )
+  set generation.number ( [generation.number] of m + 1 )
   set my.mother m
   ifelse ( member? "no-evolution" model-structure )
   [ set chromosome.I [chromosome.I] of m
@@ -1459,7 +1527,7 @@ end
 
 to-report get-mutation [ unmutated-codon type-of-mutation ]
   report ( ifelse-value
-      ( genotype-reader = "sta7us" ) [ sta7us-get-mutation unmutated-codon type-of-mutation]
+      ( genotype-reader = "sta2us" ) [ sta7us-get-mutation unmutated-codon type-of-mutation]
       [ sta7us-get-mutation unmutated-codon type-of-mutation ] ); default
 end
 @#$#@#$#@
@@ -1484,8 +1552,8 @@ GRAPHICS-WINDOW
 99
 0
 99
-1
-1
+0
+0
 1
 timesteps
 30.0
@@ -1530,7 +1598,7 @@ INPUTBOX
 387
 79
 path-to-experiment
-../results/
+../data/
 1
 0
 String
@@ -1556,7 +1624,7 @@ INPUTBOX
 849
 10
 1092
-319
+141
 observation-notes
 NIL
 1
@@ -1566,7 +1634,7 @@ String
 MONITOR
 20
 98
-97
+98
 143
 simulation
 (word simulation-id )
@@ -1600,7 +1668,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-7.0
+0.0
 .1
 1
 NIL
@@ -1615,7 +1683,7 @@ plant-maximum-neighbors
 plant-maximum-neighbors
 0
 8
-8.0
+4.0
 .1
 1
 NIL
@@ -1671,7 +1739,7 @@ plant-daily-cycle
 plant-daily-cycle
 1
 100
-10.0
+20.0
 1
 1
 ticks
@@ -1694,7 +1762,7 @@ INPUTBOX
 1226
 299
 population
-p72TNU
+population
 1
 0
 String
@@ -1705,7 +1773,7 @@ INPUTBOX
 1226
 373
 genotype
-g2873527
+g275AE5
 1
 0
 String
@@ -1769,7 +1837,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "--------" "meta-report" "verify-code" "check-runtime" "simulation-report" "model-structure" "reset-plants" "clear-population" "view-genotype" "view-decisions" "view-actions" "view-history" "view-status"
-8
+5
 
 BUTTON
 1037
@@ -1848,7 +1916,7 @@ plant-quality
 plant-quality
 .1
 10
-3.0
+5.0
 .1
 1
 NIL
@@ -1882,6 +1950,24 @@ OUTPUT
 1348
 919
 8
+
+PLOT
+849
+147
+1092
+321
+plot
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" ""
 
 @#$#@#$#@
 # B3GET 1.1.0 INFORMATION
@@ -6963,7 +7049,7 @@ repeat 75 [ go ]
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="World A: baseline" repetitions="1" runMetricsEveryStep="false">
+  <experiment name="World-A" repetitions="1" runMetricsEveryStep="false">
     <setup>setup
 
 ; give simulation-id specific configuration: sDOB17 means 
@@ -6980,11 +7066,15 @@ ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
   set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "B" plant-minimum-neighbors plant-maximum-neighbors )
 ]</setup>
     <go>go</go>
-    <final>record-simulation</final>
+    <final>record-simulation
+record-world</final>
     <timeLimit steps="10"/>
     <exitCondition>not any? anima1s or median [generation.number] of anima1s &gt; 100</exitCondition>
     <enumeratedValueSet variable="path-to-experiment">
-      <value value="&quot;../results/&quot;"/>
+      <value value="&quot;../results/thesis/&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-reader">
+      <value value="&quot;sta2us&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="plant-annual-cycle">
       <value value="1000"/>
@@ -7020,13 +7110,13 @@ ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
       <value value="8"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="population">
-      <value value="&quot;p72TNU&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="genotype">
-      <value value="&quot;g2873527&quot;"/>
+      <value value="&quot;Chimpanzees&quot;"/>
+      <value value="&quot;Hamadryas&quot;"/>
+      <value value="&quot;Geladas&quot;"/>
+      <value value="&quot;Olives&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="output-results?">
-      <value value="false"/>
+      <value value="true"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="selection-on?">
       <value value="false"/>

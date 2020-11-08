@@ -108,7 +108,7 @@ end
 ;----------------------------------------------------------------------------------------------
 
 to-report generate-population-id
-  report ( word "p" random 99 one-of get-alphabet one-of get-alphabet one-of get-alphabet )
+  report ( word "p" generate-timestamp )
 end
 
 to import-population
@@ -168,6 +168,7 @@ to import-population
       if ( bite.capacity = 0 ) [ set bite.capacity 0.2 ]
       if ( is.alive = 0 ) [ set is.alive true ]
       if ( is.resting = 0 ) [ set is.resting false ]
+      if ( fully.decayed = 0 ) [ set fully.decayed false ]
       
       update-appearance
     ]
@@ -269,7 +270,7 @@ end
 ;----------------------------------------------------------------------------------------------
 
 to-report generate-genotype-id
-  report ( word "g" [meta.id] of one-of anima1s )
+  report ( word "g" generate-timestamp )
 end
 
 to import-genotype
@@ -313,4 +314,25 @@ to save-genotype
   set observation-notes (word "New genotype " genotype " saved. " observation-notes )
   update-metafile "genotype" genotype
   output-print " Genotype successfully saved."
+end
+
+
+to-report get-group-identity-from-color [ color-of-group ]
+  ifelse ( is-number? color-of-group ) [
+    report ( random 999 * 140 + color-of-group )
+  ][
+    report "error: input value is not a number"
+  ]
+end
+
+to set-random-identity-chromosomes [ length-of-chromosomes ]
+  let get-alphabet [ "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z" ]
+  ifelse ( is-number? length-of-chromosomes ) [
+    set identity.I ""
+    set identity.II ""
+    repeat length-of-chromosomes [ set identity.I (word identity.I one-of get-alphabet ) ]
+    repeat length-of-chromosomes [ set identity.II (word identity.II one-of get-alphabet ) ]
+  ][
+    print "error: input value is not a number"
+  ] 
 end
