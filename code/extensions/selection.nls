@@ -58,9 +58,10 @@ end
 to-report restart-simulation?
   let criteria-met false
   
-  if ( count anima1s < 65 and count anima1s >= 1 )[ set criteria-met true ]
-  if ( not any? anima1s with [ biological.sex = "female" ] or not any? anima1s with [ biological.sex = "male" ] ) [ set criteria-met true ]
+  ;  if ( count anima1s < 65 and count anima1s >= 1 )[ set criteria-met true ]
+  ;  if ( not any? anima1s with [ biological.sex = "female" ] or not any? anima1s with [ biological.sex = "male" ] ) [ set criteria-met true ]
   ;if ( sum [ total.energy.gains ] of anima1s < sum [ total.energy.cost] of anima1s ) [ set criteria-met true ]
+  if ( not any? anima1s with [ biological.sex = "female" ] or not any? anima1s with [ biological.sex = "male" ] ) [ set criteria-met true ]
   
   report criteria-met
 end

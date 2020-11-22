@@ -372,6 +372,11 @@ to-report generate-verification-tape
   set function lput "do-actions" function
   set boolean lput ( not any? anima1s with [ not is.alive and length actions.completed > 0 ] ) boolean
   
+  set header lput "Not any agents that have a higher energy cost than their energy gains?" header
+  set verification lput "dynamic-check" verification 
+  set function lput "do-actions" function
+  set boolean lput ( not any? anima1s with [ generation.number > 0 and total.energy.gains < total.energy.cost ] ) boolean
+  
   ; --------------------------------------------------------------------------------------------------------------------
   ; LIVING-CHANCE
   ; --------------------------------------------------------------------------------------------------------------------
@@ -907,7 +912,7 @@ to-report generate-verification-tape
   set function lput "hide" function
   set boolean lput ( profiler:calls "hide" = action-count-for "hide" ) boolean 
   
-  set header lput "Agents who are hidden aren’t in any other agent's my.environment?" header
+  set header lput "Agents who are hidden aren’t in any other agent's my.environment?" header ; doesn't apply to gestatees who are in mother's environment
   set verification lput "dynamic-check" verification 
   set function lput "hide" function
   set boolean lput ( not any? anima1s with [ life.history != "gestatee" and hidden? and member? self ( reduce sentence [my.environment] of other anima1s ) ] ) boolean 
@@ -1135,6 +1140,16 @@ to-report generate-verification-tape
   set function lput "update-to-infant" function
   set boolean lput ( count anima1s with [ life.history = "infant" ] > 0 ) boolean
   
+  set header lput "Infants have a timestamp for infancy?" header 
+  set verification lput "always-true" verification 
+  set function lput "update-to-infant" function
+  set boolean lput ( not any? anima1s with [ generation.number > 0 and ticks.at.birth = 0 and life.history = "infant" ] ) boolean
+  
+  set header lput "Agents signal when they turned from gestatee to infant?" header 
+  set verification lput "always-true" verification 
+  set function lput "update-to-infant" function
+  set boolean lput ( not any? anima1s with [ label = "i" and ( ticks.at.birth - ticks.at.conception != age.in.ticks ) ] ) boolean
+  
   ; --------------------------------------------------------------------------------------------------------------------
   ; CHECK-JUVENILITY
   ; --------------------------------------------------------------------------------------------------------------------
@@ -1264,6 +1279,16 @@ to-report generate-verification-tape
   set function lput "update-to-juvenile" function
   set boolean lput ( count anima1s with [ life.history = "juvenile" ] > 0 ) boolean
   
+  set header lput "juveniles have a timestamp for juvenility?" header 
+  set verification lput "" verification 
+  set function lput "update-to-juvenile" function
+  set boolean lput ( not any? anima1s with [ generation.number > 0 and ticks.at.weaning = 0 and life.history = "juvenile" ] ) boolean
+  
+  set header lput "Agents signal when they turned from infant to juvenile?" header 
+  set verification lput "always-true" verification 
+  set function lput "update-to-juvenile" function
+  set boolean lput ( not any? anima1s with [ label = "j" and ( ticks.at.weaning - ticks.at.conception != age.in.ticks ) ] ) boolean
+  
   ; --------------------------------------------------------------------------------------------------------------------
   ; CHECK-ADULTHODD
   ; --------------------------------------------------------------------------------------------------------------------
@@ -1326,6 +1351,16 @@ to-report generate-verification-tape
   set verification lput "dynamic-check" verification 
   set function lput "update-to-adult" function
   set boolean lput ( not any? anima1s with [ female.fertility = "cycling" and any? anima1s with [ life.history = "gestatee" and my.mother = myself ]] ) boolean
+  
+  set header lput "Adults have a timestamp for adulthood?" header 
+  set verification lput "" verification 
+  set function lput "update-to-adult" function
+  set boolean lput ( not any? anima1s with [ generation.number > 0 and ticks.at.sexual.maturity = 0 and life.history = "adult" ] ) boolean
+  
+  set header lput "Agents signal when they turned from juvenile to adult?" header 
+  set verification lput "always-true" verification 
+  set function lput "update-to-adult" function
+  set boolean lput ( not any? anima1s with [ label = "a" and ( ticks.at.sexual.maturity - ticks.at.conception != age.in.ticks ) ] ) boolean
   
   set header lput "Only adult agents have non-zero values for adult tracking variables? " header 
   set verification lput "dynamic-check" verification 
@@ -1887,7 +1922,12 @@ to-report generate-verification-tape
   set header lput "Agents are roughly one fourth related to their grandmother?" header 
   set verification lput "dynamic-check" verification 
   set function lput "setup-chromosomes-from" function
-  set boolean lput ( not any? anima1s with [ my.mother != nobody and [my.mother] of my.mother != nobody and ( relatedness-with [my.mother] of my.mother < 0.15 or relatedness-with [my.mother] of my.mother > 0.35 ) ] ) boolean
+  set boolean lput ( not any? anima1s with [ my.mother != nobody and [my.mother] of my.mother != nobody and ( relatedness-with [my.mother] of my.mother < 0.35 or relatedness-with [my.mother] of my.mother > 0.15 ) ] ) boolean
+  
+  set header lput "Agents are roughly one eighth related to their great grandmother?" header 
+  set verification lput "dynamic-check" verification 
+  set function lput "setup-chromosomes-from" function
+  set boolean lput ( not any? anima1s with [ my.mother != nobody and [my.mother] of my.mother != nobody and [my.mother] of [my.mother] of my.mother != nobody and ( relatedness-with [my.mother] of [my.mother] of my.mother < 0.15 or relatedness-with [my.mother] of [my.mother] of my.mother > 0.05 ) ] ) boolean
   
   ; --------------------------------------------------------------------------------------------------------------------
   ; MUTATE-CHROMOSOMES

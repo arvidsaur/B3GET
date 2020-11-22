@@ -25,15 +25,14 @@ to output-results
   ; USER SETTINGS:
   ; -------------
   let verification? true           ; TRUE = runs periodic code verification checks set by the VERIFICATION-RATE
-  let verification-rate 0.001 
+  let verification-rate 0.000001 
   let simulation-summary? false    ; TRUE = records the simulation ;
-  let record-group? false          ; TRUE = records every group upon its creation ;
-  let record-agent? false          ; TRUE = records every agent upon its death
-  let scan-interval 100        
-  let simulation-scans? false      ; TRUE = scans the simulation every SCAN-INTERVAL and records population-level phenomena ;
-  let group-scans? false           ; TRUE = scans all groups every SCAN-INTERVAL and records group-level phenomena
-  let agent-scans? false           ; TRUE = scans all agents every SCAN-INTERVAL and records individual-level phenomena
-  let focal-follows? false         ; TRUE = small chance to record an individual's entire life
+  let record-agent? true          ; TRUE = records every agent upon its death
+  let scan-interval 1000        
+  let simulation-scans? true      ; TRUE = scans the simulation every SCAN-INTERVAL and records population-level phenomena ;
+  let group-scans? true           ; TRUE = scans all groups every SCAN-INTERVAL and records group-level phenomena
+  let agent-scans? true           ; TRUE = scans all agents every SCAN-INTERVAL and records individual-level phenomena
+  let focal-follows? true         ; TRUE = small chance to record an individual's entire life
   let focal-rate 0.001
   
   ;----------------------------------------------------------------------------------------------     
@@ -47,7 +46,6 @@ to output-results
   ;----------------------------------------------------------------------------------------------
   
   if ( simulation-summary? and ticks = 1 ) [ simulation-summary ]
-  ;if ( record-group? ) [ ask groups with [ age = 0 ] [ group-summary ]]
   if ( record-agent? ) [ ask anima1s with [ ticks.at.death > 0 and ticks = ( ticks.at.death + 1 ) and generation.number > 0 ] [ agent-summary ] ]
   
   ;----------------------------------------------------------------------------------------------     
@@ -68,27 +66,12 @@ to output-results
   ; There is a small chance to starting "following" an agent if they were born this timestep 
   if ( focal-follows? = true and subject = nobody ) [ if ( random-float 1.0 < focal-rate and any? anima1s with [ age.in.ticks = 0 and generation.number > 0 ] ) [ follow one-of anima1s with [ age.in.ticks = 0 and generation.number > 0 ] ]]
   
+  if ( focal-follows? = true and subject != nobody and [fully.decayed] of subject = true ) [ reset-perspective ]
+  
   ; If currently "following" an agent, take records of this subject
-  if ( focal-follows? = true and subject != nobody ) [ ask subject [ scan-agent ] ]
-  
-end
-
-;--------------------------------------------------------------------------------------------------------------------
-; RECORD DATA
-;--------------------------------------------------------------------------------------------------------------------
-
-to record-data [ path-to-file columns-list ]
-  
-  ifelse ( not file-exists? path-to-file and simulation-id != 0 ) 
-  
-  [ file-open path-to-file
-    file-print csv:to-string (list columns-list )
-    record-data path-to-file columns-list ]
-  
-  [ file-open path-to-file
-    file-print csv:to-string ( list map [ i -> run-result i ] columns-list ) ]
-  
-  file-close 
+  if ( focal-follows? = true and subject != nobody ) [ 
+    ask subject [ record-actions ]
+  ]
   
 end
 
@@ -119,9 +102,9 @@ end
 
 ;--------------------------------------------------------------------------------------------------------------------  
 ;                       _      _                           
-; __ __ __  ___   _ _  | |  __| |    ___  __   __ _   _ _  
-; \ V  V / / _ \ | '_| | | / _` |   (_-< / _| / _` | | ' \ 
-;  \_/\_/  \___/ |_|   |_| \__,_|   /__/ \__| \__,_| |_||_|
+; __ __ __  ___   _ _  | |  __| |   
+; \ V  V / / _ \ | '_| | | / _` |  
+;  \_/\_/  \___/ |_|   |_| \__,_|  
 ; 
 ;--------------------------------------------------------------------------------------------------------------------  
 
@@ -130,6 +113,243 @@ to record-world
   export-world ( word path-to-experiment "/w" but-first simulation-id "-" ticks ".csv")
   set observation-notes (word "Simulation " simulation-id " save to w" but-first simulation-id "-" ticks ". " observation-notes )
   update-metafile "world" ( word "w" but-first simulation-id "-" ticks )
+end
+
+;--------------------------------------------------------------------------------------------------------------------  
+;              _     _                   
+;  __ _   __  | |_  (_)  ___   _ _    ___
+; / _` | / _| |  _| | | / _ \ | ' \  (_-<
+; \__,_| \__|  \__| |_| \___/ |_||_| /__/
+;                                        
+;--------------------------------------------------------------------------------------------------------------------  
+
+to record-actions ; agent subroutine
+  
+  let group-summary-file-path ( word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] meta.id "-actions.csv" )
+  
+  if ( not file-exists? group-summary-file-path and simulation-id != 0 )
+  
+  [ file-open group-summary-file-path
+    file-print csv:to-string (list (list 
+      
+      "path-to-experiment"
+      "model-version"
+      "model-structure"
+      "genotype-reader"
+      "simulation-id"
+      "behaviorspace-experiment-name"
+      "population" 
+      "genotype"
+      "plant-annual-cycle" 
+      "plant-daily-cycle" 
+      "plant-seasonality" 
+      "plant-quality"
+      "plant-minimum-neighbors" 
+      "plant-maximum-neighbors" 
+      "world-width" 
+      "world-height"
+      "output-results?" 
+      "selection-on?" 
+      "deterioration-rate"
+      "maximum-visual-range"
+      "base-litter-size"
+      
+      "timesteps"
+      "get-solar-status"
+      
+      ; subject
+      "color" 
+      "heading" 
+      "xcor" 
+      "ycor" 
+      "meta.id" 
+      "age.in.ticks" 
+      "generation.number"
+      "biological.sex" 
+      "life.history" 
+      "female.fertility" 
+      "group.identity" 
+      "is.alive" 
+      "carried.items"
+      "yellow.signal" 
+      "red.signal" 
+      "blue.signal"
+      "body.size" 
+      "body.shade" 
+      "is.resting"
+      "hidden.chance"
+      "fully.decayed"
+      "living.chance" 
+      "energy.supply"
+      "bite.capacity" 
+      "mutation.chance"
+      "sex.ratio" 
+      "litter.size" 
+      "conception.chance"
+      "visual.angle" 
+      "visual.range" 
+      "day.perception"
+      "night.perception" 
+      "yellow.chance" 
+      "red.chance" 
+      "blue.chance"
+      "birthing.chance" 
+      "weaning.chance" 
+      "infancy.chance"
+      "juvenility.chance" 
+      "adulthood.chance" 
+      "x.magnitude" 
+      "y.magnitude"
+      "my.environment"
+      "decision.vectors"
+      "actions.completed"
+      "distance.traveled" 
+      "cells-occupied-count"
+      "foraging.gains"  
+      "total.energy.gains"
+      "total.energy.cost"
+      "receiving.history"
+      "receiving-count"
+      "carried.history"
+      "carried-count"
+      "aid.history"
+      "aid-count"
+      "harm.history"
+      "harm-count"
+      "copulations.history"
+      "copulations-count"
+      "conceptions.history"
+      "conceptions-count"
+      "group.transfers.history"
+      "group-transfers-count"
+      "infanticide.history"
+      "infanticide-count"
+      "whole.related.help.cost"
+      "half.related.help.cost"
+      "fourth.related.help.cost"
+      "eighth.related.help.cost"
+      
+      "action-ego"
+      "action-target"
+      "action-name"
+      "action-cost"
+      
+    )) ]
+  
+  file-open group-summary-file-path
+  
+  let action-list filter [ a -> item 0 a = ticks and ( item 1 a = self or item 2 a = self ) ] recent-actions-completed
+  
+  foreach action-list [ action ->
+    
+    file-print csv:to-string ( list ( list
+      
+      path-to-experiment
+      model-version
+      model-structure
+      genotype-reader
+      simulation-id
+      behaviorspace-experiment-name
+      population
+      genotype
+      plant-annual-cycle
+      plant-daily-cycle
+      plant-seasonality
+      plant-quality
+      plant-minimum-neighbors
+      plant-maximum-neighbors
+      world-width
+      world-height
+      output-results?
+      selection-on?
+      deterioration-rate
+      maximum-visual-range
+      base-litter-size
+      
+      ticks
+      get-solar-status
+      
+      ; subject
+      color
+      heading 
+      xcor
+      ycor
+      meta.id
+      age.in.ticks 
+      generation.number
+      biological.sex
+      life.history
+      female.fertility 
+      group.identity
+      is.alive
+      carried.items
+      yellow.signal
+      red.signal
+      blue.signal
+      body.size
+      body.shade
+      is.resting
+      hidden.chance
+      fully.decayed
+      living.chance 
+      energy.supply
+      bite.capacity
+      mutation.chance
+      sex.ratio
+      litter.size
+      conception.chance
+      visual.angle
+      visual.range
+      day.perception
+      night.perception
+      yellow.chance
+      red.chance
+      blue.chance
+      birthing.chance
+      weaning.chance 
+      infancy.chance
+      juvenility.chance
+      adulthood.chance
+      x.magnitude
+      y.magnitude
+      my.environment
+      decision.vectors
+      actions.completed
+      distance.traveled 
+      cells-occupied-count
+      foraging.gains
+      total.energy.gains
+      total.energy.cost
+      receiving.history
+      receiving-count
+      carried.history
+      carried-count
+      aid.history
+      aid-count
+      harm.history
+      harm-count
+      copulations.history
+      copulations-count
+      conceptions.history
+      conceptions-count
+      group.transfers.history
+      group-transfers-count
+      infanticide.history
+      infanticide-count
+      whole.related.help.cost
+      half.related.help.cost
+      fourth.related.help.cost
+      eighth.related.help.cost
+      
+      ifelse-value ( is-anima1? item 1 action ) [ [meta.id] of item 1 action ] [ item 1 action ]
+      ifelse-value ( is-anima1? item 2 action ) [ [meta.id] of item 2 action ] [ item 2 action ]
+      item 3 action
+      item 4 action
+      
+    ))]
+  
+  file-close 
+  
 end
 
 ;--------------------------------------------------------------------------------------------------------------------  
@@ -142,245 +362,502 @@ end
 
 to scan-agent
   
-  let agent-scan-file-path ( word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "agent-scan.csv" )
- 
-  let columns-list (list 
-    
-    ; simulation parameters and settings
-    "path-to-experiment"
-    "model-version"
-    "model-structure"
-    "genotype-reader"
-    "simulation-id"
-    "ticks"
-    "behaviorspace-experiment-name"
-    "population" 
-    "genotype"
-    "plant-annual-cycle" 
-    "plant-daily-cycle" 
-    "plant-seasonality" 
-    "plant-quality"
-    "plant-minimum-neighbors" 
-    "plant-maximum-neighbors" 
-    "world-width" 
-    "world-height"
-    "deterioration-rate" 
-    "output-results?" 
-    "selection-on?" 
-    
-    "get-solar-status"
-
-    "color" 
-    "heading" 
-    "xcor" 
-    "ycor" 
-    "meta.id" 
-    "age.in.ticks" 
-    "generation.number"
-    "biological.sex" 
-    "life.history" 
-    "female.fertility" 
-    "group.identity" 
-    "is.alive" 
-    "carried.items"
-    "yellow.signal" 
-    "red.signal" 
-    "blue.signal"
-    "body.size" 
-    "body.shade" 
-    "is.resting"
-    "fully.decayed" ; validation check, should always be false
-    "living.chance" 
-    "energy.supply"
-    "bite.capacity" 
-    "mutation.chance"
-    "sex.ratio" 
-    "litter.size" 
-    "conception.chance"
-    "visual.angle" 
-    "visual.range" 
-    "day.perception"
-    "night.perception" 
-    "yellow.chance" 
-    "red.chance" 
-    "blue.chance"
-    "birthing.chance" 
-    "weaning.chance" 
-    "infancy.chance"
-    "juvenility.chance" 
-    "adulthood.chance" 
-    "x.magnitude" 
-    "y.magnitude"
-    "my.environment"
-    "decision.vectors"
-    "actions.completed"
-    "distance.traveled" 
-    "cells-occupied-count"
-    "foraging.gains"  
-    "total.energy.gains"
-    "total.energy.cost"
-    "receiving.history"
-    "receiving-count"
-    "carried.history"
-    "carried-count"
-    "aid.history"
-    "aid-count"
-    "harm.history"
-    "harm-count"
-    "copulations.history"
-    "copulations-count"
-    "conceptions.history"
-    "conceptions-count"
-    "group.transfers.history"
-    "group-transfers-count"
-    "infanticide.history"
-    "infanticide-count"
-    
-    ; actions this timestep
-    
-  ) 
+  let agent-scan-file-path ( word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "agent-scans.csv" )
   
-  record-data agent-scan-file-path columns-list
+  if ( not file-exists? agent-scan-file-path and simulation-id != 0 )
+  
+  [ file-open agent-scan-file-path
+    file-print csv:to-string (list (list 
+      
+      "path-to-experiment"
+      "model-version"
+      "model-structure"
+      "genotype-reader"
+      "simulation-id"
+      "behaviorspace-experiment-name"
+      "population" 
+      "genotype"
+      "plant-annual-cycle" 
+      "plant-daily-cycle" 
+      "plant-seasonality" 
+      "plant-quality"
+      "plant-minimum-neighbors" 
+      "plant-maximum-neighbors" 
+      "world-width" 
+      "world-height"
+      "output-results?" 
+      "selection-on?" 
+      "deterioration-rate"
+      "maximum-visual-range"
+      "base-litter-size"
+      
+      "timesteps"
+      "get-solar-status"
+      
+      "focal-subject"
+      "color" 
+      "heading" 
+      "xcor" 
+      "ycor" 
+      "meta.id" 
+      "age.in.ticks" 
+      "generation.number"
+      "biological.sex" 
+      "life.history" 
+      "female.fertility" 
+      "group.identity" 
+      "is.alive" 
+      "carried.items"
+      "yellow.signal" 
+      "red.signal" 
+      "blue.signal"
+      "body.size" 
+      "body.shade" 
+      "is.resting"
+      "hidden.chance"
+      "fully.decayed"
+      "living.chance" 
+      "energy.supply"
+      "bite.capacity" 
+      "mutation.chance"
+      "sex.ratio" 
+      "litter.size" 
+      "conception.chance"
+      "visual.angle" 
+      "visual.range" 
+      "day.perception"
+      "night.perception" 
+      "yellow.chance" 
+      "red.chance" 
+      "blue.chance"
+      "birthing.chance" 
+      "weaning.chance" 
+      "infancy.chance"
+      "juvenility.chance" 
+      "adulthood.chance" 
+      "x.magnitude" 
+      "y.magnitude"
+      "my.environment"
+      "decision.vectors"
+      "actions.completed"
+      "distance.traveled" 
+      "cells-occupied-count"
+      "foraging.gains"  
+      "total.energy.gains"
+      "total.energy.cost"
+      "receiving.history"
+      "receiving-count"
+      "carried.history"
+      "carried-count"
+      "aid.history"
+      "aid-count"
+      "harm.history"
+      "harm-count"
+      "copulations.history"
+      "copulations-count"
+      "conceptions.history"
+      "conceptions-count"
+      "group.transfers.history"
+      "group-transfers-count"
+      "infanticide.history"
+      "infanticide-count"
+      "whole.related.help.cost"
+      "half.related.help.cost"
+      "fourth.related.help.cost"
+      "eighth.related.help.cost"
+      
+  )) ]
+  
+  file-open agent-scan-file-path
+  
+  file-print csv:to-string ( list ( list
+    
+    path-to-experiment
+    model-version
+    model-structure
+    genotype-reader
+    simulation-id
+    behaviorspace-experiment-name
+    population
+    genotype
+    plant-annual-cycle
+    plant-daily-cycle
+    plant-seasonality
+    plant-quality
+    plant-minimum-neighbors
+    plant-maximum-neighbors
+    world-width
+    world-height
+    output-results?
+    selection-on?
+    deterioration-rate
+    maximum-visual-range
+    base-litter-size
+    
+    ticks
+    get-solar-status
+    
+    focal-subject
+    color
+    heading 
+    xcor
+    ycor
+    meta.id
+    age.in.ticks 
+    generation.number
+    biological.sex
+    life.history
+    female.fertility 
+    group.identity
+    is.alive
+    carried.items
+    yellow.signal
+    red.signal
+    blue.signal
+    body.size
+    body.shade
+    is.resting
+    hidden.chance
+    fully.decayed
+    living.chance 
+    energy.supply
+    bite.capacity
+    mutation.chance
+    sex.ratio
+    litter.size
+    conception.chance
+    visual.angle
+    visual.range
+    day.perception
+    night.perception
+    yellow.chance
+    red.chance
+    blue.chance
+    birthing.chance
+    weaning.chance 
+    infancy.chance
+    juvenility.chance
+    adulthood.chance
+    x.magnitude
+    y.magnitude
+    my.environment
+    decision.vectors
+    actions.completed
+    distance.traveled 
+    cells-occupied-count
+    foraging.gains
+    total.energy.gains
+    total.energy.cost
+    receiving.history
+    receiving-count
+    carried.history
+    carried-count
+    aid.history
+    aid-count
+    harm.history
+    harm-count
+    copulations.history
+    copulations-count
+    conceptions.history
+    conceptions-count
+    group.transfers.history
+    group-transfers-count
+    infanticide.history
+    infanticide-count
+    whole.related.help.cost
+    half.related.help.cost
+    fourth.related.help.cost
+    eighth.related.help.cost
+    
+  ))
+  
+  file-close 
   
 end
 
-to-report cells-occupied-count report length cells.occupied end
-to-report receiving-count report length receiving.history end
-to-report carried-count report length carried.history end
-to-report aid-count report length aid.history end
-to-report harm-count report length harm.history end
-to-report copulations-count report length copulations.history end
-to-report conceptions-count report length conceptions.history end
-to-report group-transfers-count report length group.transfers.history end
-to-report infanticide-count report length infanticide.history end
-
-;--------------------------------------------------------------------------------------------------------------------   
-;                             _                                                     
-;  __ _   __ _   ___   _ _   | |_     ___  _  _   _ __    _ __    __ _   _ _   _  _ 
-; / _` | / _` | / -_) | ' \  |  _|   (_-< | || | | '  \  | '  \  / _` | | '_| | || |
-; \__,_| \__, | \___| |_||_|  \__|   /__/  \_,_| |_|_|_| |_|_|_| \__,_| |_|    \_, |
-;        |___/                                                                 |__/ 
-;--------------------------------------------------------------------------------------------------------------------  
-
+  
+  ;--------------------------------------------------------------------------------------------------------------------   
+  ;                             _                                                     
+  ;  __ _   __ _   ___   _ _   | |_     ___  _  _   _ __    _ __    __ _   _ _   _  _ 
+  ; / _` | / _` | / -_) | ' \  |  _|   (_-< | || | | '  \  | '  \  / _` | | '_| | || |
+  ; \__,_| \__, | \___| |_||_|  \__|   /__/  \_,_| |_|_|_| |_|_|_| \__,_| |_|    \_, |
+  ;        |___/                                                                 |__/ 
+  ;--------------------------------------------------------------------------------------------------------------------  
+  
 to agent-summary
   
-  let agent-summary-file-path  ( word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "agent-summary.csv" )
+  let agent-summary-file-path ( word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "agent-summary.csv" )
   
-  let columns-list (list
-    
-    ; simulation parameters and settings
-    "path-to-experiment"
-    "model-version"
-    "model-structure"
-    "genotype-reader"
-    "simulation-id"
-    "ticks"
-    "behaviorspace-experiment-name"
-    "population" 
-    "genotype"
-    "plant-annual-cycle" 
-    "plant-daily-cycle" 
-    "plant-seasonality" 
-    "plant-quality"
-    "plant-minimum-neighbors" 
-    "plant-maximum-neighbors" 
-    "world-width" 
-    "world-height"
-    "deterioration-rate" 
-    "output-results?" 
-    "selection-on?"
-    
-    "focal-subject"
-    "meta.id"
-    "mother.identity"
-    "father.identity"
-    "natal.group.id"
-    "natal.group.size"
-    "identity.I"
-    "identity.II"
-    "chromosome.I"
-    "chromosome.II"
-    "generation.number"
-    "biological.sex"
-    "age-at-death-in-years" 
-    "life-history-at-death" 
-    "fertility-at-death" 
-    "energy-at-death" 
-    "living-chance-at-death"
-    "ticks.at.conception" 
-    "ticks.at.birth" 
-    "ticks.at.weaning" 
-    "ticks.at.sexual.maturity"
-    "ticks.at.death"
-    "adult.living.chance"
-    "adult.body.size"
-    "adult.body.shade"
-    "adult.energy.supply"
-    "adult.bite.capacity"
-    "adult.mutation.chance"
-    "adult.sex.ratio"
-    "adult.litter.size"
-    "adult.conception.chance"
-    "adult.visual.angle"
-    "adult.visual.range"
-    "adult.day.perception"
-    "adult.night.perception"
-    "adult.yellow.chance"
-    "adult.red.chance"
-    "adult.blue.chance"
-    "mother.initiated.birth"
-    "mother.initiated.weaning"
-    "lifetime-foraging-gains"
-    "lifetime-energy-cost"
-    "lifetime-energy-gains"
-    "lifetime-receiving-count"
-    "lifetime-carried-count"
-    "lifetime-aid-count"
-    "lifetime-harm-count"
-    "lifetime-matings-count"
-    "lifetime-mates-count"
-    "lifetime-list-of-mates"
-    "lifetime-conceptions-count"
-    "lifetime-infanticide-count"
-    "lifetime-group-transfers"
-    "lifetime-distance-traveled"
-    "lifetime-cells-occupied"
-    "lifetime-whole-related-help-cost"
-    "lifetime-half-related-help-cost"
-    "lifetime-fourth-related-help-cost"
-    "lifetime-eighth-related-help-cost"
-    
-  )
+  if ( not file-exists? agent-summary-file-path and simulation-id != 0 )
   
-  record-data agent-summary-file-path columns-list
-  
-end
+  [ file-open agent-summary-file-path
+    file-print csv:to-string (list (list 
+      
+      "path-to-experiment"
+      "model-version"
+      "model-structure"
+      "genotype-reader"
+      "simulation-id"
+      "behaviorspace-experiment-name"
+      "population" 
+      "genotype"
+      "plant-annual-cycle" 
+      "plant-daily-cycle" 
+      "plant-seasonality" 
+      "plant-quality"
+      "plant-minimum-neighbors" 
+      "plant-maximum-neighbors" 
+      "world-width" 
+      "world-height"
+      "output-results?" 
+      "selection-on?" 
+      "deterioration-rate"
+      "maximum-visual-range"
+      "base-litter-size"
 
-to-report focal-subject report self = subject end
-to-report age-at-death-in-years report precision ( age.in.ticks / plant-annual-cycle ) 3 end
-to-report life-history-at-death report life.history end
-to-report fertility-at-death report female.fertility end
-to-report energy-at-death report energy.supply end
-to-report living-chance-at-death report living.chance end
-to-report lifetime-foraging-gains report foraging.gains end
-to-report lifetime-energy-cost report total.energy.cost end
-to-report lifetime-energy-gains report total.energy.gains end
-to-report lifetime-receiving-count report length receiving.history end
-to-report lifetime-carried-count report length carried.history end
-to-report lifetime-aid-count report length aid.history end
-to-report lifetime-harm-count report length harm.history end
-to-report lifetime-matings-count report length copulations.history end
-to-report lifetime-mates-count report length remove-duplicates copulations.history end
-to-report lifetime-list-of-mates report copulations.history end
-to-report lifetime-conceptions-count report length conceptions.history end
-to-report lifetime-infanticide-count report length infanticide.history end
-to-report lifetime-group-transfers report length group.transfers.history end
-to-report lifetime-distance-traveled report distance.traveled end
-to-report lifetime-cells-occupied report length cells.occupied end
-to-report lifetime-whole-related-help-cost report whole.related.help.cost end
-to-report lifetime-half-related-help-cost report half.related.help.cost end
-to-report lifetime-fourth-related-help-cost report fourth.related.help.cost end
-to-report lifetime-eighth-related-help-cost report eighth.related.help.cost end
+      "focal-subject"
+      "color" 
+      "heading" 
+      "xcor" 
+      "ycor" 
+      "meta.id" 
+      "age.in.ticks" 
+      "generation.number"
+      "biological.sex" 
+      "life.history" 
+      "female.fertility" 
+      "group.identity" 
+      "is.alive" 
+      "carried.items"
+      "yellow.signal" 
+      "red.signal" 
+      "blue.signal"
+      "body.size" 
+      "body.shade" 
+      "is.resting"
+      "hidden.chance"
+      "fully.decayed"
+      "living.chance" 
+      "energy.supply"
+      "bite.capacity" 
+      "mutation.chance"
+      "sex.ratio" 
+      "litter.size" 
+      "conception.chance"
+      "visual.angle" 
+      "visual.range" 
+      "day.perception"
+      "night.perception" 
+      "yellow.chance" 
+      "red.chance" 
+      "blue.chance"
+      "birthing.chance" 
+      "weaning.chance" 
+      "infancy.chance"
+      "juvenility.chance" 
+      "adulthood.chance" 
+      "x.magnitude" 
+      "y.magnitude"
+      "my.environment"
+      "decision.vectors"
+      "actions.completed"
+      "distance.traveled" 
+      "cells-occupied-count"
+      "foraging.gains"  
+      "total.energy.gains"
+      "total.energy.cost"
+      "receiving.history"
+      "receiving-count"
+      "carried.history"
+      "carried-count"
+      "aid.history"
+      "aid-count"
+      "harm.history"
+      "harm-count"
+      "copulations.history"
+      "copulations-count"
+      "conceptions.history"
+      "conceptions-count"
+      "group.transfers.history"
+      "group-transfers-count"
+      "infanticide.history"
+      "infanticide-count"
+      "whole.related.help.cost"
+      "half.related.help.cost"
+      "fourth.related.help.cost"
+      "eighth.related.help.cost"
+      
+      "mother.identity"
+      "father.identity"
+      "natal.group.id"
+      "natal.group.size"
+      "identity.I"
+      "identity.II"
+      "chromosome.I"
+      "chromosome.II"
+      "ticks.at.conception" 
+      "ticks.at.birth" 
+      "ticks.at.weaning" 
+      "ticks.at.sexual.maturity"
+      "ticks.at.death"
+      "adult.hidden.chance"
+      "adult.living.chance"
+      "adult.body.size"
+      "adult.body.shade"
+      "adult.energy.supply"
+      "adult.bite.capacity"
+      "adult.mutation.chance"
+      "adult.sex.ratio"
+      "adult.litter.size"
+      "adult.conception.chance"
+      "adult.visual.angle"
+      "adult.visual.range"
+      "adult.day.perception"
+      "adult.night.perception"
+      "adult.yellow.chance"
+      "adult.red.chance"
+      "adult.blue.chance"
+      "mother.initiated.birth"
+      "mother.initiated.weaning"
+      
+  )) ]
+  
+  file-open agent-summary-file-path
+  
+  file-print csv:to-string ( list ( list
+    
+    path-to-experiment
+    model-version
+    model-structure
+    genotype-reader
+    simulation-id
+    behaviorspace-experiment-name
+    population
+    genotype
+    plant-annual-cycle
+    plant-daily-cycle
+    plant-seasonality
+    plant-quality
+    plant-minimum-neighbors
+    plant-maximum-neighbors
+    world-width
+    world-height
+    output-results?
+    selection-on?
+    deterioration-rate
+    maximum-visual-range
+    base-litter-size
+    
+    focal-subject
+    color
+    heading 
+    xcor
+    ycor
+    meta.id
+    age.in.ticks 
+    generation.number
+    biological.sex
+    life.history
+    female.fertility 
+    group.identity
+    is.alive
+    carried.items
+    yellow.signal
+    red.signal
+    blue.signal
+    body.size
+    body.shade
+    is.resting
+    hidden.chance
+    fully.decayed
+    living.chance 
+    energy.supply
+    bite.capacity
+    mutation.chance
+    sex.ratio
+    litter.size
+    conception.chance
+    visual.angle
+    visual.range
+    day.perception
+    night.perception
+    yellow.chance
+    red.chance
+    blue.chance
+    birthing.chance
+    weaning.chance 
+    infancy.chance
+    juvenility.chance
+    adulthood.chance
+    x.magnitude
+    y.magnitude
+    my.environment
+    decision.vectors
+    actions.completed
+    distance.traveled 
+    cells-occupied-count
+    foraging.gains
+    total.energy.gains
+    total.energy.cost
+    receiving.history
+    receiving-count
+    carried.history
+    carried-count
+    aid.history
+    aid-count
+    harm.history
+    harm-count
+    copulations.history
+    copulations-count
+    conceptions.history
+    conceptions-count
+    group.transfers.history
+    group-transfers-count
+    infanticide.history
+    infanticide-count
+    whole.related.help.cost
+    half.related.help.cost
+    fourth.related.help.cost
+    eighth.related.help.cost
+    
+    mother.identity
+    father.identity
+    natal.group.id
+    natal.group.size
+    identity.I
+    identity.II
+    chromosome.I
+    chromosome.II
+    ticks.at.conception
+    ticks.at.birth
+    ticks.at.weaning
+    ticks.at.sexual.maturity
+    ticks.at.death
+    adult.hidden.chance
+    adult.living.chance
+    adult.body.size
+    adult.body.shade
+    adult.energy.supply
+    adult.bite.capacity
+    adult.mutation.chance
+    adult.sex.ratio
+    adult.litter.size
+    adult.conception.chance
+    adult.visual.angle
+    adult.visual.range
+    adult.day.perception
+    adult.night.perception
+    adult.yellow.chance
+    adult.red.chance
+    adult.blue.chance
+    mother.initiated.birth
+    mother.initiated.weaning
+    
+  ))
+  
+  file-close
+
+end
 
 ;--------------------------------------------------------------------------------------------------------------------                                                             
 ;  __ _   _ _   ___   _  _   _ __     ___  __   __ _   _ _  
@@ -393,103 +870,172 @@ to scan-group [ group-id ]
   
   let group-scan-file-path ( word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "group-scans.csv" )
   
-  let columns-list (list 
-    
-    ; simulation parameters and settings
-    "path-to-experiment"
-    "model-version"
-    "model-structure"
-    "genotype-reader"
-    "simulation-id"
-    "behaviorspace-experiment-name"
-    "population" 
-    "genotype"
-    "plant-annual-cycle" 
-    "plant-daily-cycle" 
-    "plant-seasonality" 
-    "plant-quality"
-    "plant-minimum-neighbors" 
-    "plant-maximum-neighbors" 
-    "world-width" 
-    "world-height"
-    "deterioration-rate" 
-    "output-results?" 
-    "selection-on?"
-    "get-solar-status"
-    "ticks" 
-;    "my-group-id group-id" ; this may not work
-;    "total-birth-count" 
-;    "current-group-size" 
-;    "adult-female-group-size" 
-;    "population-density" 
-;    "total-energy-gained" 
-;    "gestatee-female-energy-gained" 
-;    "gestatee-male-energy-gained" 
-;    "infant-female-energy-gained" 
-;    "infant-male-energy-gained" 
-;    "juvenile-female-energy-gained" 
-;    "juvenile-male-energy-gained" 
-;    "adult-cycling-energy-gained" 
-;    "adult-pregnant-energy-gained" 
-;    "adult-lactating-energy-gained" 
-;    "adult-male-energy-gained"
-;    "senescent-female-energy-gained" 
-;    "senescent-male-energy-gained" 
-;    "distance-traveled" 
+  if ( not file-exists? group-scan-file-path and simulation-id != 0 )
   
-  ) 
-  
-  record-data group-scan-file-path columns-list
-  
-end
-
-to-report my-group-id [ my-id ] report my-id end
-to-report group-size report count anima1s with [ group.identity = [meta.id] of myself ] end
-to-report current-group-size report group-size end  
-to-report group-members report anima1s with [ group.identity = [meta.id] of myself ] end
-to-report adult-female-group-size report count anima1s with [ group.identity = [meta.id] of myself and biological.sex = "female" and life.history = "adult" ] end
-
-;--------------------------------------------------------------------------------------------------------------------    
-;                                                                                   
-;  __ _   _ _   ___   _  _   _ __     ___  _  _   _ __    _ __    __ _   _ _   _  _ 
-; / _` | | '_| / _ \ | || | | '_ \   (_-< | || | | '  \  | '  \  / _` | | '_| | || |
-; \__, | |_|   \___/  \_,_| | .__/   /__/  \_,_| |_|_|_| |_|_|_| \__,_| |_|    \_, |
-; |___/                     |_|                                                |__/ 
-;--------------------------------------------------------------------------------------------------------------------    
-  
-to group-summary [ group-id ]
-  
-  let group-summary-file-path ( word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "group-summary.csv" )
-  
-  ifelse ( not file-exists? group-summary-file-path and simulation-id != 0 ) 
-  
-  [ file-open group-summary-file-path
+  [ file-open group-scan-file-path
     file-print csv:to-string (list (list 
       
-      "date-and-time" 
-      "model-version" 
-      "simulation-id" 
-      "ticks" 
-      "meta-id" 
-      "color" 
-    
-    ))
-    
-    group-summary group-id ]
-  
-  [ file-open group-summary-file-path
-    file-print csv:to-string ( list (list 
+      "path-to-experiment"
+      "model-version"
+      "model-structure"
+      "genotype-reader"
+      "simulation-id"
+      "behaviorspace-experiment-name"
+      "population" 
+      "genotype"
+      "plant-annual-cycle" 
+      "plant-daily-cycle" 
+      "plant-seasonality" 
+      "plant-quality"
+      "plant-minimum-neighbors" 
+      "plant-maximum-neighbors" 
+      "world-width" 
+      "world-height"
+      "output-results?" 
+      "selection-on?" 
+      "deterioration-rate"
+      "maximum-visual-range"
+      "base-litter-size"
       
-      date-and-time
-      model-version
-      simulation-id
-      ticks
-      group-id
-      wrap-color group-id
-   
+      "timesteps"
+      "get-solar-status"
+      "population-density"
+      
+      "group-identity"
+      "current-group-size" 
+      "group-members"
+      "adult-male-count"
+      "adult-cycling-count"
+      "adult-pregnant-count"
+      "adult-lactating-count"
+      "juvenile-male-count"
+      "juvenile-female-count"
+      "infant-male-count"
+      "infant-female-count"
+      "gestatee-male-count"
+      "gestatee-female-count"
+      
+      "total-energy" 
+      "adult-male-energy"
+      "adult-cycling-energy" 
+      "adult-pregnant-energy" 
+      "adult-lactating-energy" 
+      "juvenile-male-energy" 
+      "juvenile-female-energy" 
+      "infant-male-energy" 
+      "infant-female-energy" 
+      "gestatee-male-energy" 
+      "gestatee-female-energy" 
+      
+      "per-capita-energy" 
+      "per-capita-adult-male-energy"
+      "per-capita-adult-cycling-energy" 
+      "per-capita-adult-pregnant-energy" 
+      "per-capita-adult-lactating-energy" 
+      "per-capita-juvenile-male-energy" 
+      "per-capita-juvenile-female-energy" 
+      "per-capita-infant-male-energy" 
+      "per-capita-infant-female-energy" 
+      "per-capita-gestatee-male-energy" 
+      "per-capita-gestatee-female-energy" 
+      
   )) ]
   
-  file-close 
+  file-open group-scan-file-path
+  
+  let current-group-size count living-agents with [ group.identity = group-id ]
+  let adult-male-count count living-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ]
+  let adult-cycling-count count living-agents with [ group.identity = group-id and life.history = "adult" and female.fertility = "cycling" ]
+  let adult-pregnant-count count living-agents with [ group.identity = group-id and life.history = "adult" and female.fertility = "pregnant" ]
+  let adult-lactating-count count living-agents with [ group.identity = group-id and life.history = "adult" and female.fertility = "lactating" ]
+  let juvenile-male-count count living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "male" ]
+  let juvenile-female-count count living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "female" ]
+  let infant-male-count count living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "male" ]
+  let infant-female-count count living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "female" ]
+  let gestatee-male-count count living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "male" ]
+  let gestatee-female-count count living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "female" ]
+  
+  let total-energy sum [energy.supply] of living-agents with [ group.identity = group-id ]
+  let adult-male-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ]
+  let adult-cycling-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "adult" and female.fertility = "cycling" ]
+  let adult-pregnant-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "adult" and female.fertility = "pregnant" ]
+  let adult-lactating-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "adult" and female.fertility = "lactating" ]
+  let juvenile-male-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "male" ]
+  let juvenile-female-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "female" ]
+  let infant-male-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "male" ]
+  let infant-female-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "female" ]
+  let gestatee-male-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "male" ]
+  let gestatee-female-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "female" ]
+  
+  file-print csv:to-string ( list ( list
+    
+    path-to-experiment
+    model-version
+    model-structure
+    genotype-reader
+    simulation-id
+    behaviorspace-experiment-name
+    population
+    genotype
+    plant-annual-cycle
+    plant-daily-cycle
+    plant-seasonality
+    plant-quality
+    plant-minimum-neighbors
+    plant-maximum-neighbors
+    world-width
+    world-height
+    output-results?
+    selection-on?
+    deterioration-rate
+    maximum-visual-range
+    base-litter-size
+    
+    ticks
+    get-solar-status
+    population-density
+    
+    group-id
+    current-group-size
+    ([meta.id] of living-agents with [ group.identity = group-id ])
+    adult-male-count
+    adult-cycling-count
+    adult-pregnant-count
+    adult-lactating-count
+    juvenile-male-count
+    juvenile-female-count
+    infant-male-count
+    infant-female-count
+    gestatee-male-count
+    gestatee-female-count
+    
+    total-energy
+    adult-male-energy
+    adult-cycling-energy
+    adult-pregnant-energy
+    adult-lactating-energy
+    juvenile-male-energy
+    juvenile-female-energy
+    infant-male-energy
+    infant-female-energy
+    gestatee-male-energy
+    gestatee-female-energy
+    
+    ifelse-value ( current-group-size > 0 ) [ (total-energy / current-group-size) ] [ "NA" ]
+    ifelse-value ( adult-male-count > 0 ) [ (adult-male-energy / adult-male-count) ] [ "NA" ]
+    ifelse-value ( adult-cycling-count > 0 ) [ (adult-cycling-energy / adult-cycling-count) ] [ "NA" ]
+    ifelse-value ( adult-pregnant-count > 0 ) [ (adult-pregnant-energy / adult-pregnant-count) ] [ "NA" ]
+    ifelse-value ( adult-lactating-count > 0 ) [ (adult-lactating-energy / adult-lactating-count) ] [ "NA" ]
+    ifelse-value ( juvenile-male-count > 0 ) [ (juvenile-male-energy / juvenile-male-count) ] [ "NA" ]
+    ifelse-value ( juvenile-female-count > 0 ) [ (juvenile-female-energy / juvenile-female-count) ] [ "NA" ]
+    ifelse-value ( infant-male-count > 0 ) [ (infant-male-energy / infant-male-count) ] [ "NA" ]
+    ifelse-value ( infant-female-count > 0 ) [ (infant-female-energy / infant-female-count) ] [ "NA" ]
+    ifelse-value ( gestatee-male-count > 0 ) [ (gestatee-male-energy / gestatee-male-count) ] [ "NA" ]
+    ifelse-value ( gestatee-female-count > 0 ) [ (gestatee-female-energy / gestatee-female-count) ] [ "NA" ]
+    
+  ))
+  
+  file-close
   
 end
 
@@ -505,61 +1051,1051 @@ to scan-simulation
   
   let simulation-scan-file-path ( word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] simulation-id ".csv" )
   
-  let columns-list (list 
-    
-    ; simulation parameters and settings
-    "path-to-experiment"
-    "model-version"
-    "model-structure"
-    "genotype-reader"
-    "simulation-id"
-    "behaviorspace-experiment-name"
-    "population" 
-    "genotype"
-    "plant-annual-cycle" 
-    "plant-daily-cycle" 
-    "plant-seasonality" 
-    "plant-quality"
-    "plant-minimum-neighbors" 
-    "plant-maximum-neighbors" 
-    "world-width" 
-    "world-height"
-    "deterioration-rate" 
-    "output-results?" 
-    "selection-on?"
-    "get-solar-status"
-    "ticks"
+  if ( not file-exists? simulation-scan-file-path and simulation-id != 0 )
+  
+  [ file-open simulation-scan-file-path
+    file-print csv:to-string (list (list 
+      
+      "path-to-experiment"
+      "model-version"
+      "model-structure"
+      "genotype-reader"
+      "simulation-id"
+      "behaviorspace-experiment-name"
+      "population" 
+      "genotype"
+      "plant-annual-cycle" 
+      "plant-daily-cycle" 
+      "plant-seasonality" 
+      "plant-quality"
+      "plant-minimum-neighbors" 
+      "plant-maximum-neighbors" 
+      "world-width" 
+      "world-height"
+      "output-results?" 
+      "selection-on?" 
+      "deterioration-rate"
+      "maximum-visual-range"
+      "base-litter-size"
+      
+      "timesteps"
+      "get-solar-status"
+      "population-density"
+      
+      "current-plant-abundance"
+      "current-plant-patchiness"
+      "current-population-size"
+      "generation-number-max"
+      "generation-number-min"
+      "generation-number-mean"
+      "generation-number-median"
+      "number-of-groups"
+      "number-of-males"
+      "number-of-females" 
+      "number-of-adults" 
+      "number-of-cycling-females" 
+      "number-of-pregnant-females" 
+      "number-of-lactating-females"
+      "number-of-juveniles" 
+      "number-of-infants"
+      "number-of-gestatees" 
+      "number-of-fully-alive-agents"
+      "number-of-decaying-agents"
+      "number-of-fully-decayed-agents"
 
-    "get-solar-status"
-    "current-plant-abundance"
-    "current-plant-patchiness"
-    "current-population-size"
-    "population-density"
-    "mean-generation-number"
-    "number-of-females" 
-    "number-of-males"
-    "number-of-gestatees" 
-    "number-of-infants"
-    "number-of-juveniles" 
-    "number-of-adults" 
-    "number-of-cycling-females" 
-    "number-of-pregnant-females" 
-    "number-of-lactating-females"
-    "number-of-fully-alive-agents"
-    "number-of-decaying-agents"
-    "number-of-fully-decayed-agents"
-    "number-of-groups"
-    "adult-males-per-group"
-    "adult-females-per-group"
-  )
+  )) ]
   
-  record-data simulation-scan-file-path columns-list
+  file-open simulation-scan-file-path
   
+  file-print csv:to-string ( list ( list
+    
+    path-to-experiment
+    model-version
+    model-structure
+    genotype-reader
+    simulation-id
+    behaviorspace-experiment-name
+    population
+    genotype
+    plant-annual-cycle
+    plant-daily-cycle
+    plant-seasonality
+    plant-quality
+    plant-minimum-neighbors
+    plant-maximum-neighbors
+    world-width
+    world-height
+    output-results?
+    selection-on?
+    deterioration-rate
+    maximum-visual-range
+    base-litter-size
+    
+    ticks
+    get-solar-status
+    population-density
+    
+    current-plant-abundance
+    current-plant-patchiness
+    current-population-size
+    generation-number-max
+    generation-number-min
+    generation-number-mean
+    generation-number-median
+    
+    number-of-groups
+    number-of-males
+    number-of-females
+    number-of-adults
+    number-of-cycling-females
+    number-of-pregnant-females
+    number-of-lactating-females
+    number-of-juveniles
+    number-of-infants
+    number-of-gestatees
+    number-of-fully-alive-agents
+    number-of-decaying-agents
+    number-of-fully-decayed-agents
+    
+  ))
+  
+  file-close
+
 end
 
-to-report current-plant-abundance report sum [ penergy.supply ] of patches end
-to-report current-plant-patchiness report plant-patchiness end
+;--------------------------------------------------------------------------------------------------------------------
+;       _                  _          _     _                                                                
+;  ___ (_)  _ __    _  _  | |  __ _  | |_  (_)  ___   _ _      ___  _  _   _ __    _ __    __ _   _ _   _  _ 
+; (_-< | | | '  \  | || | | | / _` | |  _| | | / _ \ | ' \    (_-< | || | | '  \  | '  \  / _` | | '_| | || |
+; /__/ |_| |_|_|_|  \_,_| |_| \__,_|  \__| |_| \___/ |_||_|   /__/  \_,_| |_|_|_| |_|_|_| \__,_| |_|    \_, |
+;                                                                                                       |__/ 
+;--------------------------------------------------------------------------------------------------------------------
 
+to simulation-summary ; observer subroutine
+  
+  let simulations-file-path ( word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "simulations.csv" ) 
+  
+  if ( not file-exists? simulations-file-path and simulation-id != 0 )
+  
+  [ file-open simulations-file-path
+    file-print csv:to-string (list (list 
+      
+      "path-to-experiment"
+      "model-version"
+      "model-structure"
+      "genotype-reader"
+      "simulation-id"
+      "behaviorspace-experiment-name"
+      "population" 
+      "genotype"
+      "plant-annual-cycle" 
+      "plant-daily-cycle" 
+      "plant-seasonality" 
+      "plant-quality"
+      "plant-minimum-neighbors" 
+      "plant-maximum-neighbors" 
+      "world-width" 
+      "world-height"
+      "output-results?" 
+      "selection-on?" 
+      "deterioration-rate"
+      "maximum-visual-range"
+      "base-litter-size"
+      
+      "start-date-and-time"
+      "end-date-and-time"
+      "simulation-duration-seconds"
+      "simulation-duration-ticks"
+      
+      ; model validation and verification
+      "verification-true-count"
+      "verification-false-count"
+      "verification-percent-true"
+      
+      "lotka-volterra-best-fit"
+      "lotka-volterra-r1"
+      "lotka-volterra-r2"
+      "lotka-volterra-s12"
+      "lotka-volterra-s21"
+      "lotka-volterra-N1"
+      "lotka-volterra-N2"
+      
+      "optimal-foraging-regression-constant"
+      "optimal-foraging-regression-coeff"
+      "optimal-foraging-r-squared"
+      "optimal-foraging-adj-r-squared"
+      "optimal-foraging-F-statistic"
+      "optimal-foraging-probability-of-F"
+      "optimal-foraging-standard-error"
+      "optimal-foraging-tot-degrees-of-freedom"
+      "optimal-foraging-reg-degrees-of-freedom"
+      "optimal-foraging-err-degrees-of-freedom"
+      "optimal-foraging-tot-sum-of-squares"
+      "optimal-foraging-reg-sum-of-squares"
+      "optimal-foraging-err-sum-of-squares"
+      
+      "mother-initiated-birth-regression-constant"
+      "mother-initiated-birth-regression-coeff"
+      "mother-initiated-birth-r-squared"
+      "mother-initiated-birth-adj-r-squared"
+      "mother-initiated-birth-F-statistic"
+      "mother-initiated-birth-probability-of-F"
+      "mother-initiated-birth-standard-error"
+      "mother-initiated-birth-tot-degrees-of-freedom"
+      "mother-initiated-birth-reg-degrees-of-freedom"
+      "mother-initiated-birth-err-degrees-of-freedom"
+      "mother-initiated-birth-tot-sum-of-squares"
+      "mother-initiated-birth-reg-sum-of-squares"
+      "mother-initiated-birth-err-sum-of-squares"
+      
+      "mother-initiated-wean-regression-constant"
+      "mother-initiated-wean-regression-coeff"
+      "mother-initiated-wean-r-squared"
+      "mother-initiated-wean-adj-r-squared"
+      "mother-initiated-wean-F-statistic"
+      "mother-initiated-wean-probability-of-F"
+      "mother-initiated-wean-standard-error"
+      "mother-initiated-wean-tot-degrees-of-freedom"
+      "mother-initiated-wean-reg-degrees-of-freedom"
+      "mother-initiated-wean-err-degrees-of-freedom"
+      "mother-initiated-wean-tot-sum-of-squares"
+      "mother-initiated-wean-reg-sum-of-squares"
+      "mother-initiated-wean-err-sum-of-squares"
+      
+      "hamiltons-rule-regression-constant"
+      "hamiltons-rule-regression-coeff"
+      "hamiltons-rule-r-squared"
+      "hamiltons-rule-adj-r-squared"
+      "hamiltons-rule-F-statistic"
+      "hamiltons-rule-probability-of-F"
+      "hamiltons-rule-standard-error"
+      "hamiltons-rule-tot-degrees-of-freedom"
+      "hamiltons-rule-reg-degrees-of-freedom"
+      "hamiltons-rule-err-degrees-of-freedom"
+      "hamiltons-rule-tot-sum-of-squares"
+      "hamiltons-rule-reg-sum-of-squares"
+      "hamiltons-rule-err-sum-of-squares"
+      
+      ; emergent properties of plants
+      "plant-abundance-maximum" 
+      "plant-abundance-minimum" 
+      "plant-abundance-mean" 
+      "plant-abundance-variance" 
+      "plant-patchiness-maximum" 
+      "plant-patchiness-minimum" 
+      "plant-patchiness-mean" 
+      "plant-patchiness-variance" 
+      
+      ; population level 
+      "generations-max"
+      "generations-min"
+      "generations-mean"
+      "generations-median"
+      "total-simulated-individuals"
+      "total-simulated-males"
+      "total-simulated-females"
+      "total-simulated-adults"
+      "population-size-maximum"
+      "population-size-minimum"
+      "population-size-mean"
+      "population-size-variance"
+      
+      ; life history
+      "gestation-length-maximum"
+      "gestation-length-minimum"
+      "gestation-length-mean"
+      "gestation-length-variance"
+      "lactation-length-maximum"
+      "lactation-length-minimum"
+      "lactation-length-mean"
+      "lactation-length-variance"
+      "juvenile-length-maximum"
+      "juvenile-length-minimum"
+      "juvenile-length-mean"
+      "juvenile-length-variance"
+      "male-age-at-first-reproduction-maximum"
+      "male-age-at-first-reproduction-minimum"
+      "male-age-at-first-reproduction-mean"
+      "male-age-at-first-reproduction-variance"
+      "female-age-at-first-reproduction-maximum"
+      "female-age-at-first-reproduction-minimum"
+      "female-age-at-first-reproduction-mean"
+      "female-age-at-first-reproduction-variance"
+      "male-adult-longevity-maximum"
+      "male-adult-longevity-minimum"
+      "male-adult-longevity-mean"
+      "male-adult-longevity-variance"
+      "female-adult-longevity-maximum"
+      "female-adult-longevity-minimum"
+      "female-adult-longevity-mean"
+      "female-adult-longevity-variance"
+      
+      ; adult attributes
+      "male-adult-hidden-chance-maximum"
+      "male-adult-hidden-chance-minimum"
+      "male-adult-hidden-chance-mean"
+      "male-adult-hidden-chance-variance"
+      "female-adult-hidden-chance-maximum"
+      "female-adult-hidden-chance-minimum"
+      "female-adult-hidden-chance-mean"
+      "female-adult-hidden-chance-variance"
+      "male-adult-living-chance-maximum"
+      "male-adult-living-chance-minimum"
+      "male-adult-living-chance-mean"
+      "male-adult-living-chance-variance"
+      "female-adult-living-chance-maximum"
+      "female-adult-living-chance-minimum"
+      "female-adult-living-chance-mean"
+      "female-adult-living-chance-variance"
+      "male-adult-body-size-maximum"
+      "male-adult-body-size-minimum"
+      "male-adult-body-size-mean"
+      "male-adult-body-size-variance"
+      "female-adult-body-size-maximum"
+      "female-adult-body-size-minimum"
+      "female-adult-body-size-mean"
+      "female-adult-body-size-variance"
+      "male-adult-body-shade-maximum"
+      "male-adult-body-shade-minimum"
+      "male-adult-body-shade-mean"
+      "male-adult-body-shade-variance"
+      "female-adult-body-shade-maximum"
+      "female-adult-body-shade-minimum"
+      "female-adult-body-shade-mean"
+      "female-adult-body-shade-variance"
+      "male-adult-energy-supply-maximum"
+      "male-adult-energy-supply-minimum"
+      "male-adult-energy-supply-mean"
+      "male-adult-energy-supply-variance"
+      "female-adult-energy-supply-maximum"
+      "female-adult-energy-supply-minimum"
+      "female-adult-energy-supply-mean"
+      "female-adult-energy-supply-variance"
+      "male-adult-bite-capacity-maximum"
+      "male-adult-bite-capacity-minimum"
+      "male-adult-bite-capacity-mean"
+      "male-adult-bite-capacity-variance"
+      "female-adult-bite-capacity-maximum"
+      "female-adult-bite-capacity-minimum"
+      "female-adult-bite-capacity-mean"
+      "female-adult-bite-capacity-variance"
+      "male-adult-mutation-chance-maximum"
+      "male-adult-mutation-chance-minimum"
+      "male-adult-mutation-chance-mean"
+      "male-adult-mutation-chance-variance"
+      "female-adult-mutation-chance-maximum"
+      "female-adult-mutation-chance-minimum"
+      "female-adult-mutation-chance-mean"
+      "female-adult-mutation-chance-variance"
+      "male-adult-sex-ratio-maximum"
+      "male-adult-sex-ratio-minimum"
+      "male-adult-sex-ratio-mean"
+      "male-adult-sex-ratio-variance"
+      "female-adult-sex-ratio-maximum"
+      "female-adult-sex-ratio-minimum"
+      "female-adult-sex-ratio-mean"
+      "female-adult-sex-ratio-variance"
+      "male-adult-litter-size-maximum"
+      "male-adult-litter-size-minimum"
+      "male-adult-litter-size-mean"
+      "male-adult-litter-size-variance"
+      "female-adult-litter-size-maximum"
+      "female-adult-litter-size-minimum"
+      "female-adult-litter-size-mean"
+      "female-adult-litter-size-variance"
+      "male-adult-conception-chance-maximum"
+      "male-adult-conception-chance-minimum"
+      "male-adult-conception-chance-mean"
+      "male-adult-conception-chance-variance"
+      "female-adult-conception-chance-maximum"
+      "female-adult-conception-chance-minimum"
+      "female-adult-conception-chance-mean"
+      "female-adult-conception-chance-variance"
+      "male-adult-visual-angle-maximum"
+      "male-adult-visual-angle-minimum"
+      "male-adult-visual-angle-mean"
+      "male-adult-visual-angle-variance"
+      "female-adult-visual-angle-maximum"
+      "female-adult-visual-angle-minimum"
+      "female-adult-visual-angle-mean"
+      "female-adult-visual-angle-variance"
+      "male-adult-visual-range-maximum"
+      "male-adult-visual-range-minimum"
+      "male-adult-visual-range-mean"
+      "male-adult-visual-range-variance"
+      "female-adult-visual-range-maximum"
+      "female-adult-visual-range-minimum"
+      "female-adult-visual-range-mean"
+      "female-adult-visual-range-variance"
+      "male-adult-day-perception-maximum"
+      "male-adult-day-perception-minimum"
+      "male-adult-day-perception-mean"
+      "male-adult-day-perception-variance"
+      "female-adult-day-perception-maximum"
+      "female-adult-day-perception-minimum"
+      "female-adult-day-perception-mean"
+      "female-adult-day-perception-variance"
+      "male-adult-night-perception-maximum"
+      "male-adult-night-perception-minimum"
+      "male-adult-night-perception-mean"
+      "male-adult-night-perception-variance"
+      "female-adult-night-perception-maximum"
+      "female-adult-night-perception-minimum"
+      "female-adult-night-perception-mean"
+      "female-adult-night-perception-variance"
+      
+      ; behavior history
+      "natal-group-size-maximum"
+      "natal-group-size-minimum"
+      "natal-group-size-mean"
+      "natal-group-size-variance"
+      "male-lifetime-distance-traveled-maximum"
+      "male-lifetime-distance-traveled-minimum"
+      "male-lifetime-distance-traveled-mean"
+      "male-lifetime-distance-traveled-variance"
+      "female-lifetime-distance-traveled-maximum"
+      "female-lifetime-distance-traveled-minimum"
+      "female-lifetime-distance-traveled-mean"
+      "female-lifetime-distance-traveled-variance"
+      "mother-initiated-birth-count"
+      "offspring-initiated-birth-count"
+      "mother-initiated-weaning-count"
+      "offspring-initiated-weaning-count"
+      "male-lifetime-foraging-gains-maximum"  
+      "male-lifetime-foraging-gains-minimum"
+      "male-lifetime-foraging-gains-mean"
+      "male-lifetime-foraging-gains-variance"
+      "female-lifetime-foraging-gains-maximum"
+      "female-lifetime-foraging-gains-minimum"
+      "female-lifetime-foraging-gains-mean"
+      "female-lifetime-foraging-gains-variance"
+      "male-lifetime-energy-gains-maximum"  
+      "male-lifetime-energy-gains-minimum"
+      "male-lifetime-energy-gains-mean"
+      "male-lifetime-energy-gains-variance"
+      "female-lifetime-energy-gains-maximum"
+      "female-lifetime-energy-gains-minimum"
+      "female-lifetime-energy-gains-mean"
+      "female-lifetime-energy-gains-variance"
+      "male-lifetime-energy-cost-maximum"  
+      "male-lifetime-energy-cost-minimum"
+      "male-lifetime-energy-cost-mean"
+      "male-lifetime-energy-cost-variance"
+      "female-lifetime-energy-cost-maximum"
+      "female-lifetime-energy-cost-minimum"
+      "female-lifetime-energy-cost-mean"
+      "female-lifetime-energy-cost-variance"
+      "male-lifetime-whole-related-help-cost-maximum"
+      "male-lifetime-whole-related-help-cost-minimum"
+      "male-lifetime-whole-related-help-cost-mean"
+      "male-lifetime-whole-related-help-cost-variance"
+      "female-lifetime-whole-related-help-cost-maximum"
+      "female-lifetime-whole-related-help-cost-minimum"
+      "female-lifetime-whole-related-help-cost-mean"
+      "female-lifetime-whole-related-help-cost-variance"
+      "male-lifetime-half-related-help-cost-maximum"
+      "male-lifetime-half-related-help-cost-minimum"
+      "male-lifetime-half-related-help-cost-mean"
+      "male-lifetime-half-related-help-cost-variance"
+      "female-lifetime-half-related-help-cost-maximum"
+      "female-lifetime-half-related-help-cost-minimum"
+      "female-lifetime-half-related-help-cost-mean"
+      "female-lifetime-half-related-help-cost-variance"
+      "male-lifetime-fourth-related-help-cost-maximum"
+      "male-lifetime-fourth-related-help-cost-minimum"
+      "male-lifetime-fourth-related-help-cost-mean"
+      "male-lifetime-fourth-related-help-cost-variance"
+      "female-lifetime-fourth-related-help-cost-maximum"
+      "female-lifetime-fourth-related-help-cost-minimum"
+      "female-lifetime-fourth-related-help-cost-mean"
+      "female-lifetime-fourth-related-help-cost-variance"
+      "male-lifetime-eighth-related-help-cost-maximum"
+      "male-lifetime-eighth-related-help-cost-minimum"
+      "male-lifetime-eighth-related-help-cost-mean"
+      "male-lifetime-eighth-related-help-cost-variance"
+      "female-lifetime-eighth-related-help-cost-maximum"
+      "female-lifetime-eighth-related-help-cost-minimum"
+      "female-lifetime-eighth-related-help-cost-mean"
+      "female-lifetime-eighth-related-help-cost-variance"
+      "male-total-aid-count-maximum"
+      "male-total-aid-count-minimum"
+      "male-total-aid-count-mean"
+      "male-total-aid-count-variance"
+      "female-total-aid-count-maximum"
+      "female-total-aid-count-minimum"
+      "female-total-aid-count-mean"
+      "female-total-aid-count-variance"
+      "male-total-harm-count-maximum"
+      "male-total-harm-count-minimum"
+      "male-total-harm-count-mean"
+      "male-total-harm-count-variance"
+      "female-total-harm-count-maximum"
+      "female-total-harm-count-minimum"
+      "female-total-harm-count-mean"
+      "female-total-harm-count-variance"
+      "male-total-matings-maximum"
+      "male-total-matings-minimum"
+      "male-total-matings-mean"
+      "male-total-matings-variance"
+      "male-unique-female-matings-maximum"
+      "male-unique-female-matings-minimum"
+      "male-unique-female-matings-mean"
+      "male-unique-female-matings-variance"
+      "female-total-matings-maximum"
+      "female-total-matings-minimum"
+      "female-total-matings-mean"
+      "female-total-matings-variance"
+      "female-unique-male-matings-maximum"
+      "female-unique-male-matings-minimum"
+      "female-unique-male-matings-mean"
+      "female-unique-male-matings-variance"
+      "male-total-group-transfers-maximum"
+      "male-total-group-transfers-minimum"
+      "male-total-group-transfers-mean"
+      "male-total-group-transfers-variance"
+      "female-total-group-transfers-maximum"
+      "female-total-group-transfers-minimum"
+      "female-total-group-transfers-mean"
+      "female-total-group-transfers-variance"
+      "male-infantice-count-maximum"
+      "male-infantice-count-minimum"
+      "male-infantice-count-mean"
+      "male-infantice-count-variance"
+      "female-infantice-count-maximum"
+      "female-infantice-count-minimum"
+      "female-infantice-count-mean"
+      "female-infantice-count-variance"
+      
+  )) ]
+  
+  file-open simulations-file-path
+
+  ; STATISTICAL CALCULATIONS
+  
+  ; lotka volterra
+  let lotka-volterra-results (list 0 0 0 0 0 0 0 ) ; calculate-lotka-volterra
+  let lotka-volterra-best-fit item 0 lotka-volterra-results
+  let lotka-volterra-r1 item 1 lotka-volterra-results
+  let lotka-volterra-r2 item 2 lotka-volterra-results
+  let lotka-volterra-s12 item 3 lotka-volterra-results
+  let lotka-volterra-s21 item 4 lotka-volterra-results
+  let lotka-volterra-N1 item 5 lotka-volterra-results
+  let lotka-volterra-N2 item 6 lotka-volterra-results
+  
+  ; stats table with generation number in first column as dependent variable
+  let generation-table stats:newtable
+  stats:set-names generation-table ( list "generation-number" "optimal-foraging-index"  "mother-initiated-birth-percent" "mother-initiated-wean-percent" "hamiltons-rule-percent" )
+  
+  let stop-generation 10
+  let g 1
+  
+  while [ g < stop-generation ] [
+    
+    let sum-foraging-gains sum [foraging.gains] of anima1s with [ generation.number = g ]
+    let sum-energy-cost sum [total.energy.cost] of anima1s with [ generation.number = g ]
+    let generation-size count anima1s with [ generation.number = g ]
+    
+    let optimal-foraging-index ifelse-value ( sum-energy-cost > 0 ) [ sum-foraging-gains / sum-energy-cost ] [ 0 ]
+    let mother-initiated-birth-percent ifelse-value ( generation-size > 0 ) [ count anima1s with [ generation.number = g and mother.initiated.birth ] / generation-size ] [ 0 ]
+    let mother-initiated-wean-percent ifelse-value ( generation-size > 0 ) [ count anima1s with [ generation.number = g and mother.initiated.weaning ] / generation-size ] [ 0 ]
+    let hamiltons-rule-percent ifelse-value ( generation-size > 0 ) [ count anima1s with [ whole.related.help.cost > half.related.help.cost and half.related.help.cost > fourth.related.help.cost and fourth.related.help.cost > eighth.related.help.cost and generation.number = g ] / generation-size ] [ 0 ]
+    
+    stats:add generation-table ( list g optimal-foraging-index mother-initiated-birth-percent mother-initiated-wean-percent hamiltons-rule-percent )
+    
+    set g g + 1 ]
+
+  ; calculate correlations
+  let correlation-matrix stats:correlation generation-table
+  
+  ; optimal foraging
+  let optimal-foraging-correlation item 0 item 1 correlation-matrix
+  let optimal-foraging-regression-coeffs stats:regress-on generation-table [ "generation-number" "optimal-foraging-index" ]
+  let optimal-foraging-regression-constant first optimal-foraging-regression-coeffs
+  let optimal-foraging-regression-coeff last optimal-foraging-regression-coeffs
+  let regression-stats stats:get-rstats generation-table
+  let optimal-foraging-r-squared item 0 regression-stats
+  let optimal-foraging-adj-r-squared item 1 regression-stats
+  let optimal-foraging-F-statistic item 2 regression-stats
+  let optimal-foraging-probability-of-F item 3 regression-stats
+  let optimal-foraging-standard-error item 4 regression-stats
+  let optimal-foraging-tot-degrees-of-freedom item 5 regression-stats
+  let optimal-foraging-reg-degrees-of-freedom item 6 regression-stats
+  let optimal-foraging-err-degrees-of-freedom item 7 regression-stats
+  let optimal-foraging-tot-sum-of-squares item 8 regression-stats
+  let optimal-foraging-reg-sum-of-squares item 9 regression-stats
+  let optimal-foraging-err-sum-of-squares item 10 regression-stats
+  
+  ; parent-offspring conflict at birth
+  let mother-initiated-birth-correlation item 0 item 2 correlation-matrix
+  let mother-initiated-birth-regression-coeffs stats:regress-on generation-table [ "generation-number" "mother-initiated-birth-percent" ]
+  let mother-initiated-birth-regression-constant first mother-initiated-birth-regression-coeffs
+  let mother-initiated-birth-regression-coeff last mother-initiated-birth-regression-coeffs
+  set regression-stats stats:get-rstats generation-table
+  let mother-initiated-birth-r-squared item 0 regression-stats
+  let mother-initiated-birth-adj-r-squared item 1 regression-stats
+  let mother-initiated-birth-F-statistic item 2 regression-stats
+  let mother-initiated-birth-probability-of-F item 3 regression-stats
+  let mother-initiated-birth-standard-error item 4 regression-stats
+  let mother-initiated-birth-tot-degrees-of-freedom item 5 regression-stats
+  let mother-initiated-birth-reg-degrees-of-freedom item 6 regression-stats
+  let mother-initiated-birth-err-degrees-of-freedom item 7 regression-stats
+  let mother-initiated-birth-tot-sum-of-squares item 8 regression-stats
+  let mother-initiated-birth-reg-sum-of-squares item 9 regression-stats
+  let mother-initiated-birth-err-sum-of-squares item 10 regression-stats
+  
+  ; parent-offspring conflict at weaning
+  let mother-initiated-wean-correlation item 0 item 3 correlation-matrix
+  let mother-initiated-wean-regression-coeffs stats:regress-on generation-table [ "generation-number" "mother-initiated-wean-percent" ]
+  let mother-initiated-wean-regression-constant first mother-initiated-wean-regression-coeffs
+  let mother-initiated-wean-regression-coeff last mother-initiated-wean-regression-coeffs
+  set regression-stats stats:get-rstats generation-table
+  let mother-initiated-wean-r-squared item 0 regression-stats
+  let mother-initiated-wean-adj-r-squared item 1 regression-stats
+  let mother-initiated-wean-F-statistic item 2 regression-stats
+  let mother-initiated-wean-probability-of-F item 3 regression-stats
+  let mother-initiated-wean-standard-error item 4 regression-stats
+  let mother-initiated-wean-tot-degrees-of-freedom item 5 regression-stats
+  let mother-initiated-wean-reg-degrees-of-freedom item 6 regression-stats
+  let mother-initiated-wean-err-degrees-of-freedom item 7 regression-stats
+  let mother-initiated-wean-tot-sum-of-squares item 8 regression-stats
+  let mother-initiated-wean-reg-sum-of-squares item 9 regression-stats
+  let mother-initiated-wean-err-sum-of-squares item 10 regression-stats
+ 
+  ; hamilton's rule
+  let hamiltons-rule-correlation item 0 item 4 correlation-matrix
+  let hamiltons-rule-regression-coeffs 0; stats:regress-on generation-table [ "generation-number" "hamiltons-rule-percent" ]
+  let hamiltons-rule-regression-constant 0;  first hamiltons-rule-regression-coeffs
+  let hamiltons-rule-regression-coeff 0;  last hamiltons-rule-regression-coeffs
+  set regression-stats 0;  stats:get-rstats generation-table
+  let hamiltons-rule-r-squared 0;  item 0 regression-stats
+  let hamiltons-rule-adj-r-squared 0;  item 1 regression-stats
+  let hamiltons-rule-F-statistic 0;  item 2 regression-stats
+  let hamiltons-rule-probability-of-F 0;  item 3 regression-stats
+  let hamiltons-rule-standard-error  0; item 4 regression-stats
+  let hamiltons-rule-tot-degrees-of-freedom 0;  item 5 regression-stats
+  let hamiltons-rule-reg-degrees-of-freedom 0;  item 6 regression-stats
+  let hamiltons-rule-err-degrees-of-freedom 0;  item 7 regression-stats
+  let hamiltons-rule-tot-sum-of-squares 0;  item 8 regression-stats
+  let hamiltons-rule-reg-sum-of-squares 0;  item 9 regression-stats
+  let hamiltons-rule-err-sum-of-squares 0;  item 10 regression-stats
+  
+  
+  file-print csv:to-string ( list ( list
+    
+    path-to-experiment
+    model-version
+    model-structure
+    genotype-reader
+    simulation-id
+    behaviorspace-experiment-name
+    population
+    genotype
+    plant-annual-cycle
+    plant-daily-cycle
+    plant-seasonality
+    plant-quality
+    plant-minimum-neighbors
+    plant-maximum-neighbors
+    world-width
+    world-height
+    output-results?
+    selection-on?
+    deterioration-rate
+    maximum-visual-range
+    base-litter-size
+    
+    start-date-and-time
+    end-date-and-time
+    simulation-duration-seconds
+    ticks
+    
+    ; model validation and verification
+    verification-true-count
+    verification-false-count
+    verification-percent-true
+    
+    lotka-volterra-best-fit
+    lotka-volterra-r1
+    lotka-volterra-r2
+    lotka-volterra-s12
+    lotka-volterra-s21
+    lotka-volterra-N1
+    lotka-volterra-N2
+    
+    optimal-foraging-regression-constant
+    optimal-foraging-regression-coeff
+    optimal-foraging-r-squared
+    optimal-foraging-adj-r-squared
+    optimal-foraging-F-statistic
+    optimal-foraging-probability-of-F
+    optimal-foraging-standard-error
+    optimal-foraging-tot-degrees-of-freedom
+    optimal-foraging-reg-degrees-of-freedom
+    optimal-foraging-err-degrees-of-freedom
+    optimal-foraging-tot-sum-of-squares
+    optimal-foraging-reg-sum-of-squares
+    optimal-foraging-err-sum-of-squares
+    
+    mother-initiated-birth-regression-constant
+    mother-initiated-birth-regression-coeff
+    mother-initiated-birth-r-squared
+    mother-initiated-birth-adj-r-squared
+    mother-initiated-birth-F-statistic
+    mother-initiated-birth-probability-of-F
+    mother-initiated-birth-standard-error
+    mother-initiated-birth-tot-degrees-of-freedom
+    mother-initiated-birth-reg-degrees-of-freedom
+    mother-initiated-birth-err-degrees-of-freedom
+    mother-initiated-birth-tot-sum-of-squares
+    mother-initiated-birth-reg-sum-of-squares
+    mother-initiated-birth-err-sum-of-squares
+    
+    mother-initiated-wean-regression-constant
+    mother-initiated-wean-regression-coeff
+    mother-initiated-wean-r-squared
+    mother-initiated-wean-adj-r-squared
+    mother-initiated-wean-F-statistic
+    mother-initiated-wean-probability-of-F
+    mother-initiated-wean-standard-error
+    mother-initiated-wean-tot-degrees-of-freedom
+    mother-initiated-wean-reg-degrees-of-freedom
+    mother-initiated-wean-err-degrees-of-freedom
+    mother-initiated-wean-tot-sum-of-squares
+    mother-initiated-wean-reg-sum-of-squares
+    mother-initiated-wean-err-sum-of-squares
+    
+    hamiltons-rule-regression-constant
+    hamiltons-rule-regression-coeff
+    hamiltons-rule-r-squared
+    hamiltons-rule-adj-r-squared
+    hamiltons-rule-F-statistic
+    hamiltons-rule-probability-of-F
+    hamiltons-rule-standard-error
+    hamiltons-rule-tot-degrees-of-freedom
+    hamiltons-rule-reg-degrees-of-freedom
+    hamiltons-rule-err-degrees-of-freedom
+    hamiltons-rule-tot-sum-of-squares
+    hamiltons-rule-reg-sum-of-squares
+    hamiltons-rule-err-sum-of-squares
+    
+    ; emergent properties of plants
+    plant-abundance-maximum 
+    plant-abundance-minimum 
+    plant-abundance-mean 
+    plant-abundance-variance 
+    plant-patchiness-maximum 
+    plant-patchiness-minimum 
+    plant-patchiness-mean 
+    plant-patchiness-variance 
+    
+    ; population level 
+    generation-number-max
+    generation-number-min
+    generation-number-mean
+    generation-number-median
+    total-simulated-individuals
+    total-simulated-males
+    total-simulated-females
+    total-simulated-adults
+    population-size-maximum
+    population-size-minimum
+    population-size-mean
+    population-size-variance
+    
+    ; life history
+    gestation-length-maximum
+    gestation-length-minimum
+    gestation-length-mean
+    gestation-length-variance
+    lactation-length-maximum
+    lactation-length-minimum
+    lactation-length-mean
+    lactation-length-variance
+    juvenile-length-maximum
+    juvenile-length-minimum
+    juvenile-length-mean
+    juvenile-length-variance
+    male-age-at-first-reproduction-maximum
+    male-age-at-first-reproduction-minimum
+    male-age-at-first-reproduction-mean
+    male-age-at-first-reproduction-variance
+    female-age-at-first-reproduction-maximum
+    female-age-at-first-reproduction-minimum
+    female-age-at-first-reproduction-mean
+    female-age-at-first-reproduction-variance
+    male-adult-longevity-maximum
+    male-adult-longevity-minimum
+    male-adult-longevity-mean
+    male-adult-longevity-variance
+    female-adult-longevity-maximum
+    female-adult-longevity-minimum
+    female-adult-longevity-mean
+    female-adult-longevity-variance
+    
+    ; adult attributes
+    male-adult-hidden-chance-maximum
+    male-adult-hidden-chance-minimum
+    male-adult-hidden-chance-mean
+    male-adult-hidden-chance-variance
+    female-adult-hidden-chance-maximum
+    female-adult-hidden-chance-minimum
+    female-adult-hidden-chance-mean
+    female-adult-hidden-chance-variance
+    male-adult-living-chance-maximum
+    male-adult-living-chance-minimum
+    male-adult-living-chance-mean
+    male-adult-living-chance-variance
+    female-adult-living-chance-maximum
+    female-adult-living-chance-minimum
+    female-adult-living-chance-mean
+    female-adult-living-chance-variance
+    male-adult-body-size-maximum
+    male-adult-body-size-minimum
+    male-adult-body-size-mean
+    male-adult-body-size-variance
+    female-adult-body-size-maximum
+    female-adult-body-size-minimum
+    female-adult-body-size-mean
+    female-adult-body-size-variance
+    male-adult-body-shade-maximum
+    male-adult-body-shade-minimum
+    male-adult-body-shade-mean
+    male-adult-body-shade-variance
+    female-adult-body-shade-maximum
+    female-adult-body-shade-minimum
+    female-adult-body-shade-mean
+    female-adult-body-shade-variance
+    male-adult-energy-supply-maximum
+    male-adult-energy-supply-minimum
+    male-adult-energy-supply-mean
+    male-adult-energy-supply-variance
+    female-adult-energy-supply-maximum
+    female-adult-energy-supply-minimum
+    female-adult-energy-supply-mean
+    female-adult-energy-supply-variance
+    male-adult-bite-capacity-maximum
+    male-adult-bite-capacity-minimum
+    male-adult-bite-capacity-mean
+    male-adult-bite-capacity-variance
+    female-adult-bite-capacity-maximum
+    female-adult-bite-capacity-minimum
+    female-adult-bite-capacity-mean
+    female-adult-bite-capacity-variance
+    male-adult-mutation-chance-maximum
+    male-adult-mutation-chance-minimum
+    male-adult-mutation-chance-mean
+    male-adult-mutation-chance-variance
+    female-adult-mutation-chance-maximum
+    female-adult-mutation-chance-minimum
+    female-adult-mutation-chance-mean
+    female-adult-mutation-chance-variance
+    male-adult-sex-ratio-maximum
+    male-adult-sex-ratio-minimum
+    male-adult-sex-ratio-mean
+    male-adult-sex-ratio-variance
+    female-adult-sex-ratio-maximum
+    female-adult-sex-ratio-minimum
+    female-adult-sex-ratio-mean
+    female-adult-sex-ratio-variance
+    male-adult-litter-size-maximum
+    male-adult-litter-size-minimum
+    male-adult-litter-size-mean
+    male-adult-litter-size-variance
+    female-adult-litter-size-maximum
+    female-adult-litter-size-minimum
+    female-adult-litter-size-mean
+    female-adult-litter-size-variance
+    male-adult-conception-chance-maximum
+    male-adult-conception-chance-minimum
+    male-adult-conception-chance-mean
+    male-adult-conception-chance-variance
+    female-adult-conception-chance-maximum
+    female-adult-conception-chance-minimum
+    female-adult-conception-chance-mean
+    female-adult-conception-chance-variance
+    male-adult-visual-angle-maximum
+    male-adult-visual-angle-minimum
+    male-adult-visual-angle-mean
+    male-adult-visual-angle-variance
+    female-adult-visual-angle-maximum
+    female-adult-visual-angle-minimum
+    female-adult-visual-angle-mean
+    female-adult-visual-angle-variance
+    male-adult-visual-range-maximum
+    male-adult-visual-range-minimum
+    male-adult-visual-range-mean
+    male-adult-visual-range-variance
+    female-adult-visual-range-maximum
+    female-adult-visual-range-minimum
+    female-adult-visual-range-mean
+    female-adult-visual-range-variance
+    male-adult-day-perception-maximum
+    male-adult-day-perception-minimum
+    male-adult-day-perception-mean
+    male-adult-day-perception-variance
+    female-adult-day-perception-maximum
+    female-adult-day-perception-minimum
+    female-adult-day-perception-mean
+    female-adult-day-perception-variance
+    male-adult-night-perception-maximum
+    male-adult-night-perception-minimum
+    male-adult-night-perception-mean
+    male-adult-night-perception-variance
+    female-adult-night-perception-maximum
+    female-adult-night-perception-minimum
+    female-adult-night-perception-mean
+    female-adult-night-perception-variance
+    
+    ; behavior history
+    natal-group-size-maximum
+    natal-group-size-minimum
+    natal-group-size-mean
+    natal-group-size-variance
+    male-lifetime-distance-traveled-maximum
+    male-lifetime-distance-traveled-minimum
+    male-lifetime-distance-traveled-mean
+    male-lifetime-distance-traveled-variance
+    female-lifetime-distance-traveled-maximum
+    female-lifetime-distance-traveled-minimum
+    female-lifetime-distance-traveled-mean
+    female-lifetime-distance-traveled-variance
+    mother-initiated-birth-count
+    offspring-initiated-birth-count
+    mother-initiated-weaning-count
+    offspring-initiated-weaning-count
+    male-lifetime-foraging-gains-maximum  
+    male-lifetime-foraging-gains-minimum
+    male-lifetime-foraging-gains-mean
+    male-lifetime-foraging-gains-variance
+    female-lifetime-foraging-gains-maximum
+    female-lifetime-foraging-gains-minimum
+    female-lifetime-foraging-gains-mean
+    female-lifetime-foraging-gains-variance
+    male-lifetime-energy-gains-maximum  
+    male-lifetime-energy-gains-minimum
+    male-lifetime-energy-gains-mean
+    male-lifetime-energy-gains-variance
+    female-lifetime-energy-gains-maximum
+    female-lifetime-energy-gains-minimum
+    female-lifetime-energy-gains-mean
+    female-lifetime-energy-gains-variance
+    male-lifetime-energy-cost-maximum  
+    male-lifetime-energy-cost-minimum
+    male-lifetime-energy-cost-mean
+    male-lifetime-energy-cost-variance
+    female-lifetime-energy-cost-maximum
+    female-lifetime-energy-cost-minimum
+    female-lifetime-energy-cost-mean
+    female-lifetime-energy-cost-variance
+    male-lifetime-whole-related-help-cost-maximum
+    male-lifetime-whole-related-help-cost-minimum
+    male-lifetime-whole-related-help-cost-mean
+    male-lifetime-whole-related-help-cost-variance
+    female-lifetime-whole-related-help-cost-maximum
+    female-lifetime-whole-related-help-cost-minimum
+    female-lifetime-whole-related-help-cost-mean
+    female-lifetime-whole-related-help-cost-variance
+    male-lifetime-half-related-help-cost-maximum
+    male-lifetime-half-related-help-cost-minimum
+    male-lifetime-half-related-help-cost-mean
+    male-lifetime-half-related-help-cost-variance
+    female-lifetime-half-related-help-cost-maximum
+    female-lifetime-half-related-help-cost-minimum
+    female-lifetime-half-related-help-cost-mean
+    female-lifetime-half-related-help-cost-variance
+    male-lifetime-fourth-related-help-cost-maximum
+    male-lifetime-fourth-related-help-cost-minimum
+    male-lifetime-fourth-related-help-cost-mean
+    male-lifetime-fourth-related-help-cost-variance
+    female-lifetime-fourth-related-help-cost-maximum
+    female-lifetime-fourth-related-help-cost-minimum
+    female-lifetime-fourth-related-help-cost-mean
+    female-lifetime-fourth-related-help-cost-variance
+    male-lifetime-eighth-related-help-cost-maximum
+    male-lifetime-eighth-related-help-cost-minimum
+    male-lifetime-eighth-related-help-cost-mean
+    male-lifetime-eighth-related-help-cost-variance
+    female-lifetime-eighth-related-help-cost-maximum
+    female-lifetime-eighth-related-help-cost-minimum
+    female-lifetime-eighth-related-help-cost-mean
+    female-lifetime-eighth-related-help-cost-variance
+    male-total-aid-count-maximum
+    male-total-aid-count-minimum
+    male-total-aid-count-mean
+    male-total-aid-count-variance
+    female-total-aid-count-maximum
+    female-total-aid-count-minimum
+    female-total-aid-count-mean
+    female-total-aid-count-variance
+    male-total-harm-count-maximum
+    male-total-harm-count-minimum
+    male-total-harm-count-mean
+    male-total-harm-count-variance
+    female-total-harm-count-maximum
+    female-total-harm-count-minimum
+    female-total-harm-count-mean
+    female-total-harm-count-variance
+    male-total-matings-maximum
+    male-total-matings-minimum
+    male-total-matings-mean
+    male-total-matings-variance
+    male-unique-female-matings-maximum
+    male-unique-female-matings-minimum
+    male-unique-female-matings-mean
+    male-unique-female-matings-variance
+    female-total-matings-maximum
+    female-total-matings-minimum
+    female-total-matings-mean
+    female-total-matings-variance
+    female-unique-male-matings-maximum
+    female-unique-male-matings-minimum
+    female-unique-male-matings-mean
+    female-unique-male-matings-variance
+    male-total-group-transfers-maximum
+    male-total-group-transfers-minimum
+    male-total-group-transfers-mean
+    male-total-group-transfers-variance
+    female-total-group-transfers-maximum
+    female-total-group-transfers-minimum
+    female-total-group-transfers-mean
+    female-total-group-transfers-variance
+    male-infantice-count-maximum
+    male-infantice-count-minimum
+    male-infantice-count-mean
+    male-infantice-count-variance
+    female-infantice-count-maximum
+    female-infantice-count-minimum
+    female-infantice-count-mean
+    female-infantice-count-variance
+    
+  ))
+  
+  file-close
+
+end
+
+;--------------------------------------------------------------------------------------------------------------------
+; AGENT FUNCTIONS
+;--------------------------------------------------------------------------------------------------------------------
+
+to-report focal-subject report self = subject end
+to-report cells-occupied-count report length cells.occupied end
+to-report receiving-count report length receiving.history end
+to-report carried-count report length carried.history end
+to-report aid-count report length aid.history end
+to-report harm-count report length harm.history end
+to-report copulations-count report length copulations.history end
+to-report conceptions-count report length conceptions.history end
+to-report group-transfers-count report length group.transfers.history end
+to-report infanticide-count report length infanticide.history end
+  
+;--------------------------------------------------------------------------------------------------------------------
+; OBSERVER FUNCTIONS
+;--------------------------------------------------------------------------------------------------------------------
+  
+to-report living-agents report anima1s with [ is.alive and generation.number > 0 ] end
+to-report decayed-agents report anima1s with [ fully.decayed and generation.number > 0 ] end
+  
 to-report plant-patchiness
   let patch-diameter 5
   let patch-list []
@@ -584,9 +2120,14 @@ to-report plant-patchiness
   report ifelse-value ( mean patch-list = 0 ) [ 0 ] [ ( variance patch-list / mean patch-list ) ]
 end
 
-to-report current-population-size report count anima1s with [ is.alive ] end
 to-report population-density report count anima1s with [ is.alive ] / ( world-width * world-height ) end
-to-report mean-generation-number report ifelse-value ( any? anima1s with [ is.alive ] ) [ mean [ generation.number ] of anima1s with [ is.alive ] ] [ 0 ] end
+to-report current-plant-abundance report sum [ penergy.supply ] of patches end
+to-report current-plant-patchiness report plant-patchiness end
+to-report current-population-size report count anima1s with [ is.alive ] end
+to-report generation-number-max report ifelse-value ( any? living-agents ) [ max [ generation.number ] of living-agents ] [ "NA" ] end
+to-report generation-number-min report ifelse-value ( any? living-agents ) [ min [ generation.number ] of living-agents ] [ "NA" ] end
+to-report generation-number-mean report ifelse-value ( any? living-agents ) [ mean [ generation.number ] of living-agents ] [ "NA" ] end
+to-report generation-number-median report ifelse-value ( any? living-agents ) [ median [ generation.number ] of living-agents ] [ "NA" ] end
 to-report number-of-females report count anima1s with [ is.alive and biological.sex = "female" ] end
 to-report number-of-males report count anima1s with [ is.alive and biological.sex = "male" ] end
 to-report number-of-gestatees report count anima1s with [ is.alive and life.history = "gestatee" ] end
@@ -600,340 +2141,6 @@ to-report number-of-fully-alive-agents report count anima1s with [ is.alive ] en
 to-report number-of-decaying-agents report count anima1s with [ is.alive = false and fully.decayed = false ] end
 to-report number-of-fully-decayed-agents report count anima1s with [ fully.decayed ] end
 to-report number-of-groups report length remove-duplicates [ group.identity ] of anima1s end
-to-report adult-males-per-group report count anima1s with [ is.alive and life.history = "adult" and biological.sex = "male" ] / number-of-groups end
-to-report adult-females-per-group report count anima1s with [ is.alive and life.history = "adult" and biological.sex = "female" ] / number-of-groups end
-
-;--------------------------------------------------------------------------------------------------------------------
-;       _                  _          _     _                                                                
-;  ___ (_)  _ __    _  _  | |  __ _  | |_  (_)  ___   _ _      ___  _  _   _ __    _ __    __ _   _ _   _  _ 
-; (_-< | | | '  \  | || | | | / _` | |  _| | | / _ \ | ' \    (_-< | || | | '  \  | '  \  / _` | | '_| | || |
-; /__/ |_| |_|_|_|  \_,_| |_| \__,_|  \__| |_| \___/ |_||_|   /__/  \_,_| |_|_|_| |_|_|_| \__,_| |_|    \_, |
-;                                                                                                       |__/ 
-;--------------------------------------------------------------------------------------------------------------------
-
-to simulation-summary ; observer subroutine
-  
-  let simulations-file-path ( word path-to-experiment ifelse-value ( length path-to-experiment > 0 ) [ "/" ] [ "" ] "simulations.csv" ) 
-  
-  let columns-list (list
-    
-    ; simulation parameters and settings
-    "path-to-experiment"
-    "model-version"
-    "model-structure"
-    "genotype-reader"
-    "simulation-id"
-    "start-date-and-time"
-    "end-date-and-time"
-    "simulation-duration-seconds"
-    "simulation-duration-ticks"
-    "behaviorspace-experiment-name"
-    "population" 
-    "genotype"
-    "plant-annual-cycle" 
-    "plant-daily-cycle" 
-    "plant-seasonality" 
-    "plant-quality"
-    "plant-minimum-neighbors" 
-    "plant-maximum-neighbors" 
-    "world-width" 
-    "world-height"
-    "deterioration-rate" 
-    "output-results?" 
-    "selection-on?" 
-    
-    ; model validation and verification
-    "verification-true-count"
-    "verification-false-count"
-    "verification-percent-true"
-    
-    ; emergent properties of plants
-    "plant-abundance-maximum" 
-    "plant-abundance-minimum" 
-    "plant-abundance-mean" 
-    "plant-abundance-variance" 
-    "plant-patchiness-maximum" 
-    "plant-patchiness-minimum" 
-    "plant-patchiness-mean" 
-    "plant-patchiness-variance" 
-    
-    ; population level 
-    "generations-transpired"
-    "total-simulated-individuals"
-    "total-simulated-males"
-    "total-simulated-females"
-    "total-simulated-adults"
-    "population-size-maximum"
-    "population-size-minimum"
-    "population-size-mean"
-    "population-size-variance"
-    
-    ; life history
-    "gestation-length-maximum"
-    "gestation-length-minimum"
-    "gestation-length-mean"
-    "gestation-length-variance"
-    "lactation-length-maximum"
-    "lactation-length-minimum"
-    "lactation-length-mean"
-    "lactation-length-variance"
-    "juvenile-length-maximum"
-    "juvenile-length-minimum"
-    "juvenile-length-mean"
-    "juvenile-length-variance"
-    "male-age-at-first-reproduction-maximum"
-    "male-age-at-first-reproduction-minimum"
-    "male-age-at-first-reproduction-mean"
-    "male-age-at-first-reproduction-variance"
-    "female-age-at-first-reproduction-maximum"
-    "female-age-at-first-reproduction-minimum"
-    "female-age-at-first-reproduction-mean"
-    "female-age-at-first-reproduction-variance"
-    "male-adult-longevity-maximum"
-    "male-adult-longevity-minimum"
-    "male-adult-longevity-mean"
-    "male-adult-longevity-variance"
-    "female-adult-longevity-maximum"
-    "female-adult-longevity-minimum"
-    "female-adult-longevity-mean"
-    "female-adult-longevity-variance"
-    
-    ; adult attributes
-    "male-adult-living-chance-maximum"
-    "male-adult-living-chance-minimum"
-    "male-adult-living-chance-mean"
-    "male-adult-living-chance-variance"
-    "female-adult-living-chance-maximum"
-    "female-adult-living-chance-minimum"
-    "female-adult-living-chance-mean"
-    "female-adult-living-chance-variance"
-    "male-adult-body-size-maximum"
-    "male-adult-body-size-minimum"
-    "male-adult-body-size-mean"
-    "male-adult-body-size-variance"
-    "female-adult-body-size-maximum"
-    "female-adult-body-size-minimum"
-    "female-adult-body-size-mean"
-    "female-adult-body-size-variance"
-    "male-adult-body-shade-maximum"
-    "male-adult-body-shade-minimum"
-    "male-adult-body-shade-mean"
-    "male-adult-body-shade-variance"
-    "female-adult-body-shade-maximum"
-    "female-adult-body-shade-minimum"
-    "female-adult-body-shade-mean"
-    "female-adult-body-shade-variance"
-    "male-adult-energy-supply-maximum"
-    "male-adult-energy-supply-minimum"
-    "male-adult-energy-supply-mean"
-    "male-adult-energy-supply-variance"
-    "female-adult-energy-supply-maximum"
-    "female-adult-energy-supply-minimum"
-    "female-adult-energy-supply-mean"
-    "female-adult-energy-supply-variance"
-    "male-adult-bite-capacity-maximum"
-    "male-adult-bite-capacity-minimum"
-    "male-adult-bite-capacity-mean"
-    "male-adult-bite-capacity-variance"
-    "female-adult-bite-capacity-maximum"
-    "female-adult-bite-capacity-minimum"
-    "female-adult-bite-capacity-mean"
-    "female-adult-bite-capacity-variance"
-    "male-adult-mutation-chance-maximum"
-    "male-adult-mutation-chance-minimum"
-    "male-adult-mutation-chance-mean"
-    "male-adult-mutation-chance-variance"
-    "female-adult-mutation-chance-maximum"
-    "female-adult-mutation-chance-minimum"
-    "female-adult-mutation-chance-mean"
-    "female-adult-mutation-chance-variance"
-    "male-adult-sex-ratio-maximum"
-    "male-adult-sex-ratio-minimum"
-    "male-adult-sex-ratio-mean"
-    "male-adult-sex-ratio-variance"
-    "female-adult-sex-ratio-maximum"
-    "female-adult-sex-ratio-minimum"
-    "female-adult-sex-ratio-mean"
-    "female-adult-sex-ratio-variance"
-    "male-adult-litter-size-maximum"
-    "male-adult-litter-size-minimum"
-    "male-adult-litter-size-mean"
-    "male-adult-litter-size-variance"
-    "female-adult-litter-size-maximum"
-    "female-adult-litter-size-minimum"
-    "female-adult-litter-size-mean"
-    "female-adult-litter-size-variance"
-    "male-adult-conception-chance-maximum"
-    "male-adult-conception-chance-minimum"
-    "male-adult-conception-chance-mean"
-    "male-adult-conception-chance-variance"
-    "female-adult-conception-chance-maximum"
-    "female-adult-conception-chance-minimum"
-    "female-adult-conception-chance-mean"
-    "female-adult-conception-chance-variance"
-    "male-adult-visual-angle-maximum"
-    "male-adult-visual-angle-minimum"
-    "male-adult-visual-angle-mean"
-    "male-adult-visual-angle-variance"
-    "female-adult-visual-angle-maximum"
-    "female-adult-visual-angle-minimum"
-    "female-adult-visual-angle-mean"
-    "female-adult-visual-angle-variance"
-    "male-adult-visual-range-maximum"
-    "male-adult-visual-range-minimum"
-    "male-adult-visual-range-mean"
-    "male-adult-visual-range-variance"
-    "female-adult-visual-range-maximum"
-    "female-adult-visual-range-minimum"
-    "female-adult-visual-range-mean"
-    "female-adult-visual-range-variance"
-    "male-adult-day-perception-maximum"
-    "male-adult-day-perception-minimum"
-    "male-adult-day-perception-mean"
-    "male-adult-day-perception-variance"
-    "female-adult-day-perception-maximum"
-    "female-adult-day-perception-minimum"
-    "female-adult-day-perception-mean"
-    "female-adult-day-perception-variance"
-    "male-adult-night-perception-maximum"
-    "male-adult-night-perception-minimum"
-    "male-adult-night-perception-mean"
-    "male-adult-night-perception-variance"
-    "female-adult-night-perception-maximum"
-    "female-adult-night-perception-minimum"
-    "female-adult-night-perception-mean"
-    "female-adult-night-perception-variance"
-    
-    ; behavior history
-    "natal-group-size-maximum"
-    "natal-group-size-minimum"
-    "natal-group-size-mean"
-    "natal-group-size-variance"
-    "male-lifetime-distance-traveled-maximum"
-    "male-lifetime-distance-traveled-minimum"
-    "male-lifetime-distance-traveled-mean"
-    "male-lifetime-distance-traveled-variance"
-    "female-lifetime-distance-traveled-maximum"
-    "female-lifetime-distance-traveled-minimum"
-    "female-lifetime-distance-traveled-mean"
-    "female-lifetime-distance-traveled-variance"
-    "mother-initiated-birth-count"
-    "offspring-initiated-birth-count"
-    "mother-initiated-weaning-count"
-    "offspring-initiated-weaning-count"
-    "male-lifetime-foraging-gains-maximum"  
-    "male-lifetime-foraging-gains-minimum"
-    "male-lifetime-foraging-gains-mean"
-    "male-lifetime-foraging-gains-variance"
-    "female-lifetime-foraging-gains-maximum"
-    "female-lifetime-foraging-gains-minimum"
-    "female-lifetime-foraging-gains-mean"
-    "female-lifetime-foraging-gains-variance"
-    "male-lifetime-energy-gains-maximum"  
-    "male-lifetime-energy-gains-minimum"
-    "male-lifetime-energy-gains-mean"
-    "male-lifetime-energy-gains-variance"
-    "female-lifetime-energy-gains-maximum"
-    "female-lifetime-energy-gains-minimum"
-    "female-lifetime-energy-gains-mean"
-    "female-lifetime-energy-gains-variance"
-    "male-lifetime-energy-cost-maximum"  
-    "male-lifetime-energy-cost-minimum"
-    "male-lifetime-energy-cost-mean"
-    "male-lifetime-energy-cost-variance"
-    "female-lifetime-energy-cost-maximum"
-    "female-lifetime-energy-cost-minimum"
-    "female-lifetime-energy-cost-mean"
-    "female-lifetime-energy-cost-variance"
-    "male-lifetime-whole-related-help-cost-maximum"
-    "male-lifetime-whole-related-help-cost-minimum"
-    "male-lifetime-whole-related-help-cost-mean"
-    "male-lifetime-whole-related-help-cost-variance"
-    "female-lifetime-whole-related-help-cost-maximum"
-    "female-lifetime-whole-related-help-cost-minimum"
-    "female-lifetime-whole-related-help-cost-mean"
-    "female-lifetime-whole-related-help-cost-variance"
-    "male-lifetime-half-related-help-cost-maximum"
-    "male-lifetime-half-related-help-cost-minimum"
-    "male-lifetime-half-related-help-cost-mean"
-    "male-lifetime-half-related-help-cost-variance"
-    "female-lifetime-half-related-help-cost-maximum"
-    "female-lifetime-half-related-help-cost-minimum"
-    "female-lifetime-half-related-help-cost-mean"
-    "female-lifetime-half-related-help-cost-variance"
-    "male-lifetime-fourth-related-help-cost-maximum"
-    "male-lifetime-fourth-related-help-cost-minimum"
-    "male-lifetime-fourth-related-help-cost-mean"
-    "male-lifetime-fourth-related-help-cost-variance"
-    "female-lifetime-fourth-related-help-cost-maximum"
-    "female-lifetime-fourth-related-help-cost-minimum"
-    "female-lifetime-fourth-related-help-cost-mean"
-    "female-lifetime-fourth-related-help-cost-variance"
-    "male-lifetime-eighth-related-help-cost-maximum"
-    "male-lifetime-eighth-related-help-cost-minimum"
-    "male-lifetime-eighth-related-help-cost-mean"
-    "male-lifetime-eighth-related-help-cost-variance"
-    "female-lifetime-eighth-related-help-cost-maximum"
-    "female-lifetime-eighth-related-help-cost-minimum"
-    "female-lifetime-eighth-related-help-cost-mean"
-    "female-lifetime-eighth-related-help-cost-variance"
-    "male-total-aid-count-maximum"
-    "male-total-aid-count-minimum"
-    "male-total-aid-count-mean"
-    "male-total-aid-count-variance"
-    "female-total-aid-count-maximum"
-    "female-total-aid-count-minimum"
-    "female-total-aid-count-mean"
-    "female-total-aid-count-variance"
-    "male-total-harm-count-maximum"
-    "male-total-harm-count-minimum"
-    "male-total-harm-count-mean"
-    "male-total-harm-count-variance"
-    "female-total-harm-count-maximum"
-    "female-total-harm-count-minimum"
-    "female-total-harm-count-mean"
-    "female-total-harm-count-variance"
-    "male-total-matings-maximum"
-    "male-total-matings-minimum"
-    "male-total-matings-mean"
-    "male-total-matings-variance"
-    "male-unique-female-matings-maximum"
-    "male-unique-female-matings-minimum"
-    "male-unique-female-matings-mean"
-    "male-unique-female-matings-variance"
-    "female-total-matings-maximum"
-    "female-total-matings-minimum"
-    "female-total-matings-mean"
-    "female-total-matings-variance"
-    "female-unique-male-matings-maximum"
-    "female-unique-male-matings-minimum"
-    "female-unique-male-matings-mean"
-    "female-unique-male-matings-variance"
-    "male-total-group-transfers-maximum"
-    "male-total-group-transfers-minimum"
-    "male-total-group-transfers-mean"
-    "male-total-group-transfers-variance"
-    "female-total-group-transfers-maximum"
-    "female-total-group-transfers-minimum"
-    "female-total-group-transfers-mean"
-    "female-total-group-transfers-variance"
-    "male-infantice-count-maximum"
-    "male-infantice-count-minimum"
-    "male-infantice-count-mean"
-    "male-infantice-count-variance"
-    "female-infantice-count-maximum"
-    "female-infantice-count-minimum"
-    "female-infantice-count-mean"
-    "female-infantice-count-variance"
-    
-  )
-  
-  record-data simulations-file-path columns-list 
-  
-end
-
-to-report living-agents report anima1s with [ is.alive and generation.number > 0 ] end
-to-report decayed-agents report anima1s with [ fully.decayed and generation.number > 0 ] end
 
   ; simulation parameters and settings
 to-report end-date-and-time report date-and-time end
@@ -944,28 +2151,6 @@ to-report simulation-duration-ticks report ticks end
 to-report verification-true-count report length filter [ i -> i = true ] verification-results end
 to-report verification-false-count report length filter [ i -> i = false ] verification-results end
 to-report verification-percent-true report ifelse-value ( verification-true-count + verification-false-count = 0 ) [ "NA" ] [ verification-true-count / ( verification-true-count + verification-false-count ) ] end
-  
-to-report foraging-gains-vs-generation-slope report 0 end ; to do
-to-report foraging-gains-vs-generation-R-squared report 0 end ; to do
-  
-to-report mother-initiated-birth-vs-generation-slope report 0 end ; to do
-to-report mother-initiated-birth-vs-generation-R-squared report 0 end ; to do
-to-report mother-initiated-weaning-vs-generation-slope report 0 end ; to do
-to-report mother-initiated-weaning-vs-generation-R-squared report 0 end ; to do
-to-report hamiltons-rule-followed-count report 0 end ; to do
-to-report hamiltons-rule-not-followed-count report 0 end ; to do
-to-report hamiltons-rule-followed-vs-generation-slope report 0 end ; to do
-to-report hamiltons-rule-followed-vs-generation-R-squared report 0 end ; to do
-  
-  ; lotka-volterra
-  
-to table-stud
-  let stats-table stats:newtable
-  ;stats:add stats-table plant-abundance-record population-size-record 
-  ;print stats:correlation stats-table
-end
-
-
 
 ; emergent plant properties
 to-report plant-abundance-maximum report ifelse-value ( length plant-abundance-record > 0 ) [ max plant-abundance-record ] [ "NA" ] end
@@ -1032,6 +2217,18 @@ to-report female-adult-longevity-mean report ifelse-value ( length female-adult-
 to-report female-adult-longevity-variance report ifelse-value ( length female-adult-longevity-list < 2 ) [ "NA" ] [ variance female-adult-longevity-list ] end 
   
   ; adult attributes
+to-report male-adult-hidden-chance-list report [ adult.hidden.chance ] of decayed-agents with [ biological.sex = "male" and adult.hidden.chance != 0 ] end
+to-report male-adult-hidden-chance-maximum report ifelse-value ( length male-adult-hidden-chance-list < 1 ) [ "NA" ] [ max male-adult-hidden-chance-list ] end
+to-report male-adult-hidden-chance-minimum report ifelse-value ( length male-adult-hidden-chance-list < 1 ) [ "NA" ] [ min male-adult-hidden-chance-list ] end
+to-report male-adult-hidden-chance-mean report ifelse-value ( length male-adult-hidden-chance-list < 1 ) [ "NA" ] [ mean male-adult-hidden-chance-list ] end
+to-report male-adult-hidden-chance-variance report ifelse-value ( length male-adult-hidden-chance-list < 2 ) [ "NA" ] [ variance male-adult-hidden-chance-list ] end
+  
+to-report female-adult-hidden-chance-list report [ adult.hidden.chance ] of decayed-agents with [ biological.sex = "female" and adult.hidden.chance != 0 ] end
+to-report female-adult-hidden-chance-maximum report ifelse-value ( length female-adult-hidden-chance-list < 1 ) [ "NA" ] [ max female-adult-hidden-chance-list ] end
+to-report female-adult-hidden-chance-minimum report ifelse-value ( length female-adult-hidden-chance-list < 1 ) [ "NA" ] [ min female-adult-hidden-chance-list ] end
+to-report female-adult-hidden-chance-mean report ifelse-value ( length female-adult-hidden-chance-list < 1 ) [ "NA" ] [ mean female-adult-hidden-chance-list ] end
+to-report female-adult-hidden-chance-variance report ifelse-value ( length female-adult-hidden-chance-list < 2 ) [ "NA" ] [ variance female-adult-hidden-chance-list ] end
+  
 to-report male-adult-living-chance-list report [ adult.living.chance ] of decayed-agents with [ biological.sex = "male" and adult.living.chance != 0 ] end
 to-report male-adult-living-chance-maximum report ifelse-value ( length male-adult-living-chance-list < 1 ) [ "NA" ] [ max male-adult-living-chance-list ] end
 to-report male-adult-living-chance-minimum report ifelse-value ( length male-adult-living-chance-list < 1 ) [ "NA" ] [ min male-adult-living-chance-list ] end
@@ -1374,10 +2571,10 @@ to-report female-infantice-count-variance report ifelse-value ( length female-in
 ;
 ;--------------------------------------------------------------------------------------------------------------------
 
-to calculate-lotka-volterra
+to-report calculate-lotka-volterra
   
-  let N1a plant-abundance-record
-  let N2a population-size-record
+  let N1a first plant-abundance-record
+  let N2a first population-size-record
   
   let bestparam []
   let gmax 0
@@ -1435,6 +2632,7 @@ to calculate-lotka-volterra
   ] ] ] ] ] ]
   
   ;....display the best result....
+  report bestparam
   
 end
 

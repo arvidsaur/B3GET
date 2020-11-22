@@ -124,9 +124,13 @@ to import-population
     ; create new meta.ids for everyone
     let table-of-ids table:make
     ask anima1s [
-      let new-id random 9999999
-      table:put table-of-ids meta.id  new-id
-      set meta.id  new-id ]
+      
+      ifelse ( table:has-key? table-of-ids meta.id ) 
+      [ let new-id random 9999999
+        table:put table-of-ids meta.id new-id
+        set meta.id new-id ]
+      
+      [ table:put table-of-ids meta.id meta.id ]]
     
     ; update carried items list
     ask anima1s [
@@ -169,6 +173,7 @@ to import-population
       if ( is.alive = 0 ) [ set is.alive true ]
       if ( is.resting = 0 ) [ set is.resting false ]
       if ( fully.decayed = 0 ) [ set fully.decayed false ]
+      if ( hidden.chance = 0 ) [ set hidden.chance 0 ]
       
       update-appearance
     ]
