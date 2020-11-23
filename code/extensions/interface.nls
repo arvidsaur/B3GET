@@ -8,10 +8,11 @@
 ;   88 88    88   88   88.  ... 88       88     88.  .88 88.  ... 88.  ...
 ;   dP dP    dP   dP   `88888P' dP       dP     `88888P8 `88888P' `88888P'
 ;
+; © 2020 K N Crouse
 ;--------------------------------------------------------------------------------------------------------------------
 
 to setup-button
-  ;if ( simulation-id != 0 ) [ record-world ]
+  if ( simulation-id != 0 and ticks > 100000 ) [ record-world ]
   setup
 end
 
@@ -60,7 +61,6 @@ end
 ; 88.  ... 88.  .88 88  88  88 88  88  88 88.  .88 88    88 88.  .88       88 
 ; `88888P' `88888P' dP  dP  dP dP  dP  dP `88888P8 dP    dP `88888P8 `88888P' 
 ;                                                                            
-; © 2020 K N Crouse
 ;-----------------------------------------------------------------------------                                                                          
 
 to command
@@ -534,77 +534,87 @@ to display-results
     clear-output
     
     (ifelse 
-      ( selected-display = "age" and crosssectional-longitudinal-specialized = 1 ) [ plot-crosssectional-age ]
-      ( selected-display = "age" and crosssectional-longitudinal-specialized = 2 ) [ plot-longitudinal-age ]
-      ( selected-display = "age" and crosssectional-longitudinal-specialized = 3 ) [ plot-specialized-age ]
+      ( selected-display = "age" and crosssectional---longitudinal---specialized = 1 ) [ plot-cosssectional-age  ]
+      ( selected-display = "age" and crosssectional---longitudinal---specialized = 2 ) [ plot-longitudinal-age ]
+      ( selected-display = "age" and crosssectional---longitudinal---specialized = 3 ) [ plot-specialized-age ]
       
-      ( selected-display = "decisions" and crosssectional-longitudinal-specialized = 1 ) [ plot-crosssectional-decisions ]
-      ( selected-display = "decisions" and crosssectional-longitudinal-specialized = 2 ) [ plot-longitudinal-decisions ]
-      ( selected-display = "decisions" and crosssectional-longitudinal-specialized = 3 ) [ plot-specialized-decisions ]
+      ( selected-display = "decisions" and crosssectional---longitudinal---specialized = 1 ) [ plot-crosssectional-decisions ]
+      ( selected-display = "decisions" and crosssectional---longitudinal---specialized = 2 ) [ plot-longitudinal-decisions ]
+      ( selected-display = "decisions" and crosssectional---longitudinal---specialized = 3 ) [ plot-specialized-decisions ]
       
-      ( selected-display = "actions" and crosssectional-longitudinal-specialized = 1 ) [ plot-crosssectional-actions ]
-      ( selected-display = "actions" and crosssectional-longitudinal-specialized = 2 ) [ plot-longitudinal-actions ]
-      ( selected-display = "actions" and crosssectional-longitudinal-specialized = 3 ) [ plot-specialized-actions ]
+      ( selected-display = "actions" and crosssectional---longitudinal---specialized = 1 ) [ plot-crosssectional-actions ]
+      ( selected-display = "actions" and crosssectional---longitudinal---specialized = 2 ) [ plot-longitudinal-actions ]
+      ( selected-display = "actions" and crosssectional---longitudinal---specialized = 3 ) [ plot-specialized-actions ]
       
-      ( selected-display = "generations" and crosssectional-longitudinal-specialized = 1 ) [ plot-crosssectional-generations ]
-      ( selected-display = "generations" and crosssectional-longitudinal-specialized = 2 ) [ plot-longitudinal-generations ]
-      ( selected-display = "generations" and crosssectional-longitudinal-specialized = 3 ) [ plot-specialized-generations ]
+      ( selected-display = "generations" and crosssectional---longitudinal---specialized = 1 ) [ plot-crosssectional-columns "generation.number" ]
+      ( selected-display = "generations" and crosssectional---longitudinal---specialized = 2 ) [ plot-longitudinal-generations ]
+      ( selected-display = "generations" and crosssectional---longitudinal---specialized = 3 ) [ plot-specialized-generations ]
       
-      ( selected-display = "life-history" and crosssectional-longitudinal-specialized = 1 ) [ plot-crosssectional-life-history ]
-      ( selected-display = "life-history" and crosssectional-longitudinal-specialized = 2 ) [ plot-longitudinal-life-history ]
-      ( selected-display = "life-history" and crosssectional-longitudinal-specialized = 3 ) [ plot-specialized-life-history ]
+      ( selected-display = "life-history" and crosssectional---longitudinal---specialized = 1 ) [ plot-crosssectional-life-history ]
+      ( selected-display = "life-history" and crosssectional---longitudinal---specialized = 2 ) [ plot-longitudinal-life-history ]
+      ( selected-display = "life-history" and crosssectional---longitudinal---specialized = 3 ) [ plot-specialized-life-history ]
       
-      ( selected-display = "birthing" and crosssectional-longitudinal-specialized = 1 ) [ plot-crosssectional-birthing ]
-      ( selected-display = "birthing" and crosssectional-longitudinal-specialized = 2 ) [ plot-longitudinal-birthing ]
-      ( selected-display = "birthing" and crosssectional-longitudinal-specialized = 3 ) [ plot-specialized-birthing ]
+      ( selected-display = "birthing" and crosssectional---longitudinal---specialized = 1 ) [ plot-crosssectional-columns "ifelse-value ( mother.initiated.birth = true ) [ 1 ] [ 0 ]" ]
+      ( selected-display = "birthing" and crosssectional---longitudinal---specialized = 2 ) [ plot-longitudinal-birthing ]
+      ( selected-display = "birthing" and crosssectional---longitudinal---specialized = 3 ) [ plot-specialized-birthing ]
       
-      ( selected-display = "weaning" and crosssectional-longitudinal-specialized = 1 ) [ plot-crosssectional-weaning ]
-      ( selected-display = "weaning" and crosssectional-longitudinal-specialized = 2 ) [ plot-longitudinal-weaning ]
-      ( selected-display = "weaning" and crosssectional-longitudinal-specialized = 3 ) [ plot-specialized-weaning ]
+      ( selected-display = "weaning" and crosssectional---longitudinal---specialized = 1 ) [ plot-crosssectional-columns "ifelse-value ( mother.initiated.weaning = true ) [ 1 ] [ 0 ]"  ]
+      ( selected-display = "weaning" and crosssectional---longitudinal---specialized = 2 ) [ plot-longitudinal-weaning ]
+      ( selected-display = "weaning" and crosssectional---longitudinal---specialized = 3 ) [ plot-specialized-weaning ]
       
-      ( selected-display = "matings" and crosssectional-longitudinal-specialized = 1 ) [ plot-crosssectional-matings ]
-      ( selected-display = "matings" and crosssectional-longitudinal-specialized = 2 ) [ plot-longitudinal-matings ]
-      ( selected-display = "matings" and crosssectional-longitudinal-specialized = 3 ) [ plot-specialized-matings ]
+      ( selected-display = "matings" and crosssectional---longitudinal---specialized = 1 ) [ plot-crosssectional-columns "length copulations.history"  ]
+      ( selected-display = "matings" and crosssectional---longitudinal---specialized = 2 ) [ plot-longitudinal-matings ]
+      ( selected-display = "matings" and crosssectional---longitudinal---specialized = 3 ) [ plot-specialized-matings ]
       
-      ( selected-display = "mating-partners" and crosssectional-longitudinal-specialized = 1 ) [ plot-crosssectional-mating-partners ]
-      ( selected-display = "mating-partners" and crosssectional-longitudinal-specialized = 2 ) [ plot-longitudinal-mating-partners ]
-      ( selected-display = "mating-partners" and crosssectional-longitudinal-specialized = 3 ) [ plot-specialized-mating-partners ]
+      ( selected-display = "mating-partners" and crosssectional---longitudinal---specialized = 1 ) [ plot-crosssectional-columns "length remove-duplicates copulations.history"  ]
+      ( selected-display = "mating-partners" and crosssectional---longitudinal---specialized = 2 ) [ plot-longitudinal-mating-partners ]
+      ( selected-display = "mating-partners" and crosssectional---longitudinal---specialized = 3 ) [ plot-specialized-mating-partners ]
       
-      ( selected-display = "conceptions" and crosssectional-longitudinal-specialized = 1 ) [ plot-crosssectional-conceptions ]
-      ( selected-display = "conceptions" and crosssectional-longitudinal-specialized = 2 ) [ plot-longitudinal-conceptions ]
-      ( selected-display = "conceptions" and crosssectional-longitudinal-specialized = 3 ) [ plot-specialized-conceptions ]
+      ( selected-display = "conceptions" and crosssectional---longitudinal---specialized = 1 ) [ plot-crosssectional-columns "length conceptions.history"  ]
+      ( selected-display = "conceptions" and crosssectional---longitudinal---specialized = 2 ) [ plot-longitudinal-conceptions ]
+      ( selected-display = "conceptions" and crosssectional---longitudinal---specialized = 3 ) [ plot-specialized-conceptions ]
       
-      ( selected-display = "infanticide" and crosssectional-longitudinal-specialized = 1 ) [ plot-crosssectional-infanticide ]
-      ( selected-display = "infanticide" and crosssectional-longitudinal-specialized = 2 ) [ plot-longitudinal-infanticide ]
-      ( selected-display = "infanticide" and crosssectional-longitudinal-specialized = 3 ) [ plot-specialized-infanticide ]
+      ( selected-display = "infanticide" and crosssectional---longitudinal---specialized = 1 ) [ plot-crosssectional-columns "length infanticide.history"  ]
+      ( selected-display = "infanticide" and crosssectional---longitudinal---specialized = 2 ) [ plot-longitudinal-infanticide ]
+      ( selected-display = "infanticide" and crosssectional---longitudinal---specialized = 3 ) [ plot-specialized-infanticide ]
       
-      ( selected-display = "group-transfers" and crosssectional-longitudinal-specialized = 1 ) [ plot-crosssectional-group-transfers ]
-      ( selected-display = "group-transfers" and crosssectional-longitudinal-specialized = 2 ) [ plot-longitudinal-group-transfers ]
-      ( selected-display = "group-transfers" and crosssectional-longitudinal-specialized = 3 ) [ plot-specialized-group-transfers ]
+      ( selected-display = "group-transfers" and crosssectional---longitudinal---specialized = 1 ) [ plot-crosssectional-columns "length group.transfers.history"  ]
+      ( selected-display = "group-transfers" and crosssectional---longitudinal---specialized = 2 ) [ plot-longitudinal-group-transfers ]
+      ( selected-display = "group-transfers" and crosssectional---longitudinal---specialized = 3 ) [ plot-specialized-group-transfers ]
       
-      ( selected-display = "travel-distance" and crosssectional-longitudinal-specialized = 1 ) [ plot-crosssectional-travel-distance ]
-      ( selected-display = "travel-distance" and crosssectional-longitudinal-specialized = 2 ) [ plot-longitudinal-travel-distance ]
-      ( selected-display = "travel-distance" and crosssectional-longitudinal-specialized = 3 ) [ plot-specialized-travel-distance ]
+      ( selected-display = "travel-distance" and crosssectional---longitudinal---specialized = 1 ) [ plot-crosssectional-columns "distance.traveled"  ]
+      ( selected-display = "travel-distance" and crosssectional---longitudinal---specialized = 2 ) [ plot-longitudinal-travel-distance ]
+      ( selected-display = "travel-distance" and crosssectional---longitudinal---specialized = 3 ) [ plot-specialized-travel-distance ]
       
-      ( selected-display = "phenotype" and crosssectional-longitudinal-specialized = 1 ) [ plot-crosssectional-phenotype ]
-      ( selected-display = "phenotype" and crosssectional-longitudinal-specialized = 2 ) [ plot-longitudinal-phenotype ]
-      ( selected-display = "phenotype" and crosssectional-longitudinal-specialized = 3 ) [ plot-specialized-phenotype ]
+      ( selected-display = "phenotype" and crosssectional---longitudinal---specialized = 1 ) [ plot-crosssectional-phenotype ]
+      ( selected-display = "phenotype" and crosssectional---longitudinal---specialized = 2 ) [ plot-longitudinal-phenotype ]
+      ( selected-display = "phenotype" and crosssectional---longitudinal---specialized = 3 ) [ plot-specialized-phenotype ]
       
-      ( selected-display = "genotype" and crosssectional-longitudinal-specialized = 1 ) [ plot-crosssectional-genotype ]
-      ( selected-display = "genotype" and crosssectional-longitudinal-specialized = 2 ) [ plot-longitudinal-genotype ]
-      ( selected-display = "genotype" and crosssectional-longitudinal-specialized = 3 ) [ plot-specialized-genotype ]
+      ( selected-display = "genotype" and crosssectional---longitudinal---specialized = 1 ) [ plot-crosssectional-genotype ]
+      ( selected-display = "genotype" and crosssectional---longitudinal---specialized = 2 ) [ plot-longitudinal-genotype ]
+      ( selected-display = "genotype" and crosssectional---longitudinal---specialized = 3 ) [ plot-specialized-genotype ]
       
-      ( selected-display = "groups" and crosssectional-longitudinal-specialized = 1 ) [ plot-crosssectional-groups ]
-      ( selected-display = "groups" and crosssectional-longitudinal-specialized = 2 ) [ plot-longitudinal-groups ]
-      ( selected-display = "groups" and crosssectional-longitudinal-specialized = 3 ) [ plot-specialized-groups ]
+      ( selected-display = "groups" and crosssectional---longitudinal---specialized = 1 ) [ plot-crosssectional-groups ]
+      ( selected-display = "groups" and crosssectional---longitudinal---specialized = 2 ) [ plot-longitudinal-groups ]
+      ( selected-display = "groups" and crosssectional---longitudinal---specialized = 3 ) [ plot-specialized-groups ]
       
       ( selected-display = "lotka-volterra" ) [ plot-lotka-volterra ]
       
-      
-      [])
-    
+      [])   
   ]
   
+end
+
+;-----------------------------------------------------------------------------       
+; CROSS-SECTIONAL PLOTS
+;-----------------------------------------------------------------------------   
+
+to plot-crosssectional-columns [ input ]
+  let individual-list get-sorted-individuals                        ; get sorted list of living agents
+  let plot-list []                                                  ; initialize list of values to be plotted
+  foreach individual-list [ i ->     
+    set plot-list lput ( [ get-column-list input ] of i ) plot-list ]
+  plot-colored-histogram 1 plot-list life-history-color-list                   ; update plot based on plot list
 end
 
 to plot-colored-histogram [ column-interval plot-list color-list ]
@@ -631,37 +641,101 @@ to plot-colored-histogram [ column-interval plot-list color-list ]
     set index index + column-interval ]  
 end
 
-to-report get-sorted-individuals
-  report sort-on [meta.id] anima1s with [ is.alive ]
+to-report get-column-list [ input-string ]
+  let report-list []
+  set report-list lput (ifelse-value ( life.history = "gestatee" and biological.sex = "female" ) [ run-result input-string ] [ 0 ]) report-list 
+  set report-list lput (ifelse-value ( life.history = "gestatee" and biological.sex = "male" ) [ run-result input-string ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( life.history = "infant" and biological.sex = "female" ) [ run-result input-string ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( life.history = "infant" and biological.sex = "male" ) [ run-result input-string ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( life.history = "juvenile" and biological.sex = "female" ) [ run-result input-string ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( life.history = "juvenile" and biological.sex = "male" ) [ run-result input-string ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( female.fertility = "cycling" and biological.sex = "female" ) [ run-result input-string ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( female.fertility = "pregnant" and biological.sex = "female" ) [ run-result input-string ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( female.fertility = "lactating" and biological.sex = "female" ) [ run-result input-string ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( life.history = "adult" and biological.sex = "male" ) [ run-result input-string ] [ 0 ]) report-list
+  report report-list
+end
+
+to-report life-history-color-list ; female gestatee, male gestatee, female infant, male infant, female juvenile, male juvenile, cycling female, pregnant female, lactating female, adult male
+  report [ 65 55 46 43 26 23 135 125 115 95 15 ]
+end
+
+to-report get-sorted-individuals ; filter [ s -> first s != "t" ] ["hi" "there" "everyone"]
+  let base-sort sort-on [meta.id] anima1s with [ is.alive ]
+  let sex-sort ifelse-value ( sort--------female--------male--------off = 1 ) [ sort-by [ [i j ] -> [ biological.sex ] of i < [ biological.sex ] of j ] base-sort ] [ base-sort ]
+  let life-history-sort ifelse-value ( sort--adult--juvenile--infant--gestatee--off = 1 )[ sort-by [ [ i j ] -> [ life-history-number ] of i < [ life-history-number ] of j ] sex-sort ] [ sex-sort ]
+  let filter-by-life-history filter [ i -> ( sort--adult--juvenile--infant--gestatee--off = 1 ) or
+    ( sort--adult--juvenile--infant--gestatee--off = 6 ) or
+    ( sort--adult--juvenile--infant--gestatee--off = 2 and [life.history] of i = "adult" ) or 
+    ( sort--adult--juvenile--infant--gestatee--off = 3 and [life.history] of i = "juvenile" ) or 
+    ( sort--adult--juvenile--infant--gestatee--off = 4 and [life.history] of i = "infant" ) or 
+    ( sort--adult--juvenile--infant--gestatee--off = 5 and [life.history] of i = "gestatee" ) ] life-history-sort
+  let filter-by-sex filter [ i -> ( sort--------female--------male--------off = 1 ) or
+    ( sort--------female--------male--------off = 4 ) or
+    ( sort--------female--------male--------off = 2 and [biological.sex] of i = "female" ) or 
+    ( sort--------female--------male--------off = 3 and [biological.sex] of i = "male" ) ] filter-by-life-history
+  let final-sort filter-by-sex
+  report final-sort
+end
+
+to-report life-history-number
+  report (ifelse-value
+    ( life.history = "adult" ) [ 1 ]
+    ( life.history = "juvenile" ) [ 2 ]
+    ( life.history = "infant" ) [ 3 ]
+    ( life.history = "gestatee" ) [ 4 ]
+    [ 5 ])
+end
+
+to-report get-life-history-filter
+  report (ifelse-value
+    ( sort--adult--juvenile--infant--gestatee--off = 5 )[ "Gestatee " ]
+    ( sort--adult--juvenile--infant--gestatee--off = 4 )[ "Infant " ]
+    ( sort--adult--juvenile--infant--gestatee--off = 3 )[ "Juvenile " ]
+    ( sort--adult--juvenile--infant--gestatee--off = 2 )[ "Adult " ]
+    [ "" ])    
+end
+
+to-report get-sex-filter
+  report (ifelse-value
+    ( sort--------female--------male--------off = 2 )[ "Female " ]
+    ( sort--------female--------male--------off = 3 )[ "Male " ]
+    [ "" ]) 
 end
 
 ;-----------------------------------------------------------------------------       
 ; AGE
 ;-----------------------------------------------------------------------------   
 
-to plot-crosssectional-age
-
+to plot-cosssectional-age 
+  plot-crosssectional-columns "age.in.ticks"
 end
-  
+
+to output-cosssectional-age-plot
+  output-header (word "PLOT: Current Age of " get-life-history-filter get-sex-filter "Individuals")
+  output-print " x: individuals"
+  output-print " y: current age in timesteps"
+end
+
 to plot-longitudinal-age 
 
 end
 
 to plot-specialized-age 
   
-  let max-age max [age.in.ticks] of anima1s with [is.alive]
-  let how-many-bars 20
-  let age-interval max-age / how-many-bars
-  let age-list []
-  let lower-age 0
-  let upper-age lower-age + age-interval
-  repeat how-many-bars [
-    let agent-count count anima1s with [ is.alive and age.in.ticks >= lower-age and age.in.ticks < upper-age ]
-    let subject-age any? anima1s with [ is.alive and subject = self and age.in.ticks >= lower-age and age.in.ticks < upper-age ]
-    set age-list lput ( list agent-count ifelse-value ( subject-age ) [ agent-count ][ 0 ] ) age-list
-    set lower-age lower-age + age-interval
-    set upper-age upper-age + age-interval ]
-  plot-colored-histogram age-interval age-list [ black red ]
+;  let max-age max [age.in.ticks] of anima1s with [is.alive]
+;  let how-many-bars 20
+;  let age-interval max-age / how-many-bars
+;  let age-list []
+;  let lower-age 0
+;  let upper-age lower-age + age-interval
+;  repeat how-many-bars [
+;    let agent-count count anima1s with [ is.alive and age.in.ticks >= lower-age and age.in.ticks < upper-age ]
+;    let subject-age any? anima1s with [ is.alive and subject = self and age.in.ticks >= lower-age and age.in.ticks < upper-age ]
+;    set age-list lput ( list agent-count ifelse-value ( subject-age ) [ agent-count ][ 0 ] ) age-list
+;    set lower-age lower-age + age-interval
+;    set upper-age upper-age + age-interval ]
+;  plot-colored-histogram age-interval age-list [ black red ]
   
 end
 
@@ -671,21 +745,96 @@ end
 
 
 to plot-crosssectional-decisions 
+  let individual-list get-sorted-individuals                        ; get sorted list of living agents
+  let plot-list []                                                  ; initialize list of values to be plotted
+  
+  let decisions-list [ 
+    "living-chance" "body-size" "body-shade" 
+    "day-perception" "night-perception" "visual-angle" "visual-range" 
+    "conception-chance" "bite-capacity" "mutation-chance" "sex-ratio" "litter-size" 
+    "turn-right" "turn-left" "go-forward" "set-heading" "set-heading-random" 
+    "hide" "rest" 
+    "yellow-signal" "red-signal" "blue-signal" 
+    "check-infancy" "check-juvenility" "check-adulthood" 
+    "check-birth" "check-weaning" 
+    "move-toward" "move-away-from" "supply-to" "demand-from" "eat"
+    "join" "leave" "recruit" "kick-out"
+    "pick-up" "put-down" "cling-to" "squirm-from"
+    "help" "hurt" "mate-with" ]
+  
+  let color-list [ 
+    3 5 7 
+    12 14 16 18
+    23 25 27 
+    33 37
+    43 45 47 
+    54 56
+    64 67
+    73 75 77
+    82 85 87
+    93 96 
+    103 107 
+    123 125 127
+    132 134 136 138
+    142 144 146 148
+    153 155 157 ]
+  
+  foreach individual-list [ i ->                                    ; loop through each individual
+    
+    foreach decisions-list [ d ->
+      
+      
+    
+;    ifelse ( subject = i )                                          ; check if individual is subject
+;    [ set plot-list lput (list 0 [age.in.ticks] of i ) plot-list ]  ; if yes, then update plot list for red columm
+;    [ set plot-list lput (list [age.in.ticks] of i 0 ) plot-list ]] ; if no, then update plot list for black column
+  ]]
+  plot-colored-histogram 1 plot-list color-list                      ; update plot based on plot list
 end
-to plot-longitudinal-decisions end
-to plot-specialized-decisions end
 
-to plot-crosssectional-actions end
-to plot-longitudinal-actions end
-to plot-specialized-actions end
+to plot-longitudinal-decisions 
+  ; this cannot be done unless there is some longitudinal record stored within each agent
+end
+
+to plot-specialized-decisions 
+end
+
+to plot-crosssectional-actions 
+end
+
+to plot-longitudinal-actions 
+  ; this cannot be done unless there is some longitudinal record stored within each agent
+end
+
+to plot-specialized-actions 
+end
   
-to plot-crosssectional-generations end
-to plot-longitudinal-generations end
-to plot-specialized-generations end
+to plot-crosssectional-generations 
+end
   
-to plot-crosssectional-life-history end
-to plot-longitudinal-life-history end
-to plot-specialized-life-history end
+to plot-longitudinal-generations 
+  let max-generation max [generation.number] of anima1s with [is.alive]
+  let plot-list []
+  let generation 0
+  repeat ( max-generation + 1 ) [
+    let agent-count count anima1s with [ is.alive and generation.number = generation ]
+    set plot-list lput ( list agent-count ) plot-list
+    set generation generation + 1
+  ]
+  plot-colored-histogram 1 plot-list [ black ]
+end
+
+to plot-specialized-generations 
+end
+  
+to plot-crosssectional-life-history 
+end
+
+to plot-longitudinal-life-history 
+end
+
+to plot-specialized-life-history 
+end
   
 to plot-crosssectional-birthing end
 to plot-longitudinal-birthing end
@@ -733,7 +882,23 @@ to plot-specialized-genotype end
   
 to plot-crosssectional-groups end
 to plot-longitudinal-groups end
-to plot-specialized-groups end
+to plot-specialized-groups 
+  let current-groups sort remove-duplicates [group.identity] of anima1s with [ is.alive ]
+  let group-composition-list []
+  
+  foreach current-groups [ group ->
+    let this-group-composition []
+    let y-so-far count anima1s with [ is.alive and group.identity = group ]
+    foreach [ "gestatee" "infant" "juvenile" "adult" ] [ life-stage ->      
+      foreach [ "female" "male" ] [ sex ->
+        set this-group-composition lput y-so-far this-group-composition
+        set y-so-far y-so-far - count anima1s with [ is.alive and group.identity = group and life.history = life-stage and biological.sex = sex ]
+      ]
+    ]
+    set group-composition-list lput this-group-composition group-composition-list
+  ] 
+  plot-colored-histogram 1 group-composition-list [ red orange yellow green turquoise sky blue magenta ]
+end
   
 to plot-lotka-volterra 
   clear-all-plots
@@ -794,43 +959,6 @@ end
 ;  output-print ( word "  maximum-visual-range:  " maximum-visual-range )
 ;  output-print ( word "  base-litter-size:  " base-litter-size )
 ;end
-
-to plot-age-distribution
-  
-
-  
-end
-
-to plot-generation-distribution
-  let max-generation max [generation.number] of anima1s with [is.alive]
-  let plot-list []
-  let generation 0
-  repeat ( max-generation + 1 ) [
-    let agent-count count anima1s with [ is.alive and generation.number = generation ]
-    set plot-list lput ( list agent-count ) plot-list
-    set generation generation + 1
-  ]
-  print plot-list
-  plot-colored-histogram 1 plot-list [ black ]
-end
-
-to plot-group-composition
-  let current-groups sort remove-duplicates [group.identity] of anima1s with [ is.alive ]
-  let group-composition-list []
-  
-  foreach current-groups [ group ->
-    let this-group-composition []
-    let y-so-far count anima1s with [ is.alive and group.identity = group ]
-    foreach [ "gestatee" "infant" "juvenile" "adult" ] [ life-stage ->      
-      foreach [ "female" "male" ] [ sex ->
-        set this-group-composition lput y-so-far this-group-composition
-        set y-so-far y-so-far - count anima1s with [ is.alive and group.identity = group and life.history = life-stage and biological.sex = sex ]
-      ]
-    ]
-    set group-composition-list lput this-group-composition group-composition-list
-  ] 
- plot-colored-histogram 1 group-composition-list [ red orange yellow green turquoise sky blue magenta ]
-end
 
 
 

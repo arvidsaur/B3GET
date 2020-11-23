@@ -953,7 +953,7 @@ to check-birth [ cost ]
   set birthing.chance get-updated-value birthing.chance cost
   complete-action self "update-birthing-chance" 0
   if ( female.fertility = "pregnant" and random-float 1.0 < birthing.chance ) [
-    set mother.initiated.birth true
+    ask my-offspring with [ life.history = "gestatee" ] [ set mother.initiated.birth true ]
     give-birth
   ]
 end
@@ -1001,7 +1001,7 @@ to check-weaning [ cost ]
   set weaning.chance get-updated-value weaning.chance cost
   complete-action self "update-weaning-chance" 0
   if ( female.fertility = "lactating" and random-float 1.0 < weaning.chance ) [
-    set mother.initiated.weaning true
+    ask my-offspring with [ life.history = "infant" ] [ set mother.initiated.weaning true ]
     wean-offspring
   ]
 end
@@ -1937,7 +1937,7 @@ INPUTBOX
 1030
 274
 genotype
-genotype-123
+genotypetwo
 1
 0
 String
@@ -2001,7 +2001,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "meta-report" "---------------------" " > OPERATIONS   " "---------------------" "parameter-settings" "default-settings" "model-structure" "-- aspatial" "-- free-lunch" "-- ideal-form" "-- no-evolution" "-- no-plants" "-- reaper" "-- show-fertility" "-- stork" "-- uninvadable" "clear-population" "new-population" "reset-plants" "save-simulation" "---------------------" " > VERIFICATION " "---------------------" "dynamic-check" "-- true" "-- false" "runtime-check" "visual-check" "-- dine-and-dash" "-- life-history-channel" "-- musical-pairs" "-- night-and-day" "-- popularity-context" "-- supply-and-demand" "-- square-dance" "---------------------" " > DISPLAY RESULTS   " "---------------------" "age-in-timesteps" "decisions" "actions" "generations" "life-history" "birthing" "weaning" "matings" "mating-partners" "conceptions" "infanticide" "group-transfers" "travel-distance" "phenotype" "genotype" "groups" "lotka-volterra" "---------------------" " > OUTPUT RESULTS    " "---------------------"
-27
+39
 
 BUTTON
 1360
@@ -2110,81 +2110,73 @@ selection-on?
 
 OUTPUT
 848
-540
+562
 1415
 919
 12
 
 PLOT
-895
+972
 283
 1415
-529
+551
 plot
 x
 y
 0.0
-14.0
+1.0
 0.0
-10.0
+1.0
 true
 false
 "" ""
 PENS
 "default" 1.0 2 -16777216 true "" ""
 
-CHOOSER
-1730
-377
-1822
-422
-select
-select
-"sex" "female" "male" "life-history" "gestatee" "infant" "juvenile" "adult" "fertility" "cycling" "pregnant" "lactating"
-0
-
-INPUTBOX
-1730
-44
-1881
-372
-specifications
-\"female\" \n\"male\" \n\"adult\" \n\"cycling\" 
-1
-1
-String (reporter)
-
 SLIDER
 848
 283
-885
-529
-crosssectional-longitudinal-specialized
-crosssectional-longitudinal-specialized
+881
+551
+crosssectional---longitudinal---specialized
+crosssectional---longitudinal---specialized
 1
 3
+1.0
+1
+1
+NIL
+VERTICAL
+
+SLIDER
+889
+283
+922
+551
+sort--adult--juvenile--infant--gestatee--off
+sort--adult--juvenile--infant--gestatee--off
+1
+6
 3.0
 1
 1
 NIL
 VERTICAL
 
-BUTTON
-1826
-376
-1881
-422
-NIL
-NIL
-NIL
+SLIDER
+929
+283
+962
+551
+sort--------female--------male--------off
+sort--------female--------male--------off
 1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
+4
+3.0
 1
+1
+NIL
+VERTICAL
 
 @#$#@#$#@
 # B3GET 1.1.0 INFORMATION
