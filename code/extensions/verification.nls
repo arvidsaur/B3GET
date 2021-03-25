@@ -7,10 +7,10 @@
 ;  88 .88'  88.  ... 88       88 88     88 88.  ... 88.  .88   88   88 88.  .88 88    88 
 ;  8888P'   `88888P' dP       dP dP     dP `88888P' `88888P8   dP   dP `88888P' dP    dP 
 ; 
-; © 2020 K N Crouse
+; © 2020 K N Crouse  
 ;-------------------------------------------------------------------------------------------------
 ;
-; This extension contains all functions related to verifying B3GET's code during simulations.
+; This extension contains all functions related to verifying B3GET's code during simulations.   
 ;
 ;-------------------------------------------------------------------------------------------------
 
@@ -380,42 +380,28 @@ to-report generate-verification-tape
   set boolean lput ( not any? anima1z with [ generation.number > 0 and total.energy.gains < total.energy.cost ] ) boolean
   
   ; --------------------------------------------------------------------------------------------------------------------
-  ; LIVING-CHANCE
+  ; SUVIVAL-CHANCE
   ; --------------------------------------------------------------------------------------------------------------------
   
-  set header lput "Calls to living-chance less than or equal to number of decisions?" header 
+  set header lput "Calls to survival-chance less than or equal to number of decisions?" header 
   set verification lput "runtime-boundaries" verification 
-  set function lput "living-chance" function
-  set boolean lput ( profiler:calls "living-chance" <= decision-count-for "living-chance" ) boolean
+  set function lput "survival-chance" function
+  set boolean lput ( profiler:calls "survival-chance" <= decision-count-for "survival-chance" ) boolean
   
-  set header lput "Calls to living-chance equal to number of actions?" header 
+  set header lput "Calls to survival-chance equal to number of actions?" header 
   set verification lput "runtime-boundaries" verification 
-  set function lput "living-chance" function
-  set boolean lput ( profiler:calls "living-chance" = action-count-for "living-chance" ) boolean
+  set function lput "survival-chance" function
+  set boolean lput ( profiler:calls "survival-chance" = action-count-for "survival-chance" ) boolean
   
-  set header lput "All agents have a living.chance between zero and one?" header 
+  set header lput "All agents have a survival.chance between zero and one?" header 
   set verification lput "variable-boundaries" verification 
-  set function lput "living-chance" function
-  set boolean lput ( not any? anima1z with [ living.chance < 0 or living.chance > 1 ] ) boolean
-  
-  set header lput "The living-chance action updates living.chance variable as expected?" header 
-  set verification lput "static-check" verification 
-  set function lput "living-chance" function
-  let boolean-check false
-  if ( any? anima1z ) [
-    ask one-of anima1z [
-      let saved-value living.chance
-      let random-value one-of [ -1  1 ]
-      living-chance random-value
-      let new-value living.chance
-      set living.chance saved-value 
-      set boolean-check updated-value-check saved-value random-value new-value ]]
-  set boolean lput ( boolean-check ) boolean
-  
-  set header lput "There are not any individuals who have a low living.chance and are alive?" header 
+  set function lput "survival-chance" function
+  set boolean lput ( not any? anima1z with [ survival.chance < 0 or survival.chance > 1 ] ) boolean
+
+  set header lput "There are not any individuals who have a low survival.chance and are alive?" header 
   set verification lput "dynamic-check" verification 
-  set function lput "living-chance" function
-  set boolean lput ( not any? anima1z with [ living.chance < 0.95 and is.alive = true ] ) boolean
+  set function lput "survival-chance" function
+  set boolean lput ( not any? anima1z with [ survival.chance < 0.95 and is.alive = true ] ) boolean
   
   ; --------------------------------------------------------------------------------------------------------------------
   ; BODY-SIZE
@@ -435,21 +421,7 @@ to-report generate-verification-tape
   set verification lput "variable-boundaries" verification 
   set function lput "body-size" function
   set boolean lput ( not any? anima1z with [ body.size < 0 or body.size > 1 ] ) boolean
-  
-  set header lput "The body-size action updates body.size as expected?" header 
-  set verification lput "static-check" verification 
-  set function lput "body-size" function
-  set boolean-check false
-  if ( any? anima1z ) [
-    ask one-of anima1z [
-      let saved-value body.size
-      let random-value one-of [ -1  1 ]
-      body-size random-value
-      let new-value body.size
-      set body.size saved-value 
-      set boolean-check updated-value-check saved-value random-value new-value ]]
-  set boolean lput ( boolean-check ) boolean
-  
+
   set header lput "Infants are generally larger than gestatees?" header 
   set verification lput "dynamic-check" verification 
   set function lput "body-size" function
@@ -483,21 +455,6 @@ to-report generate-verification-tape
   set verification lput "variable-boundaries" verification 
   set function lput "body-shade" function
   set boolean lput ( not any? anima1z with [ body.shade < 0 or body.shade > 1 ] ) boolean
-  
-  set header lput "The body-shade action updates body.shade as expected?" header 
-  set verification lput "static-check" verification 
-  set function lput "body-shade" function
-  set boolean-check false
-  if ( any? anima1z ) [
-    ask one-of anima1z [
-      let saved-value body.shade
-      let random-value one-of [ -1  1 ]
-      body-shade random-value
-      let new-value body.shade
-      set body.shade saved-value 
-      set boolean-check updated-value-check saved-value random-value new-value ]]
-  set boolean lput ( boolean-check ) boolean
-  
   ; --------------------------------------------------------------------------------------------------------------------
   ; VISUAL-RANGE
   ; --------------------------------------------------------------------------------------------------------------------
@@ -516,21 +473,7 @@ to-report generate-verification-tape
   set verification lput "variable-boundaries" verification 
   set function lput "visual-range" function
   set boolean lput ( not any? anima1z with [ visual.range < 0 or visual.range > 1 ] ) boolean
-  
-  set header lput "The visual-range action updates visual.range as expected?" header 
-  set verification lput "static-check" verification 
-  set function lput "visual-range" function
-  set boolean-check false
-  if ( any? anima1z ) [
-    ask one-of anima1z [
-      let saved-value visual.range
-      let random-value one-of [ -1  1 ]
-      visual-range random-value
-      let new-value visual.range
-      set visual.range saved-value 
-      set boolean-check updated-value-check saved-value random-value new-value ]]
-  set boolean lput ( boolean-check ) boolean
-  
+
   set header lput "Adults have a higher visual.range than younger individuals?" header 
   set verification lput "dynamic-check" verification 
   set function lput "visual-range" function
@@ -554,21 +497,7 @@ to-report generate-verification-tape
   set verification lput "variable-boundaries" verification 
   set function lput "visual-angle" function
   set boolean lput ( not any? anima1z with [ visual.angle < 0 or visual.angle > 1 ] ) boolean
-  
-  set header lput "The visual-angle action updates visual.angle as expected?" header 
-  set verification lput "static-check" verification 
-  set function lput "visual-angle" function
-  set boolean-check false
-  if ( any? anima1z ) [
-    ask one-of anima1z [
-      let saved-value visual.angle
-      let random-value one-of [ -1  1 ]
-      visual-angle random-value
-      let new-value visual.angle
-      set visual.angle saved-value 
-      set boolean-check updated-value-check saved-value random-value new-value ]]
-  set boolean lput ( boolean-check ) boolean
-  
+
   set header lput "Adults have a higher visual.angle than younger individuals?" header 
   set verification lput "dynamic-check" verification 
   set function lput "visual-angle" function
@@ -592,21 +521,7 @@ to-report generate-verification-tape
   set verification lput "variable-boundaries" verification 
   set function lput "day-perception" function
   set boolean lput ( not any? anima1z with [ day.perception < 0 or day.perception > 1 ] ) boolean
-  
-  set header lput "The day-perception action updates day.perception as expected?" header 
-  set verification lput "static-check" verification 
-  set function lput "day-perception" function
-  set boolean-check false
-  if ( any? anima1z ) [
-    ask one-of anima1z [
-      let saved-value day.perception
-      let random-value one-of [ -1  1 ]
-      day-perception random-value
-      let new-value day.perception
-      set day.perception saved-value 
-      set boolean-check updated-value-check saved-value random-value new-value ]]
-  set boolean lput ( boolean-check ) boolean
-  
+
   set header lput "Adults are generally more day perceptive than younger individuals?" header 
   set verification lput "dynamic-check" verification 
   set function lput "day-perception" function
@@ -630,21 +545,7 @@ to-report generate-verification-tape
   set verification lput "variable-boundaries" verification 
   set function lput "night-perception" function
   set boolean lput ( not any? anima1z with [ night.perception < 0 or night.perception > 1 ] ) boolean
-  
-  set header lput "The night-perception action updates night.perception as expected?" header 
-  set verification lput "static-check" verification 
-  set function lput "night-perception" function
-  set boolean-check false
-  if ( any? anima1z ) [
-    ask one-of anima1z [
-      let saved-value night.perception
-      let random-value one-of [ -1  1 ]
-      night-perception random-value
-      let new-value night.perception
-      set night.perception saved-value 
-      set boolean-check updated-value-check saved-value random-value new-value ]]
-  set boolean lput ( boolean-check ) boolean
-  
+
   set header lput "Adults are generally more night perceptive than younger individuals?" header 
   set verification lput "dynamic-check" verification 
   set function lput "night-perception" function
@@ -668,21 +569,7 @@ to-report generate-verification-tape
   set verification lput "variable-boundaries" verification 
   set function lput "conception-chance" function
   set boolean lput ( not any? anima1z with [ conception.chance < 0 or conception.chance > 1 ] ) boolean
-  
-  set header lput "The conception-chance action updates conception.chance as expected?" header 
-  set verification lput "static-check" verification 
-  set function lput "conception-chance" function
-  set boolean-check false
-  if ( any? anima1z ) [
-    ask one-of anima1z [
-      let saved-value conception.chance
-      let random-value one-of [ -1  1 ]
-      conception-chance random-value
-      let new-value conception.chance
-      set conception.chance saved-value 
-      set boolean-check updated-value-check saved-value random-value new-value ]]
-  set boolean lput ( boolean-check ) boolean
-  
+
   set header lput "Adults generally have higher conception.chance than non-adults?" header 
   set verification lput "dynamic-check" verification 
   set function lput "conception-chance" function
@@ -712,20 +599,6 @@ to-report generate-verification-tape
   set function lput "bite-capacity" function
   set boolean lput ( not any? anima1z with [ bite.capacity < 0 or bite.capacity > 1 ] ) boolean
 
-  set header lput "The bite-capacity action updates bite.capacity as expected?" header 
-  set verification lput "static-check" verification 
-  set function lput "bite-capacity" function
-  set boolean-check false
-  if ( any? anima1z ) [
-    ask one-of anima1z [
-      let saved-value bite.capacity
-      let random-value one-of [ -1  1 ]
-      bite-capacity random-value
-      let new-value bite.capacity
-      set bite.capacity saved-value 
-      set boolean-check updated-value-check saved-value random-value new-value ]]
-  set boolean lput ( boolean-check ) boolean  
-    
   set header lput "Juveniles and adults have a non-zero bite-capacity? " header 
   set verification lput "dynamic-check" verification 
   set function lput "bite-capacity" function
@@ -749,21 +622,7 @@ to-report generate-verification-tape
   set verification lput "variable-boundaries" verification 
   set function lput "mutation-chance" function
   set boolean lput ( not any? anima1z with [ mutation.chance < 0 or mutation.chance > 1 ] ) boolean
-  
-  set header lput "The mutation-chance action updates mutation.chance as expected?" header 
-  set verification lput "static-check" verification 
-  set function lput "mutation-chance" function
-  set boolean-check false
-  if ( any? anima1z ) [
-    ask one-of anima1z [
-      let saved-value mutation.chance
-      let random-value one-of [ -1  1 ]
-      mutation-chance random-value
-      let new-value mutation.chance
-      set mutation.chance saved-value 
-      set boolean-check updated-value-check saved-value random-value new-value ]]
-  set boolean lput ( boolean-check ) boolean
-  
+
   ; --------------------------------------------------------------------------------------------------------------------
   ; SEX-RATIO
   ; --------------------------------------------------------------------------------------------------------------------
@@ -782,21 +641,7 @@ to-report generate-verification-tape
   set verification lput "variable-boundaries" verification 
   set function lput "sex-ratio" function
   set boolean lput ( not any? anima1z with [ sex.ratio < 0 or sex.ratio > 1 ] ) boolean
-  
-  set header lput "The sex-ratio action updates sex.ratio as expected?" header 
-  set verification lput "static-check" verification 
-  set function lput "sex-ratio" function
-  set boolean-check false
-  if ( any? anima1z ) [
-    ask one-of anima1z [
-      let saved-value sex.ratio
-      let random-value one-of [ -1  1 ]
-      sex-ratio random-value
-      let new-value sex.ratio
-      set sex.ratio saved-value 
-      set boolean-check updated-value-check saved-value random-value new-value ]]
-  set boolean lput ( boolean-check ) boolean
-  
+
   set header lput "There are some female agents?" header 
   set verification lput "dynamic-check" verification 
   set function lput "sex-ratio" function
@@ -825,21 +670,7 @@ to-report generate-verification-tape
   set verification lput "variable-boundaries" verification 
   set function lput "litter-size" function
   set boolean lput ( not any? anima1z with [ litter.size < 0 or litter.size > 1 ] ) boolean    
-  
-  set header lput "The litter-size action updates litter.size as expected?" header 
-  set verification lput "static-check" verification 
-  set function lput "litter-size" function
-  set boolean-check false
-  if ( any? anima1z ) [
-    ask one-of anima1z [
-      let saved-value litter.size
-      let random-value one-of [ -1  1 ]
-      litter-size random-value
-      let new-value litter.size
-      set litter.size saved-value 
-      set boolean-check updated-value-check saved-value random-value new-value ]]
-  set boolean lput ( boolean-check ) boolean
-  
+
   ; --------------------------------------------------------------------------------------------------------------------
   ; MOVE-TOWARD
   ; --------------------------------------------------------------------------------------------------------------------
@@ -993,49 +824,7 @@ to-report generate-verification-tape
   set verification lput "variable-boundaries" verification 
   set function lput "blue-signal" function
   set boolean lput ( not any? anima1z with [ blue.chance < 0 or blue.chance > 1 ] ) boolean
-  
-  set header lput "The yellow-signal action updates yellow.chance as expected?" header 
-  set verification lput "static-check" verification 
-  set function lput "yellow-signal" function
-  set boolean-check false
-  if ( any? anima1z ) [
-    ask one-of anima1z [
-      let saved-value yellow.chance
-      let random-value one-of [ -1  1 ]
-      yellow-signal random-value
-      let new-value yellow.chance
-      set yellow.chance saved-value 
-      set boolean-check updated-value-check saved-value random-value new-value ]]
-  set boolean lput ( boolean-check ) boolean
-  
-  set header lput "The red-signal action updates red.chance as expected?" header 
-  set verification lput "static-check" verification 
-  set function lput "red-signal" function
-  set boolean-check false
-  if ( any? anima1z ) [
-    ask one-of anima1z [
-      let saved-value red.chance
-      let random-value one-of [ -1  1 ]
-      red-signal random-value
-      let new-value red.chance
-      set red.chance saved-value 
-      set boolean-check updated-value-check saved-value random-value new-value ]]
-  set boolean lput ( boolean-check ) boolean
-  
-  set header lput "The blue-signal action updates blue.chance as expected?" header 
-  set verification lput "static-check" verification 
-  set function lput "blue-signal" function
-  set boolean-check false
-  if ( any? anima1z ) [
-    ask one-of anima1z [
-      let saved-value blue.chance
-      let random-value one-of [ -1  1 ]
-      blue-signal random-value
-      let new-value blue.chance
-      set blue.chance saved-value 
-      set boolean-check updated-value-check saved-value random-value new-value ]]
-  set boolean lput ( boolean-check ) boolean
-  
+
   ; --------------------------------------------------------------------------------------------------------------------
   ; CHECK-INFANCY
   ; --------------------------------------------------------------------------------------------------------------------
@@ -1369,7 +1158,7 @@ to-report generate-verification-tape
   set function lput "update-to-adult" function
   set boolean lput ( not any? anima1z with [ 
     ( life.history = "gestatee" or life.history = "infant" or life.history = "juvenile" ) 
-    and ( adult.living.chance > 0 or adult.body.size > 0 or adult.body.shade > 0 or adult.energy.supply > 0
+    and ( adult.survival.chance > 0 or adult.body.size > 0 or adult.body.shade > 0 or adult.energy.supply > 0
       or adult.bite.capacity > 0 or adult.mutation.chance > 0 or adult.sex.ratio > 0 or adult.litter.size > 0 
       or adult.conception.chance > 0 or adult.visual.range > 0 or adult.visual.angle > 0 
       or adult.day.perception > 0 or adult.night.perception > 0 

@@ -7,7 +7,7 @@
 ;  88.  .88 88.  .88   88   88.  .88 
 ;  `88888P8 `88888P8   dP   `88888P8 
 ;
-; © 2020 K N Crouse
+; © 2020 K N Crouse  
 ;----------------------------------------------------------------------------------------------     
 ; 
 ; This extension contains all functions that allow users to create population and genotypes 
@@ -111,8 +111,227 @@ to-report generate-population-id
   report ( word "p" generate-timestamp )
 end
 
-to import-population
-  output-header (word " IMPORT POPULATION : " population )
+to import-population ; use carefully function here?
+  
+  let file-to-import ( word path-to-experiment population ".csv" ) ; first try accessing file in designated file path
+  if not file-exists? file-to-import [ set file-to-import ( word "../data/" population ".csv" ) ] ; then try the data folder
+  
+  ifelse  ( is-string? file-to-import and file-exists? file-to-import ) [ ; check both locations
+    
+    file-open file-to-import
+    let data-from-filename csv:from-file file-to-import
+    file-close 
+    
+    let header-block first data-from-filename ; Header information from FILE-TO-IMPORT
+    let data-block but-first data-from-filename ; FILE-TO-IMPORT data without header information
+    
+    let i 0 ; index variable to iteratively search through each row in the DATA-BLOCK
+    let j 0 ; index variable to iteratively search through each header in the HEADER-BLOCK
+    
+    ; FOR EACH row in the DATA-BLOCK create a generic turtle
+    foreach data-block [ row -> 
+      create-turtles 1 [
+        set j 0
+        
+        ; FOR EACH header in the HEADER-BLOCK set turtle's state variables to the corresponding values
+        foreach header-block [ header ->
+          let value item j item i data-block ; the value for turtle i taken from column j of the DATA-BLOCK
+          
+          ; Put quotes around everything that is not a Number, Breed, or Boolean or List
+          ;if (not is-number? value and not is-boolean? value and not member? "\n" value and not member? "[" value ) [ set value (word "\"" value "\"")] ; 
+          
+          (ifelse ; fix to not rely on chromosome code
+            
+            ( header = "breed" ) [ set breed run-result value ]
+            ( header = "color" ) [ set color value ]
+            ( header = "heading" ) [ set heading value ]	
+            ( header = "xcor" ) [ set xcor value ]	
+            ( header = "ycor" ) [ set ycor value ]	
+            ( header = "label" ) [ set label value ]	
+            ( header = "label-color" ) [ set label-color value ]	
+            ( header = "shape" ) [ set shape value ]	
+            ( header = "hidden?" ) [ set hidden? value ]
+            ( header = "size" ) [ set size value ]	
+            ( header = "pen-size" ) [ set pen-size value ]	
+            ( header = "pen-mode" ) [ set pen-mode value ]            
+            
+            ( breed = anima1s and header = "meta.id" ) [ set meta.id value ]
+            ( breed = anima1s and header = "biological.sex" ) [ set biological.sex value ]
+            ( breed = anima1s and header = "life.history" ) [ set life.history value ]
+            ( breed = anima1s and header = "female.fertility" ) [ set female.fertility value ]
+            ( breed = anima1s and header = "group.identity" ) [ set group.identity value ]
+            ( breed = anima1s and header = "is.alive" ) [ set is.alive value ]
+            ( breed = anima1s and header = "yellow.signal" ) [ set yellow.signal value ]
+            ( breed = anima1s and header = "red.signal" ) [ set red.signal value ]
+            ( breed = anima1s and header = "blue.signal" ) [ set blue.signal value ]
+            ( breed = anima1s and header = "body.size" ) [ set body.size value ]
+            ( breed = anima1s and header = "body.shade" ) [ set body.shade value ]
+            ( breed = anima1s and header = "is.resting" ) [ set is.resting value ]
+            ( breed = anima1s and header = "identity.I" ) [ set identity.I value ]
+            ( breed = anima1s and header = "identity.II" ) [ set identity.II value ]
+            ( breed = anima1s and header = "carried.items" ) [ set carried.items value ]
+            ( breed = anima1s and header = "hidden.chance" ) [ set hidden.chance value ]
+            ( breed = anima1s and header = "fully.decayed" ) [ set fully.decayed value ]
+            ( breed = anima1s and ( header = "living.chance" or header = "survival.chance" ) ) [ set survival.chance value ]
+            ( breed = anima1s and header = "energy.supply" ) [ set energy.supply value ]
+            ( breed = anima1s and header = "bite.capacity" ) [ set bite.capacity value ]
+            ( breed = anima1s and header = "mutation.chance" ) [ set mutation.chance value ]
+            ( breed = anima1s and header = "sex.ratio" ) [ set sex.ratio value ]
+            ( breed = anima1s and header = "litter.size" ) [ set litter.size value ]
+            ( breed = anima1s and header = "conception.chance" ) [ set conception.chance value ]
+            ( breed = anima1s and header = "visual.angle" ) [ set visual.angle value ]
+            ( breed = anima1s and header = "visual.range" ) [ set visual.range value ]
+            ( breed = anima1s and header = "day.perception" ) [ set day.perception value ]
+            ( breed = anima1s and header = "night.perception" ) [ set night.perception value ]
+            ( breed = anima1s and header = "yellow.chance" ) [ set yellow.chance value ]
+            ( breed = anima1s and header = "red.chance" ) [ set red.chance value ]
+            ( breed = anima1s and header = "blue.chance" ) [ set blue.chance value ]
+            ( breed = anima1s and header = "birthing.chance" ) [ set birthing.chance value ]
+            ( breed = anima1s and header = "weaning.chance" ) [ set weaning.chance value ]
+            ( breed = anima1s and header = "infancy.chance" ) [ set infancy.chance value ]
+            ( breed = anima1s and header = "juvenility.chance" ) [ set juvenility.chance value ]
+            ( breed = anima1s and header = "adulthood.chance" ) [ set adulthood.chance value ]
+            ( breed = anima1s and header = "x.magnitude" ) [ set x.magnitude value ]
+            ( breed = anima1s and header = "y.magnitude" ) [ set y.magnitude value ]
+            ( breed = anima1s and header = "chromosome.I" ) [ set chromosome.I csv:from-string value ]
+            ( breed = anima1s and header = "chromosome.II" ) [ set chromosome.II csv:from-string value ]
+            ( breed = anima1s and header = "my.environment" ) [ set my.environment value ]
+            ( breed = anima1s and header = "decision.vectors" ) [ set decision.vectors value ]
+            ( breed = anima1s and header = "actions.completed" ) [ set actions.completed value ]
+            ( breed = anima1s and header = "age.in.ticks" ) [ set age.in.ticks value ]
+            ( breed = anima1s and header = "generation.number" ) [ set generation.number value ]
+            ( breed = anima1s and header = "my.mother" ) [ set my.mother value ]
+            ( breed = anima1s and header = "mother.identity" ) [ set mother.identity value ]
+            ( breed = anima1s and header = "father.identity" ) [ set father.identity value ]
+            ( breed = anima1s and header = "natal.group.id" ) [ set natal.group.id value ]
+            ( breed = anima1s and header = "natal.group.size" ) [ set natal.group.size value ]
+            ( breed = anima1s and header = "death.group.id" ) [ set death.group.id value ]
+            ( breed = anima1s and header = "death.group.size" ) [ set death.group.size value ]
+            ( breed = anima1s and header = "ticks.at.conception" ) [ set ticks.at.conception value ]
+            ( breed = anima1s and header = "ticks.at.birth" ) [ set ticks.at.birth value ]
+            ( breed = anima1s and header = "ticks.at.weaning" ) [ set ticks.at.weaning value ]
+            ( breed = anima1s and header = "ticks.at.sexual.maturity" ) [ set ticks.at.sexual.maturity value ]
+            ( breed = anima1s and header = "ticks.at.death" ) [ set ticks.at.death value ]
+            ( breed = anima1s and header = "adult.hidden.chance" ) [ set adult.hidden.chance value ]
+            ( breed = anima1s and ( header = "adult.living.chance" or header = "adult.survival.chance" ) ) [ set adult.survival.chance value ]
+            ( breed = anima1s and header = "adult.body.size" ) [ set adult.body.size value ]
+            ( breed = anima1s and header = "adult.body.shade" ) [ set adult.body.shade value ]
+            ( breed = anima1s and header = "adult.energy.supply" ) [ set adult.energy.supply value ]
+            ( breed = anima1s and header = "adult.bite.capacity" ) [ set adult.bite.capacity value ]
+            ( breed = anima1s and header = "adult.mutation.chance" ) [ set adult.mutation.chance value ]
+            ( breed = anima1s and header = "adult.sex.ratio" ) [ set adult.sex.ratio value ]
+            ( breed = anima1s and header = "adult.litter.size" ) [ set adult.litter.size value ]
+            ( breed = anima1s and header = "adult.conception.chance" ) [ set adult.conception.chance value ]
+            ( breed = anima1s and header = "adult.visual.angle" ) [ set adult.visual.angle value ]
+            ( breed = anima1s and header = "adult.visual.range" ) [ set adult.visual.range value ]
+            ( breed = anima1s and header = "adult.day.perception" ) [ set adult.day.perception value ]
+            ( breed = anima1s and header = "adult.night.perception" ) [ set adult.night.perception value ]
+            ( breed = anima1s and header = "adult.yellow.chance" ) [ set adult.yellow.chance value ]
+            ( breed = anima1s and header = "adult.red.chance" ) [ set adult.red.chance value ]
+            ( breed = anima1s and header = "adult.blue.chance" ) [ set adult.blue.chance value ]
+            ( breed = anima1s and header = "distance.traveled" ) [ set distance.traveled value ]
+            ( breed = anima1s and header = "cells.occupied" ) [ set cells.occupied value ]
+            ( breed = anima1s and header = "mother.initiated.birth" ) [ set mother.initiated.birth value ]
+            ( breed = anima1s and header = "mother.initiated.weaning" ) [ set mother.initiated.weaning value ]
+            ( breed = anima1s and header = "whole.related.help.cost" ) [ set whole.related.help.cost value ]
+            ( breed = anima1s and header = "half.related.help.cost" ) [ set half.related.help.cost value ]
+            ( breed = anima1s and header = "fourth.related.help.cost" ) [ set fourth.related.help.cost value ]
+            ( breed = anima1s and header = "eighth.related.help.cost" ) [ set eighth.related.help.cost value ]
+            ( breed = anima1s and header = "foraging.gains" ) [ set foraging.gains value ]
+            ( breed = anima1s and header = "total.energy.gains" ) [ set total.energy.gains value ]
+            ( breed = anima1s and header = "total.energy.cost" ) [ set total.energy.cost value ]
+            ( breed = anima1s and header = "receiving.history" ) [ set receiving.history value ]
+            ( breed = anima1s and header = "carried.history" ) [ set carried.history value ]
+            ( breed = anima1s and header = "aid.history" ) [ set aid.history value ]
+            ( breed = anima1s and header = "harm.history" ) [ set harm.history value ]
+            ( breed = anima1s and header = "copulations.history" ) [ set copulations.history value ]
+            ( breed = anima1s and header = "conceptions.history" ) [ set conceptions.history value ]
+            ( breed = anima1s and header = "group.transfers.history" ) [ set group.transfers.history value ]
+            ( breed = anima1s and header = "infanticide.history" ) [ set infanticide.history value ]
+            
+            
+            
+            
+            [ ]) ; carefully is put here to allow multiple breeds in same csv file
+          
+          ; when NetLogo fixes error to allow read-from-string to be called from command block, use this:          
+          ; ifelse ( not is-number? value and header != "breed" and not is-boolean? value and member? "\n" value ) 
+          ; [ carefully [ run (word "set " header " " "\"" csv:from-string value "\"" ) ] [] ]
+          ; [ carefully [ run (word "set " header " " value ) ] [] ]
+          
+          set j j + 1 ] 
+        set i i + 1 ]]
+    
+    
+    
+    
+    ; create new meta.ids for everyone
+    let table-of-ids table:make
+    ask anima1s [
+      
+      ifelse ( table:has-key? table-of-ids meta.id ) 
+      [ let new-id random 9999999
+        table:put table-of-ids meta.id new-id
+        set meta.id new-id ]
+      
+      [ table:put table-of-ids meta.id meta.id ]]
+    
+    ; update carried items list
+    ask anima1s [
+      if ( not is-list? carried.items ) [ set carried.items [] ]
+      foreach carried.items [ itm -> set carried.items remove itm ( lput one-of anima1s with [ meta.id  = ( table:get table-of-ids itm ) ] carried.items ) ] ]
+    
+    ; update mother identity
+    ask anima1s [
+      if ( my.mother = 0 or my.mother = "nobody" ) [ set my.mother nobody ]
+      if ( member? my.mother table:keys table-of-ids ) [ 
+        set my.mother one-of anima1s with [ table:get table-of-ids [my.mother] of myself = meta.id  ] ]]
+    
+    ; general initialization of variables
+    ask anima1s [
+      
+      ; initialize lists
+      set receiving.history []
+      set carried.history []
+      set aid.history []
+      set harm.history []
+      set group.transfers.history []
+      set copulations.history []
+      set conceptions.history []
+      set cells.occupied []
+      set infanticide.history []
+      set decision.vectors []
+      set my.environment []
+      set actions.completed []
+      set label-color white
+      
+      ; compatibility with previous versions
+      if ( yellow.signal = 0 ) [ set yellow.signal false ]
+      if ( red.signal = 0 ) [ set red.signal false ]
+      if ( blue.signal = 0 ) [ set blue.signal false ]
+      if ( visual.angle = 0 ) [ set visual.angle 0.5 ]
+      if ( visual.range = 0 ) [ set visual.range 0.9 ]
+      if ( day.perception = 0 ) [ set day.perception 0.9 ]
+      if ( night.perception = 0 ) [ set night.perception 0.25 ]
+      if ( bite.capacity = 0 ) [ set bite.capacity 0.2 ]
+      if ( is.alive = 0 ) [ set is.alive true ]
+      if ( is.resting = 0 ) [ set is.resting false ]
+      if ( fully.decayed = 0 ) [ set fully.decayed false ]
+      if ( hidden.chance = 0 ) [ set hidden.chance 0 ]
+      
+      update-appearance
+    ]
+    
+    set observation-notes (word "Population file \"" population "\" imported. " observation-notes )
+    update-metafile "population" population
+    output-print " Population import successful."
+    
+  ][ set population "" ]
+  
+end
+
+to import-population-old
+  ;output-header (word " IMPORT POPULATION : " population )
   
   let file-to-open ( word path-to-experiment population ".csv" ) ; first try accessing file in designated file path
   if not file-exists? file-to-open [ set file-to-open ( word "../data/" population ".csv" ) ] ; then try the data folder
@@ -142,7 +361,7 @@ to import-population
       if ( my.mother = 0 or my.mother = "nobody" ) [ set my.mother nobody ]
       if ( member? my.mother table:keys table-of-ids ) [ 
         set my.mother one-of anima1s with [ table:get table-of-ids [my.mother] of myself = meta.id  ] ]]
-
+    
     ; general initialization of variables
     ask anima1s [
       
@@ -187,8 +406,8 @@ to import-population
 end
 
 to save-population
-  output-header (word " SAVE POPULATION : " population )
-
+  ;output-header (word " SAVE POPULATION : " population )
+  
   ifelse ( file-exists? (word path-to-experiment population ".csv") )
   [ 
     ; popup window options if population file already exists
@@ -200,7 +419,7 @@ to save-population
     ifelse ( answer ) [ file-delete (word path-to-experiment population ".csv") save-population ] [ set population generate-population-id save-population ]
     
   ][
-
+    
     ; list of turtle state variables to save
     let turtle-list (list 
       "breed" 
@@ -226,7 +445,7 @@ to save-population
       "yellow.signal" 
       "red.signal" 
       "blue.signal"
-      "living.chance" 
+      "survival.chance" 
       "body.size" 
       "body.shade" 
       "energy.supply" 
@@ -263,7 +482,7 @@ to save-population
       export-turtle-to (word path-to-experiment population ".csv") turtle-list 
       if ( is-anima1? self ) [ set my.mother ifelse-value ( my.mother != nobody ) [ one-of anima1s with [ meta.id  = [my.mother] of myself ]] [ nobody ] ]
     ]
-
+    
     set observation-notes (word "New population " population " saved. " observation-notes )
     update-metafile "population" population
     output-print " Population successfully saved."
@@ -279,11 +498,11 @@ to-report generate-genotype-id
 end
 
 to import-genotype
-  output-header (word " IMPORT GENOTYPE : " genotype )
+  ;output-header (word " IMPORT GENOTYPE : " genotype )
   
   let file-to-open ( word path-to-experiment genotype ".txt" ) ; first try accessing file in designated file path
   if not file-exists? file-to-open [ set file-to-open ( word "../data/" genotype ".txt" ) ] ; then try the data folder
-
+  
   ifelse file-exists? file-to-open [  ; check in both places
     
     ask anima1s [
@@ -295,12 +514,50 @@ to import-genotype
       let first-chromosome? true 
       while [ not file-at-end? ] [
         let row (csv:from-row file-read-line " ")
+        
+        ifelse ( row = [""] ) 
+        [ set row false ]         ; If row is "empty" converted to format for next line
+        [
+          ;print row
+          ;set row allele-filter row   
+          
+          let contains-a-codon? false                                      ; Initially, the current allele is not known to contain a legitimate codon ( based on current genotype reader )
+          let filtered-allele []                                           ; Make a new allele that is empty
+          
+          foreach row [ itm ->                                          ; For each codon in the allele...
+            
+            let codon-exists ( ifelse-value                                ; ...Check if the codon exists in the current genotype reader lexicon
+              ( genotype-reader = "sta2us" ) [ sta2us-codon-exists itm ]   ; - sta2us genotype reader check
+              ( genotype-reader = "gat3s" ) [ gat3s-codon-exists itm ]     ; - gat3s genotype reader check
+              [ sta2us-codon-exists itm ])                                 ; - or sta2us by default
+            
+            if codon-exists [                                              ; If the current codon IS in the current genotype reader lexicon
+              set contains-a-codon? true ]                                 ; Acknowledge that the current allele contains a legitimate codon
+            
+            if codon-exists or is-number? itm or is-boolean? itm [         ; If current codon IS part of lexicon, OR it is either a number or boolean
+              set filtered-allele lput itm filtered-allele ]               ; Add the current codon to the new allele
+          ]
+          
+          set row ifelse-value ( contains-a-codon? )                        ; If current allele contains a legitimate codon
+          [ filtered-allele ]                                              ; report the new allele 
+          [ false ]                                                        ; Report FALSE to communicate that this allele should not be imported to population
+
+        ]
+        
+;        print row
+;        print ""  
+        
         (ifelse 
-          ( row = [""] ) 
-          [ set first-chromosome? false ]
-          ( first-chromosome? ) 
-          [ set chromosome.I lput row chromosome.I ]
-          [ set chromosome.II lput row chromosome.II ])
+          ( row = false                            ; If the row from the genotype file contains nothing
+            and length chromosome.I > 0 )          ; And the first chromosome contains at least one allele
+          [ set first-chromosome? false ]          ; Switch to filling in the second chromosome with alleles
+          
+          ( first-chromosome? )                    ; If currently filling in first chromosome
+          [ if ( row != false ) 
+            [ set chromosome.I lput row chromosome.I ]]
+          [ if ( row != false ) 
+            [ set chromosome.II lput row chromosome.II ]])
+        
       ]
       file-close
     ]
@@ -313,8 +570,32 @@ to import-genotype
   
 end
 
+;to-report allele-filter [ allele ]                                 
+;  
+;  let contains-a-codon? false                                      ; Initially, the current allele is not known to contain a legitimate codon ( based on current genotype reader )
+;  let filtered-allele []                                           ; Make a new allele that is empty
+;  
+;  foreach allele [ itm ->                                          ; For each codon in the allele...
+;    
+;    let codon-exists ( ifelse-value                                ; ...Check if the codon exists in the current genotype reader lexicon
+;      ( genotype-reader = "sta2us" ) [ sta2us-codon-exists itm ]   ; - sta2us genotype reader check
+;      ( genotype-reader = "gat3s" ) [ gat3s-codon-exists itm ]     ; - gat3s genotype reader check
+;      [ sta2us-codon-exists itm ])                                 ; - or sta2us by default
+;    
+;    if codon-exists [                                              ; If the current codon IS in the current genotype reader lexicon
+;      set contains-a-codon? true ]                                 ; Acknowledge that the current allele contains a legitimate codon
+;    
+;    if codon-exists or is-number? itm or is-boolean? itm [         ; If current codon IS part of lexicon, OR it is either a number or boolean
+;      set filtered-allele lput itm filtered-allele ]               ; Add the current codon to the new allele
+;  ]
+;  
+;  report ifelse-value ( contains-a-codon? )                        ; If current allele contains a legitimate codon
+;  [ filtered-allele ]                                              ; report the new allele 
+;  [ false ]                                                        ; Report FALSE to communicate that this allele should not be imported to population
+;end
+
 to save-genotype
-  output-header (word " SAVE GENOTYPE : organism " meta.id  )
+  ;output-header (word " SAVE GENOTYPE : organism " meta.id  )
   ( csv:to-file ( word path-to-experiment genotype ".txt" ) (sentence chromosome.I [[]] chromosome.II ) " " )
   set observation-notes (word "New genotype " genotype " saved. " observation-notes )
   update-metafile "genotype" genotype
@@ -340,4 +621,213 @@ to set-random-identity-chromosomes [ length-of-chromosomes ]
   ][
     print "error: input value is not a number"
   ] 
+end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to collect-data [ path-to-output ]
+  output-print (word "simulation " behaviorspace-run-number " collecting data at " ticks " ticks and at " date-and-time )
+  
+  let file-path path-to-output 
+  
+  if ( not file-exists? file-path )
+  
+  [ file-open file-path
+    file-print csv:to-string (list (list
+      
+      "behaviorspace-experiment-name"
+      "behaviorspace-run-number"
+      "date-and-time"
+      "world-width"
+      "world-height"
+      "ticks"
+      
+      
+  )) ]
+  
+  file-open file-path
+  
+  file-print csv:to-string ( list ( list
+    
+    behaviorspace-experiment-name
+    behaviorspace-run-number
+    date-and-time
+    world-width
+    world-height
+    ticks
+    
+  ))
+  
+  file-close
+  
+  ask one-of anima1s [
+    output-print self
+    output-print xcor
+    output-print ycor
+    output-print heading
+    output-print biological.sex
+    output-print life.history
+    output-print chromosome.i
+    output-print chromosome.ii
+    output-print my.environment
+    output-print decision.vectors
+    output-print actions.completed
+  ]
+  
+end
+
+;--------------------------------------------------------------------------------------------------------------------
+;
+;  oo                                         dP                                                           dP   
+;                                             88                                                           88   
+;  dP 88d8b.d8b. 88d888b. .d8888b. 88d888b. d8888P          .d8888b. dP.  .dP 88d888b. .d8888b. 88d888b. d8888P 
+;  88 88'`88'`88 88'  `88 88'  `88 88'  `88   88   88888888 88ooood8  `8bd8'  88'  `88 88'  `88 88'  `88   88   
+;  88 88  88  88 88.  .88 88.  .88 88         88            88.  ...  .d88b.  88.  .88 88.  .88 88         88   
+;  dP dP  dP  dP 88Y888P' `88888P' dP         dP            `88888P' dP'  `dP 88Y888P' `88888P' dP         dP   
+;                88                                                           88                                
+;                dP                                                           dP               
+;
+; © 2020 K N Crouse 
+;--------------------------------------------------------------------------------------------------------------------
+;
+; This extension allow users to import and export any collection of turtles. It was originally written
+; for the NetLogo model B3GET, but can be used as an extension for any NetLogo model that requires import-export
+; functionality for turtles.
+;
+;--------------------------------------------------------------------------------------------------------------------
+
+;--------------------------------------------------------------------------------------------------------------------
+; EXPORT-TURTLES-TO
+;
+; This is the same as EXPORT-TURTLE-TO function except it applies to all turtles in TURTLESET.
+;
+; CALLER: observer
+; TURTLESET: is the set of turtles to export to FILENAME.
+; FILNAME: includes the full directory path to appropriate CSV file (if one does not exist, it will be created here).
+; VARIABLES-TO-RECORD: is a list of string names that the caller-turtle has access to, including global variables, 
+; function outputs, and its own state variables.
+;
+;--------------------------------------------------------------------------------------------------------------------
+
+to export-turtles-to [ turtleset filename variables-to-record ]
+  ask turtleset [ export-turtle-to filename variables-to-record ]
+end
+
+;--------------------------------------------------------------------------------------------------------------------
+; EXPORT-TURTLE-TO
+;
+; This is a turtle-only function that allows it to record any VARIABLES-TO-RECORD (state-variables and other information 
+; it has access to) on external file FILENAME. FILENAME contains rows representing eacn turtle and columns representing 
+; the variables associated with those turtles.
+;
+; CALLER: observer
+; FILNAME: includes the full directory path to appropriate CSV file (if one does not exist, it will be created here).
+; VARIABLES-TO-RECORD: is a list of string names that the caller-turtle has access to, including global variables, 
+; function outputs, and its own state variables.
+;
+; THINGS TO KEEP IN MIND:
+;  - You should save ids rather than direct turtle references and fix with code after because who cannot be modified.
+;  - You CAN save multiple different turtles breeds to the same file
+;  - can handle booleans, numbers, strings, and lists of turtles, numbers, strings, or booleans, and csv-formatted list
+;--------------------------------------------------------------------------------------------------------------------
+
+to export-turtle-to [ filename variables-to-record ]
+  let body []
+  let header []
+  
+  ; Update or Create header for FILENAME
+  ifelse ( file-exists? filename )  
+  
+  ; File with FILENAME already exists?
+  [ file-open filename
+    let existing-file csv:from-file filename 
+    set header ifelse-value ( length existing-file > 0 ) [ first existing-file ] [ [] ]
+    set body ifelse-value ( length existing-file > 0 ) [ but-first existing-file ] [ [] ]
+    
+    ; Update header of FILENAME with any new variables
+    foreach variables-to-record [ text ->
+      if (not member? text header) [ 
+        set header lput text header
+    ]]
+    csv:to-file filename (sentence (list header ) body ) ]
+  
+  ; File with FILENAME does NOT already exist?
+  [ file-open filename
+    csv:to-file filename (list variables-to-record) ]
+  
+  ; Use updated header to retrieve appropriate data from function-caller
+  let new-header first csv:from-file filename 
+  let data-list []
+  foreach new-header [ text ->
+    
+    carefully 
+    [ let value run-result text
+      ; converts list of lists into savable csv format
+      if ( is-list? value and is-list? first value ) [ set value csv:to-string value ]
+      ; convert list of turtles to list of savable ids
+      if ( is-list? value and is-turtle? first value ) [ foreach value [ trtl -> set value remove trtl value if ( is-turtle? trtl ) [ set value lput [meta.id] of trtl value ]] ]
+      set data-list (sentence data-list (list value ) ) ] 
+    ; if there is an error, record nothing in csv file
+    [ set data-list (sentence data-list "" ) ]  
+  ]
+  
+  csv:to-file filename ( sentence (list new-header ) body (list data-list) )
+  file-close
+  
+end
+
+;----------------------------------------------------------------------------------------------------------------------------
+; IMPORT-TURTLES-FROM
+;
+; Create new turtles whose state variables are imported from FILENAME. Creates one turtle for every row in the dataset.                                      
+; Each turtle is given state values from every corresponding matching column in the dataset. State values are from state variables 
+; that match the header titles in the first row of the dataset.
+; 
+; CALLER: observer
+; FILNAME: includes the full directory path to appropriate CSV file.                      
+;
+;----------------------------------------------------------------------------------------------------------------------------
+
+to import-turtles-from [ filename ]
+  
+  ; If FILENAME does NOT exist, open a popup directory.
+  let file-to-import ifelse-value ( file-exists? filename ) [ filename ] [ user-file ]
+  
+  if ( is-string? file-to-import and file-exists? file-to-import ) [ 
+    file-open file-to-import
+    let data-from-filename csv:from-file file-to-import
+    
+    let header-block first data-from-filename ; Header information from FILE-TO-IMPORT
+    let data-block but-first data-from-filename ; FILE-TO-IMPORT data without header information
+    
+    let i 0 ; index variable to iteratively search through each row in the DATA-BLOCK
+    let j 0 ; index variable to iteratively search through each header in the HEADER-BLOCK
+    
+    ; FOR EACH row in the DATA-BLOCK create a generic turtle
+    foreach data-block [ row -> 
+      create-turtles 1 [
+        set j 0
+        
+        ; FOR EACH header in the HEADER-BLOCK set turtle's state variables to the corresponding values
+        foreach header-block [ header ->
+          let value item j item i data-block ; the value for turtle i taken from column j of the DATA-BLOCK
+          
+          ; Put quotes around everything that is not a Number, Breed, or Boolean or List
+          if (not is-number? value and header != "breed" and not is-boolean? value and not member? "\n" value and not member? "[" value ) [ set value (word "\"" value "\"")] ; 
+          
+          (ifelse ; fix to not rely on chromosome code
+            ( header = "chromosome.I" ) [ carefully [set chromosome.I csv:from-string value ][]]
+            ( header = "chromosome.II" ) [ carefully [ set chromosome.II csv:from-string value ][]]
+            [ carefully [ run (word "set " header " " value ) ] [ ]]) ; carefully is put here to allow multiple breeds in same csv file
+          
+          ; when NetLogo fixes error to allow read-from-string to be called from command block, use this:          
+          ; ifelse ( not is-number? value and header != "breed" and not is-boolean? value and member? "\n" value ) 
+          ; [ carefully [ run (word "set " header " " "\"" csv:from-string value "\"" ) ] [] ]
+          ; [ carefully [ run (word "set " header " " value ) ] [] ]
+          
+          set j j + 1 ] 
+        set i i + 1 ]]
+    
+    file-close ]
 end

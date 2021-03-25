@@ -9,17 +9,16 @@
 ;
 ;-----------------------------------------------------------------------------------
 
-extensions [ time csv profiler table stats ]
+extensions [ csv profiler table ]
 
 __includes [
   "extensions/interface.nls"
   "extensions/data.nls"
-  "extensions/import-export.nls"
-  "extensions/selection.nls"
-  "extensions/verification.nls"
   "extensions/sta2us.nls"
+  "extensions/gat3s.nls"
+  "extensions/selection.nls"
   "extensions/results.nls"
-  "extensions/g3notype.nls"
+  "extensions/verification.nls"
 ]
 
 breed [ anima1s anima1 ]
@@ -43,12 +42,12 @@ anima1s-own [
 
   identity.I
   identity.II
-  carried.items
+  carried.items           ; List of other agents representing the objects carried (eg embryo, fetus, nursing young, woodticks, etc)
 
   ; PHENOTYPE VARIABLES: hidden to all agents but self
   hidden.chance
-  fully.decayed
-  living.chance
+  fully.decayed           ; Flag indicating the animal is no longer available as food for some other animal.
+  survival.chance
   energy.supply
   bite.capacity
   mutation.chance
@@ -85,13 +84,15 @@ anima1s-own [
   father.identity
   natal.group.id
   natal.group.size
+  death.group.id
+  death.group.size
   ticks.at.conception
   ticks.at.birth
   ticks.at.weaning
   ticks.at.sexual.maturity
   ticks.at.death
   adult.hidden.chance
-  adult.living.chance
+  adult.survival.chance
   adult.body.size
   adult.body.shade
   adult.energy.supply
@@ -108,7 +109,7 @@ anima1s-own [
   adult.red.chance
   adult.blue.chance
   distance.traveled
-  cells.occupied
+  cells.occupied ; delete
   mother.initiated.birth
   mother.initiated.weaning
   whole.related.help.cost
@@ -136,7 +137,7 @@ patches-own [
 globals [
   model-version
   model-structure
-  genotype-reader
+  ;genotype-reader
   simulation-id
   deterioration-rate
   maximum-visual-range
@@ -167,8 +168,9 @@ globals [
 ;--------------------------------------------------------------------------------------------------------------------
 
 to setup-parameters
+  output-print (word "run " behaviorspace-run-number " start setup parameters at " date-and-time )
   set model-version "1.2.0-Beta"
-  set deterioration-rate -0.001
+  set deterioration-rate -0.01
   set maximum-visual-range 5
   set base-litter-size 10
   set model-structure [ "baseline" ]
@@ -181,28 +183,33 @@ to setup-parameters
   set start-date-and-time date-and-time
   set selected-display "groups"
   reset-timer
+  output-print (word "run " behaviorspace-run-number " end setup parameters at " date-and-time )
 end
 
 to setup-patches
+  output-print (word "run " behaviorspace-run-number " start setup patches at " date-and-time )
   ask patches [
     set pterminal.energy random-float plant-quality
     set pmeta.id random 9999999
     update-patch-color ]
   reset-ticks
+  output-print (word "run " behaviorspace-run-number " end setup patches at " date-and-time )
 end
 
 to setup ; [ new-simulation-id ]
          ; save world file of old simulation before starting new simulation under following conditions
          ;if ( simulation-id != 0 and behaviorspace-run-number = 0 and output-results? = true ) [ record-world ]
+  output-print (word "run " behaviorspace-run-number " start setup at "  date-and-time )
   clear-all
   reset-ticks
   set simulation-id generate-simulation-id ; new-simulation-id
   setup-parameters
   setup-patches
   if ( path-to-experiment = "" ) [ set path-to-experiment "../results/" ]
-  import-population
+  import-population ; test
   import-genotype
-  clear-output
+  ;clear-output
+  output-print (word "run " behaviorspace-run-number " end setup at "  date-and-time )
 end
 
 ; --------------------------------------------------------------------------- ;
@@ -225,7 +232,7 @@ end
 ; abstract hours. For decimal simplicity, there are 100 days per year and 10
 ; hours per day. These divisions are arbitrary and can be modified as
 ; parameters to the program. Space in this program is divided into fixed-size
-; square patches arranged in a rectangular grid, as is standard in this NetLogo
+; square patches arranged in a rectangular grid, as is standard in the NetLogo
 ; programming language.<https://en.wikipedia.org/wiki/NetLogo/>
 ;
 ; The program steps forward hour by hour, and this routine is called once per
@@ -233,8 +240,8 @@ end
 ; determine the dynamics during the present time step. This program, therefore,
 ; essentially implements an Euler method of
 ; simulation<https://en.wikipedia.org/wiki/Euler_method/> across a spatial
-; structure, making it in the most basic case essentially a partial-differential
-; equation solver. Considerations such as the
+; structure, making it, in the most basic case, essentially a
+; partial-differential equation solver. Considerations such as the
 ; Courant condition<https://en.wikipedia.org/wiki/Courant%E2%80%93Friedrichs%E2%80%93Lewy_condition/>
 ; must therefore be observed.
 ;
@@ -256,7 +263,18 @@ end
 ;            at the time.
 ;          'uninvadable' means evolution occurs without mutation, only with
 ;            recombination and other simulated genetic mechanisms.
+;        'anima1s-own' is initialized and prepared for use. In particular,
+;          'fully.decayed', 'carried.items', ... are used. [FILL IN THE ...'S]
+;        'recent-decisions-made' contains the recent history of the decision
+;          vectors created by all agents.
+;        'recent-actions-completed' contains the recent history of actions
+;          completed by all agents.
+;        'how-many-ticks?' contains the number ticks to be tracked variables
+;          carrying recent history.
 ;
+; EXIT:
+;        'recent-decisions-made' and 'recent-actions-completed' are updated
+;          with the most recent events, up to a maximum of 'how-many-ticks?'
 ;
 ;  dx/dt = f(x)                         ** Perhaps make into footnote
 ;  dx = f(x) dt    Euler method         ** Perhaps make into footnote
@@ -269,21 +287,34 @@ to go
   tick
 
   ; UPDATE WORLD
-  set recent-decisions-made filter [ vector -> item 0 vector > ( ticks - how-many-ticks? ) ] recent-decisions-made
+  set recent-decisions-made filter                ;Update code to add current timestep and remove old timestep
+  [ vector ->
+    item 0 vector > ( ticks - how-many-ticks? ) ]
+  recent-decisions-made
   set recent-actions-completed filter [ vector -> item 0 vector > ( ticks - how-many-ticks? ) ] recent-actions-completed
-
-  ; UPDATE PLANTS
-  ifelse ( member? "no-plants" model-structure )
-  [ ask patches [ set pcolor brown + 1 ] ]
-  [ update-patches ]
+                                                ; UPDATE PLANTS
+  ifelse ( member? "no-plants" model-structure )   ; If the model-structure setting contains "no-plants"
+  [
+    ask patches with [ pcolor != brown + 1 ]       ; Then for patches that are not currently brown
+    [ set pcolor brown + 1 ]                       ; Set their color to brown
+  ][
+    update-patches                                 ; Otherwise update plant growth in all patches
+  ]
 
   ; UPDATE AGENTS
   ask anima1s with [ not fully.decayed ] [
-    set my.environment [] set decision.vectors [] set actions.completed []                         ; clear memory from the previous timestep
-    set age.in.ticks age.in.ticks + 1                                                              ; all individuals age at each timestep
-    deteriorate                                                                                    ; all individuals decay at every time step
-    update-appearance                                                                              ; each individual's appearance updates once per timestep
-    if ( not empty? carried.items ) [ foreach carried.items [ itm -> ask itm [ move-to myself ]]]] ; update carried items to be with carrier
+    set my.environment [] set decision.vectors [] set actions.completed []                         ; Clear memory from the previous timestep.
+    set age.in.ticks age.in.ticks + 1                                                              ; Advance the individual's age by one timestep.
+    deteriorate                                                                                    ; Advance the individual's decay for this time step.
+                                                                                                   ; NEXT: DO THE RIGHT THING FOR SUBROUTINE "deteriorate" <------------------------------------
+    update-appearance                                                                              ; Update the visual appearance to match.
+
+    if ( not empty? carried.items ) [             ; If the carrier has move, bring all the carried items along.
+      foreach carried.items [ itm ->
+        ask itm [ move-to myself ]
+      ]
+    ]
+  ]
 
   ; UPDATE AGENTS : mortality
   ifelse ( member? "reaper" model-structure  )
@@ -310,8 +341,8 @@ to go
   ; OUTPUT RESULTS
   if output-results? [ output-results ]
 
-  ; DISPLAY RESULTS
-  if ( selected-display != "" ) [ display-results ]
+;  ; DISPLAY RESULTS
+;  if ( selected-display != "" ) [ display-results ]
 
   ; SIMULATION OUTPUT
   ;if output-results? [ output-results ]
@@ -349,13 +380,15 @@ to-report generate-simulation-id report ( word "s" generate-timestamp ) end
 
 to-report generate-timestamp
   let string-to-report ""
-  let time-difference time:difference-between (time:create "1970-01-01 00:00:00.0") (time:create "") "seconds"
-  let hex-list [ "0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z" ]
+;  let time-difference time:difference-between (time:create "1970-01-01 00:00:00.0") (time:create "") "seconds"
+;  let hex-list [ "0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z" ]
+;
+;  while [ time-difference > 0 ] [
+;    let unix-remainder floor remainder time-difference 36
+;    set string-to-report ( word item unix-remainder hex-list string-to-report )
+;    set time-difference floor ( time-difference / 36 ) ]
 
-  while [ time-difference > 0 ] [
-    let unix-remainder floor remainder time-difference 36
-    set string-to-report ( word item unix-remainder hex-list string-to-report )
-    set time-difference floor ( time-difference / 36 ) ]
+  repeat 5 [ set string-to-report (word string-to-report one-of [ "0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z" ]) ]
 
   report string-to-report
 end
@@ -398,6 +431,8 @@ end
 
 to update-patches
 
+    ;clear-plot
+
   ifelse ( get-solar-status = "DAY" ) [
     let season ( cos (( 360 / plant-annual-cycle ) * ticks ))
     let density ( sum [penergy.supply] of patches ) / ( count patches * plant-quality )
@@ -437,12 +472,36 @@ to update-terminal-energy [ plant-season plant-density ]
   let neighbor-energy-sd ( optimal-neighbor-energy - plant-minimum-neighbors )
   let neighbor-energy ( ( sum [penergy.supply] of neighbors ) / plant-quality )
 
-  let probability-up ifelse-value ( neighbor-energy-sd = 0 ) [ 0 ] [ ( seasonal-factor * e ^ ( - (( neighbor-energy - optimal-neighbor-energy ) ^ 2 ) / ( 2 * ( neighbor-energy-sd ^ 2 ) )) ) ]
+  let probability-up ifelse-value ( neighbor-energy-sd = 0 ) [ 0 ] [ ( 1 * e ^ ( - (( neighbor-energy - optimal-neighbor-energy ) ^ 2 ) / ( 2 * ( neighbor-energy-sd ^ 2 ) )) ) ]
   let y ( ( plant-daily-cycle * plant-quality ) / plant-annual-cycle ) * ( plant-density * ( 2 * probability-up - 1 ) + seasonal-factor - plant-density )
+
+;  let other-x random-float 1 * 8
+;  let other-y ( ( plant-daily-cycle * plant-quality ) / plant-annual-cycle ) * ( plant-density * ( 2 * other-x - 1 ) + seasonal-factor - plant-density )
+;  plotxy other-x other-y
 
   set pterminal.energy ( pterminal.energy + random-float y )
   if pterminal.energy >= plant-quality [ set pterminal.energy plant-quality ]
   if pterminal.energy <= 0.000 [ set pterminal.energy 0.000 ]
+
+end
+
+to plot-plants [ current-season plant-density ]
+
+  repeat 1000 [
+
+    let x random-float 8
+
+    let seasonal-factor ( ( plant-seasonality * current-season + 1 ) / 2 )
+    let optimal-neighbor-energy ( plant-minimum-neighbors + plant-maximum-neighbors ) / 2
+    let neighbor-energy-sd ( optimal-neighbor-energy - plant-minimum-neighbors )
+    let neighbor-energy x ;( ( sum [penergy.supply] of neighbors ) / plant-quality )
+
+    let probability-up ifelse-value ( neighbor-energy-sd = 0 ) [ 0 ] [ ( seasonal-factor * e ^ ( - (( neighbor-energy - optimal-neighbor-energy ) ^ 2 ) / ( 2 * ( neighbor-energy-sd ^ 2 ) )) ) ]
+    let y ( ( plant-daily-cycle * plant-quality ) / plant-annual-cycle ) * ( plant-density * ( 2 * probability-up - 1 ) + seasonal-factor - plant-density )
+
+    plotxy x y
+
+  ]
 
 end
 
@@ -466,11 +525,11 @@ end
 to deteriorate
   ; the deterioration-rate is a negative number ( i.e. -0.001 )
   ;set body.shade get-updated-value body.shade abs deterioration-rate
-  set living.chance get-updated-value living.chance deterioration-rate ;( - body.shade )
+  set survival.chance get-updated-value survival.chance deterioration-rate ;( - body.shade )
 end
 
 to check-mortality
-  if ( random-float 1.0 > living.chance ) [
+  if ( random-float 1.0 > survival.chance ) [
     ifelse ( is.alive = true )
 
     ; FIRST DEATH: set anima1 to is.alive false
@@ -484,6 +543,8 @@ end
 to set-to-dead
   set is.alive false
   set ticks.at.death ticks
+  set death.group.id group.identity
+  set death.group.size (count anima1s with [ is.alive and group.identity = [group.identity] of myself ])
   set label "x"
   set my.environment []
   set decision.vectors []
@@ -539,7 +600,7 @@ end
 ; consider-environment > make-decisions > allocate-energy > do-actions
 ;--------------------------------------------------------------------------------------------------------------------
 
-to consider-environment
+to consider-environment ; should only be able to see not fully.decayed
 
   let sun-status get-solar-status
 
@@ -580,12 +641,23 @@ to make-decisions
   ; Get decisions from selected genotype reader
   set decision.vectors ( ifelse-value
     ( genotype-reader = "sta2us" ) [ sta7us-get-decisions my.environment ]
+    ( genotype-reader = "gat3s" ) [ gat3s-get-decisions my.environment ]
     [ sta7us-get-decisions my.environment ] ) ; default
 
+  set decision.vectors reduce-to-unique-vectors decision.vectors
+
+  ; RECORD DECISIONS
+  foreach decision.vectors [ d ->
+    set recent-decisions-made lput ( sentence ticks but-last d ) recent-decisions-made ]
+
+end
+
+to-report reduce-to-unique-vectors [ input-list ]
   ;REDUCE DECISIONS TO ONE PER TARGET-ACTION COMBO
   let reduced-decisions []
 
-  foreach decision.vectors [ original-vector ->
+  foreach input-list [ original-vector ->
+    let original-ego item 0 original-vector
     let original-target item 1 original-vector
     let original-action item 2 original-vector
     let original-weight item 3 original-vector
@@ -593,12 +665,15 @@ to make-decisions
 
     let index 0
     foreach reduced-decisions [ reduced-vector ->
+      let reduced-ego item 0 reduced-vector
       let reduced-target item 1 reduced-vector
       let reduced-action item 2 reduced-vector
       let reduced-weight item 3 reduced-vector
 
-      if ( reduced-target = original-target ) and ( reduced-action = original-action ) [
+      if ( reduced-ego = original-ego ) and ( reduced-target = original-target ) and ( reduced-action = original-action ) [
         set vector-doesnt-exist false
+        set reduced-weight ifelse-value ( is-number? reduced-weight ) [ reduced-weight ] [ 0 ]
+        set original-weight ifelse-value ( is-number? original-weight ) [ original-weight ] [ 0 ]
         let new-vector ( list self reduced-target reduced-action ( reduced-weight + original-weight ) false )
         set reduced-decisions remove-item index reduced-decisions
         set reduced-decisions lput new-vector reduced-decisions ]
@@ -606,13 +681,7 @@ to make-decisions
     ]
     if vector-doesnt-exist [ set reduced-decisions lput ( list self original-target original-action original-weight false ) reduced-decisions ]
   ]
-
-  set decision.vectors reduced-decisions
-
-  ; RECORD DECISIONS
-  foreach decision.vectors [ d ->
-    set recent-decisions-made lput ( sentence ticks but-last d ) recent-decisions-made ]
-
+  report reduced-decisions
 end
 
 to do-actions
@@ -653,7 +722,7 @@ to do-actions
 
       ( ifelse ; these actions can be performed resting or not resting
         action = "rest" [ rest cost ]
-        action = "living-chance" [ living-chance cost ]
+        action = "survival-chance" [ survival-chance cost ]
         action = "body-size" [ body-size cost ]
         action = "body-shade" [ body-shade cost ]
         action = "visual-range" [ visual-range cost ]
@@ -743,9 +812,9 @@ end
 ;
 ;--------------------------------------------------------------------------------------------------------------------
 
-to living-chance [ cost ]
-  complete-action self "living-chance" cost
-  set living.chance get-updated-value living.chance cost
+to survival-chance [ cost ]
+  complete-action self "survival-chance" cost
+  set survival.chance get-updated-value survival.chance cost
 end
 
 to body-size [ cost ]
@@ -1044,7 +1113,7 @@ to update-to-adult
     set female.fertility ifelse-value ( biological.sex = "male" ) [ " " ] [ "cycling" ]
     set ticks.at.sexual.maturity ticks
     set adult.hidden.chance hidden.chance
-    set adult.living.chance living.chance
+    set adult.survival.chance survival.chance
     set adult.body.size body.size
     set adult.body.shade body.shade
     set adult.energy.supply energy.supply
@@ -1260,7 +1329,7 @@ to aid [ target cost ]
   complete-action target "aid" cost
   if ( is-anima1? target and [ is.alive ] of target = true ) [
     complete-action target "aid-complete" cost
-    ask target [ living-chance cost ]
+    ask target [ survival-chance cost ]
     set aid.history lput [meta.id] of target aid.history
     set label "+"
     ; recording kin selection
@@ -1341,7 +1410,7 @@ to harm [ target cost ]
   complete-action target "harm" cost
   if ( is-anima1? target and [ is.alive ] of target = true ) [
     complete-action target "harm-complete" cost
-    ask target [ living-chance ( - cost ) ]
+    ask target [ survival-chance ( - cost ) ]
     set harm.history lput [meta.id] of target harm.history
     set label "-"
     if ( [ life.history ] of target = "infant" and target != self ) [ set infanticide.history lput [meta.id] of target infanticide.history ]
@@ -1415,7 +1484,7 @@ to initialize-from-parents [ m f ]
   set ticks.at.sexual.maturity 0
   set ticks.at.death 0
   set adult.hidden.chance 0
-  set adult.living.chance 0
+  set adult.survival.chance 0
   set adult.body.size 0
   set adult.body.shade 0
   set adult.energy.supply 0
@@ -1457,6 +1526,7 @@ end
 to set-phenotype-to-initialized-form
   ask my.mother [ set carried.items lput myself carried.items ]
   set hidden? true
+  set is.resting true
   set body.size 0.01
   set body.shade 0
   set bite.capacity 0.1
@@ -1470,7 +1540,7 @@ to set-phenotype-to-initialized-form
   set infancy.chance 0
   set juvenility.chance 0
   set adulthood.chance 0
-  set living.chance 1
+  set survival.chance 1
   set yellow.chance 0
   set red.chance 0
   set blue.chance 0
@@ -1502,7 +1572,7 @@ to set-phenotype-to-ideal-form ; all anima1s or living animals?
   set infancy.chance mean [infancy.chance] of anima1s
   set juvenility.chance mean [juvenility.chance] of anima1s
   set adulthood.chance mean [adulthood.chance] of anima1s
-  set living.chance mean [living.chance] of anima1s
+  set survival.chance mean [survival.chance] of anima1s
   set yellow.chance mean [yellow.chance] of anima1s
   set red.chance mean [red.chance] of anima1s
   set blue.chance mean [blue.chance] of anima1s
@@ -1787,8 +1857,8 @@ NIL
 INPUTBOX
 848
 10
-1155
-125
+1117
+117
 observation-notes
 NIL
 1
@@ -1824,10 +1894,10 @@ NIL
 1
 
 SLIDER
-1171
-155
-1414
-188
+849
+468
+1118
+501
 plant-minimum-neighbors
 plant-minimum-neighbors
 0
@@ -1839,10 +1909,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1171
-191
-1414
-224
+849
+505
+1118
+538
 plant-maximum-neighbors
 plant-maximum-neighbors
 0
@@ -1865,10 +1935,10 @@ season
 11
 
 SLIDER
-1171
-82
-1414
-115
+849
+395
+1118
+428
 plant-seasonality
 plant-seasonality
 0
@@ -1880,10 +1950,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1171
-10
-1414
-43
+849
+323
+1117
+356
 plant-annual-cycle
 plant-annual-cycle
 10
@@ -1895,10 +1965,10 @@ ticks
 HORIZONTAL
 
 SLIDER
-1171
-46
-1414
-79
+849
+359
+1118
+392
 plant-daily-cycle
 plant-daily-cycle
 1
@@ -1922,9 +1992,9 @@ get-solar-status
 
 INPUTBOX
 848
-131
-1031
-200
+122
+995
+191
 population
 population
 1
@@ -1933,20 +2003,20 @@ String
 
 INPUTBOX
 848
-206
-1030
-274
+197
+995
+265
 genotype
-genotypetwo
+genotype-123
 1
 0
 String
 
 BUTTON
-1039
-131
-1094
-200
+1001
+122
+1056
+191
 ⟳
 reset-population-button
 NIL
@@ -1960,10 +2030,10 @@ NIL
 1
 
 BUTTON
-1100
-131
-1155
-164
+1062
+122
+1117
+155
 ⤒
 export-population-button
 NIL
@@ -1977,10 +2047,10 @@ NIL
 1
 
 BUTTON
-1100
-167
-1155
-200
+1062
+158
+1117
+191
 ⤓
 import-population-button
 NIL
@@ -1994,20 +2064,20 @@ NIL
 1
 
 CHOOSER
-1171
-229
-1355
-274
+849
+545
+1057
+590
 useful-commands
 useful-commands
-"help-me" "meta-report" "---------------------" " > OPERATIONS   " "---------------------" "parameter-settings" "default-settings" "model-structure" "-- aspatial" "-- free-lunch" "-- ideal-form" "-- no-evolution" "-- no-plants" "-- reaper" "-- show-fertility" "-- stork" "-- uninvadable" "clear-population" "new-population" "reset-plants" "save-simulation" "---------------------" " > VERIFICATION " "---------------------" "dynamic-check" "-- true" "-- false" "runtime-check" "visual-check" "-- dine-and-dash" "-- life-history-channel" "-- musical-pairs" "-- night-and-day" "-- popularity-context" "-- supply-and-demand" "-- square-dance" "---------------------" " > DISPLAY RESULTS   " "---------------------" "age-in-timesteps" "decisions" "actions" "generations" "life-history" "birthing" "weaning" "matings" "mating-partners" "conceptions" "infanticide" "group-transfers" "travel-distance" "phenotype" "genotype" "groups" "lotka-volterra" "---------------------" " > OUTPUT RESULTS    " "---------------------"
-39
+"help-me" "meta-report" "---------------------" " > OPERATIONS   " "---------------------" "parameter-settings" "default-settings" "model-structure" "-- aspatial" "-- free-lunch" "-- ideal-form" "-- no-evolution" "-- no-plants" "-- reaper" "-- signal-fertility" "-- stork" "-- uninvadable" "clear-population" "new-population" "reset-plants" "save-world" "import-world" "save-simulation" "---------------------" " > VERIFICATION " "---------------------" "dynamic-check" "-- true" "-- false" "runtime-check" "visual-check" "-- dine-and-dash" "-- life-history-channel" "-- musical-pairs" "-- night-and-day" "-- popularity-context" "-- supply-and-demand" "-- square-dance" "---------------------" " > DISPLAY RESULTS   " "---------------------" "age" "generations" "life-history" "genotype" "phenotype" "-- survival-chance" "-- body-size" "-- body-shade" "-- hidden-chance" "-- bite-capacity" "-- mutation-chance" "-- sex-ratio" "-- litter-size" "-- conception-chance" "-- visual-angle" "-- visual-range" "-- day-perception" "-- night-perception" "-- yellow-chance" "-- red-chance" "-- blue-chance" "-- birthing-chance" "-- weaning-chance" "-- infancy-chance" "-- juvenility-chance" "-- adulthood-chance" "carried-items" "energy-supply" "behaviors" "-- decisions" "-- actions" "-- birthing" "-- weaning" "-- matings" "-- mating-partners" "-- conceptions" "-- infanticide" "-- group-transfers" "-- travel-distance" "-- foraging-gains" "-- total-energy-gains" "-- total-energy-cost" "-- receiving-history" "-- carried-history" "-- aid-history" "-- harm-history" "---------------------" " > OUTPUT RESULTS    " "---------------------" "dynamic-verification" "verification-rate"
+48
 
 BUTTON
-1360
-230
-1415
-275
+1063
+545
+1118
+590
 ▷
 command
 NIL
@@ -2021,10 +2091,10 @@ NIL
 1
 
 BUTTON
-1040
-205
-1095
-274
+1002
+196
+1057
+265
 ⟳
 reset-genotype-button
 NIL
@@ -2038,10 +2108,10 @@ NIL
 1
 
 BUTTON
-1100
-241
-1155
-274
+1062
+232
+1117
+265
 ⤓
 import-genotype-button
 NIL
@@ -2055,10 +2125,10 @@ NIL
 1
 
 BUTTON
-1100
-205
-1155
-238
+1062
+196
+1117
+229
 ⤒
 export-genotype-button
 NIL
@@ -2072,10 +2142,10 @@ NIL
 1
 
 SLIDER
-1171
-118
-1414
-151
+849
+431
+1118
+464
 plant-quality
 plant-quality
 .1
@@ -2088,9 +2158,9 @@ HORIZONTAL
 
 SWITCH
 621
-10
+46
 757
-43
+79
 output-results?
 output-results?
 0
@@ -2099,9 +2169,9 @@ output-results?
 
 SWITCH
 621
-46
+10
 757
-79
+43
 selection-on?
 selection-on?
 1
@@ -2109,74 +2179,132 @@ selection-on?
 -1000
 
 OUTPUT
-848
-562
-1415
-919
+1130
+10
+1696
+639
 12
 
 PLOT
-972
-283
-1415
-551
+848
+650
+1696
+879
 plot
 x
 y
 0.0
-1.0
+8.0
 0.0
 1.0
 true
 false
 "" ""
 PENS
-"default" 1.0 2 -16777216 true "" ""
+"default" 1.0 1 -16777216 true "" ""
 
-SLIDER
-848
-283
-881
-551
-crosssectional---longitudinal---specialized
-crosssectional---longitudinal---specialized
+CHOOSER
+849
+271
+1117
+316
+genotype-reader
+genotype-reader
+"to1erance" "sta2us" "gat3s"
 1
-3
-1.0
-1
-1
-NIL
-VERTICAL
 
-SLIDER
-889
-283
-922
-551
-sort--adult--juvenile--infant--gestatee--off
-sort--adult--juvenile--infant--gestatee--off
-1
-6
-3.0
-1
-1
+BUTTON
+1500
+940
+1599
+973
 NIL
-VERTICAL
+display-results
+T
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
-SLIDER
-929
-283
-962
-551
-sort--------female--------male--------off
-sort--------female--------male--------off
+SWITCH
+1220
+887
+1338
+920
+adults
+adults
+0
 1
-4
-3.0
+-1000
+
+SWITCH
+1099
+887
+1215
+920
+juveniles
+juveniles
 1
 1
-NIL
-VERTICAL
+-1000
+
+SWITCH
+974
+887
+1094
+920
+infants
+infants
+1
+1
+-1000
+
+SWITCH
+849
+887
+969
+920
+gestatees
+gestatees
+1
+1
+-1000
+
+SWITCH
+1462
+887
+1578
+920
+males
+males
+0
+1
+-1000
+
+SWITCH
+1343
+887
+1457
+920
+females
+females
+0
+1
+-1000
+
+CHOOSER
+849
+594
+1118
+639
+plot-type
+plot-type
+"individuals" "groups" "population" "generations"
+0
 
 @#$#@#$#@
 # B3GET 1.1.0 INFORMATION
@@ -2231,7 +2359,7 @@ OBSERVATION-NOTES: write notes to yourself here and click 'save' to save them.
 
 ### VIEW INFORMATION
 
-The main view screen allows us to visually see emergent behaviors. 
+The main view screen allows us to visually see emergent behaviors.
 
 SIMULATION: the unique identification code of the current simulation.
 SEASON: cycles between 1.0 (summer) and -1.0 (winter) according to the plant-annual-cycle.
@@ -7250,7 +7378,7 @@ Circle -7500403 true true 210 38 60
 Circle -1 true false 218 46 44
 Circle -16777216 true false 233 53 26
 @#$#@#$#@
-NetLogo 6.1.1
+NetLogo 6.2.0
 @#$#@#$#@
 setup
 set grass? true
@@ -7261,9 +7389,82 @@ repeat 75 [ go ]
   <experiment name="TEST-QJZWXF" repetitions="1" runMetricsEveryStep="false">
     <setup>setup
 
-; give simulation-id specific configuration: sDOB17 means 
-; simulation of WORLD-D, Baboons seed population, 
-; run B (instead of A), plant-minimum-neighbors = 1 and 
+; give simulation-id specific configuration: sDOB17 means
+; simulation of WORLD-D, Baboons seed population,
+; run B (instead of A), plant-minimum-neighbors = 1 and
+; plant-maximum-neighbors = 7
+ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
+  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "A" plant-minimum-neighbors plant-maximum-neighbors )
+][
+  let min-holder plant-minimum-neighbors
+  let max-holder plant-maximum-neighbors
+  set plant-minimum-neighbors max-holder - 1
+  set plant-maximum-neighbors min-holder
+  set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "B" plant-minimum-neighbors plant-maximum-neighbors )
+]</setup>
+    <go>go</go>
+    <final>;record-simulation
+;record-world
+output-print (word "simulation " behaviorspace-run-number " ends at " ticks " ticks." )</final>
+    <timeLimit steps="10"/>
+    <exitCondition>not any? anima1s with [ is.alive ]</exitCondition>
+    <enumeratedValueSet variable="path-to-experiment">
+      <value value="&quot;../results/&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-reader">
+      <value value="&quot;sta2us&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-annual-cycle">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-daily-cycle">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-seasonality">
+      <value value="0.3"/>
+      <value value="0.6"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-quality">
+      <value value="3"/>
+      <value value="6"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-maximum-neighbors">
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="population">
+      <value value="&quot;pQJZWXF&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="output-results?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="selection-on?">
+      <value value="false"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="TEST-QKSOH9" repetitions="1" runMetricsEveryStep="false">
+    <setup>setup
+
+; give simulation-id specific configuration: sDOB17 means
+; simulation of WORLD-D, Baboons seed population,
+; run B (instead of A), plant-minimum-neighbors = 1 and
 ; plant-maximum-neighbors = 7
 ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
   set simulation-id ( word "s" (last behaviorspace-experiment-name) (first population) "A" plant-minimum-neighbors plant-maximum-neighbors )
@@ -7277,13 +7478,13 @@ ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
     <go>go</go>
     <final>record-simulation
 record-world</final>
-    <timeLimit steps="500000"/>
+    <timeLimit steps="101"/>
     <exitCondition>not any? anima1s with [ is.alive ]</exitCondition>
     <enumeratedValueSet variable="path-to-experiment">
-      <value value="&quot;../results/test-QJZWXF/&quot;"/>
+      <value value="&quot;../results/test-QKSOH9/&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="genotype-reader">
-      <value value="&quot;sta2us&quot;"/>
+      <value value="&quot;&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="plant-annual-cycle">
       <value value="1000"/>
@@ -7328,6 +7529,232 @@ record-world</final>
     </enumeratedValueSet>
     <enumeratedValueSet variable="selection-on?">
       <value value="false"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="experiment" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <final>carefully [ collect-data "../results/output.csv" ] [ output-print error-message ]</final>
+    <timeLimit steps="10"/>
+    <enumeratedValueSet variable="path-to-experiment">
+      <value value="&quot;../results/&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-reader">
+      <value value="&quot;sta2us&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-annual-cycle">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-daily-cycle">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-seasonality">
+      <value value="0.3"/>
+      <value value="0.6"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="population">
+      <value value="&quot;pQJZWXF&quot;"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="experiment-6" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <final>carefully [ collect-data "../results/output.csv" ] [ output-print error-message ]</final>
+    <timeLimit steps="10"/>
+    <enumeratedValueSet variable="path-to-experiment">
+      <value value="&quot;../results/&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="output-results?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="selection-on?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-reader">
+      <value value="&quot;sta2us&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-annual-cycle">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-daily-cycle">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-seasonality">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-quality">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-maximum-neighbors">
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="population">
+      <value value="&quot;pQJZWXF&quot;"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="experiment-24" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <final>carefully [ collect-data "../results/output.csv" ] [ output-print error-message ]</final>
+    <timeLimit steps="10"/>
+    <enumeratedValueSet variable="path-to-experiment">
+      <value value="&quot;../results/&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="output-results?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="selection-on?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-reader">
+      <value value="&quot;sta2us&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-annual-cycle">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-daily-cycle">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-seasonality">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-quality">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-maximum-neighbors">
+      <value value="6"/>
+      <value value="7"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="population">
+      <value value="&quot;pQJZWXF&quot;"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="experiment-72" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <final>carefully [ collect-data "../results/output.csv" ] [ output-print error-message ]</final>
+    <timeLimit steps="1000"/>
+    <enumeratedValueSet variable="path-to-experiment">
+      <value value="&quot;../results/&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="output-results?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="selection-on?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-reader">
+      <value value="&quot;sta2us&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-annual-cycle">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-daily-cycle">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-seasonality">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-quality">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-maximum-neighbors">
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="population">
+      <value value="&quot;pQJZWXF&quot;"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="sAO1" repetitions="1" runMetricsEveryStep="false">
+    <setup>setup
+set-simulation-id</setup>
+    <go>go</go>
+    <final>simulation-summary
+record-world</final>
+    <timeLimit steps="100000"/>
+    <enumeratedValueSet variable="path-to-experiment">
+      <value value="&quot;../results/thesis/&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="deterioration-rate">
+      <value value="-0.01"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="output-results?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="selection-on?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="population">
+      <value value="&quot;Olives&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype">
+      <value value="&quot;olives&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-reader">
+      <value value="&quot;sta2us&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-annual-cycle">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-daily-cycle">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-seasonality">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-quality">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-maximum-neighbors">
+      <value value="1"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>

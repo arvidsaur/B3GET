@@ -7,7 +7,7 @@
 ;        88   88   88.  .88 88.     88.  .88       88 
 ;  `88888P'   dP   `88888P8 Y88888P `88888P' `88888P' 
 ;                                                                                                  
-; © 2020 K N Crouse                                        
+; © 2020 K N Crouse                                              
 ;----------------------------------------------------------------------------------------------
 ; 
 ; This extension contains all functions that allow anima1s to make decisions from their 
@@ -55,7 +55,7 @@
 ; 2019-09-XX    #    has color closest to #
 ; 2020-09-XX    .    is not resting
 ;         
-; 2019-08-26   --> living.chance
+; 2019-08-26   --> survival-chance
 ; 2019-08-26   --> body-size
 ; 2019-08-26   --> body-shade
 ; XXXX-XX-XX   --> visual-angle
@@ -180,7 +180,7 @@ to-report sta7us-get-action [ action-code ]
 
   report
   (ifelse-value
-    ( action-code = "MNT" or action-code = "maintain-body" or action-code = "living-chance" ) [ "living-chance" ]
+    ( action-code = "MNT" or action-code = "maintain-body" or action-code = "living-chance" or action-code = "survival-chance") [ "survival-chance" ]
     ( action-code = "GRW" or action-code = "body-size" ) [ "body-size" ]
     ( action-code = "BSD" or action-code = "body-shade" ) [ "body-shade" ]
     ( action-code = "DPR" or action-code = "IPR" or action-code = "day-perception-range" or action-code = "visual-range" ) [ "visual-range" ]
@@ -248,7 +248,7 @@ to-report status-of [ target ]
     let target-life-history first [life.history] of target
     let target-fertility first [female.fertility] of target
     let target-size ifelse-value ( [size] of target < size ) [ "r" ] [ "b" ]
-    let target-health ifelse-value ( [living.chance] of target > living.chance ) [ "h" ] [ "x" ]
+    let target-health ifelse-value ( [survival.chance] of target > survival.chance ) [ "h" ] [ "x" ]
     let target-kin ifelse-value ( relatedness-with target > 0.2 ) [ "k" ] [ "q" ]
     let target-group ifelse-value ( [group.identity] of target = group.identity ) [ "n" ] [ "u" ] 
     let target-carry ifelse-value ( member? target carried.items ) [ "y" ] [ ifelse-value ( member? self [carried.items] of target ) [ "+" ] [ "t" ] ]
@@ -303,7 +303,7 @@ end
 
 to-report action-code-list
   report [ 
-    "living-chance" "body-size" "body-shade" 
+    "survival-chance" "body-size" "body-shade" 
     "day-perception" "night-perception" "visual-angle" "visual-range" 
     "conception-chance" "bite-capacity" "mutation-chance" "sex-ratio" "litter-size" 
     "turn-right" "turn-left" "go-forward" "set-heading" "hide" "rest" "set-heading-random"
@@ -313,6 +313,17 @@ to-report action-code-list
     "join" "leave" "recruit" "kick-out"
     "pick-up" "put-down" "cling-to" "squirm-from"
     "help" "hurt" "mate-with" ]
+end
+
+to-report discontinued-action-codons
+  report [ ]
+end
+
+to-report sta2us-codon-exists [ codon ]
+  report
+  codon != "" and not is-number? codon and not is-boolean? codon and
+  ( member? codon (sentence action-code-list discontinued-action-codons ) or
+  first-string-is-part-of-last? codon ( reduce word status-code-list ) )
 end
 
 to-report generate-status

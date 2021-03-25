@@ -7,7 +7,7 @@
 ;        88 88.  ... 88 88.  ... 88.  ...   88   88 88.  .88 88    88 
 ;  `88888P' `88888P' dP `88888P' `88888P'   dP   dP `88888P' dP    dP 
 ;
-; © 2020 K N Crouse
+; © 2020 K N Crouse     
 ;-------------------------------------------------------------------------------------------------
 ; 
 ; This extension contains all functions that allow users to apply artificial selection
@@ -25,7 +25,7 @@
 ; better able to survive in the environmental conditions set by the model parameters.
 ;-------------------------------------------------------------------------------------------------
 
-to artificial-selection
+to artificial-selection ;  memory caps?
   
   if ( any? anima1s ) [
     
