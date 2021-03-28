@@ -2,7 +2,7 @@
 codemeta.json
 /code/.B3GET.tmp.nlogo
 /output/*
-/data/*
+/data/data-to-ignore/*
 /docs/*
 /results/*
 metafile.csv
