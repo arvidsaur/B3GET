@@ -2107,7 +2107,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "meta-report" "---------------------" " > OPERATIONS   " "---------------------" "parameter-settings" "default-settings" "model-structure" "-- aspatial" "-- free-lunch" "-- ideal-form" "-- no-evolution" "-- no-plants" "-- reaper" "-- signal-fertility" "-- stork" "-- uninvadable" "clear-population" "new-population" "reset-plants" "save-world" "import-world" "save-simulation" "---------------------" " > VERIFICATION " "---------------------" "dynamic-check" "-- true" "-- false" "runtime-check" "visual-check" "-- dine-and-dash" "-- life-history-channel" "-- musical-pairs" "-- night-and-day" "-- popularity-context" "-- supply-and-demand" "-- square-dance" "---------------------" " > DISPLAY RESULTS   " "---------------------" "age" "generations" "life-history" "genotype" "phenotype" "-- survival-chance" "-- body-size" "-- body-shade" "-- hidden-chance" "-- bite-capacity" "-- mutation-chance" "-- sex-ratio" "-- litter-size" "-- conception-chance" "-- visual-angle" "-- visual-range" "-- day-perception" "-- night-perception" "-- yellow-chance" "-- red-chance" "-- blue-chance" "-- birthing-chance" "-- weaning-chance" "-- infancy-chance" "-- juvenility-chance" "-- adulthood-chance" "carried-items" "energy-supply" "behaviors" "-- decisions" "-- actions" "-- birthing" "-- weaning" "-- matings" "-- mating-partners" "-- conceptions" "-- infanticide" "-- group-transfers" "-- travel-distance" "-- foraging-gains" "-- total-energy-gains" "-- total-energy-cost" "-- receiving-history" "-- carried-history" "-- aid-history" "-- harm-history" "---------------------" " > OUTPUT RESULTS    " "---------------------" "dynamic-verification" "verification-rate"
-29
+12
 
 BUTTON
 1063
@@ -2247,7 +2247,7 @@ CHOOSER
 genotype-reader
 genotype-reader
 "to1erance" "sta2us" "gat3s"
-2
+1
 
 BUTTON
 1583
