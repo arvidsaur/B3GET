@@ -253,7 +253,7 @@ to-report status-of [ target ]
     let target-group ifelse-value ( [group.identity] of target = group.identity ) [ "n" ] [ "u" ] 
     let target-carry ifelse-value ( member? target carried.items ) [ "y" ] [ ifelse-value ( member? self [carried.items] of target ) [ "+" ] [ "t" ] ]
     let target-signal (word ifelse-value [yellow.signal] of target [ "α" ][ "å" ] ifelse-value [red.signal] of target [ "β" ][ "ß" ] ifelse-value [blue.signal] of target [ "ɣ" ][ "œ" ] )
-    let target-rest ifelse-value ( is.resting = true ) [ "s" ] [ "." ]
+    let target-rest ifelse-value ( [is.resting] of target = true ) [ "s" ] [ "." ]
     let target-color (word "" round [color] of target "")
     set status-report (word status-report 
       target-kind 

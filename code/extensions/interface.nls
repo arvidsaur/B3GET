@@ -103,6 +103,10 @@ to command
 ;    ( useful-commands = "-- supply-and-demand" ) [ set selected-display "" visual-verification ]
 ;    ( useful-commands = "-- square-dance" ) [ set selected-display "" visual-verification ]
     
+    ( useful-commands = "-- decisions" ) [ output-decisions ]
+    ( useful-commands = "-- actions" ) [ output-actions ]
+    ( useful-commands = "genotype" ) [ output-genotype ]
+    
     [])
     
     
@@ -112,9 +116,7 @@ to command
 ;      ( substring useful-commands 0 3 = "-- " ) [ set selected-display but-first but-first but-first useful-commands display-results ] ; menu item begins with dashes
       
 
-  ;      ( useful-commands = "-- decisions" ) [ output-decisions ]
-  ;      ( useful-commands = "-- actions" ) [ output-actions ]
-  ;      
+
   ;      [  ]) ; otherwise use menu item as-is ; set selected-display useful-commands display-results
   ;
   
@@ -420,7 +422,7 @@ end
 ;-----------------------------------------------------------------------------     
 
 to runtime-verification
-    ;output-header (word "CHECK RUNTIME : " how-many-ticks? " timesteps")
+    output-header (word "CHECK RUNTIME : " how-many-ticks? " timesteps")
     profiler:reset
     profiler:start
     repeat how-many-ticks? [ go ]
@@ -461,7 +463,7 @@ end
 
 to output-actions
   let anima1-to-inspect one-of anima1s with [ self = subject ]
-  ;output-header (word " ACTIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [meta.id ] of anima1-to-inspect ) ] )
+  output-header (word " ACTIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [meta.id ] of anima1-to-inspect ) ] )
   clear-output
   ifelse ( anima1-to-inspect != nobody ) 
   
@@ -482,7 +484,7 @@ end
 
 to output-decisions
   let anima1-to-inspect one-of anima1s with [ self = subject ]
-  ;output-header (word " DECISIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [meta.id ] of anima1-to-inspect ) ] )
+  output-header (word " DECISIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [meta.id ] of anima1-to-inspect ) ] )
   clear-output
   ifelse ( anima1-to-inspect != nobody ) 
   
@@ -511,27 +513,27 @@ end
 ;
 ;
 ;
-;
-;;-----------------------------------------------------------------------------       
-;; VIEW GENOTYPE
-;;-----------------------------------------------------------------------------   
-;
-;to output-genotype
-;  let anima1-to-inspect one-of anima1s with [ self = subject ]
-;  output-header (word " GENOTYPE : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [meta.id ] of anima1-to-inspect ) ] )
-;  ifelse ( anima1-to-inspect = nobody ) [
-;    ;set observation-notes (word "Organism " read-from-string command-input " not found.")
-;    ;output-print (word " Organism " read-from-string command-input " not found.")
-;  ][
-;    foreach [chromosome.I] of anima1-to-inspect [ a ->
-;      output-print (word " "reduce [ [itm nxt] -> (word itm " " nxt ) ] a ) ]
-;    output-print ""
-;    foreach [chromosome.II] of anima1-to-inspect [ a ->
-;      output-print (word " "reduce [ [itm nxt] -> (word itm " " nxt ) ] a ) ]
-;    ;set observation-notes (word "View genotype of organism " command-input ". " observation-notes )
-;  ]
-;end
-;
+
+;-----------------------------------------------------------------------------       
+; VIEW GENOTYPE
+;-----------------------------------------------------------------------------   
+
+to output-genotype
+  let anima1-to-inspect one-of anima1s with [ self = subject ]
+  output-header (word " GENOTYPE : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [meta.id ] of anima1-to-inspect ) ] )
+  ifelse ( anima1-to-inspect = nobody ) [
+    ;set observation-notes (word "Organism " read-from-string command-input " not found.")
+    ;output-print (word " Organism " read-from-string command-input " not found.")
+  ][
+    foreach [chromosome.I] of anima1-to-inspect [ a ->
+      output-print (word " "reduce [ [itm nxt] -> (word itm " " nxt ) ] a ) ]
+    output-print ""
+    foreach [chromosome.II] of anima1-to-inspect [ a ->
+      output-print (word " "reduce [ [itm nxt] -> (word itm " " nxt ) ] a ) ]
+    ;set observation-notes (word "View genotype of organism " command-input ". " observation-notes )
+  ]
+end
+
 ;;-----------------------------------------------------------------------------       
 ;; VIEW HISTORY
 ;;-----------------------------------------------------------------------------   

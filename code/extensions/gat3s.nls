@@ -94,6 +94,9 @@
 ; ELH   2019-09-XX   ego's life.history
 ; EFR   2019-09-XX   ego's female.fertility
 ; EGP   2019-09-XX   ego's group.identity
+; EYW   2019-09-XX   ego's yellow signal is on?
+; ERD   2019-09-XX   ego's red signal is on?
+; EBL   2019-09-XX   ego's blue signal is on?
 ; ERG   XXXX-XX-XX   ego is resting
 ; EHC   XXXX-XX-XX   ego's hidden chance
 ; ENG   2019-09-XX   ego's energy.supply
@@ -116,6 +119,8 @@
 ; EYC   2019-09-XX   ego's yellow.chance
 ; ERC   2019-09-XX   ego's red.chance
 ; EBC   2019-09-XX   ego's blue.chance
+; EXC   XXXX-XX-XX   ego's X coordinate
+; EYC   XXXX-XX-XX   ego's Y coordinate
 ;
 ; THN   2019-09-XX   if [TRUE] --> 
 ; TNT   2019-09-XX   if [FALSE] -->
@@ -135,7 +140,7 @@
 ; TRT   2019-08-26   --> turn-right               
 ; TLF   2019-08-26   --> turn-left                 
 ; GFD   2019-08-26   --> go-forward      
-; HED   2020-XX-XX   --> set-heading 
+; STH   2020-XX-XX   --> set-heading 
 ; SHR   2020-XX-XX   --> set-heading-random 
 ; HID   2020-XX-XX   --> hide  
 ; YWS   2019-08-26   --> yellow-signal             
@@ -152,17 +157,17 @@
 ; SPT   2019-10-16   --> supply-to 
 ; DMF   2019-10-16   --> demand-from
 ; EAT   2019-10-16   --> eat
-; JNG   2019-09-XX   --> join
+; JON   2019-09-XX   --> join
 ; LEV   2019-08-26   --> leave
 ; RCT   2019-09-XX   --> recruit
-; EXP   2019-08-26   --> kick-out
+; EXP   2019-08-26   --> expel
 ; PKU   2019-09-XX   --> pick-up
 ; PDN   2019-10-16   --> put-down
 ; CLG   2020-04-XX   --> cling-to
 ; SQM   2020-04-XX   --> squirm-from
 ; HLP   2019-09-XX   --> help
 ; ATK   2019-09-XX   --> attack 
-; MAT   2019-10-16   --> mate-with
+; MTW   2019-10-16   --> mate-with
 ; RST   XXXX-XX-XX   --> rest
 ; 
 ;----------------------------------------------------------------------------------------------
@@ -178,12 +183,7 @@
 ;----------------------------------------------------------------------------------------------
 
 to-report gat3s-get-decisions [ environment ]
-  ;let reporter []
-  ;if ( self = subject ) [ ; delete
-    ;set reporter 
   report get-iterative-decisions self environment [] true ( sentence chromosome.I chromosome.II ) [] []
-  ;] ; delete
-  ;report reporter
 end
 
 ;---------------------------------------------------------------------------------------------- 
@@ -196,16 +196,12 @@ to-report get-iterative-decisions [ me old-environment old-gates old-boolean old
   let decision-vectors []
   
   if ( self = subject ) [ print (word "GID: environment - " old-environment "  gates - " old-gates "  boolean - " old-boolean "  feed - "  length old-feed "  targets - " old-targets " vectors - " old-vectors )]
-  
-  ; old-environment : never changes, always passed to interative function in original form, which is the environment passed to decision-making subroutines
-  ; old-targets : targets that haven't been targeted yet but are saved because they passed through the filters
-  
-  
+
   if ( length old-feed > 0 ) [
     
     let allele first old-feed
     
-    if ( length allele > 0 and is-boolean? first allele ) [ set allele but-first allele ]
+    if ( length allele > 0 and is-boolean? first allele ) [ set allele but-first allele ] ; fix to accomodate [1], [2] etc.
     
     if ( self = subject ) [ print old-feed ]
     if ( self = subject ) [ print allele ]
@@ -214,19 +210,9 @@ to-report get-iterative-decisions [ me old-environment old-gates old-boolean old
     ; ALLELE CODE IS EMPTY ---> CREATE DECISION VECTORS 
     ;----------------------------------------------------------------------------------------------
     
-    ifelse ( length allele = 0 ) [
-      
-      foreach old-targets [ new-target -> ; passed through new call to iterative function
-                                          ;let new-target self
-        
-        foreach old-vectors [ v ->
-          let new-action g8tes-get-action item 0 v
-          let new-weight item 1 v
-          ;print (word "new-weight " new-weight)
-          ;let distance-to-target ifelse-value ( distance new-target > 1 ) [ distance new-target ] [ 1 ]
-          set decision-vectors lput (list meself new-target new-action new-weight ) decision-vectors ;  precision ( new-weight / ( distance-to-target ^ 2 )) 5
-          
-    ]]]
+    ifelse ( length allele = 0 ) [ ; end of allele, so generate decision-vectors from gathered information
+      set decision-vectors ( sentence decision-vectors generate-decision-vectors old-targets old-vectors )
+    ]
     
     ;---------------------------------------------------------------------------------------------- 
     ; ALLELE CODE IS NOT EMPTY ---> (READ CODE)
@@ -235,32 +221,15 @@ to-report get-iterative-decisions [ me old-environment old-gates old-boolean old
     [ ; READ THE NEXT CHUNK OF CODE of AN ALLELE
       
       ; get new chunk:
-      let remaining-allele []
-      let section-of-code []
-      let part-of-chunk true
+      let split break-apart-allele allele
+      let section-of-code first split
+      let remaining-allele last split
       
-      ; separate allele into next chunk and remaining allele
-      foreach allele [ c ->
-        ifelse ( not part-of-chunk ) [
-          set remaining-allele lput c remaining-allele
-        ][
-          ifelse ( member? c gate-codons ) [
-            
-            ifelse ( length section-of-code > 0 ) [
-              set remaining-allele lput c []
-            ][
-              set section-of-code lput c []
-            ]
-            set part-of-chunk false 
-          ][
-            set section-of-code lput c section-of-code  
-      ]]]
-      
-      ;print ( word "section-of-code - " section-of-code )
+      let first-clip first section-of-code
       
       ; settings for continuing iteration 
       let new-feed replace-item 0 old-feed remaining-allele
-      let new-gates []
+      let new-gates [] ;--->
       let new-boolean old-boolean
       let new-targets old-targets
       let new-vectors old-vectors
@@ -270,18 +239,16 @@ to-report get-iterative-decisions [ me old-environment old-gates old-boolean old
       ;----------------------------------------------------------------------------------------------
       
       ifelse ( member? first section-of-code gate-codons ) [
-        
-        let gate first section-of-code
-        
+
         (ifelse 
           
-          ( gate = "THN" ) [
+          ( first-clip = "THN" ) [
             set new-boolean old-boolean ]
           
-          ( gate = "TNT" ) [
+          ( first-clip = "TNT" ) [
             set new-boolean not old-boolean ]
           
-          [ set new-gates (lput first section-of-code old-gates) ])
+          [ set new-gates lput first-clip old-gates ]) ;<----
         
       ][
         
@@ -289,29 +256,17 @@ to-report get-iterative-decisions [ me old-environment old-gates old-boolean old
         ; (READ CODE) ---> CODE is a "DECISION" ---> SAVE DECISION and MOVE ON
         ;----------------------------------------------------------------------------------------------
         
-        ifelse ( member? first section-of-code action-codons ) [ ; this halts if code that is action is not in action-codons
-          
-          ;          if ( old-boolean ) [
-          ;            
-          ;            let new-action item 0 section-of-code
-          ;            let new-weight item 1 section-of-code
-          ;            ;set new-targets old-targets
-          ;
-          ;            foreach old-targets [ old-target -> ;;
-          ;              
-          ;              set decision-vectors ( sentence decision-vectors ( get-iterative-decisions me old-environment [] new-boolean (list first new-feed ) (list old-target) (lput (list new-action new-weight ) old-vectors)))
-          ;              
-          ;          ]]
-          
+        ifelse ( member? first-clip action-codons ) [ ; this halts if code that is action is not in action-codons
+
           if ( old-boolean ) [
             let new-action item 0 section-of-code
             let new-weight item 1 section-of-code
  
-            set decision-vectors ( sentence decision-vectors ( get-iterative-decisions me old-environment [] old-boolean (list first new-feed ) old-targets (lput (list new-action new-weight ) old-vectors)))
+            set decision-vectors ( sentence decision-vectors ( get-iterative-decisions me old-environment [] old-boolean (list first new-feed ) old-targets (lput (list new-action new-weight ) old-vectors))) ; continues with just remaining bit of allele, if any
           ]
           ; settings for continuing iteration 
           set new-boolean true ; really?
-          set new-feed ( but-first new-feed )
+          set new-feed ( but-first new-feed ) ; rest of interative decisions starts with rest of feed ---,,,?>
           set new-targets []
           set new-vectors []
         ]
@@ -321,20 +276,12 @@ to-report get-iterative-decisions [ me old-environment old-gates old-boolean old
         ;----------------------------------------------------------------------------------------------
         
         [
-          ;print (word "TARGETSS " new-targets )
           set new-targets []
           foreach old-environment [ obj ->
-            ;print obj
             let bool-result read-section section-of-code obj
-            ;print bool-result
-            ;print ""
-            if ( bool-result ) [
-              set new-targets lput obj new-targets ]
+            if ( bool-result ) [ set new-targets lput obj new-targets ]
           ]
-          ;print (word "TARGETSS 2 " new-targets )
-          
-          ;set new-targets old-environment with [ read-section section-of-code ] ; fix
-          
+
           foreach old-gates [ gate ->
             
             if ( gate = "ANY" ) [ set new-targets new-targets ]
@@ -350,7 +297,7 @@ to-report get-iterative-decisions [ me old-environment old-gates old-boolean old
               ;new-targets with [ member? self old-targets ] 
             ]
             
-            if ( gate = "UUU" ) [ set new-targets old-environment with [ member? self new-targets and member? self old-targets ] ]
+            if ( gate = "UUU" ) [ set new-targets sentence old-targets new-targets ]
             
             if ( gate = "ONE" ) [ set new-targets n-of 1 new-targets ]
             
@@ -364,18 +311,48 @@ to-report get-iterative-decisions [ me old-environment old-gates old-boolean old
           
       ]]
       
-      ;print (word "FINAL " decision-vectors )
-      
-      set decision-vectors ( sentence decision-vectors ( get-iterative-decisions me old-environment new-gates new-boolean new-feed new-targets new-vectors ) )
-      
-      ;print (word "FINAL 2 " decision-vectors )
-      
+      set decision-vectors ( sentence decision-vectors ( get-iterative-decisions me old-environment new-gates new-boolean new-feed new-targets new-vectors ) ) ;<?'''----
+
   ]]
-  
-  ;print (word "FINAL 3 " decision-vectors )
   
   report decision-vectors
   
+end
+
+to-report generate-decision-vectors [ old-targets old-vectors ]; Make each combination of vectors and targets to create decision-vector
+  let decs []
+  foreach old-targets [ new-target ->
+    foreach old-vectors [ v ->
+      let new-action g8tes-get-action item 0 v
+      let new-weight item 1 v
+      set decs lput (list self new-target new-action new-weight ) decs]]
+  report decs  
+end
+
+to-report break-apart-allele [ allele ] ; SLOW
+  let remaining-allele []
+  let section-of-code []
+  let section-length 0
+  let part-of-chunk true
+  ; separate allele into next chunk and remaining allele
+  foreach allele [ c ->
+    ifelse ( not part-of-chunk ) [
+      set remaining-allele lput c remaining-allele
+    ][
+      ifelse ( member? c gate-codons ) [
+        
+        ifelse ( section-length > 0 ) [
+          set remaining-allele lput c []
+        ][
+          set section-of-code lput c []
+          set section-length 1
+        ]
+        set part-of-chunk false 
+      ][
+        set section-of-code lput c section-of-code 
+        set section-length section-length + 1
+  ]]]
+  report (list section-of-code remaining-allele)
 end
 
 to-report g8tes-get-action [ action-code ]
@@ -388,11 +365,11 @@ to-report g8tes-get-action [ action-code ]
     ( action-code = "TRT" ) [ "turn-right" ]
     ( action-code = "TLF" ) [ "turn-left" ]
     ( action-code = "GFD" ) [ "go-forward" ]
-    ( action-code = "HED" ) [ "set-heading" ]
+    ( action-code = "STH" ) [ "set-heading" ]
     ( action-code = "SHR" ) [ "set-heading-random" ]
     ( action-code = "HID" ) [ "hide" ]
     ( action-code = "EAT" ) [ "eat" ]
-    ( action-code = "JNG" ) [ "join" ]
+    ( action-code = "JON" ) [ "join" ]
     ( action-code = "LEV" ) [ "leave" ]
     ( action-code = "RCT" ) [ "recruit" ]
     ( action-code = "EXP" ) [ "expel" ]
@@ -402,7 +379,7 @@ to-report g8tes-get-action [ action-code ]
     ( action-code = "SQM" ) [ "squirm-from" ]
     ( action-code = "HLP" ) [ "help" ]
     ( action-code = "ATK" ) [ "hurt" ] ; change to HRT??
-    ( action-code = "MAT" ) [ "mate-with" ]
+    ( action-code = "MTW" ) [ "mate-with" ]
     
     ( action-code = "RST" ) [ "rest" ]
     ( action-code = "SVC" ) [ "survival-chance" ]
@@ -495,6 +472,9 @@ to-report read-code [ code target ]
     ( code = "ELH" ) [ life.history ] 
     ( code = "EFR" ) [ female.fertility ]
     ( code = "EGP" ) [ group.identity ]  
+    ( code = "EYW" ) [ yellow.signal ]  
+    ( code = "ERD" ) [ red.signal ]  
+    ( code = "EBL" ) [ blue.signal ]  
     ( code = "ESZ" ) [ size ]
     ( code = "EBS" ) [ body.size ]
     ( code = "ESD" ) [ body.shade ]
@@ -508,20 +488,22 @@ to-report read-code [ code target ]
     ( code = "ECC" ) [ conception.chance ]
     ( code = "EBY" ) [ bite.capacity ]
     ( code = "EMC" ) [ mutation.chance ]
-    ( code = "EVR" ) [ visual.range ] 
-    ( code = "EVA" ) [ visual.angle ] 
-    ( code = "EDP" ) [ day.perception ] 
-    ( code = "ENP" ) [ night.perception ] 
+    ( code = "EVR" ) [ visual.range ]
+    ( code = "EVA" ) [ visual.angle ]
+    ( code = "EDP" ) [ day.perception ]
+    ( code = "ENP" ) [ night.perception ]
     ( code = "EBC" ) [ birthing.chance ]
     ( code = "EWC" ) [ weaning.chance ]
     ( code = "EIC" ) [ infancy.chance ]
     ( code = "EJC" ) [ juvenility.chance ]
     ( code = "EAC" ) [ adulthood.chance ]
     ( code = "ELC" ) [ survival.chance ]
-    ( code = "EYC" ) [ yellow.chance ] 
-    ( code = "ERC" ) [ red.chance ] 
-    ( code = "EBC" ) [ blue.chance ] 
-
+    ( code = "EYC" ) [ yellow.chance ]
+    ( code = "ERC" ) [ red.chance ]
+    ( code = "EBC" ) [ blue.chance ]
+    ( code = "EXC" ) [ xcor ]
+    ( code = "EYC" ) [ ycor ]
+    
     ; PRIMITIVES
     ( code = "TRU" ) [ true ]
     ( code = "FAL" ) [ false ]
@@ -573,12 +555,12 @@ to-report action-codons
     "SVC" "BDS" "BSD" "VSR" "DPR" 
     "VSA" "NPR"   
     "CNC" "BTC" "MTC" "SXR" "LTS"
-    "TRT" "TLF" "GFD" "HED" "SHR" "HID"
+    "TRT" "TLF" "GFD" "STH" "SHR" "HID"
     "YWS" "RDS" "BLS" "CKI" "CKB"
     "CKJ" "CKW" "CKA" "MOV"
-    "MAF" "SPT" "DMF" "EAT" "JNG"
+    "MAF" "SPT" "DMF" "EAT" "JON"
     "LEV" "RCT" "EXP" "PKU" "PDN"
-    "CLG" "SQM" "HLP" "ATK" "MAT" 
+    "CLG" "SQM" "HLP" "ATK" "MTW" 
     "RST" 
   ]
 end
@@ -608,7 +590,8 @@ to-report reporter-codons
     "EMC" "EVR" "EVA" "EDP" "ENP"
     "ENA" "EAA" "EWC" 
     "EIC" "EJC" "EAC" "ESC" "ELC" 
-    "EYC" "ERC" "EBC" 
+    "EYC" "ERC" "EBC" "EXC" "EYC"
+    "EYW" "ERD" "EBL"
   ]
 end
 

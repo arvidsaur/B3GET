@@ -7,59 +7,68 @@
 ;  88.  .88 88.  .88   88   88.  .88 
 ;  `88888P8 `88888P8   dP   `88888P8 
 ;
-; © 2020 K N Crouse  
-;----------------------------------------------------------------------------------------------     
-; 
+; © 2021 K N Crouse  
+;
 ; This extension contains all functions that allow users to create population and genotypes 
-; files and store metadata from a simulation. These files are stored in the data folder.
+; files and store metadata from a simulation. These files are all stored in the data folder.
 ;
 ;----------------------------------------------------------------------------------------------
 
 ;----------------------------------------------------------------------------------------------
-; METAFILE
+; CREATE OR UPDATE METAFILE WHEN USER INTERACTS WITH B3GET
+;
+; This subroutine serves to keep a record of user interface interactions, which include
+; importing and exporting population and genotype files, and some button clicks and commands.
+; Each interaction is saved as a new row within the "metafile.csv" file and each column records
+; information of interest regarding that interaction, such as the name of the current simulation,
+; the type of interaction currently underway, and current parameter settings. This information
+; is located in B3GET > data > metafile.csv.
+;
+; ENTRY:
+;
+; EXIT: 
+; 
 ;----------------------------------------------------------------------------------------------
-
-to setup-metafile
-  
-  if ( not file-exists? "../data/metafile.csv" and behaviorspace-run-number = 0 ) [
-    
-    file-open "../data/metafile.csv"
-    csv:to-file "../data/metafile.csv" (list (list
-      "date-and-time"
-      "path-to-experiment"
-      "model-version"
-      "model-structure"
-      "genotype-reader"
-      "simulation-id"
-      "ticks"
-      "file-type"
-      "file-name"
-      "observation-notes"
-      "population-input" 
-      "genotype-input"
-      "plant-annual-cycle" 
-      "plant-seasonality" 
-      "plant-minimum-neighbors" 
-      "plant-maximum-neighbors" 
-      "plant-daily-cycle" 
-      "plant-quality"
-      "world-width" 
-      "world-height"
-      "deterioration-rate" 
-      "output-results?" 
-      "selection-on?"
-      "useful-commands"
-    ))
-    
-    file-close ]
-end
 
 to update-metafile [ type-of-file name-of-file ]
   
   if ( behaviorspace-run-number = 0 ) [
     
     ; Save whatever is currently in the METAFILE or create new
-    if ( not file-exists? "../data/metafile.csv" ) [ setup-metafile ]
+    if 
+    ( not file-exists? "../data/metafile.csv" 
+      and behaviorspace-run-number = 0 ) 
+    
+    [ 
+      file-open "../data/metafile.csv"
+      csv:to-file "../data/metafile.csv" (list (list
+        "date-and-time"
+        "path-to-experiment"
+        "model-version"
+        "model-structure"
+        "genotype-reader"
+        "simulation-id"
+        "ticks"
+        "file-type"
+        "file-name"
+        "observation-notes"
+        "population-input" 
+        "genotype-input"
+        "plant-annual-cycle" 
+        "plant-seasonality" 
+        "plant-minimum-neighbors" 
+        "plant-maximum-neighbors" 
+        "plant-daily-cycle" 
+        "plant-quality"
+        "world-width" 
+        "world-height"
+        "deterioration-rate" 
+        "output-results?" 
+        "selection-on?"
+        "useful-commands"
+      ))
+    ]
+    
     file-open "../data/metafile.csv"
     let old-metafile csv:from-file "../data/metafile.csv"
     
@@ -104,14 +113,21 @@ to update-metafile [ type-of-file name-of-file ]
 end
 
 ;----------------------------------------------------------------------------------------------
-; POPULATION FILES
+; CREATE A SET OF AGENTS FROM INFORMATION STORED IN A POPULATION FILE
+; 
+; This subroutine creates a new set of agents and for each agent sets their attributes according
+; to the values stored in a csv population file. Each row in the file stores the unique attribute
+; settings for one agent and each column represents one kind of attribute that each member in the
+; population has.
+;
+; ENTRY: PATH-TO-EXPERIMENT
+;        POPULATION
+;
+; EXIT: SET OF AGENTS WHOSE COMPOSITION AND ATTRBUUTES MATCH THOSE IN THE population file
+;
 ;----------------------------------------------------------------------------------------------
 
-to-report generate-population-id
-  report ( word "p" generate-timestamp )
-end
-
-to import-population ; use carefully function here?
+to import-population
   
   let file-to-import ( word path-to-experiment population ".csv" ) ; first try accessing file in designated file path
   if not file-exists? file-to-import [ set file-to-import ( word "../data/" population ".csv" ) ] ; then try the data folder
@@ -136,11 +152,8 @@ to import-population ; use carefully function here?
         ; FOR EACH header in the HEADER-BLOCK set turtle's state variables to the corresponding values
         foreach header-block [ header ->
           let value item j item i data-block ; the value for turtle i taken from column j of the DATA-BLOCK
-          
-          ; Put quotes around everything that is not a Number, Breed, or Boolean or List
-          ;if (not is-number? value and not is-boolean? value and not member? "\n" value and not member? "[" value ) [ set value (word "\"" value "\"")] ; 
-          
-          (ifelse ; fix to not rely on chromosome code
+
+          (ifelse ; If file header and agent breed requirements are met, set state variable according to value
             
             ( header = "breed" ) [ set breed run-result value ]
             ( header = "color" ) [ set color value ]
@@ -249,21 +262,10 @@ to import-population ; use carefully function here?
             ( breed = anima1s and header = "group.transfers.history" ) [ set group.transfers.history value ]
             ( breed = anima1s and header = "infanticide.history" ) [ set infanticide.history value ]
             
-            
-            
-            
-            [ ]) ; carefully is put here to allow multiple breeds in same csv file
-          
-          ; when NetLogo fixes error to allow read-from-string to be called from command block, use this:          
-          ; ifelse ( not is-number? value and header != "breed" and not is-boolean? value and member? "\n" value ) 
-          ; [ carefully [ run (word "set " header " " "\"" csv:from-string value "\"" ) ] [] ]
-          ; [ carefully [ run (word "set " header " " value ) ] [] ]
+            [ ]) 
           
           set j j + 1 ] 
-        set i i + 1 ]]
-    
-    
-    
+        set i i + 1 ] ]
     
     ; create new meta.ids for everyone
     let table-of-ids table:make
@@ -278,6 +280,7 @@ to import-population ; use carefully function here?
     
     ; update carried items list
     ask anima1s [
+      if ( is-string? carried.items and length carried.items > 0 ) [ set carried.items run-result carried.items ]
       if ( not is-list? carried.items ) [ set carried.items [] ]
       foreach carried.items [ itm -> set carried.items remove itm ( lput one-of anima1s with [ meta.id  = ( table:get table-of-ids itm ) ] carried.items ) ] ]
     
@@ -319,94 +322,19 @@ to import-population ; use carefully function here?
       if ( fully.decayed = 0 ) [ set fully.decayed false ]
       if ( hidden.chance = 0 ) [ set hidden.chance 0 ]
       
-      update-appearance
+      update-appearance ; One the agent is updated with its attributes, update its appearance to match
     ]
     
     set observation-notes (word "Population file \"" population "\" imported. " observation-notes )
     update-metafile "population" population
     output-print " Population import successful."
     
-  ][ set population "" ]
-  
-end
-
-to import-population-old
-  ;output-header (word " IMPORT POPULATION : " population )
-  
-  let file-to-open ( word path-to-experiment population ".csv" ) ; first try accessing file in designated file path
-  if not file-exists? file-to-open [ set file-to-open ( word "../data/" population ".csv" ) ] ; then try the data folder
-  
-  ifelse file-exists? file-to-open [ ; check both locations
-    
-    import-turtles-from file-to-open
-    
-    ; create new meta.ids for everyone
-    let table-of-ids table:make
-    ask anima1s [
-      
-      ifelse ( table:has-key? table-of-ids meta.id ) 
-      [ let new-id random 9999999
-        table:put table-of-ids meta.id new-id
-        set meta.id new-id ]
-      
-      [ table:put table-of-ids meta.id meta.id ]]
-    
-    ; update carried items list
-    ask anima1s [
-      if ( not is-list? carried.items ) [ set carried.items [] ]
-      foreach carried.items [ itm -> set carried.items remove itm ( lput one-of anima1s with [ meta.id  = ( table:get table-of-ids itm ) ] carried.items ) ] ]
-    
-    ; update mother identity
-    ask anima1s [
-      if ( my.mother = 0 or my.mother = "nobody" ) [ set my.mother nobody ]
-      if ( member? my.mother table:keys table-of-ids ) [ 
-        set my.mother one-of anima1s with [ table:get table-of-ids [my.mother] of myself = meta.id  ] ]]
-    
-    ; general initialization of variables
-    ask anima1s [
-      
-      ; initialize lists
-      set receiving.history []
-      set carried.history []
-      set aid.history []
-      set harm.history []
-      set group.transfers.history []
-      set copulations.history []
-      set conceptions.history []
-      set cells.occupied []
-      set infanticide.history []
-      set decision.vectors []
-      set my.environment []
-      set actions.completed []
-      set label-color white
-      
-      ; compatibility with previous versions
-      if ( yellow.signal = 0 ) [ set yellow.signal false ]
-      if ( red.signal = 0 ) [ set red.signal false ]
-      if ( blue.signal = 0 ) [ set blue.signal false ]
-      if ( visual.angle = 0 ) [ set visual.angle 0.5 ]
-      if ( visual.range = 0 ) [ set visual.range 0.9 ]
-      if ( day.perception = 0 ) [ set day.perception 0.9 ]
-      if ( night.perception = 0 ) [ set night.perception 0.25 ]
-      if ( bite.capacity = 0 ) [ set bite.capacity 0.2 ]
-      if ( is.alive = 0 ) [ set is.alive true ]
-      if ( is.resting = 0 ) [ set is.resting false ]
-      if ( fully.decayed = 0 ) [ set fully.decayed false ]
-      if ( hidden.chance = 0 ) [ set hidden.chance 0 ]
-      
-      update-appearance
-    ]
-    
-    set observation-notes (word "Population file \"" population "\" imported. " observation-notes )
-    update-metafile "population" population
-    output-print " Population import successful."
-    
-  ][ set population "" ]
+  ][ set population "" ] ; If the population file cannot be found, set the population textbox to blank
   
 end
 
 to save-population
-  ;output-header (word " SAVE POPULATION : " population )
+  output-header (word " SAVE POPULATION : " population )
   
   ifelse ( file-exists? (word path-to-experiment population ".csv") )
   [ 
@@ -570,6 +498,63 @@ to import-genotype
   
 end
 
+to save-genotype
+  ;output-header (word " SAVE GENOTYPE : organism " meta.id  )
+  ( csv:to-file ( word path-to-experiment genotype ".txt" ) (sentence chromosome.I [[]] chromosome.II ) " " )
+  set observation-notes (word "New genotype " genotype " saved. " observation-notes )
+  update-metafile "genotype" genotype
+  output-print " Genotype successfully saved."
+end
+
+; save? - this one helps set a group to same color i think+
+to-report get-group-identity-from-color [ color-of-group ]
+  ifelse ( is-number? color-of-group ) [
+    report ( random 999 * 140 + color-of-group )
+  ][
+    report "error: input value is not a number"
+  ]
+end
+
+; save? - this one gives random chomrosome identities at first
+to set-random-identity-chromosomes [ length-of-chromosomes ]
+  let get-alphabet [ "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z" ]
+  ifelse ( is-number? length-of-chromosomes ) [
+    set identity.I ""
+    set identity.II ""
+    repeat length-of-chromosomes [ set identity.I (word identity.I one-of get-alphabet ) ]
+    repeat length-of-chromosomes [ set identity.II (word identity.II one-of get-alphabet ) ]
+  ][
+    print "error: input value is not a number"
+  ] 
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+to-report generate-population-id
+  report ( word "p" generate-timestamp )
+end
+
+
 ;to-report allele-filter [ allele ]                                 
 ;  
 ;  let contains-a-codon? false                                      ; Initially, the current allele is not known to contain a legitimate codon ( based on current genotype reader )
@@ -594,88 +579,60 @@ end
 ;  [ false ]                                                        ; Report FALSE to communicate that this allele should not be imported to population
 ;end
 
-to save-genotype
-  ;output-header (word " SAVE GENOTYPE : organism " meta.id  )
-  ( csv:to-file ( word path-to-experiment genotype ".txt" ) (sentence chromosome.I [[]] chromosome.II ) " " )
-  set observation-notes (word "New genotype " genotype " saved. " observation-notes )
-  update-metafile "genotype" genotype
-  output-print " Genotype successfully saved."
-end
-
-
-to-report get-group-identity-from-color [ color-of-group ]
-  ifelse ( is-number? color-of-group ) [
-    report ( random 999 * 140 + color-of-group )
-  ][
-    report "error: input value is not a number"
-  ]
-end
-
-to set-random-identity-chromosomes [ length-of-chromosomes ]
-  let get-alphabet [ "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z" ]
-  ifelse ( is-number? length-of-chromosomes ) [
-    set identity.I ""
-    set identity.II ""
-    repeat length-of-chromosomes [ set identity.I (word identity.I one-of get-alphabet ) ]
-    repeat length-of-chromosomes [ set identity.II (word identity.II one-of get-alphabet ) ]
-  ][
-    print "error: input value is not a number"
-  ] 
-end
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-to collect-data [ path-to-output ]
-  output-print (word "simulation " behaviorspace-run-number " collecting data at " ticks " ticks and at " date-and-time )
-  
-  let file-path path-to-output 
-  
-  if ( not file-exists? file-path )
-  
-  [ file-open file-path
-    file-print csv:to-string (list (list
-      
-      "behaviorspace-experiment-name"
-      "behaviorspace-run-number"
-      "date-and-time"
-      "world-width"
-      "world-height"
-      "ticks"
-      
-      
-  )) ]
-  
-  file-open file-path
-  
-  file-print csv:to-string ( list ( list
-    
-    behaviorspace-experiment-name
-    behaviorspace-run-number
-    date-and-time
-    world-width
-    world-height
-    ticks
-    
-  ))
-  
-  file-close
-  
-  ask one-of anima1s [
-    output-print self
-    output-print xcor
-    output-print ycor
-    output-print heading
-    output-print biological.sex
-    output-print life.history
-    output-print chromosome.i
-    output-print chromosome.ii
-    output-print my.environment
-    output-print decision.vectors
-    output-print actions.completed
-  ]
-  
-end
+;to collect-data [ path-to-output ]
+;  output-print (word "simulation " behaviorspace-run-number " collecting data at " ticks " ticks and at " date-and-time )
+;  
+;  let file-path path-to-output 
+;  
+;  if ( not file-exists? file-path )
+;  
+;  [ file-open file-path
+;    file-print csv:to-string (list (list
+;      
+;      "behaviorspace-experiment-name"
+;      "behaviorspace-run-number"
+;      "date-and-time"
+;      "world-width"
+;      "world-height"
+;      "ticks"
+;      
+;      
+;  )) ]
+;  
+;  file-open file-path
+;  
+;  file-print csv:to-string ( list ( list
+;    
+;    behaviorspace-experiment-name
+;    behaviorspace-run-number
+;    date-and-time
+;    world-width
+;    world-height
+;    ticks
+;    
+;  ))
+;  
+;  file-close
+;  
+;  ask one-of anima1s [
+;    output-print self
+;    output-print xcor
+;    output-print ycor
+;    output-print heading
+;    output-print biological.sex
+;    output-print life.history
+;    output-print chromosome.i
+;    output-print chromosome.ii
+;    output-print my.environment
+;    output-print decision.vectors
+;    output-print actions.completed
+;  ]
+;  
+;end
 
 ;--------------------------------------------------------------------------------------------------------------------
 ;
@@ -789,45 +746,124 @@ end
 ;
 ;----------------------------------------------------------------------------------------------------------------------------
 
-to import-turtles-from [ filename ]
-  
-  ; If FILENAME does NOT exist, open a popup directory.
-  let file-to-import ifelse-value ( file-exists? filename ) [ filename ] [ user-file ]
-  
-  if ( is-string? file-to-import and file-exists? file-to-import ) [ 
-    file-open file-to-import
-    let data-from-filename csv:from-file file-to-import
-    
-    let header-block first data-from-filename ; Header information from FILE-TO-IMPORT
-    let data-block but-first data-from-filename ; FILE-TO-IMPORT data without header information
-    
-    let i 0 ; index variable to iteratively search through each row in the DATA-BLOCK
-    let j 0 ; index variable to iteratively search through each header in the HEADER-BLOCK
-    
-    ; FOR EACH row in the DATA-BLOCK create a generic turtle
-    foreach data-block [ row -> 
-      create-turtles 1 [
-        set j 0
-        
-        ; FOR EACH header in the HEADER-BLOCK set turtle's state variables to the corresponding values
-        foreach header-block [ header ->
-          let value item j item i data-block ; the value for turtle i taken from column j of the DATA-BLOCK
-          
-          ; Put quotes around everything that is not a Number, Breed, or Boolean or List
-          if (not is-number? value and header != "breed" and not is-boolean? value and not member? "\n" value and not member? "[" value ) [ set value (word "\"" value "\"")] ; 
-          
-          (ifelse ; fix to not rely on chromosome code
-            ( header = "chromosome.I" ) [ carefully [set chromosome.I csv:from-string value ][]]
-            ( header = "chromosome.II" ) [ carefully [ set chromosome.II csv:from-string value ][]]
-            [ carefully [ run (word "set " header " " value ) ] [ ]]) ; carefully is put here to allow multiple breeds in same csv file
-          
-          ; when NetLogo fixes error to allow read-from-string to be called from command block, use this:          
-          ; ifelse ( not is-number? value and header != "breed" and not is-boolean? value and member? "\n" value ) 
-          ; [ carefully [ run (word "set " header " " "\"" csv:from-string value "\"" ) ] [] ]
-          ; [ carefully [ run (word "set " header " " value ) ] [] ]
-          
-          set j j + 1 ] 
-        set i i + 1 ]]
-    
-    file-close ]
-end
+;to import-turtles-from [ filename ]
+;  
+;  ; If FILENAME does NOT exist, open a popup directory.
+;  let file-to-import ifelse-value ( file-exists? filename ) [ filename ] [ user-file ]
+;  
+;  if ( is-string? file-to-import and file-exists? file-to-import ) [ 
+;    file-open file-to-import
+;    let data-from-filename csv:from-file file-to-import
+;    
+;    let header-block first data-from-filename ; Header information from FILE-TO-IMPORT
+;    let data-block but-first data-from-filename ; FILE-TO-IMPORT data without header information
+;    
+;    let i 0 ; index variable to iteratively search through each row in the DATA-BLOCK
+;    let j 0 ; index variable to iteratively search through each header in the HEADER-BLOCK
+;    
+;    ; FOR EACH row in the DATA-BLOCK create a generic turtle
+;    foreach data-block [ row -> 
+;      create-turtles 1 [
+;        set j 0
+;        
+;        ; FOR EACH header in the HEADER-BLOCK set turtle's state variables to the corresponding values
+;        foreach header-block [ header ->
+;          let value item j item i data-block ; the value for turtle i taken from column j of the DATA-BLOCK
+;          
+;          ; Put quotes around everything that is not a Number, Breed, or Boolean or List
+;          if (not is-number? value and header != "breed" and not is-boolean? value and not member? "\n" value and not member? "[" value ) [ set value (word "\"" value "\"")] ; 
+;          
+;          (ifelse ; fix to not rely on chromosome code
+;            ( header = "chromosome.I" ) [ carefully [set chromosome.I csv:from-string value ][]]
+;            ( header = "chromosome.II" ) [ carefully [ set chromosome.II csv:from-string value ][]]
+;            [ carefully [ run (word "set " header " " value ) ] [ ]]) ; carefully is put here to allow multiple breeds in same csv file
+;          
+;          ; when NetLogo fixes error to allow read-from-string to be called from command block, use this:          
+;          ; ifelse ( not is-number? value and header != "breed" and not is-boolean? value and member? "\n" value ) 
+;          ; [ carefully [ run (word "set " header " " "\"" csv:from-string value "\"" ) ] [] ]
+;          ; [ carefully [ run (word "set " header " " value ) ] [] ]
+;          
+;          set j j + 1 ] 
+;        set i i + 1 ]]
+;    
+;    file-close ]
+;end
+
+
+
+
+;to import-population-old
+;  ;output-header (word " IMPORT POPULATION : " population )
+;  
+;  let file-to-open ( word path-to-experiment population ".csv" ) ; first try accessing file in designated file path
+;  if not file-exists? file-to-open [ set file-to-open ( word "../data/" population ".csv" ) ] ; then try the data folder
+;  
+;  ifelse file-exists? file-to-open [ ; check both locations
+;    
+;    import-turtles-from file-to-open
+;    
+;    ; create new meta.ids for everyone
+;    let table-of-ids table:make
+;    ask anima1s [
+;      
+;      ifelse ( table:has-key? table-of-ids meta.id ) 
+;      [ let new-id random 9999999
+;        table:put table-of-ids meta.id new-id
+;        set meta.id new-id ]
+;      
+;      [ table:put table-of-ids meta.id meta.id ]]
+;    
+;    ; update carried items list
+;    ask anima1s [
+;      if ( not is-list? carried.items ) [ set carried.items [] ]
+;      foreach carried.items [ itm -> set carried.items remove itm ( lput one-of anima1s with [ meta.id  = ( table:get table-of-ids itm ) ] carried.items ) ] ]
+;    
+;    ; update mother identity
+;    ask anima1s [
+;      if ( my.mother = 0 or my.mother = "nobody" ) [ set my.mother nobody ]
+;      if ( member? my.mother table:keys table-of-ids ) [ 
+;        set my.mother one-of anima1s with [ table:get table-of-ids [my.mother] of myself = meta.id  ] ]]
+;    
+;    ; general initialization of variables
+;    ask anima1s [
+;      
+;      ; initialize lists
+;      set receiving.history []
+;      set carried.history []
+;      set aid.history []
+;      set harm.history []
+;      set group.transfers.history []
+;      set copulations.history []
+;      set conceptions.history []
+;      set cells.occupied []
+;      set infanticide.history []
+;      set decision.vectors []
+;      set my.environment []
+;      set actions.completed []
+;      set label-color white
+;      
+;      ; compatibility with previous versions
+;      if ( yellow.signal = 0 ) [ set yellow.signal false ]
+;      if ( red.signal = 0 ) [ set red.signal false ]
+;      if ( blue.signal = 0 ) [ set blue.signal false ]
+;      if ( visual.angle = 0 ) [ set visual.angle 0.5 ]
+;      if ( visual.range = 0 ) [ set visual.range 0.9 ]
+;      if ( day.perception = 0 ) [ set day.perception 0.9 ]
+;      if ( night.perception = 0 ) [ set night.perception 0.25 ]
+;      if ( bite.capacity = 0 ) [ set bite.capacity 0.2 ]
+;      if ( is.alive = 0 ) [ set is.alive true ]
+;      if ( is.resting = 0 ) [ set is.resting false ]
+;      if ( fully.decayed = 0 ) [ set fully.decayed false ]
+;      if ( hidden.chance = 0 ) [ set hidden.chance 0 ]
+;      
+;      update-appearance
+;    ]
+;    
+;    set observation-notes (word "Population file \"" population "\" imported. " observation-notes )
+;    update-metafile "population" population
+;    output-print " Population import successful."
+;    
+;  ][ set population "" ]
+;  
+;end
+

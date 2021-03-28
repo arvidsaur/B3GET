@@ -600,6 +600,42 @@ end
 ; consider-environment > make-decisions > allocate-energy > do-actions
 ;--------------------------------------------------------------------------------------------------------------------
 
+;to consider-environment ; should only be able to see not fully.decayed
+;
+;  let sun-status get-solar-status
+;
+;  ; ASPATIAL WORLD
+;  ifelse ( member? "aspatial" model-structure )
+;  [ let patch-count count patches in-cone ( maximum-visual-range * visual.range ) ( 360 * visual.angle )
+;    ask n-of patch-count patches [ ask myself [ set my.environment lput myself my.environment ] ]]
+;
+;  ; SPATIAL WORLD
+;  [ ask patches in-cone ( maximum-visual-range * visual.range ) ( 360 * visual.angle ) [ ask myself [ set my.environment lput myself my.environment ] ]]
+;
+;  ; Consider perception capabilties and modify environment
+;  set my.environment up-to-n-of ( ( ifelse-value ( sun-status = "DAY" ) [ day.perception ] [ night.perception ] ) * length my.environment ) my.environment
+;
+;  ; if gestatee, add mother to environment, and vice versa
+;  ifelse ( life.history = "gestatee" )
+;  [ if ( my.mother != nobody )
+;    [ ask my.mother [ set my.environment lput myself my.environment ]
+;      set my.environment lput my.mother my.environment ]]
+;
+;  ; otherwise, add agents existing on patches in environment to environment
+;  [ foreach my.environment [ p ->  ; look at each patch in environment taken from above
+;    ask [anima1s-here] of p ; add any not hidden agents to environment
+;      [ if ( not hidden? and self != myself ) [ ask myself [ set my.environment lput myself my.environment ]] ]]]
+;
+;  ; can see carried items and who is carrying you
+;  foreach carried.items [ c ->
+;    set my.environment lput c my.environment
+;    ask c [ if ( is.alive and not member? myself my.environment ) [ set my.environment lput myself my.environment ] ]]
+;
+;  set my.environment remove-duplicates lput self my.environment
+;
+;end
+
+
 to consider-environment ; should only be able to see not fully.decayed
 
   let sun-status get-solar-status
@@ -612,29 +648,29 @@ to consider-environment ; should only be able to see not fully.decayed
   ; SPATIAL WORLD
   [ ask patches in-cone ( maximum-visual-range * visual.range ) ( 360 * visual.angle ) [ ask myself [ set my.environment lput myself my.environment ] ]]
 
-  ; Consider perception capabilties and modify environment
-  set my.environment up-to-n-of ( ( ifelse-value ( sun-status = "DAY" ) [ day.perception ] [ night.perception ] ) * length my.environment ) my.environment
-
-  ; if gestatee, add mother to environment
+  ; if gestatee, add mother to environment, and vice versa
   ifelse ( life.history = "gestatee" )
   [ if ( my.mother != nobody )
     [ ask my.mother [ set my.environment lput myself my.environment ]
       set my.environment lput my.mother my.environment ]]
 
-  ; otherwise, add agents existing on patches in environment to environment
-  [ foreach my.environment [ p ->  ; look at each patch in environment taken from above
-    ask [anima1s-here] of p ; add any not hidden agents to environment
-      [ if ( not hidden? and self != myself ) [ ask myself [ set my.environment lput myself my.environment ]] ]]]
+  ; otherwise, add agents existing in perception cone to environment
+  [ ask anima1s in-cone ( maximum-visual-range * visual.range ) ( 360 * visual.angle ) [
+    if ( not hidden? and self != myself ) [ ask myself [ set my.environment lput myself my.environment ]] ]
 
-  set my.environment lput self my.environment
+    ; Consider perception capabilties and modify environment
+    set my.environment up-to-n-of ( ( ifelse-value ( sun-status = "DAY" ) [ day.perception ] [ night.perception ] ) * length my.environment ) my.environment
+  ]
 
-  ; DELETE ?
-;  foreach carried.items [ c -> if ( [my.mother] of c = self ) [
-;    set my.environment lput c my.environment ; mothers can see their carried offspring
-;    ask c [ if ( is.alive and not member? myself my.environment ) [ set my.environment lput myself my.environment ] ]]]  ; carried offspring can see their mother
-;  set my.environment remove-duplicates lput self my.environment ; self is always in environment
+  ; can see carried items and who is carrying you
+  foreach carried.items [ c ->
+    set my.environment lput c my.environment
+    ask c [ if ( is.alive and not member? myself my.environment ) [ set my.environment lput myself my.environment ] ]]
+
+  set my.environment remove-duplicates lput self my.environment
 
 end
+
 
 to make-decisions
 
@@ -716,7 +752,7 @@ to do-actions
         action = "cling-to" [ if ( check-distance target ) [ cling-to target cost ] ( hide -0.1 )]
         action = "squirm-from" [ if ( check-distance target ) [ squirm-from target cost ] ( hide -0.1 )]
         action = "help" [ if ( check-distance target ) [ help target cost ] ( hide -0.1 )]
-        action = "hurt" [ if ( check-distance target ) [ hurt target cost ] ( hide -0.1 )]
+        action = "attack" [ if ( check-distance target ) [ hurt target cost ] ( hide -0.1 )]
         action = "mate-with" [ if ( check-distance target ) [ mate-with target cost ] ( hide -0.1 )]
         [])]
 
@@ -891,7 +927,7 @@ to move-toward [ target cost ]
     if ( abs ycor-difference > maximum-visual-range and ycor-difference < 0 ) [ set ycor-difference ycor-difference + 100 ]
     if ( abs xcor-difference > maximum-visual-range and xcor-difference < 0 ) [ set xcor-difference xcor-difference + 100 ]
 
-    if ( not ( ycor-difference = 0 and xcor-difference = 0 ) ) [
+    if ( not ( ycor-difference = 0 and xcor-difference = 0 ) ) [ ; If the target isn't in the exact same location as self
 
       ; calculate angle to target
       let angle atan xcor-difference ycor-difference
@@ -1786,8 +1822,8 @@ GRAPHICS-WINDOW
 99
 0
 99
-0
-0
+1
+1
 1
 timesteps
 30.0
@@ -1832,7 +1868,7 @@ INPUTBOX
 387
 79
 path-to-experiment
-../results/2020-11-20/
+../data/visual-verification/
 1
 0
 String
@@ -1855,7 +1891,7 @@ NIL
 1
 
 INPUTBOX
-848
+849
 10
 1117
 117
@@ -1895,9 +1931,9 @@ NIL
 
 SLIDER
 849
-468
+466
 1118
-501
+499
 plant-minimum-neighbors
 plant-minimum-neighbors
 0
@@ -1910,9 +1946,9 @@ HORIZONTAL
 
 SLIDER
 849
-505
+503
 1118
-538
+536
 plant-maximum-neighbors
 plant-maximum-neighbors
 0
@@ -1936,14 +1972,14 @@ season
 
 SLIDER
 849
-395
+393
 1118
-428
+426
 plant-seasonality
 plant-seasonality
 0
 1
-0.5
+0.0
 .05
 1
 NIL
@@ -1951,9 +1987,9 @@ HORIZONTAL
 
 SLIDER
 849
-323
+321
 1117
-356
+354
 plant-annual-cycle
 plant-annual-cycle
 10
@@ -1966,9 +2002,9 @@ HORIZONTAL
 
 SLIDER
 849
-359
+357
 1118
-392
+390
 plant-daily-cycle
 plant-daily-cycle
 1
@@ -1991,23 +2027,23 @@ get-solar-status
 11
 
 INPUTBOX
-848
+849
 122
 995
 191
 population
-population
+square-dance
 1
 0
 String
 
 INPUTBOX
-848
+849
 197
 995
 265
 genotype
-genotype-123
+square-dance
 1
 0
 String
@@ -2065,19 +2101,19 @@ NIL
 
 CHOOSER
 849
-545
+543
 1057
-590
+588
 useful-commands
 useful-commands
 "help-me" "meta-report" "---------------------" " > OPERATIONS   " "---------------------" "parameter-settings" "default-settings" "model-structure" "-- aspatial" "-- free-lunch" "-- ideal-form" "-- no-evolution" "-- no-plants" "-- reaper" "-- signal-fertility" "-- stork" "-- uninvadable" "clear-population" "new-population" "reset-plants" "save-world" "import-world" "save-simulation" "---------------------" " > VERIFICATION " "---------------------" "dynamic-check" "-- true" "-- false" "runtime-check" "visual-check" "-- dine-and-dash" "-- life-history-channel" "-- musical-pairs" "-- night-and-day" "-- popularity-context" "-- supply-and-demand" "-- square-dance" "---------------------" " > DISPLAY RESULTS   " "---------------------" "age" "generations" "life-history" "genotype" "phenotype" "-- survival-chance" "-- body-size" "-- body-shade" "-- hidden-chance" "-- bite-capacity" "-- mutation-chance" "-- sex-ratio" "-- litter-size" "-- conception-chance" "-- visual-angle" "-- visual-range" "-- day-perception" "-- night-perception" "-- yellow-chance" "-- red-chance" "-- blue-chance" "-- birthing-chance" "-- weaning-chance" "-- infancy-chance" "-- juvenility-chance" "-- adulthood-chance" "carried-items" "energy-supply" "behaviors" "-- decisions" "-- actions" "-- birthing" "-- weaning" "-- matings" "-- mating-partners" "-- conceptions" "-- infanticide" "-- group-transfers" "-- travel-distance" "-- foraging-gains" "-- total-energy-gains" "-- total-energy-cost" "-- receiving-history" "-- carried-history" "-- aid-history" "-- harm-history" "---------------------" " > OUTPUT RESULTS    " "---------------------" "dynamic-verification" "verification-rate"
-48
+29
 
 BUTTON
 1063
-545
+543
 1118
-590
+588
 ▷
 command
 NIL
@@ -2143,14 +2179,14 @@ NIL
 
 SLIDER
 849
-431
+429
 1118
-464
+462
 plant-quality
 plant-quality
 .1
 10
-10.0
+5.0
 .1
 1
 NIL
@@ -2163,7 +2199,7 @@ SWITCH
 79
 output-results?
 output-results?
-0
+1
 1
 -1000
 
@@ -2211,13 +2247,13 @@ CHOOSER
 genotype-reader
 genotype-reader
 "to1erance" "sta2us" "gat3s"
-1
+2
 
 BUTTON
-1500
-940
-1599
-973
+1583
+887
+1682
+920
 NIL
 display-results
 T
@@ -2237,7 +2273,7 @@ SWITCH
 920
 adults
 adults
-0
+1
 1
 -1000
 
@@ -2281,7 +2317,7 @@ SWITCH
 920
 males
 males
-0
+1
 1
 -1000
 
@@ -2292,7 +2328,7 @@ SWITCH
 920
 females
 females
-0
+1
 1
 -1000
 
