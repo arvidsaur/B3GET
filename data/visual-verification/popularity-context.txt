@@ -1,0 +1,31 @@
+
+::::::::::: STA2US CODE :::::::::::
+
+false e e survival-chance 0.03
+false m e go-forward 0.5
+false m e set-heading 1.0
+false m64 e set-heading 0.25
+false m24 e set-heading 0.5
+false m94 e set-heading 0.75
+
+false f65 m recruit 0.5
+false m64 f25 join 0.5
+false f95 m24 recruit 0.5
+false f15 m94 expel 0.5
+false m64 f15 leave 0.5
+false m24 f15 leave 0.5
+
+::::::::::: GAT3S CODE :::::::::::
+
+false EGO EQL TRU THN SVC 0.03
+false EGO EQL TRU NNN ESX EQL MAL THN GFD 0.5 THN STH 1.0
+false EGO EQL TRU NNN ESX EQL MAL NNN ECL EQL 64 THN STH 0.25
+false EGO EQL TRU NNN ESX EQL MAL NNN ECL EQL 24 THN STH 0.5
+false EGO EQL TRU NNN ESX EQL MAL NNN ECL EQL 94 THN STH 0.75
+
+false ESX EQL FEM NNN ECL EQL 65 NNN SEX EQL MAL THN RCT 0.5
+false ESX EQL MAL NNN ECL EQL 64 NNN SEX EQL FEM NNN COL EQL 25 THN JON 0.5
+false ESX EQL FEM NNN ECL EQL 95 NNN SEX EQL MAL NNN COL EQL 24 THN RCT 0.5
+false ESX EQL FEM NNN ECL EQL 15 NNN SEX EQL MAL NNN COL EQL 94 THN EXP 0.5
+false ESX EQL MAL NNN ECL EQL 64 NNN SEX EQL FEM NNN COL EQL 15 THN LEV 0.5
+false ESX EQL MAL NNN ECL EQL 24 NNN SEX EQL FEM NNN COL EQL 15 THN LEV 0.5

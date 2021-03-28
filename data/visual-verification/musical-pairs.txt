@@ -1,0 +1,19 @@
+
+::::::::::: STA2US CODE :::::::::::
+
+false e e survival-chance 0.05
+false m få move-toward 0.3
+false m e go-forward 3
+
+false f m yellow-signal 2
+false m β move-toward 2
+
+
+::::::::::: GAT3S CODE :::::::::::
+
+false EGO EQL TRU THN SVC 0.05
+false ESX EQL MAL NNN SEX EQL FEM NNN YON EQL FAL THN MOV 0.3
+false EGO EQL TRU NNN ESX EQL MAL THN GFD 3
+
+false ESX EQL FEM NNN SEX EQL MAL THN YWS 2
+false ESX EQL MAL NNN RON EQL TRU THN MOV 2

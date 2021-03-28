@@ -1,0 +1,28 @@
+
+::::::::::: STA2US CODE :::::::::::
+
+false e e survival-chance 0.05
+false . e go-forward 0.5
+false e14 o attack 1
+false e94 o help 1
+
+false α β rest -1
+false β ɣ rest -1
+false ɣ α rest -1
+false α ɣ rest 1
+false ɣ β rest 1
+false β α rest 1
+
+::::::::::: GAT3S CODE :::::::::::
+
+false EGO EQL TRU THN SVC 0.05
+false EGO EQL TRU NNN ERG EQL FAL THN GFD 0.5
+false ECL EQL 14 NNN EGO EQL FAL THN ATK 1
+false ECL EQL 94 NNN EGO EQL FAL THN HLP 1
+
+false EYW EQL TRU NNN RON EQL TRU THN RST -1
+false ERD EQL TRU NNN BON EQL TRU THN RST -1
+false EBL EQL TRU NNN YON EQL TRU THN RST -1
+false EYW EQL TRU NNN BON EQL TRU THN RST 1
+false EBL EQL TRU NNN RON EQL TRU THN RST 1
+false ERD EQL TRU NNN YON EQL TRU THN RST 1

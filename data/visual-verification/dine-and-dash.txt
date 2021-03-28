@@ -1,0 +1,53 @@
+
+::::::::::: STA2US CODE :::::::::::
+
+false e e survival-chance 0.03
+false e139 e go-forward 0.1
+false *139 d eat 0.3
+false e16 e go-forward 0.5
+false *16 d eat 0.3
+false e25 e go-forward 0.4
+false *25 d eat 0.5
+false e35 e go-forward 0.1
+false *35 d eat 0.9
+false e45 e go-forward 0.1
+false *45 d eat 0.3
+false e86 e go-forward 0.3
+false *86 d eat 0.3
+false e115 e go-forward 0.01
+false *115 d eat 0.1
+
+false e137 e go-forward 0.3
+false e137 e turn-right 0.005
+false *137 d eat 0.1
+false e95 e go-forward 0.3
+false e95 e turn-left 0.007
+false *95 d eat 0.1
+false e104 e go-forward 0.3
+false e104 e turn-right 0.012
+false *104 d eat 0.1
+
+::::::::::: GAT3S CODE :::::::::::
+
+false EGO EQL TRU THN SVC 0.01
+false EGO EQL TRU NNN ECL EQL 139 THN GFD 0.1
+false ECL EQL 139 NNN DAY EQL TRU NNN ISP EQL TRU THN EAT 0.3
+false EGO EQL TRU NNN ECL EQL 16 THN GFD 0.5
+false ECL EQL 16 NNN DAY EQL TRU NNN ISP EQL TRU THN EAT 0.3
+false EGO EQL TRU NNN ECL EQL 25 THN GFD 0.4
+false ECL EQL 25 NNN DAY EQL TRU NNN ISP EQL TRU THN EAT 0.5
+false EGO EQL TRU NNN ECL EQL 35 THN GFD 0.1
+false ECL EQL 35 NNN DAY EQL TRU NNN ISP EQL TRU THN EAT 0.9
+false EGO EQL TRU NNN ECL EQL 45 THN GFD 0.1
+false ECL EQL 45 NNN DAY EQL TRU NNN ISP EQL TRU THN EAT 0.3
+false EGO EQL TRU NNN ECL EQL 86 THN GFD 0.3
+false ECL EQL 86 NNN DAY EQL TRU NNN ISP EQL TRU THN EAT 0.3
+false EGO EQL TRU NNN ECL EQL 115 THN GFD 0.01
+false ECL EQL 115 NNN DAY EQL TRU NNN ISP EQL TRU THN EAT 0.1
+
+false EGO EQL TRU NNN ECL EQL 137 THN GFD 0.3 THN TRT 0.005
+false ECL EQL 137 NNN DAY EQL TRU NNN ISP EQL TRU THN EAT 0.1
+false EGO EQL TRU NNN ECL EQL 95 THN GFD 0.3 THN TLF 0.007
+false ECL EQL 95 NNN DAY EQL TRU NNN ISP EQL TRU THN EAT 0.1
+false EGO EQL TRU NNN ECL EQL 104 THN GFD 0.3 THN TRT 0.012
+false ECL EQL 104 NNN DAY EQL TRU NNN ISP EQL TRU THN EAT 0.1

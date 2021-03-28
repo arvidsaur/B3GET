@@ -1,0 +1,50 @@
+
+::::::::::: STA2US CODE :::::::::::
+
+false e e survival-chance 0.05
+false i e go-forward 0.1
+false j + squirm-from 0.01
+false j e go-forward 0.1
+false a e turn-right 0.05
+false a e go-forward 0.01
+
+false g28 e check-infancy 0.01
+false p35 e check-birth 0.10
+false g48 e check-infancy 0.01
+false l45 e check-weaning 0.10
+false p65 e check-birth 0.10
+false i68 e check-juvenility 0.01
+false g78 e check-infancy 0.01
+false i78 e check-juvenility 0.01
+false p85 e check-birth 0.10
+false l85 e check-weaning 0.10
+false g98 e check-infancy 0.01
+false i98 e check-juvenility 0.01
+false j98 e check-adulthood 0.01
+false p125 e check-birth 0.10
+false l125 e check-weaning 0.10
+false j128 e check-adulthood 0.01
+
+::::::::::: GAT3S CODE :::::::::::
+
+false EGO EQL TRU THN SVC 0.05
+false EGO EQL TRU NNN ELH NQL GES THN GFD 0.1
+false ELH EQL JUV NNN CRG EQL TRU THN SQM 0.01
+false EGO EQL TRU NNN ELH EQL ADT THN TRT 0.05
+
+false EGO EQL TRU NNN ELH EQL GES NNN ECL EQL 28 THN CKI 0.01
+false EGO EQL TRU NNN EFR EQL PRG NNN ECL EQL 35 THN CKB 0.1
+false EGO EQL TRU NNN ELH EQL GES NNN ECL EQL 48 THN CKI 0.01
+false EGO EQL TRU NNN EFR EQL LAC NNN ECL EQL 45 THN CKW 0.1
+false EGO EQL TRU NNN EFR EQL PRG NNN ECL EQL 65 THN CKB 0.1
+false EGO EQL TRU NNN ELH EQL INF NNN ECL EQL 68 THN CKJ 0.01
+false EGO EQL TRU NNN ELH EQL GES NNN ECL EQL 78 THN CKI 0.01
+false EGO EQL TRU NNN ELH EQL INF NNN ECL EQL 78 THN CKJ 0.01
+false EGO EQL TRU NNN EFR EQL PRG NNN ECL EQL 85 THN CKB 0.1
+false EGO EQL TRU NNN EFR EQL LAC NNN ECL EQL 85 THN CKW 0.1
+false EGO EQL TRU NNN ELH EQL GES NNN ECL EQL 98 THN CKI 0.01
+false EGO EQL TRU NNN ELH EQL INF NNN ECL EQL 98 THN CKJ 0.01
+false EGO EQL TRU NNN ELH EQL JUV NNN ECL EQL 98 THN CKA 0.01
+false EGO EQL TRU NNN EFR EQL PRG NNN ECL EQL 125 THN CKB 0.1
+false EGO EQL TRU NNN EFR EQL LAC NNN ECL EQL 125 THN CKW 0.1
+false EGO EQL TRU NNN ELH EQL JUV NNN ECL EQL 128 THN CKA 0.01

@@ -1,0 +1,52 @@
+
+::::::::::: STA2US CODE :::::::::::
+
+false e e survival-chance 0.03
+false i e check-juvenility 0.05
+false a jy hide 1
+false j e hide 1
+
+false a15 y supply-to -0.4
+false a25 y supply-to -0.3
+false a35 y supply-to -0.2
+false a45 y supply-to -0.1
+false a65 y supply-to 0.1
+false a75 y supply-to 0.2
+false a85 y supply-to 0.3
+false a95 y supply-to 0.4
+
+false i17 + demand-from 0.6
+false i27 + demand-from 0.5
+false i37 + demand-from 0.4
+false i47 + demand-from 0.3
+false i57 + demand-from 0.2
+false i67 + demand-from 0.1
+false i87 + demand-from -0.1
+false i97 + demand-from -0.2
+
+::::::::::: GAT3S CODE :::::::::::
+
+false EGO EQL TRU THN SVC 0.03
+false EGO EQL TRU NNN ELH EQL INF THN CKJ 0.05
+false ELH EQL ADT NNN LFH EQL JUV NNN CRD EQL TRU THN HID 1
+false EGO EQL TRU NNN ELH EQL JUV THN HID 1
+
+false ELH EQL ADT NNN ECL EQL 15 NNN CRD EQL TRU THN SPT -0.4
+false ELH EQL ADT NNN ECL EQL 25 NNN CRD EQL TRU THN SPT -0.3
+false ELH EQL ADT NNN ECL EQL 35 NNN CRD EQL TRU THN SPT -0.2
+false ELH EQL ADT NNN ECL EQL 45 NNN CRD EQL TRU THN SPT -0.1
+false ELH EQL ADT NNN ECL EQL 65 NNN CRD EQL TRU THN SPT 0.1
+false ELH EQL ADT NNN ECL EQL 75 NNN CRD EQL TRU THN SPT 0.2
+false ELH EQL ADT NNN ECL EQL 85 NNN CRD EQL TRU THN SPT 0.3
+false ELH EQL ADT NNN ECL EQL 95 NNN CRD EQL TRU THN SPT 0.4
+
+false ELH EQL INF NNN ECL EQL 17 NNN CRG EQL TRU THN DMF 0.6
+false ELH EQL INF NNN ECL EQL 27 NNN CRG EQL TRU THN DMF 0.5
+false ELH EQL INF NNN ECL EQL 37 NNN CRG EQL TRU THN DMF 0.4
+false ELH EQL INF NNN ECL EQL 47 NNN CRG EQL TRU THN DMF 0.3
+false ELH EQL INF NNN ECL EQL 57 NNN CRG EQL TRU THN DMF 0.2
+false ELH EQL INF NNN ECL EQL 67 NNN CRG EQL TRU THN DMF 0.1
+false ELH EQL INF NNN ECL EQL 87 NNN CRG EQL TRU THN DMF -0.1
+false ELH EQL INF NNN ECL EQL 97 NNN CRG EQL TRU THN DMF -0.2
+
+

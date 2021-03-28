@@ -1,0 +1,63 @@
+
+::::::::::: STA2US CODE :::::::::::
+
+false e e survival-chance 0.05
+false m f mate-with 0.5
+false m f4+ set-heading 0.75
+false m f6+ set-heading 0.25
+false m f+ squirm-from 1.0
+false m e go-forward 0.25
+
+false f mt pick-up 1.0
+false f m mate-with -1.0
+false f p red-signal 0.9
+false f14 m mate-with 1.1
+false f24 m mate-with 1.2
+false f34 m mate-with 1.3
+false f54 m mate-with 1.4
+false f74 m mate-with 1.5
+false f84 m mate-with 1.6
+false f94 m mate-with 1.7
+false f104 m mate-with 1.8
+false f124 m mate-with 1.9
+false f16 m mate-with 0.1
+false f26 m mate-with 0.2
+false f36 m mate-with 0.3
+false f56 m mate-with 0.4
+false f76 m mate-with 0.5
+false f86 m mate-with 0.6
+false f96 m mate-with 0.7
+false f106 m mate-with 0.8
+false f126 m mate-with 0.9
+
+::::::::::: GAT3S CODE :::::::::::
+
+false EGO EQL TRU THN SVC 0.05
+false ESX EQL MAL NNN SEX EQL FEM THN MTW 0.5
+false ESX EQL MAL NNN EXC GRT 85 NNN CRG EQL TRU THN STH 0.75
+false ESX EQL MAL NNN EXC LST 15 NNN CRG EQL TRU THN STH 0.25
+false ESX EQL MAL NNN SEX EQL FEM NNN CRG EQL TRU THN SQM 1.0
+false EGO EQL TRU NNN ESX EQL MAL THN GFD 0.25
+
+false ESX EQL FEM NNN SEX EQL MAL NNN CRD EQL FAL THN PKU 1.0
+false ESX EQL FEM NNN SEX EQL MAL THN MTW -1.0
+false ESX EQL FEM NNN EFR EQL PRG THN RDS 0.9
+false ECL EQL 14 NNN ESX EQL FEM NNN SEX EQL MAL THN MTW 1.1
+false ECL EQL 24 NNN ESX EQL FEM NNN SEX EQL MAL THN MTW 1.2
+false ECL EQL 34 NNN ESX EQL FEM NNN SEX EQL MAL THN MTW 1.3
+false ECL EQL 54 NNN ESX EQL FEM NNN SEX EQL MAL THN MTW 1.4
+false ECL EQL 74 NNN ESX EQL FEM NNN SEX EQL MAL THN MTW 1.5
+false ECL EQL 84 NNN ESX EQL FEM NNN SEX EQL MAL THN MTW 1.6
+false ECL EQL 94 NNN ESX EQL FEM NNN SEX EQL MAL THN MTW 1.7
+false ECL EQL 104 NNN ESX EQL FEM NNN SEX EQL MAL THN MTW 1.8
+false ECL EQL 124 NNN ESX EQL FEM NNN SEX EQL MAL THN MTW 1.9
+false ECL EQL 16 NNN ESX EQL FEM NNN SEX EQL MAL THN MTW 0.1
+false ECL EQL 26 NNN ESX EQL FEM NNN SEX EQL MAL THN MTW 0.2
+false ECL EQL 36 NNN ESX EQL FEM NNN SEX EQL MAL THN MTW 0.3
+false ECL EQL 56 NNN ESX EQL FEM NNN SEX EQL MAL THN MTW 0.4
+false ECL EQL 76 NNN ESX EQL FEM NNN SEX EQL MAL THN MTW 0.5
+false ECL EQL 86 NNN ESX EQL FEM NNN SEX EQL MAL THN MTW 0.6
+false ECL EQL 96 NNN ESX EQL FEM NNN SEX EQL MAL THN MTW 0.7
+false ECL EQL 106 NNN ESX EQL FEM NNN SEX EQL MAL THN MTW 0.8
+false ECL EQL 126 NNN ESX EQL FEM NNN SEX EQL MAL THN MTW 0.9
+

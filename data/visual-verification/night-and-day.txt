@@ -1,0 +1,73 @@
+
+::::::::::: STA2US CODE :::::::::::
+
+false * e survival-chance 0.01
+false * e139 living-chance 0.01
+false * e16 body-size 0.1
+false * e2 body-shade 0.1
+false * e35 bite-capacity 0.01
+false * e45 mutation-rate 0.01
+false * e57 visual-range 0.1
+false * e65 visual-angle 0.1
+false * e76 litter-size 0.01
+false * e86 conception-chance 0.01
+false * e95 day-perception 0.1
+false * e104 night-perception 0.1
+false * e118 sex-ratio 0.01
+false * e115 yellow-signal 0.01
+false * e137 red-signal 0.01
+false * e111 blue-signal 0.01
+
+false - e survival-chance 0.01
+false - e139 living-chance -0.01
+false - e16 body-size -0.1
+false - e2 body-shade -0.1
+false - e35 bite-capacity -0.01
+false - e45 mutation-rate -0.01
+false - e57 visual-range -0.1
+false - e65 visual-angle -0.1
+false - e76 litter-size -0.01
+false - e86 conception-chance -0.01
+false - e95 day-perception -0.1
+false - e104 night-perception -0.1
+false - e118 sex-ratio -0.01
+false - e115 yellow-signal -0.01
+false - e137 red-signal -0.01
+false - e111 blue-signal -0.01
+
+::::::::::: GAT3S CODE :::::::::::
+
+false EGO EQL TRU NNN DAY EQL TRU THN SVC 0.01
+false EGO EQL TRU NNN DAY EQL TRU NNN ECL EQL 139 THN SVC 0.1
+false EGO EQL TRU NNN DAY EQL TRU NNN ECL EQL 16 THN BDS 0.1
+false EGO EQL TRU NNN DAY EQL TRU NNN ECL EQL 2 THN BSD 0.1
+false EGO EQL TRU NNN DAY EQL TRU NNN ECL EQL 35 THN BTC 0.1
+false EGO EQL TRU NNN DAY EQL TRU NNN ECL EQL 45 THN MTC 0.1
+false EGO EQL TRU NNN DAY EQL TRU NNN ECL EQL 57 THN VSR 0.1
+false EGO EQL TRU NNN DAY EQL TRU NNN ECL EQL 65 THN VSA 0.1
+false EGO EQL TRU NNN DAY EQL TRU NNN ECL EQL 76 THN LTS 0.1
+false EGO EQL TRU NNN DAY EQL TRU NNN ECL EQL 86 THN CNC 0.1
+false EGO EQL TRU NNN DAY EQL TRU NNN ECL EQL 95 THN DPR 0.1
+false EGO EQL TRU NNN DAY EQL TRU NNN ECL EQL 104 THN NPR 0.1
+false EGO EQL TRU NNN DAY EQL TRU NNN ECL EQL 118 THN SXR 0.1
+false EGO EQL TRU NNN DAY EQL TRU NNN ECL EQL 115 THN YWS 0.1
+false EGO EQL TRU NNN DAY EQL TRU NNN ECL EQL 137 THN RDS 0.1
+false EGO EQL TRU NNN DAY EQL TRU NNN ECL EQL 111 THN BLS 0.1
+
+false EGO EQL TRU NNN NGT EQL TRU THN SVC 0.01
+false EGO EQL TRU NNN NGT EQL TRU NNN ECL EQL 139 THN SVC -0.1
+false EGO EQL TRU NNN NGT EQL TRU NNN ECL EQL 16 THN BDS -0.1
+false EGO EQL TRU NNN NGT EQL TRU NNN ECL EQL 2 THN BSD -0.1
+false EGO EQL TRU NNN NGT EQL TRU NNN ECL EQL 35 THN BTC -0.1
+false EGO EQL TRU NNN NGT EQL TRU NNN ECL EQL 45 THN MTC -0.1
+false EGO EQL TRU NNN NGT EQL TRU NNN ECL EQL 57 THN VSR -0.1
+false EGO EQL TRU NNN NGT EQL TRU NNN ECL EQL 65 THN VSA -0.1
+false EGO EQL TRU NNN NGT EQL TRU NNN ECL EQL 76 THN LTS -0.1
+false EGO EQL TRU NNN NGT EQL TRU NNN ECL EQL 86 THN CNC -0.1
+false EGO EQL TRU NNN NGT EQL TRU NNN ECL EQL 95 THN DPR -0.1
+false EGO EQL TRU NNN NGT EQL TRU NNN ECL EQL 104 THN NPR -0.1
+false EGO EQL TRU NNN NGT EQL TRU NNN ECL EQL 118 THN SXR -0.1
+false EGO EQL TRU NNN NGT EQL TRU NNN ECL EQL 115 THN YWS -0.1
+false EGO EQL TRU NNN NGT EQL TRU NNN ECL EQL 137 THN RDS -0.1
+false EGO EQL TRU NNN NGT EQL TRU NNN ECL EQL 111 THN BLS -0.1
+
