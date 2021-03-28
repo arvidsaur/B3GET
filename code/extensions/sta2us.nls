@@ -315,15 +315,10 @@ to-report action-code-list
     "help" "hurt" "mate-with" ]
 end
 
-to-report discontinued-action-codons
-  report [ ]
-end
-
 to-report sta2us-codon-exists [ codon ]
   report
   codon != "" and not is-number? codon and not is-boolean? codon and
-  ( member? codon (sentence action-code-list discontinued-action-codons ) or
-  first-string-is-part-of-last? codon ( reduce word status-code-list ) )
+  ( member? codon action-code-list or first-string-is-part-of-last? codon ( reduce word status-code-list ) ) ; codon is either an action or part of the status codons list
 end
 
 to-report generate-status
