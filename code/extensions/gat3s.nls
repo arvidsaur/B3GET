@@ -330,6 +330,9 @@ to-report generate-decision-vectors [ old-targets old-vectors ]; Make each combi
 end
 
 to-report break-apart-allele [ allele ] ; SLOW
+  let gtlist [ 
+    "ANY" "UUU" "NNN" "ONE" "MEE" 
+    "ALL" "THN" "TNT" ]
   let remaining-allele []
   let section-of-code []
   let section-length 0
@@ -339,7 +342,7 @@ to-report break-apart-allele [ allele ] ; SLOW
     ifelse ( not part-of-chunk ) [
       set remaining-allele lput c remaining-allele
     ][
-      ifelse ( member? c gate-codons ) [
+      ifelse ( member? c gtlist ) [
         
         ifelse ( section-length > 0 ) [
           set remaining-allele lput c []

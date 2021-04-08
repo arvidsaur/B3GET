@@ -21,19 +21,6 @@
 ;----------------------------------------------------------------------------------------------
   
 to output-results
-  
-  ; USER SETTINGS:
-  ; -------------
-  let verification? false          ; TRUE = runs periodic code verification checks set by the VERIFICATION-RATE
-  let verification-rate 0.0001    
-  let simulation-summary? false   ; TRUE = records the simulation ;
-  let record-agent? true          ; TRUE = records every agent upon its death
-  let scan-interval 250
-  let simulation-scans? true      ; TRUE = scans the simulation every SCAN-INTERVAL and records population-level phenomena ;
-  let group-scans? true           ; TRUE = scans all groups every SCAN-INTERVAL and records group-level phenomena
-  let agent-scans? true           ; TRUE = scans all agents every SCAN-INTERVAL and records individual-level phenomena
-  let focal-follows? true         ; TRUE = small chance to record an individual's entire life
-  let focal-rate 0.000001
 
   ;----------------------------------------------------------------------------------------------     
   ; VERIFICATION : collect data on outcomes of periodic code verification checks
@@ -45,7 +32,7 @@ to output-results
   ; SUMMARY : collect summary data of simulations, groups, or individuals
   ;----------------------------------------------------------------------------------------------
   
-  if ( simulation-summary? and ticks = 1 ) [ simulation-summary ]
+  if ( simulation-summary? and member? ticks simulation-summary-ticks ) [ simulation-summary ]
   if ( record-agent? ) [ ask anima1s with [ ticks.at.death > 0 and ticks = ( ticks.at.death + 1 ) and generation.number > 0 ] [ agent-summary ] ]
   
   ;----------------------------------------------------------------------------------------------     
@@ -728,6 +715,7 @@ to agent-summary
       "adult.blue.chance"
       "mother.initiated.birth"
       "mother.initiated.weaning"
+      "cause.of.death"
       
   )) ]
   
@@ -862,6 +850,7 @@ to agent-summary
     adult.blue.chance
     mother.initiated.birth
     mother.initiated.weaning
+    cause.of.death
     
   ))
   
@@ -911,6 +900,9 @@ to scan-group [ group-id ]
       "timesteps"
       "get-solar-status"
       "population-density"
+      "plant-abundance"
+      "plant-season"
+      "plant-patchiness"
       
       "group-identity"
       "current-group-size" 
@@ -1006,6 +998,9 @@ to scan-group [ group-id ]
     ticks
     get-solar-status
     population-density
+    sum [penergy.supply] of patches
+    the-season
+    plant-patchiness
     
     group-id
     current-group-size

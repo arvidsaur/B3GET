@@ -23,6 +23,9 @@
 ;
 ; Operation that allows an override of B3GET to artificially select for populations that are
 ; better able to survive in the environmental conditions set by the model parameters.
+; 
+; The genotype files incrememntally show the selection process. The population files record each population
+; before the reset occurs, whether successful or not
 ;-------------------------------------------------------------------------------------------------
 
 to artificial-selection ;  memory caps?
@@ -30,19 +33,28 @@ to artificial-selection ;  memory caps?
   if ( any? anima1s ) [
     
     ; MUTATE GENOTYPES
-    if ( ticks = 0 ) [ ask anima1s [ mutate-chromosomes 0.1 ]] ; increases the genetic variation of the initial population
+    if ( ticks = 0 ) [ ask anima1s [ mutate-chromosomes 0.05 ]] ; increases the genetic variation of the initial population
+    
+    ; SET GENOTYPE TO PROPER STANDARDIZED NAME
+    if ( genotype = "" ) [
+      set genotype generate-genotype-id
+    ]
     
     let number-list [ "1" "2" "3" "4" "5" "6" "7" "8" "9" "0" ]
-    if ( genotype = "" or not member? last genotype number-list ) [
+    if ( not member? "-" genotype or not member? last genotype number-list ) [
       set genotype ( word genotype "-0" )
       ask one-of anima1s [ save-genotype ]]
     
+    impose-selection
+    
     ; RESET SIMULATION
-    if ( restart-simulation? ) [
+    if ( restart-simulation? ) [ ; if criteria met for restarting simulation
       
-      let selected-anima1 max-one-of anima1s [ generation.number ]
-      if ( [generation.number] of selected-anima1 > read-from-string last genotype  ) [
-        set genotype ( word but-last genotype ( read-from-string last genotype + 1 ) ) ; set new genotype name up one more number increment
+      simulation-summary
+      
+      let selected-anima1 max-one-of anima1s with [ life.history = "adult" ] [ generation.number ]
+      if ( [generation.number] of selected-anima1 > genotype-number ) [
+        set genotype (word (genotype-name) ( genotype-number + 1 ) ) ; set new genotype name up one more number increment
         ask selected-anima1 [ save-genotype ]]
       
       let old-population-name population
@@ -55,14 +67,42 @@ to artificial-selection ;  memory caps?
   ]
 end
 
+to-report dash-position 
+  report ( position "-" genotype ) 
+end
+
+to-report genotype-number
+  report read-from-string substring genotype ( dash-position + 1 ) ( length genotype )
+end
+
+to-report genotype-name
+  report substring genotype 0 ( dash-position )
+end
+
+to impose-selection
+  
+  if ( count anima1s with [ is.alive ] > 100 and random-float 1.0 < 0.01 ) [
+    
+    let min-generation min [generation.number] of anima1s with [ is.alive ]
+    if ( any? anima1s with [ is.alive and generation.number > min-generation ] ) [ ; if any agents who have more than min generation (aka there is variation for this trait)
+      ask one-of anima1s with [ is.alive and generation.number = min-generation ] [ ; select one of earliest generation agents to die
+        set-to-dead ; agent dies but body remains and decomposes
+        set cause.of.death "selected to die" ]
+    ]
+  ]
+  
+end
+
 to-report restart-simulation?
   let criteria-met false
   
-  ;  if ( count anima1s < 65 and count anima1s >= 1 )[ set criteria-met true ]
-  ;  if ( not any? anima1s with [ biological.sex = "female" ] or not any? anima1s with [ biological.sex = "male" ] ) [ set criteria-met true ]
-  ;if ( sum [ total.energy.gains ] of anima1s < sum [ total.energy.cost] of anima1s ) [ set criteria-met true ]
   if ( not any? anima1s with [ biological.sex = "female" ] or not any? anima1s with [ biological.sex = "male" ] ) [ set criteria-met true ]
   
+  let ticks-scale 10000 ; how many ticks (max) transpire between mean generations
+  if ( ticks > ticks-scale * ( mean [generation.number] of anima1s with [ is.alive ] + 0.5 )) [
+    set criteria-met true
+  ]
+
   report criteria-met
 end
 

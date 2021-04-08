@@ -71,7 +71,7 @@ to command
     ( useful-commands = "help-me" ) [ help-me ]
     ( useful-commands = "meta-report" ) [ meta-report ]
     
-    ( useful-commands = "parameter-settings" ) [  ]
+    ( useful-commands = "parameter-settings" ) [ parameter-report ]
     ( useful-commands = "default-settings" ) [ default-settings ]
     ( useful-commands = "model-structure" ) [ set-model-structure ]
     ( useful-commands = "-- aspatial" ) [ set-model-structure ]
@@ -90,37 +90,28 @@ to command
     ( useful-commands = "import-world" ) [ import-world-command ]
     ( useful-commands = "save-simulation" ) [  ]
     
-    ( useful-commands = "dynamic-check" ) [ set selected-display "" dynamic-verification ]
-    ( useful-commands = "-- true" ) [ set selected-display "" dynamic-verification ]
-    ( useful-commands = "-- false" ) [ set selected-display "" dynamic-verification ]
+    ( useful-commands = "dynamic-check" ) [ dynamic-verification ]
+    ( useful-commands = "-- true" ) [ dynamic-verification ]
+    ( useful-commands = "-- false" ) [ dynamic-verification ]
     ( useful-commands = "runtime-check" ) [ runtime-verification ]
-;    ( useful-commands = "visual-check" ) [ set selected-display "" visual-verification ]
-;    ( useful-commands = "-- dine-and-dash" ) [ set selected-display "" visual-verification ]
-;    ( useful-commands = "-- life-history-channel" ) [ set selected-display "" visual-verification ]
-;    ( useful-commands = "-- musical-pairs" ) [ set selected-display "" visual-verification ]
-;    ( useful-commands = "-- night-and-day" ) [ set selected-display "" visual-verification ]
-;    ( useful-commands = "-- popularity-context" ) [ set selected-display "" visual-verification ]
-;    ( useful-commands = "-- supply-and-demand" ) [ set selected-display "" visual-verification ]
-;    ( useful-commands = "-- square-dance" ) [ set selected-display "" visual-verification ]
+    ( useful-commands = "visual-check" ) [ visual-verification ]
+    ( useful-commands = "-- attack-pattern" ) [ visual-verification ]
+    ( useful-commands = "-- dine-and-dash" ) [ visual-verification ]
+    ( useful-commands = "-- life-history-channel" ) [ visual-verification ]
+    ( useful-commands = "-- musical-pairs" ) [ visual-verification ]
+    ( useful-commands = "-- night-and-day" ) [ visual-verification ]
+    ( useful-commands = "-- popularity-context" ) [ visual-verification ]
+    ( useful-commands = "-- speed-mating" ) [ visual-verification ]
+    ( useful-commands = "-- supply-and-demand" ) [ visual-verification ]
+    ( useful-commands = "-- square-dance" ) [ visual-verification ]
     
-    ( useful-commands = "-- decisions" ) [ output-decisions ]
-    ( useful-commands = "-- actions" ) [ output-actions ]
-    ( useful-commands = "genotype" ) [ output-genotype ]
+    ( useful-commands = "-- decisions" ) [ display-results ] ;output-decisions
+    ( useful-commands = "-- actions" ) [ display-results ] ; output-actions 
+    ( useful-commands = "genotype" ) [ output-genotype  ]
     
-    [])
-    
-    
-
-    
-;      
-;      ( substring useful-commands 0 3 = "-- " ) [ set selected-display but-first but-first but-first useful-commands display-results ] ; menu item begins with dashes
-      
-
-
-  ;      [  ]) ; otherwise use menu item as-is ; set selected-display useful-commands display-results
-  ;
+    [ display-results ])
   
-
+  
 
   ;"age"
   ;"generations"
@@ -130,6 +121,7 @@ to command
   ;"-- survival-chance"
   ;"-- body-size"
   ;"-- body-shade"
+  ;"-- female-fertility" ;; new
   ;"-- hidden-chance"
   ;"-- bite-capacity"
   ;"-- mutation-chance"
@@ -151,6 +143,7 @@ to command
   ;"carried-items"
   ;"energy-supply"
   ;"behaviors"
+  ;-- environment
   ;"-- decisions"
   ;"-- actions"
   ;"-- birthing"
@@ -168,12 +161,8 @@ to command
   ;"-- carried-history"
   ;"-- aid-history"
   ;"-- harm-history"
-  ;"---------------------"
-  ;" > OUTPUT RESULTS    "
-  ;"---------------------"
-  ;"dynamic-verification"
-  ;"verification-rate"
-    
+
+
 
 end
 
@@ -247,7 +236,7 @@ end
 ; PARAMETERS
 ;-----------------------------------------------------------------------------     
 
-to output-simulation-report
+to parameter-report
   output-header ( word " SIMULATION REPORT : " )
   output-print ( word "  simulation-id:  " simulation-id )
   output-print ( word "  model-version:  " model-version )
@@ -279,7 +268,7 @@ to default-settings
   ; plot
   ; output
 
-  output-simulation-report
+  parameter-report
   
 end
 
@@ -338,41 +327,6 @@ to import-world-command
   set observation-notes (word "World imported." )
   update-metafile "world" file-name
 end
-  
-  
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-;-----------------------------------------------------------------------------       
-; AGE HISTOGRAM
-;-----------------------------------------------------------------------------    
-
-to age-histogram
-  clear-plot
-  set-plot-pen-interval 100
-  set-plot-x-range 0 max [ age.in.ticks ] of anima1s with [ is.alive ]
-  histogram [ age.in.ticks ] of anima1s with [ is.alive ]
-end
 
 ;-----------------------------------------------------------------------------       
 ; RESET PLANTS
@@ -406,14 +360,14 @@ to dynamic-verification
   ( ifelse
     
     ( user-choice = "true" ) [
-      ;output-header " CODE VERIFICATION : TRUE ONLY  "
+      output-header " CODE VERIFICATION : TRUE ONLY  "
       output-true-verification ]
     
     ( user-choice = "false" ) [
-      ;output-header " CODE VERIFICATION : FALSE ONLY   "
+      output-header " CODE VERIFICATION : FALSE ONLY   "
       output-false-verification ]
     
-    [ ;output-header " CODE VERIFICATION :  ALL  "
+    [ output-header " CODE VERIFICATION :  ALL  "
       output-all-verification ])
 end
 
@@ -430,32 +384,34 @@ to runtime-verification
     profiler:stop
 end
 
-;;-----------------------------------------------------------------------------       
-;; VISUAL CHECK
-;;-----------------------------------------------------------------------------     
-;
-;to visual-verification
-;  let user-choice substring useful-commands 5 length useful-commands
-;  let visual-list [ "dine-and-dash" "life-history-channel" "musical-pairs" "night-and-day" "popularity-context" "speed-mating" "square-dance" "supply-and-demand" ]
-;  
-;  if ( member? user-choice visual-list ) [
-;    
-;    let visual-verification-file ( word "../data/visual-verification/" user-choice ".csv" )
-;    
-;    ifelse ( file-exists? visual-verification-file )
-;    
-;    [ set output-results? false
-;      set selection-on? false
-;      clear-turtles
-;      set path-to-experiment "../data/visual-verification/"
-;      set population user-choice 
-;      set genotype user-choice 
-;      import-population ]
-;    
-;    [ user-message "File not found." ]
-;    
-;  ]
-;end
+;-----------------------------------------------------------------------------       
+; VISUAL CHECK
+;-----------------------------------------------------------------------------     
+
+to visual-verification
+  let user-choice substring useful-commands 3 length useful-commands
+  let visual-list [ "dine-and-dash" "life-history-channel" "musical-pairs" "night-and-day" "popularity-context" "speed-mating" "square-dance" "supply-and-demand" "attack-pattern" ]
+  
+  if ( member? user-choice visual-list ) [
+    
+    let visual-verification-file ( word "../data/visual-verification/" user-choice ".csv" )
+    
+    ifelse ( file-exists? visual-verification-file )
+    
+    [ set output-results? false
+      set selection-on? false
+      clear-turtles
+      set path-to-experiment "../data/visual-verification/"
+      set population user-choice 
+      set genotype user-choice 
+      import-population 
+      import-genotype
+    ]
+    
+    [ user-message "File not found." ]
+    
+  ]
+end
 
 ;-----------------------------------------------------------------------------       
 ; VIEW ACTIONS
@@ -496,23 +452,13 @@ to output-decisions
       output-print (word "  " d ) ]]
 end
 
-;;-----------------------------------------------------------------------------       
-;; VIEW ENVIRONMENT
-;;-----------------------------------------------------------------------------  
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
+;-----------------------------------------------------------------------------       
+; VIEW ENVIRONMENT
+;-----------------------------------------------------------------------------  
+
+
+
+
 
 ;-----------------------------------------------------------------------------       
 ; VIEW GENOTYPE
@@ -534,100 +480,6 @@ to output-genotype
   ]
 end
 
-;;-----------------------------------------------------------------------------       
-;; VIEW HISTORY
-;;-----------------------------------------------------------------------------   
-;
-;to output-history
-;  let anima1-to-inspect one-of anima1s with [ self = subject ]
-;  output-header (word " HISTORY : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [meta.id ] of anima1-to-inspect ) ] )
-;  
-;  output-print ( word " Total energy gained: "
-;    ifelse-value ( anima1-to-inspect != nobody ) 
-;    [ [ precision total.energy.gains 2 ] of subject ] 
-;    [ ( word precision ( sum [ total.energy.gains ] of anima1s with [ biological.sex = "female"] ) 2 " (females) " precision ( sum [ total.energy.gains ] of anima1s with [ biological.sex = "male"] ) 2 " (males) " ) ] )
-;  
-;  output-print ( word " Total energy cost: "
-;    ifelse-value ( anima1-to-inspect != nobody ) 
-;    [ [ precision total.energy.cost 2 ] of subject ] 
-;    [ ( word precision ( sum [ total.energy.cost ] of anima1s with [ biological.sex = "female"] ) 2 " (females) " precision ( sum [ total.energy.cost ] of anima1s with [ biological.sex = "male"]) 2 " (males) " ) ] )
-;  
-;  output-print ( word " Total energy gained by foraging: "
-;    ifelse-value ( anima1-to-inspect != nobody ) 
-;    [ [ precision foraging.gains 2 ] of subject ] 
-;    [ ( word precision ( sum [ foraging.gains ] of anima1s with [ biological.sex = "female"] ) 2 " (females) " precision ( sum [ foraging.gains ] of anima1s with [ biological.sex = "male"]) 2 " (males) " ) ] )
-;  
-;  output-print ( word " Number of helpful behaviors: "
-;    ifelse-value ( anima1-to-inspect != nobody ) 
-;    [ [ length aid.history ] of subject ] 
-;    [ ( word sum [ length aid.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length aid.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
-;  
-;  output-print ( word " Number of aggressive behaviors: "
-;    ifelse-value ( anima1-to-inspect != nobody ) 
-;    [ [ length harm.history ] of subject ] 
-;    [ ( word sum [ length harm.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length harm.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
-;  
-;  output-print ( word " Number of infanticides: "
-;    ifelse-value ( anima1-to-inspect != nobody ) 
-;    [ [ length infanticide.history ] of subject ] 
-;    [ ( word sum [ length infanticide.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length infanticide.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
-;  
-;  output-print ( word " Number of copulations: "
-;    ifelse-value ( anima1-to-inspect != nobody ) 
-;    [ [ length copulations.history ] of subject ] 
-;    [ ( word sum [ length copulations.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length copulations.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
-;  
-;  output-print ( word " Number of conceptions: "
-;    ifelse-value ( anima1-to-inspect != nobody ) 
-;    [ [ length conceptions.history ] of subject ] 
-;    [ ( word sum [ length conceptions.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length conceptions.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
-;  
-;  output-print ( word " Number of group transfers: "
-;    ifelse-value ( anima1-to-inspect != nobody ) 
-;    [ [ length group.transfers.history ] of subject ] 
-;    [ ( word sum [ length group.transfers.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length group.transfers.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
-;  
-;end
-;
-;;-----------------------------------------------------------------------------       
-;; VIEW STATUS
-;;-----------------------------------------------------------------------------   
-;
-;to output-status
-;  let anima1-to-inspect one-of anima1s with [ self = subject ]
-;  output-header (word " STATUS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [ meta.id ] of anima1-to-inspect ) ] )
-;  
-;  ;output-print ( word " Number of individuals: " count anima1z )
-;  output-print ( word " Number of females: " count anima1z with [ biological.sex = "female" ] )
-;  output-print ( word " Number of males: " count anima1z with [ biological.sex = "male" ] )
-;  
-;  let group-list []
-;  let group-size-list []
-;  let females-in-group []
-;  let males-in-group []
-;  let juveniles-in-group []
-;  let infants-in-group []
-;  let gestatees-in-group []
-;  
-;  ask anima1z [ if ( not member? group.identity group-list ) [ set group-list lput group.identity group-list ]]
-;  foreach group-list [ g -> 
-;    set group-size-list lput ( count anima1z with [ group.identity = g ] ) group-size-list 
-;    set females-in-group lput ( count anima1z with [ group.identity = g and biological.sex = "female" and life.history = "adult"] ) females-in-group 
-;    set males-in-group lput ( count anima1z with [ group.identity = g and biological.sex = "male" and life.history = "adult" ] ) males-in-group 
-;    set juveniles-in-group lput ( count anima1z with [ group.identity = g and life.history = "juvenile" ] ) juveniles-in-group
-;    set infants-in-group lput ( count anima1z with [ group.identity = g and life.history = "infant" ] ) infants-in-group
-;    set gestatees-in-group lput ( count anima1z with [ group.identity = g and life.history = "gestatee" ] ) gestatees-in-group
-;  ]
-;  
-;  output-print ( word " Number of groups: " length group-list )
-;  output-print ( word " Average group size: " precision mean group-size-list 2 )
-;  output-print ( word " Average number of adult females per group: " precision mean females-in-group 2 )
-;  output-print ( word " Average number of adult males per group: " precision mean males-in-group 2 )
-;  output-print ( word " Average number of juveniles per group: " precision mean juveniles-in-group 2 )
-;  output-print ( word " Average number of infants per group: " precision mean infants-in-group 2 )
-;  output-print ( word " Average number of gestatees per group: " precision mean gestatees-in-group 2 )
-;end
-
 ;-----------------------------------------------------------------------------   
 ;
 ;            dP            dP            
@@ -646,7 +498,7 @@ to display-results
     
     (ifelse 
       ( plot-type = "individuals" ) [ plot-individuals-columns ]
-      ( plot-type = "groups" ) [ plot-groups-columns ]
+      ( plot-type = "groups" )      [ plot-groups-columns ]
       ( plot-type = "populations" ) [ plot-population-histogram  ]
       ( plot-type = "generations" ) [ plot-evolution-generations ]
      
@@ -654,7 +506,11 @@ to display-results
 end
 
 ;-----------------------------------------------------------------------------       
-; INDIVIDUALS
+; PLOT INDIVIDUALS ACCORDING TO THE SPECIFIED SETTINGS
+;
+; ENTRY
+;
+; EXIT
 ;-----------------------------------------------------------------------------   
 
 to plot-individuals-columns
@@ -668,6 +524,25 @@ to plot-individuals-columns
   plot-colored-histogram 1 plot-list life-history-color-list 1                   ; update plot based on plot list
  
   ;output-window input "" (list "column" "meta.id" input ) row-list plot-list 0 0 0
+end
+
+to-report get-column-list [ input-string ] ; used if you want to separate by life history and sex colors
+  let report-list []
+  set report-list lput (ifelse-value ( life.history = "gestatee" and biological.sex = "female" ) [ get-result-from-selected-display ] [ 0 ]) report-list 
+  set report-list lput (ifelse-value ( life.history = "gestatee" and biological.sex = "male" ) [ get-result-from-selected-display ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( life.history = "infant" and biological.sex = "female" ) [ get-result-from-selected-display ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( life.history = "infant" and biological.sex = "male" ) [ get-result-from-selected-display ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( life.history = "juvenile" and biological.sex = "female" ) [ get-result-from-selected-display ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( life.history = "juvenile" and biological.sex = "male" ) [ get-result-from-selected-display ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( female.fertility = "cycling" and biological.sex = "female" ) [ get-result-from-selected-display ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( female.fertility = "pregnant" and biological.sex = "female" ) [ get-result-from-selected-display ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( female.fertility = "lactating" and biological.sex = "female" ) [ get-result-from-selected-display ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( life.history = "adult" and biological.sex = "male" ) [ get-result-from-selected-display ] [ 0 ]) report-list
+  report report-list
+end
+
+to-report life-history-color-list ; female gestatee, male gestatee, female infant, male infant, female juvenile, male juvenile, cycling female, pregnant female, lactating female, adult male
+  report [ 65 55 46 43 26 23 135 125 115 95 15 ]
 end
 
 ;-----------------------------------------------------------------------------       
@@ -706,13 +581,17 @@ to plot-groups-columns
   ;output-window input "" (list "column" "meta.id" input ) row-list plot-list 0 0 0
 end
 
+to-report get-sorted-groups
+  report sort remove-duplicates [group.identity] of anima1s with [ is.alive ]
+end
+
 ;-----------------------------------------------------------------------------       
 ; POPULATION
 ;-----------------------------------------------------------------------------   
 
 to plot-population-histogram  ; works! bad runtime
   let max-value max [ get-result-from-selected-display ] of anima1z
-  let column-no how-many-columns
+  let column-no 10
   let interval precision ( max-value / column-no ) 2
   let plot-list []
   let lower 0
@@ -754,7 +633,62 @@ to plot-evolution-generations
 end
 
 ;-----------------------------------------------------------------------------       
-; HELPER
+; HELPER FUNCTION THAT RETURNS INFORMATION
+;----------------------------------------------------------------------------- 
+
+to-report get-result-from-selected-display
+  report (ifelse-value
+    ( useful-commands = "age" ) [ age.in.ticks ]
+    ( useful-commands = "generations" ) [ generation.number ]
+    ( useful-commands = "genotype" ) [ length ( sentence chromosome.I chromosome.II ) ]
+    ( useful-commands = "-- survival-chance" ) [ survival.chance ]
+    ( useful-commands = "-- body-size" ) [ body.size ]
+    ( useful-commands = "-- body-shade" ) [ body.shade ]
+    ( useful-commands = "-- female-fertility" ) [ (ifelse-value (female.fertility = "lactating") [ 3 ] ( female.fertility = "pregnant" ) [ 2 ] ( female.fertility = "cycling" ) [ 1 ] [ 0 ]) ]
+    ( useful-commands = "-- hidden-chance" ) [ hidden.chance ]
+    ( useful-commands = "-- bite-capacity" ) [ bite.capacity ]    
+    ( useful-commands = "-- mutation-chance" ) [ mutation.chance ]
+    ( useful-commands = "-- sex-ratio" ) [ sex.ratio ]
+    ( useful-commands = "-- litter-size" ) [ litter.size ]
+    ( useful-commands = "-- conception-chance" ) [ conception.chance ]
+    ( useful-commands = "-- visual-angle" ) [ visual.angle ]
+    ( useful-commands = "-- visual-range" ) [ visual.range ]
+    ( useful-commands = "-- day-perception" ) [ day.perception ]
+    ( useful-commands = "-- night-perception" ) [ night.perception ]
+    ( useful-commands = "-- yellow-chance" ) [ yellow.chance ]
+    ( useful-commands = "-- red-chance" ) [ red.chance ]
+    ( useful-commands = "-- blue-chance" ) [ blue.chance ]
+    ( useful-commands = "-- birthing-chance" ) [ birthing.chance ]
+    ( useful-commands = "-- weaning-chance" ) [ weaning.chance ]
+    ( useful-commands = "-- infancy-chance" ) [ infancy.chance ]
+    ( useful-commands = "-- juvenility-chance" ) [ juvenility.chance ]
+    ( useful-commands = "-- adulthood-chance" ) [ adulthood.chance ]
+    ( useful-commands = "carried-items" ) [ length carried.items ]
+    ( useful-commands = "energy-supply" ) [ energy.supply ]
+    ( useful-commands = "-- environment" ) [ length my.environment ]
+    ( useful-commands = "-- decisions" ) [ length decision.vectors ]
+    ( useful-commands = "-- actions" ) [ length actions.completed ]    
+    ( useful-commands = "-- birthing" ) [ ifelse-value ( mother.initiated.birth = true ) [ 1 ] [ 0 ] ]
+    ( useful-commands = "-- weaning" ) [ ifelse-value ( mother.initiated.weaning = true ) [ 1 ] [ 0 ] ]
+    ( useful-commands = "-- matings" ) [ length copulations.history ]
+    ( useful-commands = "-- mating-partners" ) [ length remove-duplicates copulations.history ]
+    ( useful-commands = "-- conceptions" ) [ length conceptions.history ]
+    ( useful-commands = "-- infanticide" ) [ length infanticide.history ]
+    ( useful-commands = "-- group-transfers" ) [ length group.transfers.history ]
+    ( useful-commands = "-- travel-distance" ) [ distance.traveled ]
+    ( useful-commands = "-- foraging-gains" ) [ foraging.gains ]
+    ( useful-commands = "-- total-energy-gains" ) [ total.energy.gains ]
+    ( useful-commands = "-- total-energy-cost" ) [ total.energy.cost ]
+    ( useful-commands = "-- receiving-history" ) [ length receiving.history ]
+    ( useful-commands = "-- carried-history" ) [ length carried.history ]
+    ( useful-commands = "-- aid-history" ) [ length aid.history ]
+    ( useful-commands = "-- harm-history" ) [ length harm.history ]
+    
+    [ 0 ])
+end
+
+;-----------------------------------------------------------------------------       
+; HELPER HISTOGRAM PLOTTING
 ;-----------------------------------------------------------------------------   
 
 to plot-colored-histogram [ column-interval plot-list color-list plot-type-1 ]
@@ -781,43 +715,22 @@ to plot-colored-histogram [ column-interval plot-list color-list plot-type-1 ]
     set index index + column-interval ]  
 end
 
-to output-window [ input blurb column-list row-list plot-list key-code bar-code print-code ]
-  if ( ceiling ( ticks / 10 ) = ( ticks / 10 ) ) [
-    output-header ( word "PLOT: " input " of " get-life-history-filter get-sex-filter get-plot-focus-filter )
-    output-print (word " x: " get-plot-focus-filter )
-    output-print (word " y: " input )
-    output-print ""
-    print-life-history-key
-    output-print ""
-    let column-header-string " "
-    foreach column-list [ c -> set column-header-string ( word column-header-string  c "   ") ]
-    output-print column-header-string
-    let index 0
-    foreach row-list [ r ->
-      output-print (word "   [" (index + 1) "]     " ( item index row-list ) "     " ( max item index plot-list  ))      
-      set index index + 1
-    ]
-  ]
-end
-
-to-report get-column-list [ input-string ] ; used if you want to separate by life history and sex colors
-  let report-list []
-  set report-list lput (ifelse-value ( life.history = "gestatee" and biological.sex = "female" ) [ get-result-from-selected-display ] [ 0 ]) report-list 
-  set report-list lput (ifelse-value ( life.history = "gestatee" and biological.sex = "male" ) [ get-result-from-selected-display ] [ 0 ]) report-list
-  set report-list lput (ifelse-value ( life.history = "infant" and biological.sex = "female" ) [ get-result-from-selected-display ] [ 0 ]) report-list
-  set report-list lput (ifelse-value ( life.history = "infant" and biological.sex = "male" ) [ get-result-from-selected-display ] [ 0 ]) report-list
-  set report-list lput (ifelse-value ( life.history = "juvenile" and biological.sex = "female" ) [ get-result-from-selected-display ] [ 0 ]) report-list
-  set report-list lput (ifelse-value ( life.history = "juvenile" and biological.sex = "male" ) [ get-result-from-selected-display ] [ 0 ]) report-list
-  set report-list lput (ifelse-value ( female.fertility = "cycling" and biological.sex = "female" ) [ get-result-from-selected-display ] [ 0 ]) report-list
-  set report-list lput (ifelse-value ( female.fertility = "pregnant" and biological.sex = "female" ) [ get-result-from-selected-display ] [ 0 ]) report-list
-  set report-list lput (ifelse-value ( female.fertility = "lactating" and biological.sex = "female" ) [ get-result-from-selected-display ] [ 0 ]) report-list
-  set report-list lput (ifelse-value ( life.history = "adult" and biological.sex = "male" ) [ get-result-from-selected-display ] [ 0 ]) report-list
-  report report-list
-end
-
-to-report life-history-color-list ; female gestatee, male gestatee, female infant, male infant, female juvenile, male juvenile, cycling female, pregnant female, lactating female, adult male
-  report [ 65 55 46 43 26 23 135 125 115 95 15 ]
-end
+;-----------------------------------------------------------------------------  
+;
+; GET LIST OF FILTERED AND SORTED INDIVIDUALS
+;
+; This subroutine is used to obtain a sorted and filtered list of agents, 
+; sorted by the user interface button settings located beneath the plot. 
+; If one button selected, the collection only contains agents with the 
+; selected attribute. If multiple buttons of the same type are selected, 
+; the collection is sorted by those attributes.
+; 
+; ENTRY: collection of anima1s
+;        buttons gestatees, infants, juveniles, adults, females, males
+;
+; EXIT:  returns list of anima1s sorted by button settings
+; 
+;----------------------------------------------------------------------------- 
 
 to-report get-sorted-individuals ; returns a list of agents, sorted and filtered by parameter specifications
   let sorted-filtered-list sort-on [ age.in.ticks ] anima1s with [ is.alive ]
@@ -846,6 +759,37 @@ to-report life-history-number
     [ 5 ])
 end
 
+;-----------------------------------------------------------------------------  
+;
+; PRINT SPECIFIED AGENT INFORMATION TO OUTPUT WINDOW
+;
+; This subroutine...
+; 
+; ENTRY: 
+;
+; EXIT:  
+; 
+;----------------------------------------------------------------------------- 
+
+to output-window [ input blurb column-list row-list plot-list key-code bar-code print-code ]
+
+  output-header ( word "PLOT: " input " of " get-life-history-filter get-sex-filter get-plot-focus-filter )
+  output-print (word " x: " get-plot-focus-filter )
+  output-print (word " y: " input )
+  output-print ""
+  print-life-history-key
+  output-print ""
+  let column-header-string " "
+  foreach column-list [ c -> set column-header-string ( word column-header-string  c "   ") ]
+  output-print column-header-string
+  let index 0
+  foreach row-list [ r ->
+    output-print (word "   [" (index + 1) "]     " ( item index row-list ) "     " ( max item index plot-list  ))      
+    set index index + 1
+  ]
+  
+end
+
 to-report get-life-history-filter
   report (ifelse-value
     ( gestatees )[ "Gestatee " ]
@@ -871,12 +815,6 @@ to-report get-plot-focus-filter
   [ "" ])    
 end
 
-to-report get-sorted-groups
-  report sort remove-duplicates [group.identity] of anima1s with [ is.alive ]
-end
-
-to-report how-many-columns report 10 end
-  
 to print-life-history-key
   output-print " PLOT KEY :"
   output-print " blue : adult male "
@@ -891,52 +829,6 @@ to print-life-history-key
   output-print " lime : gestatee female"
 end
 
-to-report get-result-from-selected-display
-  report (ifelse-value
-    ( useful-commands = "age" ) [ age.in.ticks ]
-    ( useful-commands = "generations" ) [ generation.number ]
-    ( useful-commands = "survival-chance" ) [ survival.chance ]
-    ( useful-commands = "-- body-size" ) [ body.size ]
-    ( useful-commands = "-- body-shade" ) [ body.shade ]
-    ( useful-commands = "-- hidden-chance" ) [ hidden.chance ]
-    ( useful-commands = "-- bite-capacity" ) [ bite.capacity ]    
-    ( useful-commands = "-- mutation-chance" ) [ mutation.chance ]
-    ( useful-commands = "-- sex-ratio" ) [ sex.ratio ]
-    ( useful-commands = "-- litter-size" ) [ litter.size ]
-    ( useful-commands = "-- conception-chance" ) [ conception.chance ]
-    ( useful-commands = "-- visual-angle" ) [ visual.angle ]
-    ( useful-commands = "-- visual-range" ) [ visual.range ]
-    ( useful-commands = "-- day-perception" ) [ day.perception ]
-    ( useful-commands = "-- night-perception" ) [ night.perception ]
-    ( useful-commands = "-- yellow-chance" ) [ yellow.chance ]
-    ( useful-commands = "-- red-chance" ) [ red.chance ]
-    ( useful-commands = "-- blue-chance" ) [ blue.chance ]
-    ( useful-commands = "-- birthing-chance" ) [ birthing.chance ]
-    ( useful-commands = "-- weaning-chance" ) [ weaning.chance ]
-    ( useful-commands = "-- infancy-chance" ) [ infancy.chance ]
-    ( useful-commands = "-- juvenility-chance" ) [ juvenility.chance ]
-    ( useful-commands = "-- adulthood-chance" ) [ adulthood.chance ]
-    ( useful-commands = "-- carried-items" ) [ length carried.items ]
-    ( useful-commands = "-- energy-supply" ) [ energy.supply ]
-    ( useful-commands = "birthing" ) [ ifelse-value ( mother.initiated.birth = true ) [ 2 ] [ 1 ] ]
-    ( useful-commands = "weaning" ) [ ifelse-value ( mother.initiated.weaning = true ) [ 2 ] [ 1 ] ]
-    ( useful-commands = "matings" ) [ length copulations.history ]
-    ( useful-commands = "mating-partners" ) [ length remove-duplicates copulations.history ]
-    ( useful-commands = "conceptions" ) [ length conceptions.history ]
-    ( useful-commands = "infanticide" ) [ length infanticide.history ]
-    ( useful-commands = "group-transfers" ) [ length group.transfers.history ]
-    ( useful-commands = "travel-distance" ) [ distance.traveled ]
-    ( useful-commands = "foraging-gains" ) [ foraging.gains ]
-    ( useful-commands = "total-energy-gains" ) [ total.energy.gains ]
-    ( useful-commands = "total-energy-cost" ) [ total.energy.cost ]
-    ( useful-commands = "receiving.history" ) [ receiving.history ]
-    ( useful-commands = "carried.history" ) [ length carried.history ]
-    ( useful-commands = "aid-history" ) [ length aid.history ]
-    ( useful-commands = "harm-history" ) [ length harm.history ]
-    
-    ;( input = "birth" ) [ ( ticks.at.birth - ticks.at.conception ) ]
-    [ 0 ])
-end
 
 
 
@@ -944,262 +836,451 @@ end
 
 
 
-to-report get-column-results [ agent-list stats-list ]
-  
-  let report-list []
-  foreach stats-list [ i ->
-    set report-list (sentence report-list get-stats-results i agent-list )
-  ]
-  report report-list ; concatinated lists of numbers
-end
 
-to-report get-stats-results [ stats-type agent-list ]
-  ; foreach get-value-array, ( for each measurement done)
-  ;    apply stats-type to turn list into number
-  ; therefore end up with one list of numbers, or list of single number 
-  
-  ; return list of numbers
-  let report-list []
-  let values get-value-array agent-list selected-display  
-  
-  foreach values [ v -> 
-    set report-list (ifelse-value
-      ( stats-type = "min" ) [ min v ]
-      ( stats-type = "max" ) [ max v ]
-      ( stats-type = "mean" ) [ mean v ]
-      ( stats-type = "median" ) [ median v ]
-      ( stats-type = "variance" ) [ variance v ]
-      [ count v ])
-  ]
-  report report-list
-  
-;  report (ifelse-value
-;    ( stats-type = "min" ) [ min get-value-array agent-list selected-display ]
-;    [])
-end
 
-to-report get-value-array [ agent-list inputs ] ; returns a list of lists, one list for each measurement done on agent-list
-  let report-list []
-  
-;  foreach inputs [ input ->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;to-report get-column-results [ agent-list stats-list ]
 ;  
-;  set report-list lput ( ifelse
-;;    ( input = "life-history" ) [ foreach [ "gestation" "lactation" "sexual-maturity" "longevity" ] [ l ->  set report-list lput ( get-value-array agent-list l ) report-list ]]
-;;    ( input = "genotype" )[ get-genotype-measurements agent-list ]
-;;    ( input = "phenotype" )[ get-phenotype-measurements agent-list ] ;
-;;    ( input = "kin-selection" )[ get-kin-sselection-measurements agent-list ] ;
-;;    ( input = "actions" )[ get-action-measurements agent-list ]
-;;    ( input = "decisions" )[ get-decision-measurements agent-list ]
-;    ( input = "age" ) [ set report-list lput [ age.in.ticks ] of agent-list ]
-;    ( input = "generations" ) [ generation.number ]
-;    ( input = "survival-chance" ) [ survival.chance ]
-;    ( input = "body-size" ) [ body.size ]
-;    ( input = "body-shade" ) [ body.shade ]
-;    ( input = "hidden-chance" ) [ hidden.chance ]
-;    ( input = "bite-capacity" ) [ bite.capacity ]    
-;    ( input = "mutation-chance" ) [ mutation.chance ]
-;    ( input = "sex-ratio" ) [ sex.ratio ]
-;    ( input = "litter-size" ) [ litter.size ]
-;    ( input = "conception-chance" ) [ conception.chance ]
-;    ( input = "visual-angle" ) [ visual.angle ]
-;    ( input = "visual-range" ) [ visual.range ]
-;    ( input = "day-perception" ) [ day.perception ]
-;    ( input = "night-perception" ) [ night.perception ]
-;    ( input = "yellow-chance" ) [ yellow.chance ]
-;    ( input = "red-chance" ) [ red.chance ]
-;    ( input = "blue-chance" ) [ blue.chance ]
-;    ( input = "birthing-chance" ) [ birthing.chance ]
-;    ( input = "weaning-chance" ) [ weaning.chance ]
-;    ( input = "infancy-chance" ) [ infancy.chance ]
-;    ( input = "juvenility-chance" ) [ juvenility.chance ]
-;    ( input = "adulthood-chance" ) [ adulthood.chance ]
-;    ( input = "carried-items" ) [ length carried.items ]
-;    ( input = "energy-supply" ) [ energy.supply ]
-;    ( input = "birthing" ) [ ifelse-value ( mother.initiated.birth = true ) [ 2 ] [ 1 ] ]
-;    ( input = "weaning" ) [ ifelse-value ( mother.initiated.weaning = true ) [ 2 ] [ 1 ] ]
-;    ( input = "matings" ) [ length copulations.history ]
-;    ( input = "mating-partners" ) [ length remove-duplicates copulations.history ]
-;    ( input = "conceptions" ) [ length conceptions.history ]
-;    ( input = "infanticide" ) [ length infanticide.history ]
-;    ( input = "group-transfers" ) [ length group.transfers.history ]
-;    ( input = "travel-distance" ) [ distance.traveled ]
-;    ( input = "foraging-gains" ) [ foraging.gains ]
-;    ( input = "total-energy-gains" ) [ total.energy.gains ]
-;    ( input = "total-energy-cost" ) [ total.energy.cost ]
-;    ( input = "receiving.history" ) [ receiving.history ]
-;    ( input = "carried.history" ) [ length carried.history ]
-;    ( input = "aid-history" ) [ length aid.history ]
-;    ( input = "harm-history" ) [ length harm.history ]
-;      
-;    [])
+;  let report-list []
+;  foreach stats-list [ i ->
+;    set report-list (sentence report-list get-stats-results i agent-list )
 ;  ]
- 
-  report report-list
+;  report report-list ; concatinated lists of numbers
+;end
+;
+;to-report get-stats-results [ stats-type agent-list ]
+;  ; foreach get-value-array, ( for each measurement done)
+;  ;    apply stats-type to turn list into number
+;  ; therefore end up with one list of numbers, or list of single number 
+;  
+;  ; return list of numbers
+;  let report-list []
+;  let values get-value-array agent-list selected-display  
+;  
+;  foreach values [ v -> 
+;    set report-list (ifelse-value
+;      ( stats-type = "min" ) [ min v ]
+;      ( stats-type = "max" ) [ max v ]
+;      ( stats-type = "mean" ) [ mean v ]
+;      ( stats-type = "median" ) [ median v ]
+;      ( stats-type = "variance" ) [ variance v ]
+;      [ count v ])
+;  ]
+;  report report-list
+;  
+;;  report (ifelse-value
+;;    ( stats-type = "min" ) [ min get-value-array agent-list selected-display ]
+;;    [])
+;end
+;
+;to-report get-value-array [ agent-list inputs ] ; returns a list of lists, one list for each measurement done on agent-list
+;  let report-list []
+;  
+;;  foreach inputs [ input ->
+;;  
+;;  set report-list lput ( ifelse
+;;;    ( input = "life-history" ) [ foreach [ "gestation" "lactation" "sexual-maturity" "longevity" ] [ l ->  set report-list lput ( get-value-array agent-list l ) report-list ]]
+;;;    ( input = "genotype" )[ get-genotype-measurements agent-list ]
+;;;    ( input = "phenotype" )[ get-phenotype-measurements agent-list ] ;
+;;;    ( input = "kin-selection" )[ get-kin-sselection-measurements agent-list ] ;
+;;;    ( input = "actions" )[ get-action-measurements agent-list ]
+;;;    ( input = "decisions" )[ get-decision-measurements agent-list ]
+;;    ( input = "age" ) [ set report-list lput [ age.in.ticks ] of agent-list ]
+;;    ( input = "generations" ) [ generation.number ]
+;;    ( input = "survival-chance" ) [ survival.chance ]
+;;    ( input = "body-size" ) [ body.size ]
+;;    ( input = "body-shade" ) [ body.shade ]
+;;    ( input = "hidden-chance" ) [ hidden.chance ]
+;;    ( input = "bite-capacity" ) [ bite.capacity ]    
+;;    ( input = "mutation-chance" ) [ mutation.chance ]
+;;    ( input = "sex-ratio" ) [ sex.ratio ]
+;;    ( input = "litter-size" ) [ litter.size ]
+;;    ( input = "conception-chance" ) [ conception.chance ]
+;;    ( input = "visual-angle" ) [ visual.angle ]
+;;    ( input = "visual-range" ) [ visual.range ]
+;;    ( input = "day-perception" ) [ day.perception ]
+;;    ( input = "night-perception" ) [ night.perception ]
+;;    ( input = "yellow-chance" ) [ yellow.chance ]
+;;    ( input = "red-chance" ) [ red.chance ]
+;;    ( input = "blue-chance" ) [ blue.chance ]
+;;    ( input = "birthing-chance" ) [ birthing.chance ]
+;;    ( input = "weaning-chance" ) [ weaning.chance ]
+;;    ( input = "infancy-chance" ) [ infancy.chance ]
+;;    ( input = "juvenility-chance" ) [ juvenility.chance ]
+;;    ( input = "adulthood-chance" ) [ adulthood.chance ]
+;;    ( input = "carried-items" ) [ length carried.items ]
+;;    ( input = "energy-supply" ) [ energy.supply ]
+;;    ( input = "birthing" ) [ ifelse-value ( mother.initiated.birth = true ) [ 2 ] [ 1 ] ]
+;;    ( input = "weaning" ) [ ifelse-value ( mother.initiated.weaning = true ) [ 2 ] [ 1 ] ]
+;;    ( input = "matings" ) [ length copulations.history ]
+;;    ( input = "mating-partners" ) [ length remove-duplicates copulations.history ]
+;;    ( input = "conceptions" ) [ length conceptions.history ]
+;;    ( input = "infanticide" ) [ length infanticide.history ]
+;;    ( input = "group-transfers" ) [ length group.transfers.history ]
+;;    ( input = "travel-distance" ) [ distance.traveled ]
+;;    ( input = "foraging-gains" ) [ foraging.gains ]
+;;    ( input = "total-energy-gains" ) [ total.energy.gains ]
+;;    ( input = "total-energy-cost" ) [ total.energy.cost ]
+;;    ( input = "receiving.history" ) [ receiving.history ]
+;;    ( input = "carried.history" ) [ length carried.history ]
+;;    ( input = "aid-history" ) [ length aid.history ]
+;;    ( input = "harm-history" ) [ length harm.history ]
+;;      
+;;    [])
+;;  ]
+; 
+;  report report-list
+;end
+;
+;to-report get-phenotype-measurements
+;  
+;end
+;
+;to-report get-genotype-measurements
+;  report []
+;end
+;
+;to plot-individuals-decisions 
+;  let individual-list get-sorted-individuals                        ; get sorted list of living agents
+;  let plot-list []                                                  ; initialize list of values to be plotted
+;  
+;  let decisions-list [ 
+;    "survival-chance" "body-size" "body-shade" 
+;    "day-perception" "night-perception" "visual-angle" "visual-range" 
+;    "conception-chance" "bite-capacity" "mutation-chance" "sex-ratio" "litter-size" 
+;    "turn-right" "turn-left" "go-forward" "set-heading" "set-heading-random" 
+;    "hide" "rest" 
+;    "yellow-signal" "red-signal" "blue-signal" 
+;    "check-infancy" "check-juvenility" "check-adulthood" 
+;    "check-birth" "check-weaning" 
+;    "move-toward" "move-away-from" "supply-to" "demand-from" "eat"
+;    "join" "leave" "recruit" "kick-out"
+;    "pick-up" "put-down" "cling-to" "squirm-from"
+;    "help" "hurt" "mate-with" ]
+;  
+;  let color-list [ 
+;    3 5 7 
+;    12 14 16 18
+;    23 25 27 
+;    33 37
+;    43 45 47 
+;    54 56
+;    64 67
+;    73 75 77
+;    82 85 87
+;    93 96 
+;    103 107 
+;    123 125 127
+;    132 134 136 138
+;    142 144 146 148
+;    153 155 157 ]
+;  
+;  foreach individual-list [ i ->                                    ; loop through each individual
+;    
+;    foreach decisions-list [ d ->
+;      
+;      
+;    
+;;    ifelse ( subject = i )                                          ; check if individual is subject
+;;    [ set plot-list lput (list 0 [age.in.ticks] of i ) plot-list ]  ; if yes, then update plot list for red columm
+;;    [ set plot-list lput (list [age.in.ticks] of i 0 ) plot-list ]] ; if no, then update plot list for black column
+;  ]]
+;  ;plot-colored-histogram 1 plot-list color-list                      ; update plot based on plot list
+;end
+;  
+;to plot-groups-groups 
+;  let current-groups sort remove-duplicates [group.identity] of anima1s with [ is.alive ]
+;  let group-composition-list []
+;  
+;  foreach current-groups [ group ->
+;    let this-group-composition []
+;    let y-so-far count anima1s with [ is.alive and group.identity = group ]
+;    foreach [ "gestatee" "infant" "juvenile" "adult" ] [ life-stage ->      
+;      foreach [ "female" "male" ] [ sex ->
+;        set this-group-composition lput y-so-far this-group-composition
+;        set y-so-far y-so-far - count anima1s with [ is.alive and group.identity = group and life.history = life-stage and biological.sex = sex ]
+;      ]
+;    ]
+;    set group-composition-list lput this-group-composition group-composition-list
+;  ] 
+;  ;plot-colored-histogram 1 group-composition-list [ red orange yellow green turquoise sky blue magenta ]
+;end
+;  
+;to plot-lotka-volterra 
+;  clear-all-plots
+;  set-plot-pen-mode 0
+;  set-plot-pen-color green
+;  let index 0
+;  foreach plant-abundance-record [ p ->
+;    plotxy ( 100 * index ) ( ln p )
+;    set index index + 1 ]
+;  plot-pen-up
+;  set index 0
+;  set-plot-pen-color brown
+;  foreach population-size-record [ s ->
+;    plotxy ( 100 * index ) ( ln s )
+;    plot-pen-down
+;    set index index + 1 ]
+;end
+;
+;
+;to reduce-genotype
+;  clear-output
+;  ;REDUCE DECISIONS TO ONE PER TARGET-ACTION COMBO
+;  let reduced-decisions []
+;  
+;  let input-list ( sentence chromosome.i chromosome.ii )
+;  
+;  foreach input-list [ original-vector ->
+;    let original-ego ifelse-value ( length original-vector > 1 ) [ item 1 original-vector ] [ 0 ]
+;    let original-target ifelse-value ( length original-vector > 2 ) [ item 2 original-vector ] [ 0 ]
+;    let original-action ifelse-value ( length original-vector > 3 ) [ item 3 original-vector ] [ 0 ]
+;    let original-weight ifelse-value ( length original-vector > 4 ) [ item 4 original-vector ] [ 0 ]
+;    let vector-doesnt-exist true
+;    
+;    let index 0
+;    foreach reduced-decisions [ reduced-vector ->
+;      let reduced-ego ifelse-value ( length reduced-vector > 1 ) [ item 1 reduced-vector ] [ 0 ]
+;      let reduced-target ifelse-value ( length reduced-vector > 2 ) [ item 2 reduced-vector ] [ 0 ]
+;      let reduced-action ifelse-value ( length reduced-vector > 3 ) [ item 3 reduced-vector ] [ 0 ]
+;      let reduced-weight ifelse-value ( length reduced-vector > 4 ) [ item 4 reduced-vector ] [ 0 ]
+;      
+;      print original-ego
+;      print original-target
+;      print original-action
+;      print original-weight
+;      print reduced-ego
+;      print reduced-target
+;      print reduced-action
+;      print reduced-weight
+;      
+;      if ( reduced-ego = original-ego ) and ( reduced-target = original-target ) and ( reduced-action = original-action ) and is-number? reduced-weight and is-number? original-weight [
+;        set vector-doesnt-exist false
+;        print "match"
+;        let new-vector ( list reduced-ego reduced-target reduced-action ( reduced-weight + original-weight ) )
+;        set reduced-decisions remove-item index reduced-decisions
+;        set reduced-decisions lput new-vector reduced-decisions ]
+;      set index index + 1
+;    ]
+;    if vector-doesnt-exist [ set reduced-decisions lput ( list original-ego original-target original-action original-weight ) reduced-decisions ]
+;    ; print reduced-decisions
+;  ]
+;  foreach reduced-decisions [ d ->
+;    output-print d
+;  ]
+;end
+;
+;
+;
+;
+;
+;;; detelet?
+;
+;
+;
+;
+;
+;
+;
+;;-----------------------------------------------------------------------------       
+;; AGE HISTOGRAM
+;;-----------------------------------------------------------------------------    
+;
+;;to age-histogram
+;;  clear-plot
+;;  set-plot-pen-interval 100
+;;  set-plot-x-range 0 max [ age.in.ticks ] of anima1s with [ is.alive ]
+;;  histogram [ age.in.ticks ] of anima1s with [ is.alive ]
+;;end
+;
+;;;-----------------------------------------------------------------------------       
+;;; VIEW HISTORY
+;;;-----------------------------------------------------------------------------   
+;;
+;;to output-history
+;;  let anima1-to-inspect one-of anima1s with [ self = subject ]
+;;  output-header (word " HISTORY : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [meta.id ] of anima1-to-inspect ) ] )
+;;  
+;;  output-print ( word " Total energy gained: "
+;;    ifelse-value ( anima1-to-inspect != nobody ) 
+;;    [ [ precision total.energy.gains 2 ] of subject ] 
+;;    [ ( word precision ( sum [ total.energy.gains ] of anima1s with [ biological.sex = "female"] ) 2 " (females) " precision ( sum [ total.energy.gains ] of anima1s with [ biological.sex = "male"] ) 2 " (males) " ) ] )
+;;  
+;;  output-print ( word " Total energy cost: "
+;;    ifelse-value ( anima1-to-inspect != nobody ) 
+;;    [ [ precision total.energy.cost 2 ] of subject ] 
+;;    [ ( word precision ( sum [ total.energy.cost ] of anima1s with [ biological.sex = "female"] ) 2 " (females) " precision ( sum [ total.energy.cost ] of anima1s with [ biological.sex = "male"]) 2 " (males) " ) ] )
+;;  
+;;  output-print ( word " Total energy gained by foraging: "
+;;    ifelse-value ( anima1-to-inspect != nobody ) 
+;;    [ [ precision foraging.gains 2 ] of subject ] 
+;;    [ ( word precision ( sum [ foraging.gains ] of anima1s with [ biological.sex = "female"] ) 2 " (females) " precision ( sum [ foraging.gains ] of anima1s with [ biological.sex = "male"]) 2 " (males) " ) ] )
+;;  
+;;  output-print ( word " Number of helpful behaviors: "
+;;    ifelse-value ( anima1-to-inspect != nobody ) 
+;;    [ [ length aid.history ] of subject ] 
+;;    [ ( word sum [ length aid.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length aid.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
+;;  
+;;  output-print ( word " Number of aggressive behaviors: "
+;;    ifelse-value ( anima1-to-inspect != nobody ) 
+;;    [ [ length harm.history ] of subject ] 
+;;    [ ( word sum [ length harm.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length harm.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
+;;  
+;;  output-print ( word " Number of infanticides: "
+;;    ifelse-value ( anima1-to-inspect != nobody ) 
+;;    [ [ length infanticide.history ] of subject ] 
+;;    [ ( word sum [ length infanticide.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length infanticide.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
+;;  
+;;  output-print ( word " Number of copulations: "
+;;    ifelse-value ( anima1-to-inspect != nobody ) 
+;;    [ [ length copulations.history ] of subject ] 
+;;    [ ( word sum [ length copulations.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length copulations.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
+;;  
+;;  output-print ( word " Number of conceptions: "
+;;    ifelse-value ( anima1-to-inspect != nobody ) 
+;;    [ [ length conceptions.history ] of subject ] 
+;;    [ ( word sum [ length conceptions.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length conceptions.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
+;;  
+;;  output-print ( word " Number of group transfers: "
+;;    ifelse-value ( anima1-to-inspect != nobody ) 
+;;    [ [ length group.transfers.history ] of subject ] 
+;;    [ ( word sum [ length group.transfers.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length group.transfers.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
+;;  
+;;end
+;;
+;;;-----------------------------------------------------------------------------       
+;;; VIEW STATUS
+;;;-----------------------------------------------------------------------------   
+;;
+;;to output-status
+;;  let anima1-to-inspect one-of anima1s with [ self = subject ]
+;;  output-header (word " STATUS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [ meta.id ] of anima1-to-inspect ) ] )
+;;  
+;;  ;output-print ( word " Number of individuals: " count anima1z )
+;;  output-print ( word " Number of females: " count anima1z with [ biological.sex = "female" ] )
+;;  output-print ( word " Number of males: " count anima1z with [ biological.sex = "male" ] )
+;;  
+;;  let group-list []
+;;  let group-size-list []
+;;  let females-in-group []
+;;  let males-in-group []
+;;  let juveniles-in-group []
+;;  let infants-in-group []
+;;  let gestatees-in-group []
+;;  
+;;  ask anima1z [ if ( not member? group.identity group-list ) [ set group-list lput group.identity group-list ]]
+;;  foreach group-list [ g -> 
+;;    set group-size-list lput ( count anima1z with [ group.identity = g ] ) group-size-list 
+;;    set females-in-group lput ( count anima1z with [ group.identity = g and biological.sex = "female" and life.history = "adult"] ) females-in-group 
+;;    set males-in-group lput ( count anima1z with [ group.identity = g and biological.sex = "male" and life.history = "adult" ] ) males-in-group 
+;;    set juveniles-in-group lput ( count anima1z with [ group.identity = g and life.history = "juvenile" ] ) juveniles-in-group
+;;    set infants-in-group lput ( count anima1z with [ group.identity = g and life.history = "infant" ] ) infants-in-group
+;;    set gestatees-in-group lput ( count anima1z with [ group.identity = g and life.history = "gestatee" ] ) gestatees-in-group
+;;  ]
+;;  
+;;  output-print ( word " Number of groups: " length group-list )
+;;  output-print ( word " Average group size: " precision mean group-size-list 2 )
+;;  output-print ( word " Average number of adult females per group: " precision mean females-in-group 2 )
+;;  output-print ( word " Average number of adult males per group: " precision mean males-in-group 2 )
+;;  output-print ( word " Average number of juveniles per group: " precision mean juveniles-in-group 2 )
+;;  output-print ( word " Average number of infants per group: " precision mean infants-in-group 2 )
+;;  output-print ( word " Average number of gestatees per group: " precision mean gestatees-in-group 2 )
+;;end
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+
+
+
+
+
+
+; save? - this one helps set a group to same color i think+
+to-report get-group-identity-from-color [ color-of-group ]
+  ifelse ( is-number? color-of-group ) [
+    report ( random 999 * 140 + color-of-group )
+  ][
+    report "error: input value is not a number"
+  ]
 end
 
-to-report get-phenotype-measurements
-  
-end
 
-to-report get-genotype-measurements
-  report []
-end
-
-to plot-individuals-decisions 
-  let individual-list get-sorted-individuals                        ; get sorted list of living agents
-  let plot-list []                                                  ; initialize list of values to be plotted
-  
-  let decisions-list [ 
-    "survival-chance" "body-size" "body-shade" 
-    "day-perception" "night-perception" "visual-angle" "visual-range" 
-    "conception-chance" "bite-capacity" "mutation-chance" "sex-ratio" "litter-size" 
-    "turn-right" "turn-left" "go-forward" "set-heading" "set-heading-random" 
-    "hide" "rest" 
-    "yellow-signal" "red-signal" "blue-signal" 
-    "check-infancy" "check-juvenility" "check-adulthood" 
-    "check-birth" "check-weaning" 
-    "move-toward" "move-away-from" "supply-to" "demand-from" "eat"
-    "join" "leave" "recruit" "kick-out"
-    "pick-up" "put-down" "cling-to" "squirm-from"
-    "help" "hurt" "mate-with" ]
-  
-  let color-list [ 
-    3 5 7 
-    12 14 16 18
-    23 25 27 
-    33 37
-    43 45 47 
-    54 56
-    64 67
-    73 75 77
-    82 85 87
-    93 96 
-    103 107 
-    123 125 127
-    132 134 136 138
-    142 144 146 148
-    153 155 157 ]
-  
-  foreach individual-list [ i ->                                    ; loop through each individual
-    
-    foreach decisions-list [ d ->
-      
-      
-    
-;    ifelse ( subject = i )                                          ; check if individual is subject
-;    [ set plot-list lput (list 0 [age.in.ticks] of i ) plot-list ]  ; if yes, then update plot list for red columm
-;    [ set plot-list lput (list [age.in.ticks] of i 0 ) plot-list ]] ; if no, then update plot list for black column
-  ]]
-  ;plot-colored-histogram 1 plot-list color-list                      ; update plot based on plot list
-end
-  
-to plot-groups-groups 
-  let current-groups sort remove-duplicates [group.identity] of anima1s with [ is.alive ]
-  let group-composition-list []
-  
-  foreach current-groups [ group ->
-    let this-group-composition []
-    let y-so-far count anima1s with [ is.alive and group.identity = group ]
-    foreach [ "gestatee" "infant" "juvenile" "adult" ] [ life-stage ->      
-      foreach [ "female" "male" ] [ sex ->
-        set this-group-composition lput y-so-far this-group-composition
-        set y-so-far y-so-far - count anima1s with [ is.alive and group.identity = group and life.history = life-stage and biological.sex = sex ]
-      ]
-    ]
-    set group-composition-list lput this-group-composition group-composition-list
+; save? - this one gives random chomrosome identities at first
+to set-random-identity-chromosomes [ length-of-chromosomes ]
+  let get-alphabet [ "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z" ]
+  ifelse ( is-number? length-of-chromosomes ) [
+    set identity.I ""
+    set identity.II ""
+    repeat length-of-chromosomes [ set identity.I (word identity.I one-of get-alphabet ) ]
+    repeat length-of-chromosomes [ set identity.II (word identity.II one-of get-alphabet ) ]
+  ][
+    print "error: input value is not a number"
   ] 
-  ;plot-colored-histogram 1 group-composition-list [ red orange yellow green turquoise sky blue magenta ]
 end
-  
-to plot-lotka-volterra 
-  clear-all-plots
-  set-plot-pen-mode 0
-  set-plot-pen-color green
-  let index 0
-  foreach plant-abundance-record [ p ->
-    plotxy ( 100 * index ) ( ln p )
-    set index index + 1 ]
-  plot-pen-up
-  set index 0
-  set-plot-pen-color brown
-  foreach population-size-record [ s ->
-    plotxy ( 100 * index ) ( ln s )
-    plot-pen-down
-    set index index + 1 ]
-end
-
-
-to reduce-genotype
-  clear-output
-  ;REDUCE DECISIONS TO ONE PER TARGET-ACTION COMBO
-  let reduced-decisions []
-  
-  let input-list ( sentence chromosome.i chromosome.ii )
-  
-  foreach input-list [ original-vector ->
-    let original-ego ifelse-value ( length original-vector > 1 ) [ item 1 original-vector ] [ 0 ]
-    let original-target ifelse-value ( length original-vector > 2 ) [ item 2 original-vector ] [ 0 ]
-    let original-action ifelse-value ( length original-vector > 3 ) [ item 3 original-vector ] [ 0 ]
-    let original-weight ifelse-value ( length original-vector > 4 ) [ item 4 original-vector ] [ 0 ]
-    let vector-doesnt-exist true
-    
-    let index 0
-    foreach reduced-decisions [ reduced-vector ->
-      let reduced-ego ifelse-value ( length reduced-vector > 1 ) [ item 1 reduced-vector ] [ 0 ]
-      let reduced-target ifelse-value ( length reduced-vector > 2 ) [ item 2 reduced-vector ] [ 0 ]
-      let reduced-action ifelse-value ( length reduced-vector > 3 ) [ item 3 reduced-vector ] [ 0 ]
-      let reduced-weight ifelse-value ( length reduced-vector > 4 ) [ item 4 reduced-vector ] [ 0 ]
-      
-      print original-ego
-      print original-target
-      print original-action
-      print original-weight
-      print reduced-ego
-      print reduced-target
-      print reduced-action
-      print reduced-weight
-      
-      if ( reduced-ego = original-ego ) and ( reduced-target = original-target ) and ( reduced-action = original-action ) and is-number? reduced-weight and is-number? original-weight [
-        set vector-doesnt-exist false
-        print "match"
-        let new-vector ( list reduced-ego reduced-target reduced-action ( reduced-weight + original-weight ) )
-        set reduced-decisions remove-item index reduced-decisions
-        set reduced-decisions lput new-vector reduced-decisions ]
-      set index index + 1
-    ]
-    if vector-doesnt-exist [ set reduced-decisions lput ( list original-ego original-target original-action original-weight ) reduced-decisions ]
-    ; print reduced-decisions
-  ]
-  foreach reduced-decisions [ d ->
-    output-print d
-  ]
-end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
