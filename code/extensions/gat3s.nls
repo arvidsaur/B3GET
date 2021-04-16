@@ -154,6 +154,7 @@
 
 ; MOV   2020-04-01   --> move-toward
 ; MAF   2020-04-01   --> move-away-from
+; MCH   2020-04-01   --> match-heading
 ; SPT   2019-10-16   --> supply-to 
 ; DMF   2019-10-16   --> demand-from
 ; EAT   2019-10-16   --> eat
@@ -365,6 +366,7 @@ to-report g8tes-get-action [ action-code ]
     
     ( action-code = "MOV" ) [ "move-toward" ]
     ( action-code = "MAF" ) [ "move-away-from" ]
+    ( action-code = "MCH" ) [ "match-heading" ]
     ( action-code = "TRT" ) [ "turn-right" ]
     ( action-code = "TLF" ) [ "turn-left" ]
     ( action-code = "GFD" ) [ "go-forward" ]
@@ -543,7 +545,7 @@ end
 ; CALLER: anima1
 ;----------------------------------------------------------------------------------------------
 
-to-report g8tes-get-mutation [ original-codon ]
+to-report g8tes-get-mutation [ original-codon type-of-mutation ]
   report one-of (sentence gate-codons action-codons operation-codons reporter-codons )
 end
 
@@ -560,7 +562,7 @@ to-report action-codons
     "CNC" "BTC" "MTC" "SXR" "LTS"
     "TRT" "TLF" "GFD" "STH" "SHR" "HID"
     "YWS" "RDS" "BLS" "CKI" "CKB"
-    "CKJ" "CKW" "CKA" "MOV"
+    "CKJ" "CKW" "CKA" "MOV" "MCH"
     "MAF" "SPT" "DMF" "EAT" "JON"
     "LEV" "RCT" "EXP" "PKU" "PDN"
     "CLG" "SQM" "HLP" "ATK" "MTW" 

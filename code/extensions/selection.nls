@@ -54,7 +54,7 @@ to artificial-selection ;  memory caps?
       
       let selected-anima1 max-one-of anima1s with [ life.history = "adult" ] [ generation.number ]
       if ( [generation.number] of selected-anima1 > genotype-number ) [
-        set genotype (word (genotype-name) ( genotype-number + 1 ) ) ; set new genotype name up one more number increment
+        set genotype (word (genotype-name) "-" ( genotype-number + 1 ) ) ; set new genotype name up one more number increment
         ask selected-anima1 [ save-genotype ]]
       
       let old-population-name population

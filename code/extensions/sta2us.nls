@@ -30,7 +30,7 @@
 ; 2019-09-XX    k    is kin (relatedness > 0.2) ; target is 0.25 or more related
 ; 2019-09-XX    l    is lactating
 ; 2019-09-XX    m    is a male
-; 2019-09-XX    n    is a group member
+; 2019-09-XX    n    is a group member or location
 ; 2019-09-XX    o    is another (not myself)
 ; 2019-09-XX    p    is pregnant
 ; 2019-09-XX    q    is not kin (relatedness <= 0.2)
@@ -85,6 +85,7 @@
 ;
 ; 2020-04-01   --> move-toward 
 ; 2020-04-01   --> move-away-from
+; 2020-04-01   --> match-heading
 ; 2019-10-16   --> supply-to 
 ; 2019-10-16   --> demand-from  
 ; 2019-10-16   --> eat   
@@ -167,7 +168,7 @@ end
 
 to-report sta7us-get-mutation [ original-codon type-of-mutation ] ; numbers, letters, both
   report ( ifelse-value 
-    ( is-number? original-codon and ( type-of-mutation = "numbers" or type-of-mutation = "both" ) ) [ get-updated-value original-codon ( one-of [ 1 -1 ] ) ]
+    ( is-number? original-codon and ( type-of-mutation = "numbers" or type-of-mutation = "both" ) ) [ ( one-of [ 1 -1 ] ) * get-updated-value original-codon ( one-of [ 1 -1 ] ) ]
     ( member? original-codon action-code-list and ( type-of-mutation = "letters" or type-of-mutation = "both" ) ) [ one-of action-code-list ]
     [ ifelse-value ( type-of-mutation = "letters" or type-of-mutation = "both" ) [ generate-status ] [ original-codon ]] ) 
 end
@@ -201,6 +202,7 @@ to-report sta7us-get-action [ action-code ]
     ( action-code = "MOV" or action-code = "move-toward" ) [ "move-toward" ]
     ( action-code = "move-away-from" ) [ "move-away-from" ]
     ( action-code = "HED" or action-code = "set-heading" ) [ "set-heading" ]
+    ( action-code = "match-heading" ) [ "match-heading" ]
     ( action-code = "set-heading-random" ) [ "set-heading-random" ]
     ( action-code = "HID" or action-code = "hide" ) [ "hide" ]
     ( action-code = "rest" ) [ "rest" ]
@@ -254,7 +256,7 @@ to-report status-of [ target ]
     let target-carry ifelse-value ( member? target carried.items ) [ "y" ] [ ifelse-value ( member? self [carried.items] of target ) [ "+" ] [ "t" ] ]
     let target-signal (word ifelse-value [yellow.signal] of target [ "α" ][ "å" ] ifelse-value [red.signal] of target [ "β" ][ "ß" ] ifelse-value [blue.signal] of target [ "ɣ" ][ "œ" ] )
     let target-rest ifelse-value ( [is.resting] of target = true ) [ "s" ] [ "." ]
-    let target-color (word "" round [color] of target "")
+    let target-color (word "" round [color] of target "" ifelse-value ( shade-of? color [color] of target) [ "#" ] [ "" ])
     set status-report (word status-report 
       target-kind 
       target-self 
@@ -273,8 +275,10 @@ to-report status-of [ target ]
     
   if ( is-patch? target ) [ ; PATCHES
     let target-kind "d" 
+    let plant-group [pgroup.identity] of target
+    let target-group ifelse-value ( plant-group = 0 or plant-group = group.identity ) [ "n" ] [ "u" ] 
     let target-pcolor (word "" round [pcolor] of target "")
-    set status-report (word status-report word target-kind target-pcolor )]
+    set status-report (word status-report word target-kind target-group target-pcolor )]
   
   report status-report
 end
@@ -306,7 +310,7 @@ to-report action-code-list
     "survival-chance" "body-size" "body-shade" 
     "day-perception" "night-perception" "visual-angle" "visual-range" 
     "conception-chance" "bite-capacity" "mutation-chance" "sex-ratio" "litter-size" 
-    "turn-right" "turn-left" "go-forward" "set-heading" "hide" "rest" "set-heading-random"
+    "turn-right" "turn-left" "go-forward" "set-heading" "hide" "rest" "set-heading-random" "match-heading"
     "yellow-signal" "red-signal" "blue-signal" 
     "check-infancy" "check-birth" "check-juvenility" "check-weaning" "check-adulthood" 
     "move-toward" "move-away-from" "supply-to" "demand-from" "eat"

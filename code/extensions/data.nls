@@ -41,10 +41,14 @@ end
 ; 
 ;----------------------------------------------------------------------------------------------
 
-to update-metafile [ type-of-file name-of-file ]
+to update-metafile [ type-of-file name-of-file metafile-notes ]
+  
+  set observation-notes metafile-notes
+  
+  let filename "../results/metafile.csv"
   
   ; Save whatever is currently in the METAFILE or create new
-  if ( not file-exists? "../data/metafile.csv" ) 
+  if ( not file-exists? filename ) 
   
   [ 
     file-open "../data/metafile.csv"
@@ -76,7 +80,7 @@ to update-metafile [ type-of-file name-of-file ]
     ))
   ]
   
-  file-open "../data/metafile.csv"
+  file-open filename
   
   if observation-notes = "" [ set observation-notes "Metafile updated." ]
   
@@ -328,8 +332,7 @@ to import-population
       update-appearance ; One the agent is updated with its attributes, update its appearance to match
     ]
     
-    set observation-notes (word "Population file \"" population "\" imported. " observation-notes )
-    update-metafile "population" population
+    update-metafile "population" population (word "POPULATION " population " IMPORTED")
     output-print " Population import successful."
     
   ][ set population "" ] ; If the population file cannot be found, set the population textbox to blank
@@ -369,10 +372,10 @@ to save-population
   [ 
     ; popup window options if population file already exists
     let answer user-yes-or-no? 
-    (word "The population " population " already exists! "
-      "Would you like to: overwrite the existing file with current population [ YES ], "
-      "save current population to a different randomly generated file name [ NO ], "
-      "or forget the whole darn thing [ HALT ]?" )
+    (word "The population \"" population "\" already exists! " 
+      "Click YES overwrite the existing file with the current population, "
+      "NO to save the current population to a different randomly generated file name, "
+      "or HALT to forget the whole darn thing." )
     ifelse ( answer ) 
     [ file-delete filename save-population ]                       ; YES
     [ reset-population-button save-population ]                    ; NO
@@ -504,13 +507,15 @@ to save-population
       if ( is-anima1? self ) [ set my.mother ifelse-value ( my.mother != nobody ) [ one-of anima1s with [ meta.id  = [my.mother] of myself ]] [ nobody ] ]
     ]
     
-    file-open filename
-    csv:to-file filename ( sentence (list header ) body )
-    file-close
+    if ( file-exists? filename )
+    [ 
+      file-open filename
+      csv:to-file filename ( sentence (list header ) body )
+      file-close
+      update-metafile "population" population (word "POPULATION " population " SAVED")
+      output-print " Population successfully saved."
+    ]
     
-    set observation-notes (word "New population " population " saved. " observation-notes )
-    update-metafile "population" population
-    output-print " Population successfully saved."
   ]
 end
 
@@ -529,6 +534,8 @@ end
 
 to import-genotype
   output-header (word " IMPORT GENOTYPE : " genotype )
+  
+  let first-codon-list [ "[0]" "[1]" "[2]" "[3]" "[4]" "[5]" ]
   
   let file-to-open ( word path-to-experiment genotype ".txt" ) ; first try accessing file in designated file path
   if not file-exists? file-to-open [ set file-to-open ( word "../data/" genotype ".txt" ) ] ; then try the data folder
@@ -554,6 +561,8 @@ to import-genotype
           
           foreach row [ itm ->                                          ; For each codon in the allele...
             
+            if ( subject = self ) [ print itm ]
+            
             let codon-exists ( ifelse-value                                ; ...Check if the codon exists in the current genotype reader lexicon
               ( genotype-reader = "sta2us" ) [ sta2us-codon-exists itm ]   ; - sta2us genotype reader check
               ( genotype-reader = "gat3s" ) [ gat3s-codon-exists itm ]     ; - gat3s genotype reader check
@@ -562,7 +571,7 @@ to import-genotype
             if codon-exists [                                              ; If the current codon IS in the current genotype reader lexicon
               set contains-a-codon? true ]                                 ; Acknowledge that the current allele contains a legitimate codon
             
-            if codon-exists or is-number? itm or is-boolean? itm [         ; If current codon IS part of lexicon, OR it is either a number or boolean
+            if codon-exists or is-number? itm or is-boolean? itm or member? itm first-codon-list [         ; If current codon IS part of lexicon, OR it is either a number or boolean
               set filtered-allele lput itm filtered-allele ]               ; Add the current codon to the new allele
           ]
           
@@ -587,8 +596,7 @@ to import-genotype
       file-close
     ]
     
-    set observation-notes (word "Genotype file \"" genotype "\" imported. " observation-notes )
-    update-metafile "genotype" genotype
+    update-metafile "genotype" genotype (word "GENOTYPE " genotype " IMPORTED")
     output-print " Genotype import successful."
     
   ] [ set genotype "" ]
@@ -610,9 +618,9 @@ end
 
 to save-genotype
   output-header (word " SAVE GENOTYPE : organism " meta.id  )
+  if ( genotype = "" ) [ if ( subject != nobody ) [ set genotype (word [meta.id] of subject ) ]]
   ( csv:to-file ( word path-to-experiment genotype ".txt" ) (sentence chromosome.I [[]] chromosome.II ) " " )
-  set observation-notes (word "New genotype " genotype " saved. " observation-notes )
-  update-metafile "genotype" genotype
+  update-metafile "genotype" genotype (word "GENOTYPE " genotype " SAVED")
   output-print " Genotype successfully saved."
 end
 

@@ -9,7 +9,7 @@
 ;
 ;-----------------------------------------------------------------------------------
 
-extensions [ csv profiler table time ]
+extensions [ csv profiler table time stats ]
 
 __includes [
   "extensions/interface.nls"
@@ -21,16 +21,26 @@ __includes [
   "extensions/verification.nls"
 ]
 
+; CHARACTERISTICS OF MOVABLE AGENTS IN THE PROGRAM
+;
+; In this program, plants are part of the patch structure of the system but
+; characteristics animals are defined here.
+;
+; ETC, etc.
+;
+; The term "anima1" is used with the digit "1" instead of an "l" to mark these
+; as virtual animals.
+
 breed [ anima1s anima1 ]
 
 anima1s-own [
 
-  meta.id
+  meta.id            ; Unique identification number for each animal.
 
   ; PHENOTYPE VARIABLES: visible to all agents
-  biological.sex
-  life.history
-  female.fertility
+  biological.sex     ; Female/male
+  life.history       ; Adult, juvenile, infant, gestatee
+  female.fertility   ; Etc...
   group.identity
   is.alive
   yellow.signal
@@ -127,19 +137,29 @@ anima1s-own [
   conceptions.history
   group.transfers.history
   infanticide.history
-  cause.of.death
-]
+  cause.of.death ]
+
+; CHARACTERISTICS OF STATIONARY AGENTS IN THE PROGRAM
+;
+; In this program, plants are part of the patch structure of the system,
+; defined here, in contrast with animals, which are defined above.
 
 patches-own [
   pmeta.id
   pterminal.energy
-  penergy.supply ]
+  penergy.supply
+  pgroup.identity
+]
+
+; VARIABLES AVAILABLE TO THE ENTIRE PROGRAM
 
 globals [
   model-version
   model-structure
   ;genotype-reader
   simulation-id
+
+  ; LOREM IPSUM DOLOR SIT AMET
   deterioration-rate
   maximum-visual-range
   base-litter-size
@@ -155,18 +175,18 @@ globals [
   recent-decisions-made
   recent-actions-completed
 
-  verification?
+  ; SETTING TO OUTPUT DATA
+  verification-on
   verification-rate
-  simulation-summary?
+  simulation-summary-on
   simulation-summary-ticks
-  record-agent?
+  record-individuals-on
   scan-interval
-  simulation-scans?
-  group-scans?
-  agent-scans?
-  focal-follows?
-  focal-rate
-
+  simulation-scans-on
+  group-scans-on
+  individual-scans-on
+  focal-follows-on
+  focal-follow-rate
 ]
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -197,17 +217,17 @@ to setup-parameters
   set start-date-and-time date-and-time
   set selected-display "groups"
 
-  set verification? false          ; TRUE = runs periodic code verification checks set by the VERIFICATION-RATE
-  set verification-rate 0.0001
-  set simulation-summary? false   ; TRUE = records the simulation ;
-  set simulation-summary-ticks [ 5000 ]
-  set record-agent? true          ; TRUE = records every agent upon its death
-  set scan-interval 250
-  set simulation-scans? true      ; TRUE = scans the simulation every SCAN-INTERVAL and records population-level phenomena ;
-  set group-scans? true           ; TRUE = scans all groups every SCAN-INTERVAL and records group-level phenomena
-  set agent-scans? true           ; TRUE = scans all agents every SCAN-INTERVAL and records individual-level phenomena
-  set focal-follows? true         ; TRUE = small chance to record an individual's entire life
-  set focal-rate 0.000001
+  if ( verification-on = 0 ) [ set verification-on false ]                               ; TRUE = runs periodic code verification checks set by the VERIFICATION-RATE
+  if ( verification-rate = 0 ) [ set verification-rate 0.0001 ]
+  if ( simulation-summary-on = 0 ) [ set simulation-summary-on false ]                     ; TRUE = records the simulation ;
+  if ( simulation-summary-ticks = 0 ) [ set simulation-summary-ticks [ 5000 ]]
+  if ( record-individuals-on = 0 ) [ set record-individuals-on true ]                             ; TRUE = records every agent upon its death
+  if ( scan-interval = 0 ) [ set scan-interval 250 ]
+  if ( simulation-scans-on = 0 ) [ set simulation-scans-on true ]                  ; TRUE = scans the simulation every SCAN-INTERVAL and records population-level phenomena ;
+  if ( group-scans-on = 0 ) [ set group-scans-on true ]                             ; TRUE = scans all groups every SCAN-INTERVAL and records group-level phenomena
+  if ( individual-scans-on = 0 ) [ set individual-scans-on true ]                           ; TRUE = scans all agents every SCAN-INTERVAL and records individual-level phenomena
+  if ( focal-follows-on = 0 ) [ set focal-follows-on true ]                         ; TRUE = small chance to record an individual's entire life
+  if ( focal-follow-rate = 0 ) [ set focal-follow-rate 0.000001 ]
 
   reset-timer
   output-print (word "run " behaviorspace-run-number " end setup parameters at " date-and-time )
@@ -303,29 +323,62 @@ end
 ;        'recent-decisions-made' and 'recent-actions-completed' are updated
 ;          with the most recent events, up to a maximum of 'how-many-ticks?'
 ;
-;  dx/dt = f(x)                         ** Perhaps make into footnote
-;  dx = f(x) dt    Euler method         ** Perhaps make into footnote
-;  dt = dx/f(x)    Gillespie method     ** Perhaps make into footnote
-;
 ; --------------------------------------------------------------------------- ;
 
 to go
 
-  tick
+  if ( ticks = 0 ) [                                              ; At the start of a new simulation,
+    update-metafile                                               ; update the metafile.
+    "simulation"
+    simulation-id
+    "SIMULATION STARTED"
+  ]
 
+  global-update                                                  ; Update global variables
+  animal-update                                                  ; Update animals
+  plants-update                                                  ; Update plants
+
+  ; ASSIGN EACH AGENT ITS INDIVIDUAL BEHAVIOR BASED ON GENOTYPE
+  ask anima1s with [ is.alive ] [ consider-environment ]
+  ask anima1s with [ is.alive ] [ make-decisions ]
+  ask anima1s with [ is.alive ] [ do-actions ]
+
+  if selection-on? [ artificial-selection ]                       ; Impose artificial selection on animals
+  if output-results? [ output-results ]                           ; Generate data with results
+  print-out-simulation-status
+
+  tick                                                            ; Move forward one simulated hour.
+
+end
+
+to global-update
   ; UPDATE WORLD
   set recent-decisions-made filter                ;Update code to add current timestep and remove old timestep
   [ vector ->
     item 0 vector > ( ticks - how-many-ticks? ) ]
   recent-decisions-made
   set recent-actions-completed filter [ vector -> item 0 vector > ( ticks - how-many-ticks? ) ] recent-actions-completed
-                                                ; UPDATE PLANTS
-  ifelse ( member? "no-plants" model-structure )   ; If the model-structure setting contains "no-plants"
+end
+
+to animal-update
+
+  ifelse ( member? "reaper" model-structure )
   [
-    ask patches with [ pcolor != brown + 1 ]       ; Then for patches that are not currently brown
-    [ set pcolor brown + 1 ]                       ; Set their color to brown
-  ][
-    update-patches                                 ; Otherwise update plant growth in all patches
+    ; UPDATE AGENTS : mortality
+    if (( count anima1s with [ is.alive ] - 100 ) > 0 ) [ ask n-of ( count anima1s with [ is.alive ] - 100 ) anima1s [ set-to-dead ]]
+    ask anima1s with [ not fully.decayed and is.alive = false ] [ check-mortality ] ; this organization ensures that 100 individuals stay alive at all times
+  ]
+  [ ask anima1s with [ not fully.decayed ] [ check-mortality ] ]
+
+  if ( member? "stork" model-structure ) [
+
+    ; UPDATE AGENTS : reproduction ( when model-structure = "stork" )
+    if (count anima1s with [ is.alive ] < 100 ) ; random mating
+    [ repeat ( 100 - count anima1s with [ is.alive ]) [
+      if ( ( count anima1s with [ biological.sex = "male" and life.history = "adult" and is.alive ] > 0 )                                        ; if there is at least one adult male
+        and ( count anima1s with [ biological.sex = "female" and life.history = "adult" and female.fertility = "cycling" and is.alive ] > 0 ) )  ; and one adult cycling female left in the simulation,
+      [ ask one-of anima1s with [ biological.sex = "female" and life.history = "adult" and female.fertility = "cycling" and is.alive ]           ; randomly select one adult male and one cycling female,
+        [ conceive-with ( one-of anima1s with [ biological.sex = "male" and life.history = "adult" and is.alive ] ) 999999 ]]]]                  ; and the female spontaneously conceives a new offspring from their alleles
   ]
 
   ; UPDATE AGENTS
@@ -341,37 +394,25 @@ to go
         ask itm [ move-to myself ]
       ]
     ]
+
+    ask patch-here [ set pgroup.identity [group.identity] of myself ] ; update territories of groups
   ]
+end
 
-  ; UPDATE AGENTS : mortality
-  ifelse ( member? "reaper" model-structure  )
-  [ if (( count anima1s with [ is.alive ] - 100 ) > 0 ) [ ask n-of ( count anima1s with [ is.alive ] - 100 ) anima1s [ set-to-dead ]]
-    ask anima1s with [ not fully.decayed and is.alive = false ] [ check-mortality ]] ; this organization ensures that 100 individuals stay alive at all times
-  [ ask anima1s with [ not fully.decayed ] [ check-mortality ] ]
+to plants-update
+  ; UPDATE PLANTS
+  ifelse ( member? "no-plants" model-structure )   ; If the model-structure setting contains "no-plants"
+  [
+    ask patches with [ pcolor != brown + 1 ]       ; Then for patches that are not currently brown
+    [ set pcolor brown + 1 ]                       ; Set their color to brown
+  ][
+    update-patches                                 ; Otherwise update plant growth in all patches
+  ]
+end
 
-  ; UPDATE AGENTS : reproduction ( when model-structure = "stork" )
-  if ( member? "stork" model-structure and count anima1s with [ is.alive ] < 100 ) ; random mating
-  [ repeat ( 100 - count anima1s with [ is.alive ]) [
-    if ( ( count anima1s with [ biological.sex = "male" and life.history = "adult" and is.alive ] > 0 )                                        ; if there is at least one adult male
-      and ( count anima1s with [ biological.sex = "female" and life.history = "adult" and female.fertility = "cycling" and is.alive ] > 0 ) )  ; and one adult cycling female left in the simulation,
-    [ ask one-of anima1s with [ biological.sex = "female" and life.history = "adult" and female.fertility = "cycling" and is.alive ]           ; randomly select one adult male and one cycling female,
-      [ conceive-with ( one-of anima1s with [ biological.sex = "male" and life.history = "adult" and is.alive ] ) 999999 ]]]]                  ; and the female spontaneously conceives a new offspring from their alleles
 
-  ; AGENT AGENCY
-  ask anima1s with [ is.alive ] [ consider-environment ]
-  ask anima1s with [ is.alive ] [ make-decisions ]
-  ask anima1s with [ is.alive ] [ do-actions ]
-
-  ; ARTIFICAL SELECTION
-  if selection-on? [ artificial-selection ]
-
-  ; OUTPUT RESULTS
-  if output-results? [ output-results ]
-
-;  ; DISPLAY RESULTS
-;  if ( selected-display != "" ) [ display-results ]
-
-  ; SIMULATION OUTPUT
+to print-out-simulation-status
+   ; SIMULATION OUTPUT
   ;if output-results? [ output-results ]
   ; prints out current status of the simulation every 100 timesteps
   if ( ticks > 0 and ceiling (ticks / 100) = (ticks / 100) and any? anima1s with [ is.alive ] ) [
@@ -383,8 +424,8 @@ to go
       precision mean [generation.number] of anima1s with [ is.alive ] 3 " generations, and contains "
       count anima1s with [ is.alive ] " living organisms.")
     print print-text
-    if ( behaviorspace-run-number > 0 ) [ output-print print-text ] ]
-
+   ; if ( behaviorspace-run-number > 0 ) [ output-print print-text ]
+  ]
 end
 
 ; --------------------------------------------------------------------------- ;
@@ -408,6 +449,7 @@ to-report generate-simulation-id report ( word "s" generate-timestamp ) end
 to-report generate-timestamp
   let string-to-report ""
   let time-difference time:difference-between (time:create "1970-01-01 00:00:00.0") (time:create "") "seconds"
+  set time-difference time-difference + random 1000 - random 1000
   let hex-list [ "0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z" ]
 
   while [ time-difference > 0 ] [
@@ -505,10 +547,6 @@ to update-terminal-energy [ plant-season plant-density ]
 
   let probability-up ifelse-value ( neighbor-energy-sd = 0 ) [ 0 ] [ ( 1 * e ^ ( - (( neighbor-energy - optimal-neighbor-energy ) ^ 2 ) / ( 2 * ( neighbor-energy-sd ^ 2 ) )) ) ]
   let y ( ( plant-daily-cycle * plant-quality ) / plant-annual-cycle ) * ( plant-density * ( 2 * probability-up - 1 ) + seasonal-factor - plant-density )
-
-;  let other-x random-float 1 * 8
-;  let other-y ( ( plant-daily-cycle * plant-quality ) / plant-annual-cycle ) * ( plant-density * ( 2 * other-x - 1 ) + seasonal-factor - plant-density )
-;  plotxy other-x other-y
 
   set pterminal.energy ( pterminal.energy + random-float y )
   if pterminal.energy >= plant-quality [ set pterminal.energy plant-quality ]
@@ -631,42 +669,6 @@ end
 ; consider-environment > make-decisions > allocate-energy > do-actions
 ;--------------------------------------------------------------------------------------------------------------------
 
-;to consider-environment ; should only be able to see not fully.decayed
-;
-;  let sun-status get-solar-status
-;
-;  ; ASPATIAL WORLD
-;  ifelse ( member? "aspatial" model-structure )
-;  [ let patch-count count patches in-cone ( maximum-visual-range * visual.range ) ( 360 * visual.angle )
-;    ask n-of patch-count patches [ ask myself [ set my.environment lput myself my.environment ] ]]
-;
-;  ; SPATIAL WORLD
-;  [ ask patches in-cone ( maximum-visual-range * visual.range ) ( 360 * visual.angle ) [ ask myself [ set my.environment lput myself my.environment ] ]]
-;
-;  ; Consider perception capabilties and modify environment
-;  set my.environment up-to-n-of ( ( ifelse-value ( sun-status = "DAY" ) [ day.perception ] [ night.perception ] ) * length my.environment ) my.environment
-;
-;  ; if gestatee, add mother to environment, and vice versa
-;  ifelse ( life.history = "gestatee" )
-;  [ if ( my.mother != nobody )
-;    [ ask my.mother [ set my.environment lput myself my.environment ]
-;      set my.environment lput my.mother my.environment ]]
-;
-;  ; otherwise, add agents existing on patches in environment to environment
-;  [ foreach my.environment [ p ->  ; look at each patch in environment taken from above
-;    ask [anima1s-here] of p ; add any not hidden agents to environment
-;      [ if ( not hidden? and self != myself ) [ ask myself [ set my.environment lput myself my.environment ]] ]]]
-;
-;  ; can see carried items and who is carrying you
-;  foreach carried.items [ c ->
-;    set my.environment lput c my.environment
-;    ask c [ if ( is.alive and not member? myself my.environment ) [ set my.environment lput myself my.environment ] ]]
-;
-;  set my.environment remove-duplicates lput self my.environment
-;
-;end
-
-
 to consider-environment ; should only be able to see not fully.decayed
 
   let sun-status get-solar-status
@@ -701,7 +703,6 @@ to consider-environment ; should only be able to see not fully.decayed
   set my.environment remove-duplicates lput self my.environment
 
 end
-
 
 to make-decisions
 
@@ -772,6 +773,7 @@ to do-actions
         action = "go-forward" [ go-forward cost ( hide -0.1 )]
         action = "set-heading" [ set-heading cost ( hide -0.1 )]
         action = "set-heading-random" [ set-heading-random cost ( hide -0.1 )]
+        action = "match-heading" [ match-heading target cost ( hide -0.1 )]
         action = "hide" [ hide cost ]
         action = "eat" [ if ( check-distance target ) [ eat target cost ] ( hide -0.1 )]
         action = "join" [ join target cost ( hide -0.1 )]
@@ -974,7 +976,9 @@ to move-toward [ target cost ]
 end
 
 to match-heading [ target cost ]
-  if ( cost > 0 ) [
+  let cost-of-heading abs subtract-headings heading [heading] of target / 360
+  ;print cost-of-heading
+  if ( cost > cost-of-heading ) [
     set heading [heading] of target
     complete-action target "match-heading" cost
   ]
@@ -1709,7 +1713,7 @@ to mutate-chromosomes [ rate-of-mutation ]
   set chromosome.II mutate-chromosome chromosome.II rate-of-mutation
 end
 
-; --------------------------------------------------------------------------- ;
+; -------------------------------------------------------------------------------------------------- ;
 ;
 ; MODIFY CHROMOSOME WITH NOVEL MUTATIONS AT RANDOM ALLELE LOCI
 ;
@@ -1718,136 +1722,135 @@ end
 ; each locus. See the overall description of the program for the structure of
 ; chromosomes, alleles, and codons.
 ;
-; ENTRY:  'input-chromosome' is the chromosome to be copied.
-;         'mutation-chance-per-locus' defines the chance that a mutation will
+; ENTRY:  |input-chromosome| is the chromosome to be copied.
+;
+;         |mutation-chance-per-locus| defines the chance that a mutation will
 ;           occur at each allele locus.
-;         'model-structure' defines the type of code used. In particular, if
-;           it is set to "uninvadable", then no new codons may be created.
+;
+;         |model-structure| defines the type of code used. In particular, if
+;           it is set to "uninvadable," then no new codons may be created.
+;
 ;
 ; EXIT:   'mutate-chromosome' returns a copy of the chromosome with
 ;           modifications to a subset of the alleles.
 ;
-; --------------------------------------------------------------------------- ;
+; -------------------------------------------------------------------------------------------------- ;
 
 to-report mutate-chromosome [ input-chromosome mutation-chance-per-locus ]
 
-  let ouput-chromosome []
-  foreach input-chromosome [ allele ->
-    let updated-alleles (list allele)
+  let ouput-chromosome []                                        ; Establish an empty chromosome.
+
+  foreach input-chromosome [ allele ->                           ; Begin a loop through each allele
+    let updated-alleles (list allele)                            ; in chromosome supplied on entry.
 
     let first-allele first allele
 
-    if ( ( first-allele != "[0]"
-      or first-allele = true ) ; this line is for capatibility with older genotype files that have a boolean in first position
-      and random-float 1.0 < mutation-chance-per-locus ) [
+    if ( ( first-allele != "[0]"                                 ; The allele is able to mutate if the first codon is not [0] or false
+      or first-allele = true )                                   ; Check whether the allele is mutable and if ; this line is for capatibility with older genotype files that have a boolean in first position
+      and random-float 1.0 < mutation-chance-per-locus ) [       ; probability dictates that it should be changed.
 
-      let choice ( ifelse-value
+      let choice ( ifelse-value                                  ; Check first-allele for range of mutation choices allowed
         ( first-allele = "[1]" ) [ 1 ]
         ( first-allele = "[2]" ) [ one-of [ 1 2 ] ]
         ( first-allele = "[3]" ) [ one-of [ 1 2 3 ] ]
         ( first-allele = "[4]" ) [ one-of [ 1 2 3 4 5 ] ]
         ( first-allele = "[5]" ) [ one-of [ 1 2 3 4 5 6 7 ] ]
-        [ one-of [ 1 2 3 4 5 6 7 ] ] ) ; when first-allele is true
+        [ one-of [ 1 2 3 4 5 6 7 ] ] )                           ; Or return any choice when first-allele is true
 
-      (ifelse
+      (ifelse                                                    ; Select the proper case.
 
-        ; mutate allele
-        ( choice < 6 ) [
+                                                                 ; Prepare to mutate the allele
+        ( choice < 6 ) [                                         ; Generate a random number between 0 and 4.
           let new-allele []
-          let random-index random ( length allele - 1 ) + 1 ; excludes first codon from mutation
+          let random-index random ( length allele - 1 ) + 1      ; excludes first codon from mutation
           let index 0
-          foreach allele [ codon ->
+          foreach allele [ codon ->                              ; Proceed to examine each codon in the allele.
             ( ifelse
-              ( choice = 1 and random-index = index and not member? "uninvadable" model-structure ) [ set new-allele lput get-mutation codon "numbers" new-allele ] ; mutate codon, numbers only
-              ( choice = 2 and random-index = index and not member? "uninvadable" model-structure ) [ set new-allele lput get-mutation codon "letters" new-allele ] ; mutate codon, letters only
-              ( choice = 3 and random-index = index and not member? "uninvadable" model-structure ) [ set new-allele lput get-mutation codon "both" new-allele ] ; mutate codon, both numbers and letters
-              ( choice = 4 and random-index = index ) [ repeat 2 [ set new-allele lput codon new-allele ] ] ; duplicate codon
-              ( choice = 5 and random-index = index ) [  ] ; delete codon
-              [ set new-allele lput codon new-allele ])
-            set index index + 1 ]
-          set updated-alleles ( list new-allele ) ]
 
-        ; duplicate allele
-        ( choice = 6 ) [
+              ( choice = 1                                       ; CHOICE 1: mutate codon if it is a number ; unless the structure is uninvadable.
+                and random-index = index
+                and not member? "uninvadable" model-structure )
+              [ set new-allele
+                lput get-mutation codon "numbers" new-allele ]
+
+              ( choice = 2                                       ; CHOICE 2: mutate codon, letters only unless the structure is uninvadable.
+                and random-index = index
+                and not member? "uninvadable" model-structure )
+              [ set new-allele
+                lput get-mutation codon "letters" new-allele ]
+
+              ( choice = 3                                       ; CHOICE 3: mutate codon, both numbers and letters unless the structure is uninvadable.
+                and random-index = index
+                and not member? "uninvadable" model-structure )
+              [ set new-allele
+                lput get-mutation codon "both" new-allele ]
+
+              ( choice = 4                                       ; CHOICE 4: duplicate codon
+                and random-index = index )
+              [ repeat 2
+                [ set new-allele lput codon new-allele ] ]
+
+              ( choice = 5                                       ; CHOICE 5: delete codon
+                and random-index = index ) [  ]
+
+              [ set new-allele lput codon new-allele ])          ; Copy untouched codons into the new allele.
+            set index index + 1 ]                                ; Advance and repeat for all codons,
+          set updated-alleles ( list new-allele ) ]              ; then update the allele.
+
+        ( choice = 6 ) [                                         ; CHOICE 6: duplicate allele making an exact copy
           set updated-alleles (list allele allele) ]
 
-        ; delete allele
-        ( choice = 7 ) [
+        ( choice = 7 ) [                                         ; CHOICE 7: delete allele completely
           set updated-alleles [] ]
 
         [])]
 
-    foreach updated-alleles [ allele-update ->
-      set ouput-chromosome ifelse-value ( allele-update != [] ) [ lput allele-update ouput-chromosome ] [ ouput-chromosome ]]
+    foreach updated-alleles [ allele-update ->                   ; Finally, if modification occurred
+      set ouput-chromosome ifelse-value                          ; in any allele, then update the
+      ( allele-update != [] )                                    ; chromosome with those modified
+      [ lput allele-update ouput-chromosome ]                    ; alleles.
+      [ ouput-chromosome ]]
   ]
-  report ouput-chromosome
+  report ouput-chromosome                                        ; Return the results.
 end
 
-;to-report mutate-chromosome [ input-chromosome  mutation-chance-per-locus ]
+
+; -------------------------------------------------------------------------------------------------- ;
 ;
-;  let ouput-chromosome []                              ; Establish an empty chromosome.
+; GET A MODIFIED VERSION OF A GIVEN CODON
 ;
-;  foreach input-chromosome [ allele ->                 ; Begin a loop through each allele
-;    let updated-alleles (list allele)                  ; in chromosome supplied on entry.
+; This subroutine takes a codon and returns a mutated version of that codon.
 ;
-;    if ( first allele = true and                       ; Check whether the allele is mutable and if
-;      random-float 1.0 < mutation-chance-per-locus ) [ ; probability dictates that it should be changed.
+; ENTRY:  |unmutated-codon| is the initial codon.
 ;
-;      let choice random 5                              ; Generate a random number between 0 and 4.
+;         |type-of-mutation| defines the what type of mutation can occur "numbers," "letters," or "both"
 ;
-;      (ifelse                                          ; Select the proper case.
 ;
-;        ( choice = 0 ) [                               ; With 1/5 probability, delete the allele
-;          set updated-alleles [] ]                     ; completely.
+; EXIT:   GET-CHROMOSOME returns a mutant verion of the unmutated-codon
 ;
-;        ( choice = 1 ) [                               ; With 1/5 probability, make an exact copy
-;          set updated-alleles (list allele allele) ]   ; of the allele.
-;
-;        ( choice >= 2 ) [                              ; Otherwise prepare to mutate the allele
-;          let new-allele []                            ; by changing, duplicating, or deleting one selected codon.
-;          let random-index random ( length allele - 1 ) + 1 ;
-;
-;          let index 0                                  ; Proceed to examine each codon in the allele.
-;          foreach allele [ codon ->
-;            ( ifelse
-;              ( choice = 2 and random-index = index                    ; With 1/5 probability, mutate
-;                and model-structure != "uninvadable" )                 ; a codon selected at random, unless
-;                [ set new-allele lput get-mutation codon new-allele ]  ; the structure is uninvadable.
-;
-;              ( choice = 3 and random-index = index )                  ; With 1/5 probability, duplicate
-;                [ repeat 2 [ set new-allele lput codon new-allele ] ]  ; a codon selected at random.
-;
-;              ( choice = 4 and random-index = index )                  ; With 1/5 probability, delete
-;                [  ]                                                   ; a codon selected at random.
-;
-;              [ set new-allele lput codon new-allele ])                ; Copy untouched codons into the new allele.
-;
-;            set index index + 1 ]                                      ; Advance and repeat for all codons,
-;          set updated-alleles ( list new-allele ) ]                    ; then update the allele.
-;        [])]
-;
-;    foreach updated-alleles [ allele-update ->                         ; Finally, if modification occurred
-;      set ouput-chromosome ifelse-value                                ; in any allele, then update the
-;      ( allele-update != [] ) [ lput allele-update ouput-chromosome ]  ; chromosome with those modified
-;                              [ ouput-chromosome ]]                    ; alleles.
-;  ]
-;  report ouput-chromosome                                              ; Return the results.
-;end
+; -------------------------------------------------------------------------------------------------- ;
 
 to-report get-mutation [ unmutated-codon type-of-mutation ]
-  report ( ifelse-value
-      ( genotype-reader = "sta2us" ) [ sta7us-get-mutation unmutated-codon type-of-mutation]
-      [ sta7us-get-mutation unmutated-codon type-of-mutation ] ); default
+
+  report ( ifelse-value                                          ; Return the mutation based on:
+
+    ( genotype-reader = "sta2us" )                               ; If genotype-reader is sta2us..
+    [ sta7us-get-mutation unmutated-codon type-of-mutation]      ; then get mutation from sta2us extension
+
+    ( genotype-reader = "gat3s" )                                ; If genotype-reader is gat3s..
+    [ g8tes-get-mutation unmutated-codon type-of-mutation]       ; then get mutation from gat3s extension
+
+    [ sta7us-get-mutation unmutated-codon type-of-mutation ] )   ; default mutation if gentoype-reader not indicated
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
 6
 86
-838
-919
+837
+918
 -1
 -1
-8.24
+8.23
 1
 10
 1
@@ -1907,7 +1910,7 @@ INPUTBOX
 354
 79
 path-to-experiment
-../results/selection-experiment/
+../data/virtual-species/
 1
 0
 String
@@ -1977,7 +1980,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-0.0
+5.1
 .1
 1
 NIL
@@ -2018,7 +2021,7 @@ plant-seasonality
 plant-seasonality
 0
 1
-0.5
+1.0
 .05
 1
 NIL
@@ -2048,7 +2051,7 @@ plant-daily-cycle
 plant-daily-cycle
 1
 100
-10.0
+1.0
 1
 1
 ticks
@@ -2071,7 +2074,7 @@ INPUTBOX
 995
 191
 population
-seed
+Geladas
 1
 0
 String
@@ -2082,7 +2085,7 @@ INPUTBOX
 995
 265
 genotype
-gQR8UP4-0
+moving
 1
 0
 String
@@ -2224,8 +2227,8 @@ SLIDER
 plant-quality
 plant-quality
 .1
-10
-5.0
+100
+20.6
 .1
 1
 NIL
@@ -2238,7 +2241,7 @@ SWITCH
 79
 output-results?
 output-results?
-0
+1
 1
 -1000
 
@@ -2249,7 +2252,7 @@ SWITCH
 43
 selection-on?
 selection-on?
-0
+1
 1
 -1000
 
@@ -2281,17 +2284,17 @@ PENS
 CHOOSER
 849
 271
-1117
+1118
 316
 genotype-reader
 genotype-reader
-"to1erance" "sta2us" "gat3s"
-1
+"sta2us" "gat3s"
+0
 
 SWITCH
-1220
+1274
 886
-1338
+1409
 919
 adults
 adults
@@ -2300,9 +2303,9 @@ adults
 -1000
 
 SWITCH
-1099
+1130
 886
-1215
+1268
 919
 juveniles
 juveniles
@@ -2311,9 +2314,9 @@ juveniles
 -1000
 
 SWITCH
-974
+989
 886
-1094
+1125
 919
 infants
 infants
@@ -2324,7 +2327,7 @@ infants
 SWITCH
 849
 886
-969
+984
 919
 gestatees
 gestatees
@@ -2333,10 +2336,10 @@ gestatees
 -1000
 
 SWITCH
-1462
-886
-1578
-919
+1414
+885
+1552
+918
 males
 males
 1
@@ -2344,10 +2347,10 @@ males
 -1000
 
 SWITCH
-1343
-886
-1457
-919
+1557
+885
+1697
+918
 females
 females
 1
@@ -2362,15 +2365,15 @@ CHOOSER
 plot-type
 plot-type
 "individuals" "groups" "population" "generations"
-3
+0
 
 MONITOR
 1131
 594
 1696
 639
-NIL
-model-structure
+plot-information
+\"Individual Plot of Body Size for Adult Females\"
 17
 1
 11
@@ -7851,6 +7854,120 @@ save-population</setup>
     </enumeratedValueSet>
     <enumeratedValueSet variable="genotype">
       <value value="&quot;&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-reader">
+      <value value="&quot;sta2us&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-annual-cycle">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-daily-cycle">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-seasonality">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-quality">
+      <value value="5"/>
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-maximum-neighbors">
+      <value value="8"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="selection" repetitions="1" runMetricsEveryStep="false">
+    <setup>setup
+set genotype generate-genotype-id
+set population generate-population-id
+save-population</setup>
+    <go>go</go>
+    <final>record-world</final>
+    <exitCondition>any? anima1s with [ generation.number = 10 ]</exitCondition>
+    <enumeratedValueSet variable="path-to-experiment">
+      <value value="&quot;../results/selection/&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="deterioration-rate">
+      <value value="-0.01"/>
+      <value value="-0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="output-results?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="selection-on?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="population">
+      <value value="&quot;seed&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype">
+      <value value="&quot;seed&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-reader">
+      <value value="&quot;sta2us&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-annual-cycle">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-daily-cycle">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-seasonality">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-quality">
+      <value value="5"/>
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-maximum-neighbors">
+      <value value="8"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="selection-alpha" repetitions="1" runMetricsEveryStep="false">
+    <setup>setup
+set genotype generate-genotype-id
+set population generate-population-id
+save-population</setup>
+    <go>go</go>
+    <final>record-world</final>
+    <exitCondition>any? anima1s with [ generation.number = 5 ]</exitCondition>
+    <enumeratedValueSet variable="path-to-experiment">
+      <value value="&quot;../results/seed-alpha/&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="deterioration-rate">
+      <value value="-0.01"/>
+      <value value="-0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="output-results?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="selection-on?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="population">
+      <value value="&quot;seed&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype">
+      <value value="&quot;seed&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="genotype-reader">
       <value value="&quot;sta2us&quot;"/>

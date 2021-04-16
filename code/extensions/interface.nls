@@ -27,7 +27,7 @@ end
 
 to save-button
   if ( simulation-id = 0 ) [ set simulation-id generate-simulation-id ]
-  update-metafile "simulation" simulation-id
+  update-metafile "simulation" simulation-id "SIMULATION SAVED."
 end
 
 to reset-population-button
@@ -218,7 +218,7 @@ end
 to meta-report ; Fix cutting off letters at beginning
   output-header ( word "META REPORT " )
   
-  let metafile but-first csv:from-file "../data/metafile.csv"
+  let metafile but-first csv:from-file "../results/metafile.csv"
   let how-many-rows length metafile
   let up-to-40-rows ifelse-value ( how-many-rows > 40 ) [ sublist metafile ( how-many-rows - 40 ) ( how-many-rows ) ] [ metafile ]
   
@@ -313,19 +313,20 @@ end
 ; WORLD
 ;-----------------------------------------------------------------------------   
 
-to record-world
-  let file-path ( word path-to-experiment "w" but-first simulation-id "-" ticks ".csv" )
-  export-world file-path
-  set observation-notes (word "Simulation " simulation-id " save to w" but-first simulation-id "-" ticks ". " observation-notes )
-  update-metafile "world" ( word "w" but-first simulation-id "-" ticks )
-end
+;to record-world
+;  let file-path ( word path-to-experiment "w" but-first simulation-id "-" ticks ".csv" )
+;  export-world file-path
+;  update-metafile "world" ( word "w" but-first simulation-id "-" ticks ) ( word "WORLD SAVED" )
+;end
 
 to import-world-command
   let file-name user-file
-  import-world file-name
-  
-  set observation-notes (word "World imported." )
-  update-metafile "world" file-name
+  if ( is-string? file-name and file-exists? file-name ) [ 
+    print file-name
+    import-world file-name 
+    let file-short-name substring file-name ( ( position but-first but-first path-to-experiment file-name ) + ( length but-first but-first path-to-experiment ) ) ( length file-name )
+    update-metafile "world" file-name (word "WORLD " file-short-name " IMPORTED" )
+  ] 
 end
 
 ;-----------------------------------------------------------------------------       

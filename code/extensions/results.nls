@@ -26,14 +26,14 @@ to output-results
   ; VERIFICATION : collect data on outcomes of periodic code verification checks
   ;----------------------------------------------------------------------------------------------
   
-  if ( verification? = true and random-float verification-rate < verification-rate ) [ record-verification  ]
+  if ( verification-on = true and random-float verification-rate < verification-rate ) [ record-verification  ]
   
   ;----------------------------------------------------------------------------------------------     
   ; SUMMARY : collect summary data of simulations, groups, or individuals
   ;----------------------------------------------------------------------------------------------
   
-  if ( simulation-summary? and member? ticks simulation-summary-ticks ) [ simulation-summary ]
-  if ( record-agent? ) [ ask anima1s with [ ticks.at.death > 0 and ticks = ( ticks.at.death + 1 ) and generation.number > 0 ] [ agent-summary ] ]
+  if ( simulation-summary-on and member? ticks simulation-summary-ticks ) [ simulation-summary ]
+  if ( record-individuals-on ) [ ask anima1s with [ ticks.at.death > 0 and ticks = ( ticks.at.death + 1 ) and generation.number > 0 ] [ agent-summary ] ]
   
   ;----------------------------------------------------------------------------------------------     
   ; SCAN : collect data on the current state of simulations, groups, or individuals
@@ -41,9 +41,9 @@ to output-results
   
   if ( ticks > 0 and ceiling (ticks / scan-interval) = (ticks / scan-interval) ) 
   [ 
-    if ( simulation-scans? ) [ scan-simulation ]
-    if ( group-scans? and any? anima1s with [ is.alive and generation.number > 0 ] ) [ foreach remove-duplicates [ group.identity ] of anima1s with [ is.alive and generation.number > 0 ] [ g -> scan-group g ]]
-    if ( agent-scans? and any? anima1s with [ is.alive and generation.number > 0 ] ) [ ask anima1s with [ is.alive and generation.number > 0 ] [ scan-agent ]]
+    if ( simulation-scans-on ) [ scan-simulation ]
+    if ( group-scans-on and any? anima1s with [ is.alive and generation.number > 0 ] ) [ foreach remove-duplicates [ group.identity ] of anima1s with [ is.alive and generation.number > 0 ] [ g -> scan-group g ]]
+    if ( individual-scans-on and any? anima1s with [ is.alive and generation.number > 0 ] ) [ ask anima1s with [ is.alive and generation.number > 0 ] [ scan-agent ]]
   ]
   
   ;----------------------------------------------------------------------------------------------     
@@ -51,12 +51,12 @@ to output-results
   ;----------------------------------------------------------------------------------------------
   
   ; There is a small chance to starting "following" an agent if they were born this timestep 
-  if ( focal-follows? = true and subject = nobody ) [ if ( random-float 1.0 < focal-rate and any? anima1s with [ age.in.ticks = 0 and generation.number > 0 ] ) [ follow one-of anima1s with [ age.in.ticks = 0 and generation.number > 0 ] ]]
+  if ( focal-follows-on = true and subject = nobody ) [ if ( random-float 1.0 < focal-follow-rate and any? anima1s with [ age.in.ticks = 0 and generation.number > 0 ] ) [ follow one-of anima1s with [ age.in.ticks = 0 and generation.number > 0 ] ]]
 
-  if ( focal-follows? = true and subject != nobody and [fully.decayed] of subject = true ) [ reset-perspective ] ; when focal subject dies and fully decays, stop following them
+  if ( focal-follows-on = true and subject != nobody and [fully.decayed] of subject = true ) [ reset-perspective ] ; when focal subject dies and fully decays, stop following them
   
   ; If currently "following" an agent, take records of this subject
-  if ( focal-follows? = true and subject != nobody ) [ 
+  if ( focal-follows-on = true and subject != nobody ) [ 
     ask subject [ record-actions ]
   ]
   
@@ -79,7 +79,13 @@ to set-simulation-id
   ]
   
 end
-  
+
+
+to record-world
+  let file-path ( word path-to-experiment "w" but-first simulation-id "-" ticks ".csv" )
+  export-world file-path
+  update-metafile "world" ( word "w" but-first simulation-id "-" ticks ) ( word "WORLD SAVED" )
+end
   
 ;--------------------------------------------------------------------------------------------------------------------  
 ;                    _    __   _               _     _              
@@ -1182,7 +1188,7 @@ end
 
 to simulation-summary ; observer subroutine
   
-  let simulations-file-path ( word path-to-experiment "simulations.csv" ) 
+  let simulations-file-path ( word path-to-experiment "simulations-" ticks ".csv" ) 
   
   if ( not file-exists? simulations-file-path and simulation-id != 0 )
   
