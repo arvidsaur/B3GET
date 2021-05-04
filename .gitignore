@@ -1,5 +1,6 @@
 .DS_Store
 codemeta.json
+/code/.B3GET.*
 /code/.B3GET.tmp.nlogo
 /code/B3GET.nlogo+*
 /code/autosave*
