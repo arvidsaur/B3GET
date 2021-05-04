@@ -3,9 +3,9 @@
 
 false e e survival-chance 0.05
 false m f mate-with 0.5
-false m f4+ set-heading 0.75
-false m f6+ set-heading 0.25
-false m f+ squirm-from 1.0
+false m f4¥ set-heading 0.75
+false m f6¥ set-heading 0.25
+false m f¥ squirm-from 1.0
 false m e go-forward 0.25
 
 false f mt pick-up 1.0

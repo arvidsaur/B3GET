@@ -1,4 +1,4 @@
-;-----------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 ;
 ;   888888ba  d8888b.  .88888.   88888888b d888888P
 ;   88    `8b     `88 d8'   `88  88           88
@@ -7,9 +7,9 @@
 ;   88    .88     .88 Y8.   .88  88           88
 ;   88888888P d88888P  `88888'   88888888P    dP
 ;
-;-----------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 
-extensions [ csv profiler table time stats ]
+extensions [ csv profiler table time ]
 
 __includes [
   "extensions/interface.nls"
@@ -21,72 +21,75 @@ __includes [
   "extensions/verification.nls"
 ]
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; CHARACTERISTICS OF MOVABLE AGENTS IN THE PROGRAM
 ;
-; In this program, plants are part of the patch structure of the system but
-; characteristics animals are defined here.
-;
-; ETC, etc.
-;
-; The term "anima1" is used with the digit "1" instead of an "l" to mark these
+; In this program, plants are part of the patch structure of the system but characteristics animals are
+; defined here. The term "anima1" is used with the digit "1" instead of an "l" to mark these
 ; as virtual animals.
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 breed [ anima1s anima1 ]
 
 anima1s-own [
 
-  meta.id            ; Unique identification number for each animal.
+  meta.id                    ; Unique identification number for each individual.
 
-  ; PHENOTYPE VARIABLES: visible to all agents
-  biological.sex     ; Female/male
-  life.history       ; Adult, juvenile, infant, gestatee
-  female.fertility   ; Etc...
-  group.identity
-  is.alive
-  yellow.signal
-  red.signal
-  blue.signal
-  body.size
-  body.shade
-  is.resting
+                             ; PHENOTYPE VARIABLES THAT ARE VISIBLE TO ALL ANIMALS
 
-  identity.I
-  identity.II
-  carried.items           ; List of other agents representing the objects carried (eg embryo, fetus, nursing young, woodticks, etc)
+  biological.sex             ; Upon conception, each animal is assigned a sex based on ratio preference of both parents
+  life.history               ; Upon conception, animals are assigned “gestatee” status, but are expected to move through each life history stage depending on how much energy is invested to upgrading life history.
+  female.fertility           ; Only adult females have a fertility status, which changes depending on events like conception and weaning.
+  group.identity             ; Each animal is affiliated with exactly one group, which can influence spatial movement and interaction decision-making.
+  is.alive                   ; Defines whether or not an animal is alive, which allows them to perform actions, and not otherwise.
+  yellow.signal              ; When this variable is set to true, the animal has its yellow signal showing on its back.
+  red.signal                 ; When this variable is set to true, the animal has its red signal showing on its back.
+  blue.signal                ; When this variable is set to true, the animal has its blue signal showing on its back.
+  body.size                  ; Upon conception, animals have a body.size of 0.01, but this value can change over time depending on how much energy is allocated to growth.
+  body.shade                 ; Upon conception, animals have a body.shade of 0, but this value can change over time depending on how much energy is allocated to body-shade.
+  is.resting                 ; TRUE means animal cannot move or perform "active" actions, FALSE means otherwise
 
-  ; PHENOTYPE VARIABLES: hidden to all agents but self
-  hidden.chance
-  fully.decayed           ; Flag indicating the animal is no longer available as food for some other animal.
-  survival.chance
-  energy.supply
-  bite.capacity
-  mutation.chance
-  sex.ratio
-  litter.size
-  conception.chance
-  visual.angle
-  visual.range
-  day.perception
-  night.perception
-  yellow.chance
-  red.chance
-  blue.chance
-  birthing.chance
-  weaning.chance
-  infancy.chance
-  juvenility.chance
-  adulthood.chance
-  x.magnitude
-  y.magnitude
+  identity.I                 ; Represents a string of letters used to determine degree of genetic relatedness.
+  identity.II                ; Represents a string of letters used to determine degree of genetic relatedness.
+  carried.items              ; List of other agents representing the objects carried (eg embryo, fetus, nursing young, woodticks, etc)
 
-  chromosome.I
-  chromosome.II
+                             ; PHENOTYPE VARIABLES THAT ARE HIDDEN TO ALL ANIMALS BUT SELF
 
-  my.environment
-  decision.vectors
-  actions.completed
+  hidden.chance              ; The probability that an animal will become hidden from view
+  fully.decayed              ; Flag indicating the animal is no longer available as food for some other animal.
+  survival.chance            ;
+  energy.supply              ;
+  bite.capacity              ;
+  mutation.chance            ;
+  sex.ratio                  ;
+  litter.size                ;
+  conception.chance          ;
+  visual.angle               ;
+  visual.range               ;
+  day.perception             ;
+  night.perception           ;
+  yellow.chance              ;
+  red.chance                 ;
+  blue.chance                ;
+  birthing.chance            ;
+  weaning.chance             ;
+  infancy.chance             ;
+  juvenility.chance          ;
+  adulthood.chance           ;
+  x.magnitude                ;
+  y.magnitude                ;
 
-  ; TRACKING VARIABLES: hidden to all agents
+  chromosome.I               ;
+  chromosome.II              ;
+
+  my.environment             ;
+  decision.vectors           ;
+  actions.completed          ;
+
+                             ; TRACKING VARIABLES: hidden to all agents
+
   age.in.ticks
   generation.number
   my.mother
@@ -126,6 +129,12 @@ anima1s-own [
   half.related.help.cost
   fourth.related.help.cost
   eighth.related.help.cost
+  not.related.help.cost
+  whole.related.attack.cost
+  half.related.attack.cost
+  fourth.related.attack.cost
+  eighth.related.attack.cost
+  not.related.attack.cost
   foraging.gains
   total.energy.gains
   total.energy.cost
@@ -139,10 +148,14 @@ anima1s-own [
   infanticide.history
   cause.of.death ]
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; CHARACTERISTICS OF STATIONARY AGENTS IN THE PROGRAM
 ;
 ; In this program, plants are part of the patch structure of the system,
 ; defined here, in contrast with animals, which are defined above.
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 patches-own [
   pmeta.id
@@ -151,15 +164,18 @@ patches-own [
   pgroup.identity
 ]
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; VARIABLES AVAILABLE TO THE ENTIRE PROGRAM
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 globals [
   model-version
   model-structure
-  ;genotype-reader
   simulation-id
 
-  ; LOREM IPSUM DOLOR SIT AMET
+  ; WORLD SETTINGS
   deterioration-rate
   maximum-visual-range
   base-litter-size
@@ -189,7 +205,7 @@ globals [
   focal-follow-rate
 ]
 
-;--------------------------------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 ;
 ;                      dP
 ;                      88
@@ -199,10 +215,8 @@ globals [
 ;  `88888P' `88888P'   dP   `88888P' 88Y888P'
 ;                                    88
 ;                                    dP
-;--------------------------------------------------------------------------------------------------------------------
-
+; --------------------------------------------------------------------------------------------------------- ;
 to setup-parameters
-  output-print (word "run " behaviorspace-run-number " start setup parameters at " date-and-time )
   set model-version "1.2.0-Beta"
   set deterioration-rate -0.01
   set maximum-visual-range 5
@@ -227,39 +241,36 @@ to setup-parameters
   if ( group-scans-on = 0 ) [ set group-scans-on true ]                             ; TRUE = scans all groups every SCAN-INTERVAL and records group-level phenomena
   if ( individual-scans-on = 0 ) [ set individual-scans-on true ]                           ; TRUE = scans all agents every SCAN-INTERVAL and records individual-level phenomena
   if ( focal-follows-on = 0 ) [ set focal-follows-on true ]                         ; TRUE = small chance to record an individual's entire life
-  if ( focal-follow-rate = 0 ) [ set focal-follow-rate 0.000001 ]
+  if ( focal-follow-rate = 0 ) [ set focal-follow-rate 0.00001 ]
 
   reset-timer
-  output-print (word "run " behaviorspace-run-number " end setup parameters at " date-and-time )
 end
 
 to setup-patches
-  output-print (word "run " behaviorspace-run-number " start setup patches at " date-and-time )
   ask patches [
     set pterminal.energy random-float plant-quality
+    set penergy.supply pterminal.energy
     set pmeta.id random 9999999
     update-patch-color ]
   reset-ticks
-  output-print (word "run " behaviorspace-run-number " end setup patches at " date-and-time )
 end
 
 to setup ; [ new-simulation-id ]
          ; save world file of old simulation before starting new simulation under following conditions
          ;if ( simulation-id != 0 and behaviorspace-run-number = 0 and output-results? = true ) [ record-world ]
-  output-print (word "run " behaviorspace-run-number " start setup at "  date-and-time )
+
   clear-all
   reset-ticks
-  set simulation-id generate-simulation-id ; new-simulation-id
+  set simulation-id generate-simulation-id
   setup-parameters
   setup-patches
   if ( path-to-experiment = "" ) [ set path-to-experiment "../results/" ]
   import-population ; test
   import-genotype
-  ;clear-output
-  output-print (word "run " behaviorspace-run-number " end setup at "  date-and-time )
+  output-print (word " Run " behaviorspace-run-number " end setup at "  date-and-time )
 end
 
-; --------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
 ;
 ;  .d8888b. .d8888b.
 ;  88'  `88 88'  `88
@@ -268,9 +279,9 @@ end
 ;       .88
 ;   d8888P
 ;
-; --------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
 
-; --------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
 ;
 ; MAIN SUBROUTINE CALLED ONCE EACH TIMESTEP
 ;
@@ -323,7 +334,7 @@ end
 ;        'recent-decisions-made' and 'recent-actions-completed' are updated
 ;          with the most recent events, up to a maximum of 'how-many-ticks?'
 ;
-; --------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to go
 
@@ -415,22 +426,22 @@ to print-out-simulation-status
    ; SIMULATION OUTPUT
   ;if output-results? [ output-results ]
   ; prints out current status of the simulation every 100 timesteps
-  if ( ticks > 0 and ceiling (ticks / 100) = (ticks / 100) and any? anima1s with [ is.alive ] ) [
+  if ( ticks > 0 and ceiling (ticks / 100) = (ticks / 100) ) [
     set plant-abundance-record lput sum [penergy.supply] of patches plant-abundance-record
     set plant-patchiness-record lput plant-patchiness plant-patchiness-record
     set population-size-record lput count anima1s with [ is.alive ] population-size-record
     let print-text (word "Simulation " simulation-id " is now at " precision (ticks / plant-annual-cycle) 3 " years, "
       precision sum [penergy.supply] of patches 3 " plant units, "
-      precision mean [generation.number] of anima1s with [ is.alive ] 3 " generations, and contains "
+      ifelse-value ( count anima1s with  [is.alive]  > 0 ) [ precision mean [generation.number] of anima1s with [ is.alive ] 3 ] [ 0 ] " generations, and contains "
       count anima1s with [ is.alive ] " living organisms.")
     print print-text
    ; if ( behaviorspace-run-number > 0 ) [ output-print print-text ]
   ]
 end
 
-; --------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
 ; GLOBAL
-; --------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report how-many-ticks? report 10 end
 
@@ -462,11 +473,11 @@ to-report generate-timestamp
   report string-to-report
 end
 
-;---------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
 ; PATCHES / PLANTS
-;---------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
 
-; --------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
 ;
 ; UPDATE THE ATTRIBUTES OF ALL PLANTS FOR THIS TIMESTEP
 ;
@@ -496,7 +507,7 @@ end
 ;          1 to  0 represents fall   ( 90 degrees to 180 degrees)
 ;          0 to -1 represents winter (180 degrees to -90 degrees)
 ;
-; --------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to update-patches
 
@@ -520,7 +531,7 @@ to-report the-season ; save because called in results
   report ( cos (( 360 / plant-annual-cycle ) * ticks ))
 end
 
-; --------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
 ;
 ; INCREASE OR DECREASE A PLANT'S TERMINAL ENERGY VALUE
 ;
@@ -536,7 +547,7 @@ end
 ;        'plant-density' specifies the average energy per plant, as a proportion
 ;          of the maximum plant quality.
 ;
-; --------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to update-terminal-energy [ plant-season plant-density ]
 
@@ -546,7 +557,8 @@ to update-terminal-energy [ plant-season plant-density ]
   let neighbor-energy ( ( sum [penergy.supply] of neighbors ) / plant-quality )
 
   let probability-up ifelse-value ( neighbor-energy-sd = 0 ) [ 0 ] [ ( 1 * e ^ ( - (( neighbor-energy - optimal-neighbor-energy ) ^ 2 ) / ( 2 * ( neighbor-energy-sd ^ 2 ) )) ) ]
-  let y ( ( plant-daily-cycle * plant-quality ) / plant-annual-cycle ) * ( plant-density * ( 2 * probability-up - 1 ) + seasonal-factor - plant-density )
+  let y ( ( plant-daily-cycle * plant-quality ) / plant-annual-cycle ) * ( seasonal-factor * plant-density * ( 2 * probability-up - 1 ) + seasonal-factor - plant-density )
+  ; let y ( ( plant-daily-cycle * plant-quality ) / plant-annual-cycle ) * ( plant-density * ( 2 * probability-up - 1 ) + seasonal-factor - plant-density )
 
   set pterminal.energy ( pterminal.energy + random-float y )
   if pterminal.energy >= plant-quality [ set pterminal.energy plant-quality ]
@@ -554,42 +566,42 @@ to update-terminal-energy [ plant-season plant-density ]
 
 end
 
-to plot-plants [ current-season plant-density ]
+;to plot-plants [ current-season plant-density ]
+;
+;  repeat 1000 [
+;
+;    let x random-float 8
+;
+;    let seasonal-factor ( ( plant-seasonality * current-season + 1 ) / 2 )
+;    let optimal-neighbor-energy ( plant-minimum-neighbors + plant-maximum-neighbors ) / 2
+;    let neighbor-energy-sd ( optimal-neighbor-energy - plant-minimum-neighbors )
+;    let neighbor-energy x ;( ( sum [penergy.supply] of neighbors ) / plant-quality )
+;
+;    let probability-up ifelse-value ( neighbor-energy-sd = 0 ) [ 0 ] [ ( seasonal-factor * e ^ ( - (( neighbor-energy - optimal-neighbor-energy ) ^ 2 ) / ( 2 * ( neighbor-energy-sd ^ 2 ) )) ) ]
+;    let y ( ( plant-daily-cycle * plant-quality ) / plant-annual-cycle ) * ( plant-density * ( 2 * probability-up - 1 ) + seasonal-factor - plant-density )
+;
+;    plotxy x y
+;
+;  ]
+;
+;end
 
-  repeat 1000 [
-
-    let x random-float 8
-
-    let seasonal-factor ( ( plant-seasonality * current-season + 1 ) / 2 )
-    let optimal-neighbor-energy ( plant-minimum-neighbors + plant-maximum-neighbors ) / 2
-    let neighbor-energy-sd ( optimal-neighbor-energy - plant-minimum-neighbors )
-    let neighbor-energy x ;( ( sum [penergy.supply] of neighbors ) / plant-quality )
-
-    let probability-up ifelse-value ( neighbor-energy-sd = 0 ) [ 0 ] [ ( seasonal-factor * e ^ ( - (( neighbor-energy - optimal-neighbor-energy ) ^ 2 ) / ( 2 * ( neighbor-energy-sd ^ 2 ) )) ) ]
-    let y ( ( plant-daily-cycle * plant-quality ) / plant-annual-cycle ) * ( plant-density * ( 2 * probability-up - 1 ) + seasonal-factor - plant-density )
-
-    plotxy x y
-
-  ]
-
-end
-
-; --------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
 ;
 ; UPDATE COLOR OF A PLANT BASED ON ITS CURRENT ENERGY SUPPLY AND TERMINAL ENERGY
 ;
 ; This soubroutine is called by each plant once per timestep and updates the
 ; color of the plant, which can be viewed in the interface.
 ;
-; --------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to update-patch-color
   set pcolor scale-color green (( ( pterminal.energy + penergy.supply ) / 2 ) / plant-quality ) 1.5 -0.25
 end
 
-; --------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;;
 ; AGENTS
-; --------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to deteriorate
   ; the deterioration-rate is a negative number ( i.e. -0.001 )
@@ -656,7 +668,8 @@ to update-energy [ update ]
   [ set total.energy.cost total.energy.cost + abs update ]
 end
 
-;--------------------------------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ;                             oo
 ;
 ;  .d8888b. 88d888b. .d8888b. dP 88d888b. .d8888b.
@@ -666,65 +679,145 @@ end
 ;                         .88
 ;                     d8888P
 ;
-; consider-environment > make-decisions > allocate-energy > do-actions
-;--------------------------------------------------------------------------------------------------------------------
+; This is the "engine" of the simulation, where all living agents assess their environments and then make
+; decisions based upon this assessment and also upon their genotypes. If they have enough energy they perform
+; actions that correspond to the decisions that they made. A specific case includes mothers and gestatees,
+; who always include each other in their sets of environmental objects. The main subroutines used in each
+; timestep for each individual are:
+;
+; consider-environment > make-decisions > check-energy > do-actions
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
-to consider-environment ; should only be able to see not fully.decayed
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; SET CURRENT ENVIRONMENT OF ANIMALS AND PLANTS FROM CURRENT FIELD OF VIEW
+;
+; This routine runs once per time step for each animal.
+;
+; ENTRY: The collection of patches defines the status of all individuals at the end of the previous time step.
+;
+;        'model-structure' defines the overall conditions for the simulation, as documented in subroutine 'go'.
+;
+; EXIT:  Each agent has a new set of patches and agents, including itself, that make up its environment.
+;
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
-  let sun-status get-solar-status
+to consider-environment
 
-  ; ASPATIAL WORLD
-  ifelse ( member? "aspatial" model-structure )
-  [ let patch-count count patches in-cone ( maximum-visual-range * visual.range ) ( 360 * visual.angle )
-    ask n-of patch-count patches [ ask myself [ set my.environment lput myself my.environment ] ]]
+  let sun-status get-solar-status                              ; Update the current status, day or night.
 
-  ; SPATIAL WORLD
-  [ ask patches in-cone ( maximum-visual-range * visual.range ) ( 360 * visual.angle ) [ ask myself [ set my.environment lput myself my.environment ] ]]
+                                                               ; ASPATIAL WORLD
 
-  ; if gestatee, add mother to environment, and vice versa
-  ifelse ( life.history = "gestatee" )
-  [ if ( my.mother != nobody )
-    [ ask my.mother [ set my.environment lput myself my.environment ]
-      set my.environment lput my.mother my.environment ]]
+  ifelse ( member? "aspatial" model-structure )                ; If this world is aspatial,
+  [ let patch-count count patches                              ; count the number of patches
+    in-cone                                                    ; that would be in the field of
+    ( maximum-visual-range * visual.range )                    ; view were the world spatial,
+    ( 360 * visual.angle )                                     ; then randomly select a set of
+    ask n-of patch-count patches                               ; patches to match the size of
+    [ ask myself                                               ; that field of view.
+      [ set my.environment lput myself my.environment ] ]
 
-  ; otherwise, add agents existing in perception cone to environment
-  [ ask anima1s in-cone ( maximum-visual-range * visual.range ) ( 360 * visual.angle ) [
-    if ( not hidden? and self != myself ) [ ask myself [ set my.environment lput myself my.environment ]] ]
+    if ( life.history != "gestatee" ) [                        ; If the individual is not a gestatee,
+      ask other anima1s with                                   ; put all the visible individuals in
+      [ member? patch-here [my.environment] of myself ]        ; the randomly selected patched into
+      [ if ( not hidden? )                                     ; the current environment.
+        [ ask myself
+          [ set my.environment
+            lput myself my.environment ] ] ] ] ]
+                                                               ; SPATIAL WORLD
 
-    ; Consider perception capabilties and modify environment
-    set my.environment up-to-n-of ( ( ifelse-value ( sun-status = "DAY" ) [ day.perception ] [ night.perception ] ) * length my.environment ) my.environment
-  ]
+  [ ask patches in-cone                                        ; If this world is spatial,
+    ( maximum-visual-range * visual.range )                    ; select all the patches that
+    ( 360 * visual.angle )                                     ; actually are in the field of
+    [ ask myself                                               ; view.
+      [ set my.environment lput myself my.environment ] ]
 
-  ; can see carried items and who is carrying you
-  foreach carried.items [ c ->
-    set my.environment lput c my.environment
-    ask c [ if ( is.alive and not member? myself my.environment ) [ set my.environment lput myself my.environment ] ]]
+    if ( life.history != "gestatee" ) [                        ; If the individual is not a gestatee,
+      ask other anima1s in-cone                                ; put all the visible individuals in
+      ( maximum-visual-range * visual.range )                  ; the field of view into the current
+      ( 360 * visual.angle )                                   ; environment.
+      [ if ( not hidden? )
+        [ ask myself
+          [ set my.environment
+            lput myself my.environment ] ] ] ] ]
 
-  set my.environment remove-duplicates lput self my.environment
+  let current-perception ifelse-value ( sun-status = "DAY" )   ; Current perceptive abilities are based own
+  [ day.perception ] [ night.perception ]                      ; visual attributes and on whether it is day or night.
+  set my.environment up-to-n-of                                ; If current perceptive abilities are
+  ( current-perception * length my.environment )               ; less than 100%, randomly remove some objects
+  my.environment                                               ; from environment to correspond with limited perceptive abilities.
+
+  if ( life.history = "gestatee" )                             ; If the individual is a gestatee,
+  [ if (  my.mother != nobody )                                ; put the gestatee in the mother's
+    [ ask my.mother                                            ; current environment.
+      [ set my.environment
+          lput myself my.environment ]
+      set my.environment                                       ; Also in that case put the mother
+        lput my.mother my.environment ] ]                      ; in the gestatee's environment.
+
+  foreach carried.items [ itm ->                               ; All objects that the individual is carrying
+    set my.environment lput itm my.environment                 ; are also added to the current
+    ask itm [                                                  ; environment.
+      if ( is.alive and not member? myself my.environment )
+      [ set my.environment lput myself my.environment ] ]]
+
+  set my.environment lput self my.environment                  ; Individual also adds itself to current environment.
+  set my.environment remove-duplicates my.environment          ; Remove any duplicate objects from current environment.
 
 end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; GENERATE LIST OF DECISIONS FROM CURRENT ENVIRONMENT AND GENOTYPE
+;
+; Description of subroutine....
+;
+; ENTRY:
+;
+; EXIT:
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to make-decisions
 
-  ; Get decisions from selected genotype reader
-  set decision.vectors ( ifelse-value
-    ( genotype-reader = "sta2us" ) [ sta7us-get-decisions my.environment ]
-    ( genotype-reader = "gat3s" ) [ gat3s-get-decisions my.environment ]
-    [ sta7us-get-decisions my.environment ] ) ; default
+  set decision.vectors ( ifelse-value                          ; Get decisions from selected genotype reader
+    ( genotype-reader = "sta2us" )                             ; If genotype reader is sta2us,
+    [ sta7us-get-decisions my.environment ]                    ;
+    ( genotype-reader = "gat3s" )                              ;
+    [ gat3s-get-decisions my.environment ]                     ;
+    [ sta7us-get-decisions my.environment ] )                  ; If not specified, assume current genotype reader is sta2us
 
-  set decision.vectors reduce-to-unique-vectors decision.vectors
+  reduce-to-unique-vectors                                     ;
 
-  ; RECORD DECISIONS
-  foreach decision.vectors [ d ->
-    set recent-decisions-made lput ( sentence ticks but-last d ) recent-decisions-made ]
+  foreach decision.vectors [ d ->                              ; Record these decisions into global pool
+    set recent-decisions-made lput                             ; for tracking purposes.
+    ( sentence ticks but-last d )
+    recent-decisions-made ]
 
 end
 
-to-report reduce-to-unique-vectors [ input-list ]
-  ;REDUCE DECISIONS TO ONE PER TARGET-ACTION COMBO
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; REDUCE LIST OF DECISIONS TO UNIQUE COMBINATIONS OF TARGET AND ACTION
+;
+; This subroutine reduces the decision vectors initially generated into a list of unique vectors such that
+; there is only one vector for each combination of target and action. During this reduction processes, the
+; decision vector weights are added together such that the resulting decision vector is the net weight.
+;
+; ENTRY: Initial list of decision vectors before reduction process.
+;
+; EXIT:  Final list of decision vectors after the reduction process.
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to reduce-to-unique-vectors
+
+  let initial-decisions decision.vectors
   let reduced-decisions []
 
-  foreach input-list [ original-vector ->
+  foreach initial-decisions [ original-vector ->
     let original-ego item 0 original-vector
     let original-target item 1 original-vector
     let original-action item 2 original-vector
@@ -749,8 +842,20 @@ to-report reduce-to-unique-vectors [ input-list ]
     ]
     if vector-doesnt-exist [ set reduced-decisions lput ( list self original-target original-action original-weight false ) reduced-decisions ]
   ]
-  report reduced-decisions
+  set decision.vectors reduced-decisions
 end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; PERFORM EACH ACTION IN THE LIST OF DECISION VECTORS IF THERE IS SUFFICIENT ENERGY
+;
+; Description of subroutine....
+;
+; ENTRY:
+;
+; EXIT:
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to do-actions
 
@@ -766,30 +871,30 @@ to do-actions
 
       [ ( ifelse  ; these actions can only be performed when not resting
 
-        action = "move-toward" [ move-toward target cost ( hide -0.1 ) ]
-        action = "move-away-from" [ move-toward target ( - cost ) ( hide -0.1 )]
-        action = "turn-right" [ turn-right cost ( hide -0.1 )]
-        action = "turn-left" [ turn-right ( - cost ) ( hide -0.1 )]
-        action = "go-forward" [ go-forward cost ( hide -0.1 )]
-        action = "set-heading" [ set-heading cost ( hide -0.1 )]
-        action = "set-heading-random" [ set-heading-random cost ( hide -0.1 )]
-        action = "match-heading" [ match-heading target cost ( hide -0.1 )]
-        action = "hide" [ hide cost ]
-        action = "eat" [ if ( check-distance target ) [ eat target cost ] ( hide -0.1 )]
-        action = "join" [ join target cost ( hide -0.1 )]
-        action = "leave" [ leave target cost ( hide -0.1 )]
-        action = "recruit" [ recruit target cost ( hide -0.1 )]
-        action = "expel" [ expel target cost ( hide -0.1 )]
-        action = "pick-up" [ if ( check-distance target ) [ pick-up target cost ] ( hide -0.1 )]
-        action = "put-down" [ if ( check-distance target ) [ put-down target cost  ] ( hide -0.1 )]
-        action = "cling-to" [ if ( check-distance target ) [ cling-to target cost ] ( hide -0.1 )]
-        action = "squirm-from" [ if ( check-distance target ) [ squirm-from target cost ] ( hide -0.1 )]
-        action = "help" [ if ( check-distance target ) [ help target cost ] ( hide -0.1 )]
-        action = "attack" [ if ( check-distance target ) [ hurt target cost ] ( hide -0.1 )]
-        action = "mate-with" [ if ( check-distance target ) [ mate-with target cost ] ( hide -0.1 )]
+        action = "move-toward" [ move-toward target cost ]
+        action = "move-away-from" [ move-toward target ( - cost ) ]
+        action = "turn-right" [ turn-right cost ]
+        action = "turn-left" [ turn-right ( - cost ) ]
+        action = "go-forward" [ go-forward cost ]
+        action = "set-heading" [ set-heading cost ]
+        action = "set-heading-random" [ set-heading-random cost ]
+        action = "match-heading" [ match-heading target cost ]
+        action = "eat" [ if ( check-distance target ) [ eat target cost ] ]
+        action = "join" [ join target cost ]
+        action = "leave" [ leave target cost ]
+        action = "recruit" [ recruit target cost ]
+        action = "expel" [ expel target cost ]
+        action = "pick-up" [ if ( check-distance target ) [ pick-up target cost ] ]
+        action = "put-down" [ if ( check-distance target ) [ put-down target cost  ] ]
+        action = "cling-to" [ if ( check-distance target ) [ cling-to target cost ] ]
+        action = "squirm-from" [ if ( check-distance target ) [ squirm-from target cost ] ]
+        action = "help" [ if ( check-distance target ) [ help target cost ] ]
+        action = "attack" [ if ( check-distance target ) [ hurt target cost ] ]
+        action = "mate-with" [ if ( check-distance target ) [ mate-with target cost ] ]
         [])]
 
       ( ifelse ; these actions can be performed resting or not resting
+        action = "hide" [ hide cost ]
         action = "rest" [ rest cost ]
         action = "survival-chance" [ survival-chance cost ]
         action = "body-size" [ body-size cost ]
@@ -818,11 +923,28 @@ to do-actions
   ]
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; CHECK THAT DISTANCE TO TARGET IS CLOSE ENOUGH TO INTERACT
+;
+; Description of subroutine....
+;
+; ENTRY:
+;
+; EXIT:
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to-report check-distance [ target ]
   report ( ifelse-value
     ( member? "aspatial" model-structure ) [ true ]
     ( target = nobody ) [ false ]
-    [ distance target < ( size / 2 + ( ifelse-value ( is-patch? target ) [ 1 ] [[size] of target / 2 ])) ])
+    [ distance target < max-proximity target ])
+end
+
+to-report max-proximity [ target ] ; the max distance between two individuals (based on their body size - bigger individuals are in proximity from farther away)
+  ; distance measured between centers of bodies
+  report ( size / 2 + ( ifelse-value ( is-patch? target ) [ 1 ] [[size] of target / 2 ]))
 end
 
 to-report check-energy [ vector ]
@@ -863,7 +985,7 @@ to complete-action [ target action cost ]
   set recent-actions-completed lput ( sentence ticks completed-action ) recent-actions-completed
 end
 
-;--------------------------------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 ;
 ;                      dP   oo
 ;                      88
@@ -879,7 +1001,7 @@ end
 ;
 ; The 'Info' tab contains a summary of possible actions.
 ;
-;--------------------------------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 
 to survival-chance [ cost ]
   complete-action self "survival-chance" cost
@@ -941,9 +1063,9 @@ to litter-size [ cost ]
   set litter.size get-updated-value litter.size cost
 end
 
-;--------------------------------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 ; MOVEMENT
-;--------------------------------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 
 to move-toward [ target cost ]
   complete-action target "move-toward" cost
@@ -976,37 +1098,70 @@ to move-toward [ target cost ]
 end
 
 to match-heading [ target cost ]
-  let cost-of-heading abs subtract-headings heading [heading] of target / 360
-  ;print cost-of-heading
-  if ( cost > cost-of-heading ) [
-    set heading [heading] of target
-    complete-action target "match-heading" cost
+  complete-action target "match-heading" cost
+;  ;print heading
+;  ;print [heading] of target
+  ;  let total-cost 10 * cost / ( abs deterioration-rate ) ; scaled with deterioration rate
+  ;  let heading-difference subtract-headings heading [heading] of target
+  ;  ;print heading-difference
+  ;  let cost-of-heading abs heading-difference / 360
+  ;  ;print cost-of-heading
+  ;
+  ;  ifelse ( total-cost >= cost-of-heading ) [
+  ;    set heading [heading] of target
+  ;  ][
+  ;    set heading heading + 360 * total-cost * -1 * ( heading-difference / abs heading-difference )
+  ;  ]
+  ;print heading
+  ;print ""
+
+
+  if (target != nobody ) [
+
+    ; deteremine x and y coordinate difference to target
+    let ycor-difference [ y.magnitude ] of target
+    let xcor-difference [ x.magnitude ] of target
+
+    if ( not ( ycor-difference = 0 and xcor-difference = 0 ) ) [ ; If the target isn't in the exact same location as self
+
+      ; calculate angle to target
+      let angle atan xcor-difference ycor-difference
+      if ( cost < 0 ) [ set angle angle - 180 ]
+
+      ; set magnitudes based on cost
+      set x.magnitude x.magnitude + (abs cost * sin angle)
+      set y.magnitude y.magnitude + (abs cost * cos angle) ]
+
+    ; set heading based on magnitudes
+    set heading ifelse-value ( x.magnitude = 0 and y.magnitude = 0 ) [ heading ] [ ( atan x.magnitude y.magnitude ) ]
   ]
+
 end
 
 to turn-right [ cost ]
-  complete-action self "turn-right" cost
-  if ( cost > 0 ) [ right ( 360 * cost )]
-  if ( cost < 0 ) [ left ( 360 * abs cost )]
+  complete-action self "turn" cost
+  if ( cost > 0 ) [ right ( 360 * cost )
+    complete-action self "turn-right" 0 ]
+  if ( cost < 0 ) [ left ( 360 * abs cost )
+    complete-action self "turn-left" 0 ]
 end
 
 to go-forward [ cost ]
   complete-action self "go-forward" cost
   if ( life.history != "gestatee" ) [
 
-    if ( cost < 0 ) [ right 180 ]
+    ifelse ( cost < 0 ) [ right 180 complete-action self "went-backward" 0] [ complete-action self "went-forward" 0 ]
     let sum-weight size
     foreach carried.items [ object -> set sum-weight sum-weight + [size] of object ]
-    let travel-distance (size * (sqrt (( 2 * abs cost ) / sum-weight )) )
+    let travel-distance ifelse-value ( sum-weight > 0 ) [ (size * (sqrt (( 2 * abs cost ) / sum-weight )) ) ] [ 0 ]
     forward travel-distance
-    complete-action self "went-forward" 0
 
     set x.magnitude 0
     set y.magnitude 0
 
     ; track travel
     set distance.traveled distance.traveled + travel-distance
-    ;if not member? patch-here cells.occupied [ set cells.occupied lput patch-here cells.occupied ]
+
   ]
 end
 
@@ -1039,9 +1194,9 @@ to rest [ cost ]
   if ( cost < 0 ) [ set is.resting false complete-action self "not-resting" 0 ]
 end
 
-;--------------------------------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 ; SIGNALING
-;--------------------------------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 
 to yellow-signal [ cost ]
   complete-action self "yellow-signal" cost
@@ -1079,9 +1234,9 @@ to blue-signal [ cost ]
   ]
 end
 
-;--------------------------------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 ; LIFE HISTORY
-;--------------------------------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 
 to check-infancy [ cost ]
   complete-action self "check-infancy" cost
@@ -1127,6 +1282,7 @@ to update-to-infant
     set life.history "infant"
     set female.fertility " "
     set hidden? false
+    set is.resting false
     set ticks.at.birth ticks
     set label "i"
   ]
@@ -1211,33 +1367,9 @@ to update-to-adult
   ]
 end
 
-;to-report my-offspring
-;  report ifelse-value ( biological.sex = "female" )
-;  [ anima1s with [ my.mother = myself ]]
-;  [ anima1s with [ father.identity = [meta.id] of myself ]]
-;end
-
-;to-report current-group
-;  report ifelse-value (any? groups with [ meta-id = [group.identity] of myself ] and group.identity != 0 )
-;  [ one-of groups with [ meta-id = [group.identity] of myself ] ]
-;  [ nobody ]
-;end
-
-;to-report mother
-;  report ifelse-value (any? turtles with [ meta-id = [mother-identity] of myself ])
-;  [ one-of turtles with [ meta-id = [mother-identity] of myself ]]
-;  [ nobody ]
-;end
-;
-;to-report father
-;  report ifelse-value (any? turtles with [ meta-id = [father.identity] of myself ])
-;  [ one-of turtles with [ meta-id = [father.identity] of myself ]]
-;  [ nobody ]
-;end
-
-;--------------------------------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 ; ENERGY
-;--------------------------------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 
 to supply-to [ target cost ]
   complete-action target "supply-to" cost
@@ -1276,13 +1408,13 @@ to receive-from [ target cost ]
       ifelse ( is-patch? target )
       [ ask target [ set penergy.supply penergy.supply - energy-received ]]
       [ ask target [ update-energy ( - energy-received ) ]]
-      if ( life.history = "juvenile" or life.history = "adult" ) [ set foraging.gains foraging.gains + energy-received ]
+      if ( life.history = "juvenile" or life.history = "adult" ) [ set foraging.gains foraging.gains + energy-received ] ; only juveniles and adults can eat plants
   ]]
 end
 
-;--------------------------------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 ; INTERACTIONS
-;--------------------------------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 
 to join [ target cost ]
   complete-action target "join" cost
@@ -1415,11 +1547,12 @@ to aid [ target cost ]
     if ( relatedness-with-target > 0.75 ) [ set whole.related.help.cost whole.related.help.cost + cost ]
     if ( relatedness-with-target <= 0.75 and relatedness-with-target > 0.375 ) [ set half.related.help.cost half.related.help.cost + cost ]
     if ( relatedness-with-target <= 0.375 and relatedness-with-target > 0.1875 ) [ set fourth.related.help.cost fourth.related.help.cost + cost ]
-    if ( relatedness-with-target <= 0.1875  ) [ set eighth.related.help.cost eighth.related.help.cost + cost ]
+    if ( relatedness-with-target <= 0.1875 and relatedness-with-target > 0.0156 ) [ set eighth.related.help.cost eighth.related.help.cost + cost ]
+    if ( relatedness-with-target <= 0.0156 ) [ set not.related.help.cost not.related.help.cost + cost ]
   ]
 end
 
-; --------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
 ;
 ; DETERMINE GENETIC RELATEDNESS BETWEEN TWO INDIVIDUALS
 ;
@@ -1449,7 +1582,7 @@ end
 ; EXIT:   'relatedness-with' returns an estimate of the degree of relatedness, as
 ;          fraction between 0 and 1.
 ;
-; --------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report relatedness-with [ target ]
   let matching 0
@@ -1520,7 +1653,7 @@ to conceive-with [ target net-mate-cost ] ; FEMALE PROCEDURE
   complete-action target "conceive-with" net-mate-cost
   if ( biological.sex = "female" and female.fertility = "cycling" and life.history = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "male" and [ is.alive ] of target = true ) [ ; move these checks to copulate-with
     if random-float 1.0 < ( get-updated-value (mean (list conception.chance [conception.chance] of target)) net-mate-cost ) [
-      let preferred-litter base-litter-size ^ ( mean (list litter.size [litter.size] of target))
+      let preferred-litter base-litter-size ^ litter.size
       let floor-litter floor preferred-litter
       let percent-litter preferred-litter - floor-litter
       let my-litter-size ifelse-value ( random-float 1.0 < percent-litter ) [ floor-litter + 1 ] [ floor-litter ]
@@ -1584,6 +1717,12 @@ to initialize-from-parents [ m f ]
   set half.related.help.cost 0
   set fourth.related.help.cost 0
   set eighth.related.help.cost 0
+  set not.related.help.cost 0
+  set whole.related.attack.cost 0
+  set half.related.attack.cost 0
+  set fourth.related.attack.cost 0
+  set eighth.related.attack.cost 0
+  set not.related.attack.cost 0
   set foraging.gains 0
   set total.energy.gains 0
   set total.energy.cost 0
@@ -1606,10 +1745,10 @@ to set-phenotype-to-initialized-form
   ask my.mother [ set carried.items lput myself carried.items ]
   set hidden? true
   set is.resting true
-  set body.size 0.01
+  set body.size 0
   set body.shade 0
-  set bite.capacity 0.1
-  set mutation.chance 0.01
+  set bite.capacity 0.01
+  set mutation.chance 0.05
   set sex.ratio 0.5
   set litter.size 0
   set conception.chance 0
@@ -1626,10 +1765,10 @@ to set-phenotype-to-initialized-form
   set yellow.signal false
   set red.signal false
   set blue.signal false
-  set visual.angle 0.1
-  set visual.range 0.1
-  set day.perception 0.1
-  set night.perception 0.1
+  set visual.angle 0
+  set visual.range 0
+  set day.perception 0
+  set night.perception 0
 end
 
 to set-phenotype-to-ideal-form ; all anima1s or living animals?
@@ -1638,6 +1777,7 @@ to set-phenotype-to-ideal-form ; all anima1s or living animals?
     set energy.supply new-energy-supply
     ask myself [ set energy.supply new-energy-supply ]]
   set hidden? false
+  set is.resting false
   set body.size mean [body.size] of anima1s
   set body.shade mean [body.shade] of anima1s
   set bite.capacity mean [bite.capacity] of anima1s
@@ -1713,7 +1853,7 @@ to mutate-chromosomes [ rate-of-mutation ]
   set chromosome.II mutate-chromosome chromosome.II rate-of-mutation
 end
 
-; -------------------------------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
 ;
 ; MODIFY CHROMOSOME WITH NOVEL MUTATIONS AT RANDOM ALLELE LOCI
 ;
@@ -1722,131 +1862,136 @@ end
 ; each locus. See the overall description of the program for the structure of
 ; chromosomes, alleles, and codons.
 ;
-; ENTRY:  |input-chromosome| is the chromosome to be copied.
+; ENTRY:  input-chromosome | is the chromosome to be copied.
 ;
-;         |mutation-chance-per-locus| defines the chance that a mutation will
+;         mutation-chance-per-locus | defines the chance that a mutation will
 ;           occur at each allele locus.
 ;
-;         |model-structure| defines the type of code used. In particular, if
+;         model-structure | defines the type of code used. In particular, if
 ;           it is set to "uninvadable," then no new codons may be created.
 ;
 ;
 ; EXIT:   'mutate-chromosome' returns a copy of the chromosome with
 ;           modifications to a subset of the alleles.
 ;
-; -------------------------------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report mutate-chromosome [ input-chromosome mutation-chance-per-locus ]
 
-  let ouput-chromosome []                                        ; Establish an empty chromosome.
+  let ouput-chromosome []                                      ; Establish an empty chromosome.
 
-  foreach input-chromosome [ allele ->                           ; Begin a loop through each allele
-    let updated-alleles (list allele)                            ; in chromosome supplied on entry.
+  foreach input-chromosome [ allele ->                         ; Begin a loop through each allele
+    let updated-alleles (list allele)                          ; in chromosome supplied on entry.
 
     let first-allele first allele
 
-    if ( ( first-allele != "[0]"                                 ; The allele is able to mutate if the first codon is not [0] or false
-      or first-allele = true )                                   ; Check whether the allele is mutable and if ; this line is for capatibility with older genotype files that have a boolean in first position
-      and random-float 1.0 < mutation-chance-per-locus ) [       ; probability dictates that it should be changed.
+    if ( ( first-allele != "[0]"                               ; The allele is able to mutate if the first codon is not [0] or false
+      or first-allele = true )                                 ; Check whether the allele is mutable and if ; this line is for capatibility with older genotype files that have a boolean in first position
+      and random-float 1.0 < mutation-chance-per-locus ) [     ; probability dictates that it should be changed.
 
-      let choice ( ifelse-value                                  ; Check first-allele for range of mutation choices allowed
+      let choice ( ifelse-value                                ; Check first-allele for range of mutation choices allowed
         ( first-allele = "[1]" ) [ 1 ]
         ( first-allele = "[2]" ) [ one-of [ 1 2 ] ]
         ( first-allele = "[3]" ) [ one-of [ 1 2 3 ] ]
         ( first-allele = "[4]" ) [ one-of [ 1 2 3 4 5 ] ]
         ( first-allele = "[5]" ) [ one-of [ 1 2 3 4 5 6 7 ] ]
-        [ one-of [ 1 2 3 4 5 6 7 ] ] )                           ; Or return any choice when first-allele is true
+        [ one-of [ 1 2 3 4 5 6 7 ] ] )                         ; Or return any choice when first-allele is true
 
-      (ifelse                                                    ; Select the proper case.
+      (ifelse                                                  ; Select the proper case.
 
-                                                                 ; Prepare to mutate the allele
-        ( choice < 6 ) [                                         ; Generate a random number between 0 and 4.
+                                                               ; Prepare to mutate the allele
+        ( choice < 6 ) [                                       ; Generate a random number between 0 and 4.
           let new-allele []
-          let random-index random ( length allele - 1 ) + 1      ; excludes first codon from mutation
+          let random-index random ( length allele - 1 ) + 1    ; excludes first codon from mutation
           let index 0
-          foreach allele [ codon ->                              ; Proceed to examine each codon in the allele.
+          foreach allele [ codon ->                            ; Proceed to examine each codon in the allele.
             ( ifelse
 
-              ( choice = 1                                       ; CHOICE 1: mutate codon if it is a number ; unless the structure is uninvadable.
+              ( choice = 1                                     ; CHOICE 1: mutate codon if it is a number ; unless the structure is uninvadable.
                 and random-index = index
                 and not member? "uninvadable" model-structure )
               [ set new-allele
                 lput get-mutation codon "numbers" new-allele ]
 
-              ( choice = 2                                       ; CHOICE 2: mutate codon, letters only unless the structure is uninvadable.
+              ( choice = 2                                     ; CHOICE 2: mutate codon, letters only unless the structure is uninvadable.
                 and random-index = index
                 and not member? "uninvadable" model-structure )
               [ set new-allele
                 lput get-mutation codon "letters" new-allele ]
 
-              ( choice = 3                                       ; CHOICE 3: mutate codon, both numbers and letters unless the structure is uninvadable.
+              ( choice = 3                                     ; CHOICE 3: mutate codon, both numbers and letters unless the structure is uninvadable.
                 and random-index = index
                 and not member? "uninvadable" model-structure )
               [ set new-allele
                 lput get-mutation codon "both" new-allele ]
 
-              ( choice = 4                                       ; CHOICE 4: duplicate codon
+              ( choice = 4                                     ; CHOICE 4: duplicate codon
                 and random-index = index )
               [ repeat 2
                 [ set new-allele lput codon new-allele ] ]
 
-              ( choice = 5                                       ; CHOICE 5: delete codon
+              ( choice = 5                                     ; CHOICE 5: delete codon
                 and random-index = index ) [  ]
 
-              [ set new-allele lput codon new-allele ])          ; Copy untouched codons into the new allele.
-            set index index + 1 ]                                ; Advance and repeat for all codons,
-          set updated-alleles ( list new-allele ) ]              ; then update the allele.
+              [ set new-allele lput codon new-allele ])        ; Copy untouched codons into the new allele.
+            set index index + 1 ]                              ; Advance and repeat for all codons,
+          set updated-alleles ( list new-allele ) ]            ; then update the allele.
 
-        ( choice = 6 ) [                                         ; CHOICE 6: duplicate allele making an exact copy
+        ( choice = 6 ) [                                       ; CHOICE 6: duplicate allele making an exact copy
           set updated-alleles (list allele allele) ]
 
-        ( choice = 7 ) [                                         ; CHOICE 7: delete allele completely
+        ( choice = 7 ) [                                       ; CHOICE 7: delete allele completely
           set updated-alleles [] ]
 
         [])]
 
-    foreach updated-alleles [ allele-update ->                   ; Finally, if modification occurred
-      set ouput-chromosome ifelse-value                          ; in any allele, then update the
-      ( allele-update != [] )                                    ; chromosome with those modified
-      [ lput allele-update ouput-chromosome ]                    ; alleles.
+    foreach updated-alleles [ allele-update ->                 ; Finally, if modification occurred
+      set ouput-chromosome ifelse-value                        ; in any allele, then update the
+      ( allele-update != [] )                                  ; chromosome with those modified
+      [ lput allele-update ouput-chromosome ]                  ; alleles.
       [ ouput-chromosome ]]
   ]
-  report ouput-chromosome                                        ; Return the results.
+  report ouput-chromosome                                      ; Return the results.
 end
 
 
-; -------------------------------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
 ;
 ; GET A MODIFIED VERSION OF A GIVEN CODON
 ;
 ; This subroutine takes a codon and returns a mutated version of that codon.
 ;
-; ENTRY:  |unmutated-codon| is the initial codon.
+; ENTRY:  unmutated-codon | is the initial codon.
 ;
-;         |type-of-mutation| defines the what type of mutation can occur "numbers," "letters," or "both"
+;         type-of-mutation | defines the what type of mutation can occur "numbers," "letters," or "both"
 ;
 ;
 ; EXIT:   GET-CHROMOSOME returns a mutant verion of the unmutated-codon
 ;
-; -------------------------------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report get-mutation [ unmutated-codon type-of-mutation ]
 
-  report ( ifelse-value                                          ; Return the mutation based on:
+  report ( ifelse-value                                        ; Return the mutation based on:
 
-    ( genotype-reader = "sta2us" )                               ; If genotype-reader is sta2us..
-    [ sta7us-get-mutation unmutated-codon type-of-mutation]      ; then get mutation from sta2us extension
+    ( genotype-reader = "sta2us" )                             ; If genotype-reader is sta2us..
+    [ sta7us-get-mutation unmutated-codon type-of-mutation]    ; then get mutation from sta2us extension
 
-    ( genotype-reader = "gat3s" )                                ; If genotype-reader is gat3s..
-    [ g8tes-get-mutation unmutated-codon type-of-mutation]       ; then get mutation from gat3s extension
+    ( genotype-reader = "gat3s" )                              ; If genotype-reader is gat3s..
+    [ g8tes-get-mutation unmutated-codon type-of-mutation]     ; then get mutation from gat3s extension
 
-    [ sta7us-get-mutation unmutated-codon type-of-mutation ] )   ; default mutation if gentoype-reader not indicated
+    [ sta7us-get-mutation unmutated-codon type-of-mutation ] ) ; default mutation if gentoype-reader not indicated
 end
+
+
+; NOTE FOR CL: if     (..condition..) [..truepart..]
+;              ifelse (..condition..) [..truepart..] [..falsepart..]
+
 @#$#@#$#@
 GRAPHICS-WINDOW
-6
+7
 86
-837
+838
 918
 -1
 -1
@@ -1980,7 +2125,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-5.1
+0.0
 .1
 1
 NIL
@@ -2051,7 +2196,7 @@ plant-daily-cycle
 plant-daily-cycle
 1
 100
-1.0
+10.0
 1
 1
 ticks
@@ -2074,7 +2219,7 @@ INPUTBOX
 995
 191
 population
-Geladas
+Geladas-small
 1
 0
 String
@@ -2085,7 +2230,7 @@ INPUTBOX
 995
 265
 genotype
-moving
+movement
 1
 0
 String
@@ -2148,8 +2293,8 @@ CHOOSER
 588
 useful-commands
 useful-commands
-"help-me" "meta-report" "---------------------" " > OPERATIONS   " "---------------------" "parameter-settings" "default-settings" "model-structure" "-- aspatial" "-- free-lunch" "-- ideal-form" "-- no-evolution" "-- no-plants" "-- reaper" "-- signal-fertility" "-- stork" "-- uninvadable" "clear-population" "new-population" "reset-plants" "save-world" "import-world" "save-simulation" "---------------------" " > VERIFICATION " "---------------------" "dynamic-check" "-- true" "-- false" "runtime-check" "visual-check" "-- attack-pattern" "-- dine-and-dash" "-- life-history-channel" "-- musical-pairs" "-- night-and-day" "-- popularity-context" "-- speed-mating" "-- square-dance" "-- supply-and-demand" "---------------------" " > DISPLAY RESULTS   " "---------------------" "age" "generations" "life-history" "genotype" "phenotype" "-- survival-chance" "-- body-size" "-- body-shade" "-- female-fertility" "-- hidden-chance" "-- bite-capacity" "-- mutation-chance" "-- sex-ratio" "-- litter-size" "-- conception-chance" "-- visual-angle" "-- visual-range" "-- day-perception" "-- night-perception" "-- yellow-chance" "-- red-chance" "-- blue-chance" "-- birthing-chance" "-- weaning-chance" "-- infancy-chance" "-- juvenility-chance" "-- adulthood-chance" "carried-items" "energy-supply" "behaviors" "-- environment" "-- decisions" "-- actions" "-- birthing" "-- weaning" "-- matings" "-- mating-partners" "-- conceptions" "-- infanticide" "-- group-transfers" "-- travel-distance" "-- foraging-gains" "-- total-energy-gains" "-- total-energy-cost" "-- receiving-history" "-- carried-history" "-- aid-history" "-- harm-history" "---------------------" " > OUTPUT RESULTS    " "---------------------" "dynamic-verification" "verification-rate"
-1
+"help-me" "meta-report" "show-territories" "---------------------" " > OPERATIONS   " "---------------------" "parameter-settings" "default-settings" "model-structure" "-- aspatial" "-- free-lunch" "-- ideal-form" "-- no-evolution" "-- no-plants" "-- reaper" "-- signal-fertility" "-- stork" "-- uninvadable" "clear-population" "new-population" "reset-plants" "save-world" "import-world" "save-simulation" "output-results" "---------------------" " > VERIFICATION " "---------------------" "dynamic-check" "-- true" "-- false" "runtime-check" "visual-check" "-- attack-pattern" "-- dine-and-dash" "-- life-history-channel" "-- musical-pairs" "-- night-and-day" "-- popularity-context" "-- speed-mating" "-- square-dance" "-- supply-and-demand" "---------------------" " > DISPLAY RESULTS   " "---------------------" "age" "generations" "life-history" "genotype" "phenotype" "-- survival-chance" "-- body-size" "-- body-shade" "-- female-fertility" "-- hidden-chance" "-- bite-capacity" "-- mutation-chance" "-- sex-ratio" "-- litter-size" "-- conception-chance" "-- visual-angle" "-- visual-range" "-- day-perception" "-- night-perception" "-- yellow-chance" "-- red-chance" "-- blue-chance" "-- birthing-chance" "-- weaning-chance" "-- infancy-chance" "-- juvenility-chance" "-- adulthood-chance" "carried-items" "energy-supply" "behaviors" "-- environment" "-- decisions" "-- actions" "-- birthing" "-- weaning" "-- matings" "-- mating-partners" "-- conceptions" "-- infanticide" "-- group-transfers" "-- travel-distance" "-- foraging-gains" "-- total-energy-gains" "-- total-energy-cost" "-- receiving-history" "-- carried-history" "-- aid-history" "-- harm-history"
+41
 
 BUTTON
 1063
@@ -2228,7 +2373,7 @@ plant-quality
 plant-quality
 .1
 100
-20.6
+5.0
 .1
 1
 NIL
@@ -2264,7 +2409,7 @@ OUTPUT
 12
 
 PLOT
-849
+850
 646
 1696
 878
@@ -2276,10 +2421,19 @@ y
 0.0
 1.0
 true
-false
+true
 "" ""
 PENS
-"default" 1.0 1 -16777216 true "" ""
+"cycling female" 0.1 1 -2064490 true "" ""
+"pregnant female" 1.0 0 -5825686 true "" ""
+"lactating female" 1.0 0 -8630108 true "" ""
+"adult male" 1.0 0 -13791810 true "" ""
+"juvenile female" 1.0 0 -13840069 true "" ""
+"juvenile male" 1.0 0 -10899396 true "" ""
+"infant female" 1.0 0 -1184463 true "" ""
+"infant male" 1.0 0 -6459832 true "" ""
+"gestatee female" 1.0 0 -955883 true "" ""
+"gestatee male" 1.0 0 -2674135 true "" ""
 
 CHOOSER
 849
@@ -2293,52 +2447,52 @@ genotype-reader
 
 SWITCH
 1274
-886
-1409
-919
-adults
-adults
-1
-1
--1000
-
-SWITCH
-1130
-886
-1268
-919
-juveniles
-juveniles
-1
-1
--1000
-
-SWITCH
-989
-886
-1125
-919
-infants
-infants
-1
-1
--1000
-
-SWITCH
-849
-886
-984
-919
-gestatees
-gestatees
-1
-1
--1000
-
-SWITCH
-1414
 885
-1552
+1409
+918
+adults
+adults
+1
+1
+-1000
+
+SWITCH
+1131
+885
+1269
+918
+juveniles
+juveniles
+1
+1
+-1000
+
+SWITCH
+990
+885
+1126
+918
+infants
+infants
+1
+1
+-1000
+
+SWITCH
+850
+885
+985
+918
+gestatees
+gestatees
+1
+1
+-1000
+
+SWITCH
+1415
+885
+1553
 918
 males
 males
@@ -2347,9 +2501,9 @@ males
 -1000
 
 SWITCH
-1557
+1558
 885
-1697
+1696
 918
 females
 females
@@ -2368,7 +2522,7 @@ plot-type
 0
 
 MONITOR
-1131
+1130
 594
 1696
 639
@@ -7997,6 +8151,94 @@ save-population</setup>
     </enumeratedValueSet>
     <enumeratedValueSet variable="plant-maximum-neighbors">
       <value value="8"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="sAC1" repetitions="1" runMetricsEveryStep="false">
+    <setup>setup
+set-simulation-id</setup>
+    <go>go</go>
+    <final>simulation-summary
+record-world</final>
+    <timeLimit steps="500000"/>
+    <enumeratedValueSet variable="path-to-experiment">
+      <value value="&quot;../results/thesis/&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="deterioration-rate">
+      <value value="-0.01"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="output-results?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="selection-on?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="population">
+      <value value="&quot;Chimpanzees&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype">
+      <value value="&quot;chimpanzees&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-reader">
+      <value value="&quot;sta2us&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-annual-cycle">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-daily-cycle">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-seasonality">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-quality">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-maximum-neighbors">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="verification-on">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="verification-rate">
+      <value value="1.0E-4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="simulation-summary-on">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="simulation-summary-ticks">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="record-individuals-on">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="scan-interval">
+      <value value="250"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="simulation-scans-on">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="group-scans-on">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="individual-scans-on">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="focal-follows-on">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="focal-follow-rate">
+      <value value="1.0E-4"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>

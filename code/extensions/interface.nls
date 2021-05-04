@@ -105,11 +105,18 @@ to command
     ( useful-commands = "-- supply-and-demand" ) [ visual-verification ]
     ( useful-commands = "-- square-dance" ) [ visual-verification ]
     
-    ( useful-commands = "-- decisions" ) [ display-results ] ;output-decisions
-    ( useful-commands = "-- actions" ) [ display-results ] ; output-actions 
+    ( useful-commands = "-- environment" ) [ environment-check ]
+    ( useful-commands = "-- decisions" ) [ output-decisions display-results ] ;
+    ( useful-commands = "-- actions" ) [ output-actions  display-results ] ; 
     ( useful-commands = "genotype" ) [ output-genotype  ]
     
+    
+    ( useful-commands = "show-territories" ) [ output-territories  ]
+    
     [ display-results ])
+  
+  ; SHOW TERRITORIES
+  ; follow random anima1
   
   
 
@@ -164,6 +171,31 @@ to command
 
 
 
+end
+
+to environment-check
+  ifelse ( subject != nobody ) [
+    
+    ask subject [
+    foreach my.environment [ envir -> 
+      output-print envir
+    ]]
+    
+  ][
+    
+    
+    
+    
+  ]
+end
+
+to output-territories
+  ask patches [ if ( pgroup.identity != 0 ) [ set pcolor pgroup.identity ]]
+  
+  foreach remove-duplicates [ group.identity ] of anima1s [ grp ->
+    print ( word grp " " count patches with [ pgroup.identity = grp ] ) 
+    
+  ]
 end
 
 to help-me
@@ -306,7 +338,8 @@ end
 to clear-population
   output-header "CLEAR POPULATION "
   ask turtles [ die ]
-  output-print " All agents have been virtually incinerated and no longer exist."
+  ask patches [ set pgroup.identity 0 ]
+  output-print " All organisms have been virtually incinerated and no longer exist."
 end
 
 ;-----------------------------------------------------------------------------       
@@ -543,7 +576,7 @@ to-report get-column-list [ input-string ] ; used if you want to separate by lif
 end
 
 to-report life-history-color-list ; female gestatee, male gestatee, female infant, male infant, female juvenile, male juvenile, cycling female, pregnant female, lactating female, adult male
-  report [ 65 55 46 43 26 23 135 125 115 95 15 ]
+  report [ 25 15 45 35 65 55 135 125 115 95 ]
 end
 
 ;-----------------------------------------------------------------------------       
@@ -714,6 +747,8 @@ to plot-colored-histogram [ column-interval plot-list color-list plot-type-1 ]
       set column-index column-index + 1
     ]
     set index index + column-interval ]  
+  
+  set-plot-pen-color pink ; reset "cycling female" label back to pink
 end
 
 ;-----------------------------------------------------------------------------  

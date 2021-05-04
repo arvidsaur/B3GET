@@ -1,123 +1,199 @@
-true e e living-chance 0.06
-true j e set-heading 0.5
-true a e set-heading 0.5
-true a on set-heading -0.5
-true a on set-heading 0.5
-true e -e rest 0.00001
-true e *e rest -0.00001
-true j e set-heading-random 0.05
-true a e set-heading-random 0.001
-true a d8 move-toward 0.00001
-true a d7 move-toward 0.00002
-true a d6 move-toward 0.00003
-true a d5 move-toward 0.00004
-true a d4 move-toward 0.00005
-true a d3 move-toward 0.00006
-true j d eat 0.00001
-true a d eat 0.00001
-true e e body-shade 0.0001
-true g e body-size 0.0005
-true g e check-infancy 0.0005
-true g e bite-capacity 0.001
-true i e body-size 0.00005
-true i e visual-range 0.001
-true i e visual-angle 0.001
-true i e day-perception 0.001
-true i e check-juvenility 0.0005
-true j e body-size 0.00005
-true j e check-adulthood 0.0001
-true j e conception-chance 0.001
-true cå e yellow-signal-on 0.00005
-true cɣ e blue-signal-on -0.0005
-true p g supply-to 0.00001
-true pß e red-signal-on 0.00005
-true pα e yellow-signal-on -0.0005
-true l i supply-to 0.00001
-true lœ e blue-signal-on 0.00005
-true lβ e red-signal-on -0.0005
-true acf jyv put-down 0.00005
-true ac amn move-toward 0.00001
-true am fn move-toward 0.0005
-true am afα move-toward 0.05
-true ac amn mate-with 0.00005
-true am afα mate-with 0.0005
-true jf fk move-toward 0.0002
-true jm ofk leave 0.00001
-true am uaf join 0.00001
-true am oamq hurt 0.01
-true am e turn-right 0.0001
-true af e turn-right 0.001
-true am am move-toward 0.00001
-true am amxrq expel 0.0001
-true jf on move-toward 0.005
-true a an move-toward 0.005
-true a o move-away-from 0.0005
-true a au move-away-from 0.0005
-true a1 a9 move-away-from 0.0005
-true a9 a1 move-away-from 0.0005
-true a1 a1 move-toward 0.0005
-true a9 a9 move-toward 0.0005
-true j e go-forward 0.1
-true a e go-forward 0.1
-
-true e e living-chance 0.06
-true j e set-heading 0.5
-true a e set-heading 0.5
-true a on set-heading -0.5
-true a on set-heading 0.5
-true e -e rest 0.00001
-true e *e rest -0.00001
-true j e set-heading-random 0.05
-true a e set-heading-random 0.001
-true a d8 move-toward 0.00001
-true a d7 move-toward 0.00002
-true a d6 move-toward 0.00003
-true a d5 move-toward 0.00004
-true a d4 move-toward 0.00005
-true a d3 move-toward 0.00006
-true j d eat 0.00001
-true a d eat 0.00001
-true e e body-shade 0.0001
-true g e body-size 0.0005
-true g e check-infancy 0.0005
-true g e bite-capacity 0.001
-true i e body-size 0.00005
-true i e visual-range 0.001
-true i e visual-angle 0.001
-true i e day-perception 0.001
-true i e check-juvenility 0.0005
-true j e body-size 0.00005
-true j e check-adulthood 0.0001
-true j e conception-chance 0.001
-true cå e yellow-signal-on 0.00005
-true cɣ e blue-signal-on -0.0005
-true p g supply-to 0.00001
-true pß e red-signal-on 0.00005
-true pα e yellow-signal-on -0.0005
-true l i supply-to 0.00001
-true lœ e blue-signal-on 0.00005
-true lβ e red-signal-on -0.0005
-true acf jyv put-down 0.00005
-true ac amn move-toward 0.00001
-true am fn move-toward 0.0005
-true am afα move-toward 0.05
-true ac amn mate-with 0.00005
-true am afα mate-with 0.0005
-true jf fk move-toward 0.0002
-true jm ofk leave 0.00001
-true am uaf join 0.00001
-true am oamq hurt 0.01
-true am e turn-right 0.0001
-true af e turn-right 0.001
-true am am move-toward 0.00001
-true am amxrq expel 0.0001
-true jf on move-toward 0.005
-true a an move-toward 0.005
-true a o move-away-from 0.0005
-true a au move-away-from 0.0005
-true a1 a9 move-away-from 0.0005
-true a9 a1 move-away-from 0.0005
-true a1 a1 move-toward 0.0005
-true a9 a9 move-toward 0.0005
-true j e go-forward 0.1
-true a e go-forward 0.1
+[1] e e survival-chance 6.00E-03
+[1] g e body-size 5.00E-05
+[1] i e body-size 1.00E-03
+[1] jf e body-size 5.00E-04
+[1] jm e body-size 5.00E-04
+[0] e e body-shade 1.00E-04   ;;
+[1] i e visual-range 2.00E-03
+[1] i e visual-angle 2.00E-03
+[1] i e day-perception 2.00E-03
+[0] i e night-perception 0
+[1] jf e conception-chance 1.00E-03
+[1] jm e conception-chance 1.00E-03
+[1] g e bite-capacity 1.00E-03
+[1] c ß red-signal 1.00E-03
+[1] l β red-signal -1.00E-03
+[1] p β red-signal -1.00E-03
+[1] j e mutation-rate 0
+[1] j e sex-ratio 0
+[1] j e litter-size 0
+[1] gf e check-infancy 5.00E-04
+[1] gm e check-infancy 5.00E-04
+[1] if e check-juvenility 3.00E-04
+[1] im e check-juvenility 3.00E-04
+[1] jf e check-adulthood 1.00E-04
+[1] jm e check-adulthood 1.00E-04
+[1] p e check-birth 5.00E-04
+[1] l e check-weaning 3.00E-04
+[1] jf e go-forward 5.00E-03
+[1] jm e go-forward 5.00E-03
+[1] af e go-forward 5.00E-03
+[1] am e go-forward 5.00E-03
+[0] e *e rest -1.00E-09
+[0] e -e rest 1.00E-09
+[1] e ovn move-toward 1.00E-05 ;; G
+[1] f ofkv move-toward 5.00E-05 ;; G
+[1] am afv move-toward 7.00E-05 ;; G
+[1] am βv move-toward 1.00E-05
+[1] c amv move-toward 1.00E-03
+[1] j d53 move-toward 1.00E-03
+[1] j d54 move-toward 1.00E-04
+[1] j d55 move-toward 1.00E-05
+[1] j d56 move-toward 1.00E-06
+[1] j d57 move-toward 1.00E-07
+[1] j d58 move-toward 1.00E-08
+[1] a d53 move-toward 1.00E-03
+[1] a d54 move-toward 1.00E-04
+[1] a d55 move-toward 1.00E-05
+[1] a d56 move-toward 1.00E-06
+[1] a d57 move-toward 1.00E-07
+[1] a d58 move-toward 1.00E-08
+[0] m ombv< move-toward 0  ;; G
+[0] e onv< move-toward -1      ;; G
+[0] e ouv move-away-from 0 ;; G
+[1] p gvy supply-to 1.00E-09
+[1] l ivy supply-to 1.00E-09
+[1] g pv¥ demand-from 1.00E-09
+[1] i lv¥ demand-from 1.00E-09
+[1] j d eat 1.00E-09
+[1] a d eat 1.00E-09
+[0] m zvu join 0.001 ;; G
+[0] am omu join -0.01 ;; G
+[0] jm fkn leave 0.001 ;; G
+[0] af oafvnq leave 0.00001 ;; G
+[1] cf jy put-down 1.00E-09
+[1] af ik help 0           
+[1] af iq help 0             
+[1] af jk help 0              
+[1] af jq help 0
+[1] af oamk help 0
+[1] af oamq help 0
+[1] af oafk help 0
+[1] af oafq help 0
+[1] am ik help 0
+[1] am iq help 0
+[1] am jk help 0
+[1] am jq help 0
+[1] am oamk help 0
+[1] am oamq help 0
+[1] am oafk help 0
+[1] am oafq help 0
+[1] af ik attack 0
+[1] af iq attack 0
+[1] af jk attack 0
+[1] af jq attack 0
+[1] af oamk attack 0
+[1] af oamq attack 0
+[1] af oafk attack 0
+[1] af oafq attack 0
+[1] am ik attack 0
+[1] am iq attack 0.001 ;;; G
+[1] am jk attack 0
+[1] am jq attack 0
+[1] am oamk attack 0.001 ;;; G
+[1] am oamq attack 0.001 ;;; G
+[1] am oafk attack 0
+[1] am oafq attack 0
+[1] am βqnv mate-with 1.00E-05
+[1] c amqnv mate-with 1.00E-05
+[0] e oafnv match-heading 0.0005  ;;; G
+ 
+[1] e e survival-chance 6.00E-03
+[1] g e body-size 5.00E-05
+[1] i e body-size 1.00E-03
+[1] jf e body-size 5.00E-04
+[1] jm e body-size 5.00E-04
+[0] e e body-shade 1.00E-04   ;;
+[1] i e visual-range 2.00E-03
+[1] i e visual-angle 2.00E-03
+[1] i e day-perception 2.00E-03
+[0] i e night-perception 0
+[1] jf e conception-chance 1.00E-03
+[1] jm e conception-chance 1.00E-03
+[1] g e bite-capacity 1.00E-03
+[1] c ß red-signal 1.00E-03
+[1] l β red-signal -1.00E-03
+[1] p β red-signal -1.00E-03
+[1] j e mutation-rate 0
+[1] j e sex-ratio 0
+[1] j e litter-size 0
+[1] gf e check-infancy 5.00E-04
+[1] gm e check-infancy 5.00E-04
+[1] if e check-juvenility 3.00E-04
+[1] im e check-juvenility 3.00E-04
+[1] jf e check-adulthood 1.00E-04
+[1] jm e check-adulthood 1.00E-04
+[1] p e check-birth 5.00E-04
+[1] l e check-weaning 3.00E-04
+[1] jf e go-forward 5.00E-03
+[1] jm e go-forward 5.00E-03
+[1] af e go-forward 5.00E-03
+[1] am e go-forward 5.00E-03
+[0] e *e rest -1.00E-09
+[0] e -e rest 1.00E-09
+[1] e ovn move-toward 1.00E-03 ;; G
+[1] f ofkv move-toward 5.00E-05 ;; G
+[1] am afv move-toward 7.00E-05 ;; G
+[1] am βv move-toward 1.00E-05
+[1] c amv move-toward 1.00E-03
+[1] j d53 move-toward 1.00E-03
+[1] j d54 move-toward 1.00E-04
+[1] j d55 move-toward 1.00E-05
+[1] j d56 move-toward 1.00E-06
+[1] j d57 move-toward 1.00E-07
+[1] j d58 move-toward 1.00E-08
+[1] a d53 move-toward 1.00E-03
+[1] a d54 move-toward 1.00E-04
+[1] a d55 move-toward 1.00E-05
+[1] a d56 move-toward 1.00E-06
+[1] a d57 move-toward 1.00E-07
+[1] a d58 move-toward 1.00E-08
+[0] m ombv< move-toward 0  ;; G
+[0] e onv< move-toward -1       ;; G
+[0] e ouv move-away-from 0 ;; G
+[1] p gvy supply-to 1.00E-09
+[1] l ivy supply-to 1.00E-09
+[1] g pv¥ demand-from 1.00E-09
+[1] i lv¥ demand-from 1.00E-09
+[1] j d eat 1.00E-09
+[1] a d eat 1.00E-09
+[0] m zvu join 0.001 ;; G
+[0] am omu join -0.01 ;; G
+[0] jm fkn leave 0.001 ;; G
+[0] af oafvnq leave 0.00001 ;; G
+[1] cf jy put-down 1.00E-09
+[1] af ik help 0           
+[1] af iq help 0             
+[1] af jk help 0              
+[1] af jq help 0
+[1] af oamk help 0
+[1] af oamq help 0
+[1] af oafk help 0
+[1] af oafq help 0
+[1] am ik help 0
+[1] am iq help 0
+[1] am jk help 0
+[1] am jq help 0
+[1] am oamk help 0
+[1] am oamq help 0
+[1] am oafk help 0
+[1] am oafq help 0
+[1] af ik attack 0
+[1] af iq attack 0
+[1] af jk attack 0
+[1] af jq attack 0
+[1] af oamk attack 0
+[1] af oamq attack 0
+[1] af oafk attack 0
+[1] af oafq attack 0
+[1] am ik attack 0
+[1] am iq attack 0.001 ;;; G
+[1] am jk attack 0
+[1] am jq attack 0
+[1] am oamk attack 0.001 ;;; G
+[1] am oamq attack 0.001 ;;; G
+[1] am oafk attack 0
+[1] am oafq attack 0
+[1] am βqnv mate-with 1.00E-05
+[1] c amqnv mate-with 1.00E-05
+[0] e oafnv match-heading 0.0005  ;;; G

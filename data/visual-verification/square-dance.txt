@@ -3,99 +3,99 @@
 
 false e e survival-chance 0.05
 
-false i103 a+ turn-right 0.25
+false i103 a¥ turn-right 0.25
 false i103 e go-forward 0.5
 false i103 at cling-to 1.0
-false i103 a+ squirm-from 1.0
+false i103 a¥ squirm-from 1.0
 false a103 iy103 squirm-from -1.0
 
-false i26 a+ turn-right 0.25
+false i26 a¥ turn-right 0.25
 false i26 e go-forward 0.5
 false i26 at cling-to 1.0
-false i26 a+ squirm-from 1.0
+false i26 a¥ squirm-from 1.0
 false a26 iy14 squirm-from -1.0
 
-false i67 a+ turn-right 0.25
+false i67 a¥ turn-right 0.25
 false i67 e go-forward 0.5
 false i67 at cling-to 1.0
-false i67 a+ squirm-from 1.0
+false i67 a¥ squirm-from 1.0
 false a67 iy67 squirm-from -1.0
 
-false i14 a+ turn-right 0.25
+false i14 a¥ turn-right 0.25
 false i14 e go-forward 0.5
 false i14 at cling-to 1.0
-false i14 a+ squirm-from 1.0
+false i14 a¥ squirm-from 1.0
 false a14 iy26 squirm-from -1.0
 
 false a45 iy put-down 1.0
-false i45 a+45 put-down -1.0
-false i45 a+ turn-right 0.25
+false i45 a¥45 put-down -1.0
+false i45 a¥ turn-right 0.25
 false i45 e go-forward 0.5
 false a45 it pick-up 1.0
 
 false a125 iy put-down 1.0
-false i125 a+75 put-down -1.0
-false i125 a+ turn-right 0.25
+false i125 a¥75 put-down -1.0
+false i125 a¥ turn-right 0.25
 false i125 e go-forward 0.5
 false a125 it pick-up 1.0
 
 false a85 iy put-down 1.0
-false i85 a+85 put-down -1.0
-false i85 a+ turn-right 0.25
+false i85 a¥85 put-down -1.0
+false i85 a¥ turn-right 0.25
 false i85 e go-forward 0.5
 false a85 it pick-up 1.0
 
 false a75 iy put-down 1.0
-false i75 a+125 put-down -1.0
-false i75 a+ turn-right 0.25
+false i75 a¥125 put-down -1.0
+false i75 a¥ turn-right 0.25
 false i75 e go-forward 0.5
 false a75 it pick-up 1.0
 
-false i56 a+ turn-right 0.25
+false i56 a¥ turn-right 0.25
 false i56 e go-forward 0.5
 false i56 at cling-to 1.0
 false a56 iy put-down 1.0
-false i56 a+56 put-down -1.0
+false i56 a¥56 put-down -1.0
 
-false i135 a+ turn-right 0.25
+false i135 a¥ turn-right 0.25
 false i135 e go-forward 0.5
 false i135 at cling-to 1.0
 false a135 iy put-down 1.0
-false i135 a+116 put-down -1.0
+false i135 a¥116 put-down -1.0
 
-false i34 a+ turn-right 0.25
+false i34 a¥ turn-right 0.25
 false i34 e go-forward 0.5
 false i34 at cling-to 1.0
 false a34 iy put-down 1.0
-false i34 a+34 put-down -1.0
+false i34 a¥34 put-down -1.0
 
-false i116 a+ turn-right 0.25
+false i116 a¥ turn-right 0.25
 false i116 e go-forward 0.5
 false i116 at cling-to 1.0
 false a116 iy put-down 1.0
-false i116 a+135 put-down -1.0
+false i116 a¥135 put-down -1.0
 
 false a120 it pick-up 1.0
-false i120 a+ squirm-from 1.0
-false i120 a+ turn-right 0.25
+false i120 a¥ squirm-from 1.0
+false i120 a¥ turn-right 0.25
 false i120 e go-forward 0.5
 false a120 iy120 squirm-from -1.0
 
 false a24 it pick-up 1.0
-false i24 a+ squirm-from 1.0
-false i24 a+ turn-right 0.25
+false i24 a¥ squirm-from 1.0
+false i24 a¥ turn-right 0.25
 false i24 e go-forward 0.5
 false a24 iy9 squirm-from -1.0
 
 false a17 it pick-up 1.0
-false i17 a+ squirm-from 1.0
-false i17 a+ turn-right 0.25
+false i17 a¥ squirm-from 1.0
+false i17 a¥ turn-right 0.25
 false i17 e go-forward 0.5
 false a17 iy17 squirm-from -1.0
 
 false a9 it pick-up 1.0
-false i9 a+ squirm-from 1.0
-false i9 a+ turn-right 0.25
+false i9 a¥ squirm-from 1.0
+false i9 a¥ turn-right 0.25
 false i9 e go-forward 0.5
 false a9 iy24 squirm-from -1.0
 

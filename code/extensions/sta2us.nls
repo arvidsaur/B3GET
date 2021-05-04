@@ -43,7 +43,7 @@
 ; 2019-09-XX    x    is sicker than myself
 ; 2019-09-XX    y    is carried by myself
 ; 2019-09-XX    z    is an anima1 (not a plant)
-; 2019-09-XX    +    is carrying myself
+; 2019-09-XX    ¥    is carrying myself
 ; 2019-09-XX    α    has yellow signal on
 ; 2019-09-XX    å    has yellow signal off
 ; 2019-09-XX    β    has red signal on
@@ -52,8 +52,11 @@
 ; 2019-09-XX    œ    has blue signal off
 ; 2019-09-XX    *    is observed during the day
 ; 2019-09-XX    -    is observed during the night
-; 2019-09-XX    #    has color closest to #
+; 2019-09-XX   0-9   displayed color
 ; 2020-09-XX    .    is not resting
+; XXXX-XX-XX    <    is within near range
+; XXXX-XX-XX    |    is neither too near or far
+; XXXX-XX-XX    >    is close to edge of 
 ;         
 ; 2019-08-26   --> survival-chance
 ; 2019-08-26   --> body-size
@@ -147,7 +150,7 @@ to-report sta7us-get-decisions [ my-environment ]
             
             let distance-to-target distance other-guy
             set distance-to-target ifelse-value ( distance-to-target > 1 ) [ distance-to-target ] [ 1 ]
-            set decision-vectors lput (list meself other-guy ( sta7us-get-action gene-action ) precision ( gene-weight / ( distance-to-target ^ 2 )) 5 false ) decision-vectors 
+            set decision-vectors lput (list meself other-guy ( sta7us-get-action gene-action ) precision ( gene-weight / ( distance-to-target ^ 2 )) 10 false ) decision-vectors 
             
           ]
         ]
@@ -156,6 +159,35 @@ to-report sta7us-get-decisions [ my-environment ]
   ]
   
   report decision-vectors
+end
+
+to get-decision [ g ]
+  let my-environment my.environment
+  let ego-status status-of self
+  if ( length g = 5 and is-string? item 1 g and is-string? item 2 g and is-string? item 3 g and is-number? item 4 g ) [ ; checks that allele correctly organized
+    let gene-ego item 1 g
+    let gene-other item 2 g
+    let gene-action item 3 g
+    let gene-weight item 4 g
+    
+    ; Check that first CODON matches self
+    if first-string-is-part-of-last? ( gene-ego ) ( ego-status ) [
+      
+      ; Consider status-of others in the environment
+      foreach my-environment [ other-guy ->
+        let other-status status-of other-guy 
+        
+        ; Check that second CODON matches other
+        if first-string-is-part-of-last? ( gene-other ) ( other-status ) [
+          
+          let distance-to-target distance other-guy
+          set distance-to-target ifelse-value ( distance-to-target > 1 ) [ distance-to-target ] [ 1 ]
+          print (list self other-guy ( sta7us-get-action gene-action ) precision ( gene-weight / ( distance-to-target ^ 2 )) 10 false ) 
+          
+        ]
+      ]
+    ]
+  ]  
 end
 
 ;----------------------------------------------------------------------------------------------
@@ -241,6 +273,7 @@ to-report status-of [ target ]
   let status-report ""
 
   set status-report ( word status-report ifelse-value ( get-solar-status = "DAY" ) [ "*" ][ "-" ] )
+  let distance-to-target distance target
   
   if (is-anima1? target) [ ; ANIMALS
     let target-kind "z"
@@ -253,10 +286,11 @@ to-report status-of [ target ]
     let target-health ifelse-value ( [survival.chance] of target > survival.chance ) [ "h" ] [ "x" ]
     let target-kin ifelse-value ( relatedness-with target > 0.2 ) [ "k" ] [ "q" ]
     let target-group ifelse-value ( [group.identity] of target = group.identity ) [ "n" ] [ "u" ] 
-    let target-carry ifelse-value ( member? target carried.items ) [ "y" ] [ ifelse-value ( member? self [carried.items] of target ) [ "+" ] [ "t" ] ]
+    let target-carry ifelse-value ( member? target carried.items ) [ "y" ] [ ifelse-value ( member? self [carried.items] of target ) [ "¥" ] [ "t" ] ]
     let target-signal (word ifelse-value [yellow.signal] of target [ "α" ][ "å" ] ifelse-value [red.signal] of target [ "β" ][ "ß" ] ifelse-value [blue.signal] of target [ "ɣ" ][ "œ" ] )
     let target-rest ifelse-value ( [is.resting] of target = true ) [ "s" ] [ "." ]
     let target-color (word "" round [color] of target "" ifelse-value ( shade-of? color [color] of target) [ "#" ] [ "" ])
+    let target-proximity (ifelse-value ( distance-to-target < max-proximity target ) [ "<" ] ( distance-to-target > 0.5 * maximum-visual-range * visual.range ) [ ">" ] [ "|" ] )
     set status-report (word status-report 
       target-kind 
       target-self 
@@ -271,7 +305,8 @@ to-report status-of [ target ]
       target-carry 
       target-signal
       target-rest 
-      target-color ) ]
+      target-color 
+      target-proximity ) ]
     
   if ( is-patch? target ) [ ; PATCHES
     let target-kind "d" 
@@ -299,7 +334,7 @@ to-report status-code-list
     "a" "b" "c" "d" "e" "f" "g" 
     "h" "i" "j" "k" "l" "m" "n"
     "o" "p" "q" "r" "s" "t" "u"
-    "v" "w" "x" "y" "z" "+" "α" 
+    "v" "w" "x" "y" "z" "¥" "α" 
     "å" "β" "ß" "ɣ" "œ" "*" "-" 
     "#" "$" "~" "1" "2" "3" "4" 
     "5" "6" "7" "8" "9" "0" "." ]

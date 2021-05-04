@@ -3,7 +3,7 @@
 
 false e e survival-chance 0.05
 false i e go-forward 0.1
-false j + squirm-from 0.01
+false j ¥ squirm-from 0.01
 false j e go-forward 0.1
 false a e turn-right 0.05
 false a e go-forward 0.01

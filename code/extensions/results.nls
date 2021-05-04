@@ -33,7 +33,7 @@ to output-results
   ;----------------------------------------------------------------------------------------------
   
   if ( simulation-summary-on and member? ticks simulation-summary-ticks ) [ simulation-summary ]
-  if ( record-individuals-on ) [ ask anima1s with [ ticks.at.death > 0 and ticks = ( ticks.at.death + 1 ) and generation.number > 0 ] [ agent-summary ] ]
+  if ( record-individuals-on ) [ ask anima1s with [ ticks.at.death > 0 and ticks = ( ticks.at.death + 1 ) and generation.number > 0 ] [ individual-summary ] ]
   
   ;----------------------------------------------------------------------------------------------     
   ; SCAN : collect data on the current state of simulations, groups, or individuals
@@ -79,6 +79,22 @@ to set-simulation-id
   ]
   
 end
+
+;to setup-chimp-world
+;  let id 
+;  ask patches with [ pxcor < 50 and pycor > 50 ] [
+;    set pgroup.identity one-of [group.identity] of anima1s-here
+;  ]
+;    ask patches with [ pxcor > 50 and pycor > 50 ] [
+;    set pgroup.identity one-of [group.identity] of anima1s-here
+;  ]
+;    ask patches with [ pxcor < 50 and pycor < 50 ] [
+;    set pgroup.identity one-of [group.identity] of anima1s-here
+;  ]
+;    ask patches with [ pxcor > 50 and pycor < 50 ] [
+;    set pgroup.identity one-of [group.identity] of anima1s-here
+;  ]
+;end
 
 
 to record-world
@@ -198,11 +214,10 @@ to record-actions ; agent subroutine
       "adulthood.chance" 
       "x.magnitude" 
       "y.magnitude"
-      "my.environment"
-      "decision.vectors"
-      "actions.completed"
-      "distance.traveled" 
-      "cells-occupied-count"
+      "my.environment" ;
+      "decision.vectors" ;
+      "actions.completed" ;
+      "distance.traveled"  
       "foraging.gains"  
       "total.energy.gains"
       "total.energy.cost"
@@ -214,11 +229,11 @@ to record-actions ; agent subroutine
       "aid-count"
       "harm.history"
       "harm-count"
-      "copulations.history"
+      "copulations.history" ;
       "copulations-count"
-      "conceptions.history"
+      "conceptions.history" ;
       "conceptions-count"
-      "group.transfers.history"
+      "group.transfers.history" ;
       "group-transfers-count"
       "infanticide.history"
       "infanticide-count"
@@ -226,6 +241,12 @@ to record-actions ; agent subroutine
       "half.related.help.cost"
       "fourth.related.help.cost"
       "eighth.related.help.cost"
+      "not.related.help.cost"
+      "whole.related.attack.cost"
+      "half.related.attack.cost"
+      "fourth.related.attack.cost"
+      "eighth.related.attack.cost"
+      "not.related.attack.cost"
       
       "action-ego"
       "action-target"
@@ -314,8 +335,7 @@ to record-actions ; agent subroutine
       my.environment
       decision.vectors
       actions.completed
-      distance.traveled 
-      cells-occupied-count
+      distance.traveled
       foraging.gains
       total.energy.gains
       total.energy.cost
@@ -339,6 +359,12 @@ to record-actions ; agent subroutine
       half.related.help.cost
       fourth.related.help.cost
       eighth.related.help.cost
+      not.related.help.cost
+      whole.related.attack.cost
+      half.related.attack.cost
+      fourth.related.attack.cost
+      eighth.related.attack.cost
+      not.related.attack.cost
       
       ifelse-value ( is-anima1? item 1 action ) [ [meta.id] of item 1 action ] [ item 1 action ]
       ifelse-value ( is-anima1? item 2 action ) [ [meta.id] of item 2 action ] [ item 2 action ]
@@ -361,7 +387,7 @@ end
 
 to scan-agent
   
-  let file-path ( word path-to-experiment "agent-scans.csv" )
+  let file-path ( word path-to-experiment "individual-scans.csv" )
   
   if ( not file-exists? file-path and simulation-id != 0 )
   
@@ -441,7 +467,6 @@ to scan-agent
       "decision.vectors"
       "actions.completed"
       "distance.traveled" 
-      "cells-occupied-count"
       "foraging.gains"  
       "total.energy.gains"
       "total.energy.cost"
@@ -465,6 +490,12 @@ to scan-agent
       "half.related.help.cost"
       "fourth.related.help.cost"
       "eighth.related.help.cost"
+      "not.related.help.cost"
+      "whole.related.attack.cost"
+      "half.related.attack.cost"
+      "fourth.related.attack.cost"
+      "eighth.related.attack.cost"
+      "not.related.attack.cost"
       
   )) ]
   
@@ -545,7 +576,6 @@ to scan-agent
     decision.vectors
     actions.completed
     distance.traveled 
-    cells-occupied-count
     foraging.gains
     total.energy.gains
     total.energy.cost
@@ -569,6 +599,12 @@ to scan-agent
     half.related.help.cost
     fourth.related.help.cost
     eighth.related.help.cost
+    not.related.help.cost
+    whole.related.attack.cost
+    half.related.attack.cost
+    fourth.related.attack.cost
+    eighth.related.attack.cost
+    not.related.attack.cost
     
   ))
   
@@ -585,9 +621,9 @@ end
   ;        |___/                                                                 |__/ 
   ;--------------------------------------------------------------------------------------------------------------------  
   
-to agent-summary
+to individual-summary
   
-  let file-path ( word path-to-experiment "agent-summary.csv" )
+  let file-path ( word path-to-experiment "individuals.csv" )
   
   if ( not file-exists? file-path and simulation-id != 0 )
   
@@ -664,7 +700,6 @@ to agent-summary
       "decision.vectors"
       "actions.completed"
       "distance.traveled" 
-      "cells-occupied-count"
       "foraging.gains"  
       "total.energy.gains"
       "total.energy.cost"
@@ -688,6 +723,12 @@ to agent-summary
       "half.related.help.cost"
       "fourth.related.help.cost"
       "eighth.related.help.cost"
+      "not.related.help.cost"
+      "whole.related.attack.cost"
+      "half.related.attack.cost"
+      "fourth.related.attack.cost"
+      "eighth.related.attack.cost"
+      "not.related.attack.cost"
       
       "mother.identity"
       "father.identity"
@@ -795,34 +836,39 @@ to agent-summary
     adulthood.chance
     x.magnitude
     y.magnitude
-    my.environment
-    decision.vectors
-    actions.completed
+    "" ;my.environment
+    "" ;decision.vectors
+    "" ;actions.completed
     distance.traveled 
-    cells-occupied-count
     foraging.gains
     total.energy.gains
     total.energy.cost
-    receiving.history
+    "" ;receiving.history
     receiving-count
-    carried.history
+    "" ;carried.history
     carried-count
-    aid.history
+    "" ;aid.history
     aid-count
-    harm.history
+    "" ;harm.history
     harm-count
-    copulations.history
+    "" ;copulations.history
     copulations-count
-    conceptions.history
+    "" ;conceptions.history
     conceptions-count
-    group.transfers.history
+    "" ;group.transfers.history
     group-transfers-count
-    infanticide.history
+    "" ;infanticide.history
     infanticide-count
     whole.related.help.cost
     half.related.help.cost
     fourth.related.help.cost
     eighth.related.help.cost
+    not.related.help.cost
+    whole.related.attack.cost
+    half.related.attack.cost
+    fourth.related.attack.cost
+    eighth.related.attack.cost
+    not.related.attack.cost
     
     mother.identity
     father.identity
@@ -830,8 +876,8 @@ to agent-summary
     natal.group.size
     identity.I
     identity.II
-    chromosome.I
-    chromosome.II
+    "" ;chromosome.I
+    "" ;chromosome.II
     ticks.at.conception
     ticks.at.birth
     ticks.at.weaning
@@ -909,6 +955,7 @@ to scan-group [ group-id ]
       "plant-abundance"
       "plant-season"
       "plant-patchiness"
+      "territory-size"
       
       "group-identity"
       "current-group-size" 
@@ -924,28 +971,40 @@ to scan-group [ group-id ]
       "gestatee-male-count"
       "gestatee-female-count"
       
-      "total-energy" 
-      "adult-male-energy"
-      "adult-cycling-energy" 
-      "adult-pregnant-energy" 
-      "adult-lactating-energy" 
-      "juvenile-male-energy" 
-      "juvenile-female-energy" 
-      "infant-male-energy" 
-      "infant-female-energy" 
-      "gestatee-male-energy" 
-      "gestatee-female-energy" 
+      "total-death-count"
+      "adult-male-death-count"
+      "adult-cycling-death-count"
+      "adult-pregnant-death-count"
+      "adult-lactating-death-count"
+      "juvenile-male-death-count"
+      "juvenile-female-death-count"
+      "infant-male-death-count"
+      "infant-female-death-count"
+      "gestatee-male-death-count"
+      "gestatee-female-death-count"
       
-      "per-capita-energy" 
+      "total-energy"
+      "adult-male-energy"
+      "adult-cycling-energy"
+      "adult-pregnant-energy"
+      "adult-lactating-energy"
+      "juvenile-male-energy"
+      "juvenile-female-energy"
+      "infant-male-energy"
+      "infant-female-energy"
+      "gestatee-male-energy"
+      "gestatee-female-energy"
+      
+      "per-capita-energy"
       "per-capita-adult-male-energy"
-      "per-capita-adult-cycling-energy" 
-      "per-capita-adult-pregnant-energy" 
-      "per-capita-adult-lactating-energy" 
-      "per-capita-juvenile-male-energy" 
-      "per-capita-juvenile-female-energy" 
-      "per-capita-infant-male-energy" 
-      "per-capita-infant-female-energy" 
-      "per-capita-gestatee-male-energy" 
+      "per-capita-adult-cycling-energy"
+      "per-capita-adult-pregnant-energy"
+      "per-capita-adult-lactating-energy"
+      "per-capita-juvenile-male-energy"
+      "per-capita-juvenile-female-energy"
+      "per-capita-infant-male-energy"
+      "per-capita-infant-female-energy"
+      "per-capita-gestatee-male-energy"
       "per-capita-gestatee-female-energy" 
       
   )) ]
@@ -963,6 +1022,19 @@ to scan-group [ group-id ]
   let infant-female-count count living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "female" ]
   let gestatee-male-count count living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "male" ]
   let gestatee-female-count count living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "female" ]
+  
+  let dying-agents anima1s with [ is.alive = false and ticks.at.death = ticks ]
+  let total-death-count count dying-agents with [ group.identity = group-id ]
+  let adult-male-death-count count dying-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ]
+  let adult-cycling-death-count count dying-agents with [ group.identity = group-id and life.history = "adult" and female.fertility = "cycling" ]
+  let adult-pregnant-death-count count dying-agents with [ group.identity = group-id and life.history = "adult" and female.fertility = "pregnant" ]
+  let adult-lactating-death-count count dying-agents with [ group.identity = group-id and life.history = "adult" and female.fertility = "lactating" ]
+  let juvenile-male-death-count count dying-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "male" ]
+  let juvenile-female-death-count count dying-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "female" ]
+  let infant-male-death-count count dying-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "male" ]
+  let infant-female-death-count count dying-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "female" ]
+  let gestatee-male-death-count count dying-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "male" ]
+  let gestatee-female-death-count count dying-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "female" ]
   
   let total-energy sum [energy.supply] of living-agents with [ group.identity = group-id ]
   let adult-male-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ]
@@ -1007,6 +1079,7 @@ to scan-group [ group-id ]
     sum [penergy.supply] of patches
     the-season
     plant-patchiness
+    count patches with [ pgroup.identity = group-id ]
     
     group-id
     current-group-size
@@ -1021,6 +1094,18 @@ to scan-group [ group-id ]
     infant-female-count
     gestatee-male-count
     gestatee-female-count
+    
+    total-death-count
+    adult-male-death-count
+    adult-cycling-death-count
+    adult-pregnant-death-count
+    adult-lactating-death-count
+    juvenile-male-death-count
+    juvenile-female-death-count
+    infant-male-death-count
+    infant-female-death-count
+    gestatee-male-death-count
+    gestatee-female-death-count
     
     total-energy
     adult-male-energy
@@ -1500,6 +1585,7 @@ to simulation-summary ; observer subroutine
       "female-lifetime-energy-cost-minimum"
       "female-lifetime-energy-cost-mean"
       "female-lifetime-energy-cost-variance"
+      
       "male-lifetime-whole-related-help-cost-maximum"
       "male-lifetime-whole-related-help-cost-minimum"
       "male-lifetime-whole-related-help-cost-mean"
@@ -1532,6 +1618,55 @@ to simulation-summary ; observer subroutine
       "female-lifetime-eighth-related-help-cost-minimum"
       "female-lifetime-eighth-related-help-cost-mean"
       "female-lifetime-eighth-related-help-cost-variance"
+      "male-lifetime-not-related-help-cost-maximum"
+      "male-lifetime-not-related-help-cost-minimum"
+      "male-lifetime-not-related-help-cost-mean"
+      "male-lifetime-not-related-help-cost-variance"
+      "female-lifetime-not-related-help-cost-maximum"
+      "female-lifetime-not-related-help-cost-minimum"
+      "female-lifetime-not-related-help-cost-mean"
+      "female-lifetime-not-related-help-cost-variance"
+      "male-lifetime-whole-related-attack-cost-maximum"
+      "male-lifetime-whole-related-attack-cost-minimum"
+      "male-lifetime-whole-related-attack-cost-mean"
+      "male-lifetime-whole-related-attack-cost-variance"
+      "female-lifetime-whole-related-attack-cost-maximum"
+      "female-lifetime-whole-related-attack-cost-minimum"
+      "female-lifetime-whole-related-attack-cost-mean"
+      "female-lifetime-whole-related-attack-cost-variance"
+      "male-lifetime-half-related-attack-cost-maximum"
+      "male-lifetime-half-related-attack-cost-minimum"
+      "male-lifetime-half-related-attack-cost-mean"
+      "male-lifetime-half-related-attack-cost-variance"
+      "female-lifetime-half-related-attack-cost-maximum"
+      "female-lifetime-half-related-attack-cost-minimum"
+      "female-lifetime-half-related-attack-cost-mean"
+      "female-lifetime-half-related-attack-cost-variance"
+      "male-lifetime-fourth-related-attack-cost-maximum"
+      "male-lifetime-fourth-related-attack-cost-minimum"
+      "male-lifetime-fourth-related-attack-cost-mean"
+      "male-lifetime-fourth-related-attack-cost-variance"
+      "female-lifetime-fourth-related-attack-cost-maximum"
+      "female-lifetime-fourth-related-attack-cost-minimum"
+      "female-lifetime-fourth-related-attack-cost-mean"
+      "female-lifetime-fourth-related-attack-cost-variance"
+      "male-lifetime-eighth-related-attack-cost-maximum"
+      "male-lifetime-eighth-related-attack-cost-minimum"
+      "male-lifetime-eighth-related-attack-cost-mean"
+      "male-lifetime-eighth-related-attack-cost-variance"
+      "female-lifetime-eighth-related-attack-cost-maximum"
+      "female-lifetime-eighth-related-attack-cost-minimum"
+      "female-lifetime-eighth-related-attack-cost-mean"
+      "female-lifetime-eighth-related-attack-cost-variance"
+      "male-lifetime-not-related-attack-cost-maximum"
+      "male-lifetime-not-related-attack-cost-minimum"
+      "male-lifetime-not-related-attack-cost-mean"
+      "male-lifetime-not-related-attack-cost-variance"
+      "female-lifetime-not-related-attack-cost-maximum"
+      "female-lifetime-not-related-attack-cost-minimum"
+      "female-lifetime-not-related-attack-cost-mean"
+      "female-lifetime-not-related-attack-cost-variance"
+      
       "male-total-aid-count-maximum"
       "male-total-aid-count-minimum"
       "male-total-aid-count-mean"
@@ -2002,6 +2137,7 @@ to simulation-summary ; observer subroutine
     female-lifetime-energy-cost-minimum
     female-lifetime-energy-cost-mean
     female-lifetime-energy-cost-variance
+    
     male-lifetime-whole-related-help-cost-maximum
     male-lifetime-whole-related-help-cost-minimum
     male-lifetime-whole-related-help-cost-mean
@@ -2034,6 +2170,55 @@ to simulation-summary ; observer subroutine
     female-lifetime-eighth-related-help-cost-minimum
     female-lifetime-eighth-related-help-cost-mean
     female-lifetime-eighth-related-help-cost-variance
+    male-lifetime-not-related-help-cost-maximum
+    male-lifetime-not-related-help-cost-minimum
+    male-lifetime-not-related-help-cost-mean
+    male-lifetime-not-related-help-cost-variance
+    female-lifetime-not-related-help-cost-maximum
+    female-lifetime-not-related-help-cost-minimum
+    female-lifetime-not-related-help-cost-mean
+    female-lifetime-not-related-help-cost-variance
+    male-lifetime-whole-related-attack-cost-maximum
+    male-lifetime-whole-related-attack-cost-minimum
+    male-lifetime-whole-related-attack-cost-mean
+    male-lifetime-whole-related-attack-cost-variance
+    female-lifetime-whole-related-attack-cost-maximum
+    female-lifetime-whole-related-attack-cost-minimum
+    female-lifetime-whole-related-attack-cost-mean
+    female-lifetime-whole-related-attack-cost-variance
+    male-lifetime-half-related-attack-cost-maximum
+    male-lifetime-half-related-attack-cost-minimum
+    male-lifetime-half-related-attack-cost-mean
+    male-lifetime-half-related-attack-cost-variance
+    female-lifetime-half-related-attack-cost-maximum
+    female-lifetime-half-related-attack-cost-minimum
+    female-lifetime-half-related-attack-cost-mean
+    female-lifetime-half-related-attack-cost-variance
+    male-lifetime-fourth-related-attack-cost-maximum
+    male-lifetime-fourth-related-attack-cost-minimum
+    male-lifetime-fourth-related-attack-cost-mean
+    male-lifetime-fourth-related-attack-cost-variance
+    female-lifetime-fourth-related-attack-cost-maximum
+    female-lifetime-fourth-related-attack-cost-minimum
+    female-lifetime-fourth-related-attack-cost-mean
+    female-lifetime-fourth-related-attack-cost-variance
+    male-lifetime-eighth-related-attack-cost-maximum
+    male-lifetime-eighth-related-attack-cost-minimum
+    male-lifetime-eighth-related-attack-cost-mean
+    male-lifetime-eighth-related-attack-cost-variance
+    female-lifetime-eighth-related-attack-cost-maximum
+    female-lifetime-eighth-related-attack-cost-minimum
+    female-lifetime-eighth-related-attack-cost-mean
+    female-lifetime-eighth-related-attack-cost-variance
+    male-lifetime-not-related-attack-cost-maximum
+    male-lifetime-not-related-attack-cost-minimum
+    male-lifetime-not-related-attack-cost-mean
+    male-lifetime-not-related-attack-cost-variance
+    female-lifetime-not-related-attack-cost-maximum
+    female-lifetime-not-related-attack-cost-minimum
+    female-lifetime-not-related-attack-cost-mean
+    female-lifetime-not-related-attack-cost-variance
+    
     male-total-aid-count-maximum
     male-total-aid-count-minimum
     male-total-aid-count-mean
@@ -2094,7 +2279,6 @@ end
 ;--------------------------------------------------------------------------------------------------------------------
 
 to-report focal-subject report self = subject end
-to-report cells-occupied-count report length cells.occupied end
 to-report receiving-count report length receiving.history end
 to-report carried-count report length carried.history end
 to-report aid-count report length aid.history end
@@ -2507,6 +2691,78 @@ to-report female-lifetime-eighth-related-help-cost-maximum report ifelse-value (
 to-report female-lifetime-eighth-related-help-cost-minimum report ifelse-value ( length female-lifetime-eighth-related-help-cost-list < 1 ) [ "NA" ] [ min female-lifetime-eighth-related-help-cost-list ] end
 to-report female-lifetime-eighth-related-help-cost-mean report ifelse-value ( length female-lifetime-eighth-related-help-cost-list < 1 ) [ "NA" ] [ mean female-lifetime-eighth-related-help-cost-list ] end
 to-report female-lifetime-eighth-related-help-cost-variance report ifelse-value ( length female-lifetime-eighth-related-help-cost-list < 2 ) [ "NA" ] [ variance female-lifetime-eighth-related-help-cost-list ] end
+  
+to-report male-lifetime-not-related-help-cost-list report [ not.related.help.cost ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
+to-report male-lifetime-not-related-help-cost-maximum report ifelse-value ( length male-lifetime-not-related-help-cost-list < 1 ) [ "NA" ] [ max male-lifetime-not-related-help-cost-list ] end
+to-report male-lifetime-not-related-help-cost-minimum report ifelse-value ( length male-lifetime-not-related-help-cost-list < 1 ) [ "NA" ] [ min male-lifetime-not-related-help-cost-list ] end
+to-report male-lifetime-not-related-help-cost-mean report ifelse-value ( length male-lifetime-not-related-help-cost-list < 1 ) [ "NA" ] [ mean male-lifetime-not-related-help-cost-list ] end
+to-report male-lifetime-not-related-help-cost-variance report ifelse-value ( length male-lifetime-not-related-help-cost-list < 2 ) [ "NA" ] [ variance male-lifetime-not-related-help-cost-list ] end
+  
+to-report female-lifetime-not-related-help-cost-list report [ not.related.help.cost ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
+to-report female-lifetime-not-related-help-cost-maximum report ifelse-value ( length female-lifetime-not-related-help-cost-list < 1 ) [ "NA" ] [ max female-lifetime-not-related-help-cost-list ] end
+to-report female-lifetime-not-related-help-cost-minimum report ifelse-value ( length female-lifetime-not-related-help-cost-list < 1 ) [ "NA" ] [ min female-lifetime-not-related-help-cost-list ] end
+to-report female-lifetime-not-related-help-cost-mean report ifelse-value ( length female-lifetime-not-related-help-cost-list < 1 ) [ "NA" ] [ mean female-lifetime-not-related-help-cost-list ] end
+to-report female-lifetime-not-related-help-cost-variance report ifelse-value ( length female-lifetime-not-related-help-cost-list < 2 ) [ "NA" ] [ variance female-lifetime-not-related-help-cost-list ] end
+  
+to-report male-lifetime-whole-related-attack-cost-list report [ whole.related.attack.cost ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
+to-report male-lifetime-whole-related-attack-cost-maximum report ifelse-value ( length male-lifetime-whole-related-attack-cost-list < 1 ) [ "NA" ] [ max male-lifetime-whole-related-attack-cost-list ] end
+to-report male-lifetime-whole-related-attack-cost-minimum report ifelse-value ( length male-lifetime-whole-related-attack-cost-list < 1 ) [ "NA" ] [ min male-lifetime-whole-related-attack-cost-list ] end
+to-report male-lifetime-whole-related-attack-cost-mean report ifelse-value ( length male-lifetime-whole-related-attack-cost-list < 1 ) [ "NA" ] [ mean male-lifetime-whole-related-attack-cost-list ] end
+to-report male-lifetime-whole-related-attack-cost-variance report ifelse-value ( length male-lifetime-whole-related-attack-cost-list < 2 ) [ "NA" ] [ variance male-lifetime-whole-related-attack-cost-list ] end
+  
+to-report female-lifetime-whole-related-attack-cost-list report [ whole.related.attack.cost ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
+to-report female-lifetime-whole-related-attack-cost-maximum report ifelse-value ( length female-lifetime-whole-related-attack-cost-list < 1 ) [ "NA" ] [ max female-lifetime-whole-related-attack-cost-list ] end
+to-report female-lifetime-whole-related-attack-cost-minimum report ifelse-value ( length female-lifetime-whole-related-attack-cost-list < 1 ) [ "NA" ] [ min female-lifetime-whole-related-attack-cost-list ] end
+to-report female-lifetime-whole-related-attack-cost-mean report ifelse-value ( length female-lifetime-whole-related-attack-cost-list < 1 ) [ "NA" ] [ mean female-lifetime-whole-related-attack-cost-list ] end
+to-report female-lifetime-whole-related-attack-cost-variance report ifelse-value ( length female-lifetime-whole-related-attack-cost-list < 2 ) [ "NA" ] [ variance female-lifetime-whole-related-attack-cost-list ] end
+  
+to-report male-lifetime-half-related-attack-cost-list report [ half.related.attack.cost ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
+to-report male-lifetime-half-related-attack-cost-maximum report ifelse-value ( length male-lifetime-half-related-attack-cost-list < 1 ) [ "NA" ] [ max male-lifetime-half-related-attack-cost-list ] end
+to-report male-lifetime-half-related-attack-cost-minimum report ifelse-value ( length male-lifetime-half-related-attack-cost-list < 1 ) [ "NA" ] [ min male-lifetime-half-related-attack-cost-list ] end
+to-report male-lifetime-half-related-attack-cost-mean report ifelse-value ( length male-lifetime-half-related-attack-cost-list < 1 ) [ "NA" ] [ mean male-lifetime-half-related-attack-cost-list ] end
+to-report male-lifetime-half-related-attack-cost-variance report ifelse-value ( length male-lifetime-half-related-attack-cost-list < 2 ) [ "NA" ] [ variance male-lifetime-half-related-attack-cost-list ] end
+  
+to-report female-lifetime-half-related-attack-cost-list report [ half.related.attack.cost ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
+to-report female-lifetime-half-related-attack-cost-maximum report ifelse-value ( length female-lifetime-half-related-attack-cost-list < 1 ) [ "NA" ] [ max female-lifetime-half-related-attack-cost-list ] end
+to-report female-lifetime-half-related-attack-cost-minimum report ifelse-value ( length female-lifetime-half-related-attack-cost-list < 1 ) [ "NA" ] [ min female-lifetime-half-related-attack-cost-list ] end
+to-report female-lifetime-half-related-attack-cost-mean report ifelse-value ( length female-lifetime-half-related-attack-cost-list < 1 ) [ "NA" ] [ mean female-lifetime-half-related-attack-cost-list ] end
+to-report female-lifetime-half-related-attack-cost-variance report ifelse-value ( length female-lifetime-half-related-attack-cost-list < 2 ) [ "NA" ] [ variance female-lifetime-half-related-attack-cost-list ] end
+  
+to-report male-lifetime-fourth-related-attack-cost-list report [ fourth.related.attack.cost ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
+to-report male-lifetime-fourth-related-attack-cost-maximum report ifelse-value ( length male-lifetime-fourth-related-attack-cost-list < 1 ) [ "NA" ] [ max male-lifetime-fourth-related-attack-cost-list ] end
+to-report male-lifetime-fourth-related-attack-cost-minimum report ifelse-value ( length male-lifetime-fourth-related-attack-cost-list < 1 ) [ "NA" ] [ min male-lifetime-fourth-related-attack-cost-list ] end
+to-report male-lifetime-fourth-related-attack-cost-mean report ifelse-value ( length male-lifetime-fourth-related-attack-cost-list < 1 ) [ "NA" ] [ mean male-lifetime-fourth-related-attack-cost-list ] end
+to-report male-lifetime-fourth-related-attack-cost-variance report ifelse-value ( length male-lifetime-fourth-related-attack-cost-list < 2 ) [ "NA" ] [ variance male-lifetime-fourth-related-attack-cost-list ] end
+  
+to-report female-lifetime-fourth-related-attack-cost-list report [ fourth.related.attack.cost ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
+to-report female-lifetime-fourth-related-attack-cost-maximum report ifelse-value ( length female-lifetime-fourth-related-attack-cost-list < 1 ) [ "NA" ] [ max female-lifetime-fourth-related-attack-cost-list ] end
+to-report female-lifetime-fourth-related-attack-cost-minimum report ifelse-value ( length female-lifetime-fourth-related-attack-cost-list < 1 ) [ "NA" ] [ min female-lifetime-fourth-related-attack-cost-list ] end
+to-report female-lifetime-fourth-related-attack-cost-mean report ifelse-value ( length female-lifetime-fourth-related-attack-cost-list < 1 ) [ "NA" ] [ mean female-lifetime-fourth-related-attack-cost-list ] end
+to-report female-lifetime-fourth-related-attack-cost-variance report ifelse-value ( length female-lifetime-fourth-related-attack-cost-list < 2 ) [ "NA" ] [ variance female-lifetime-fourth-related-attack-cost-list ] end
+  
+to-report male-lifetime-eighth-related-attack-cost-list report [ eighth.related.attack.cost ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
+to-report male-lifetime-eighth-related-attack-cost-maximum report ifelse-value ( length male-lifetime-eighth-related-attack-cost-list < 1 ) [ "NA" ] [ max male-lifetime-eighth-related-attack-cost-list ] end
+to-report male-lifetime-eighth-related-attack-cost-minimum report ifelse-value ( length male-lifetime-eighth-related-attack-cost-list < 1 ) [ "NA" ] [ min male-lifetime-eighth-related-attack-cost-list ] end
+to-report male-lifetime-eighth-related-attack-cost-mean report ifelse-value ( length male-lifetime-eighth-related-attack-cost-list < 1 ) [ "NA" ] [ mean male-lifetime-eighth-related-attack-cost-list ] end
+to-report male-lifetime-eighth-related-attack-cost-variance report ifelse-value ( length male-lifetime-eighth-related-attack-cost-list < 2 ) [ "NA" ] [ variance male-lifetime-eighth-related-attack-cost-list ] end
+  
+to-report female-lifetime-eighth-related-attack-cost-list report [ eighth.related.attack.cost ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
+to-report female-lifetime-eighth-related-attack-cost-maximum report ifelse-value ( length female-lifetime-eighth-related-attack-cost-list < 1 ) [ "NA" ] [ max female-lifetime-eighth-related-attack-cost-list ] end
+to-report female-lifetime-eighth-related-attack-cost-minimum report ifelse-value ( length female-lifetime-eighth-related-attack-cost-list < 1 ) [ "NA" ] [ min female-lifetime-eighth-related-attack-cost-list ] end
+to-report female-lifetime-eighth-related-attack-cost-mean report ifelse-value ( length female-lifetime-eighth-related-attack-cost-list < 1 ) [ "NA" ] [ mean female-lifetime-eighth-related-attack-cost-list ] end
+to-report female-lifetime-eighth-related-attack-cost-variance report ifelse-value ( length female-lifetime-eighth-related-attack-cost-list < 2 ) [ "NA" ] [ variance female-lifetime-eighth-related-attack-cost-list ] end
+  
+to-report male-lifetime-not-related-attack-cost-list report [ not.related.attack.cost ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
+to-report male-lifetime-not-related-attack-cost-maximum report ifelse-value ( length male-lifetime-not-related-attack-cost-list < 1 ) [ "NA" ] [ max male-lifetime-not-related-attack-cost-list ] end
+to-report male-lifetime-not-related-attack-cost-minimum report ifelse-value ( length male-lifetime-not-related-attack-cost-list < 1 ) [ "NA" ] [ min male-lifetime-not-related-attack-cost-list ] end
+to-report male-lifetime-not-related-attack-cost-mean report ifelse-value ( length male-lifetime-not-related-attack-cost-list < 1 ) [ "NA" ] [ mean male-lifetime-not-related-attack-cost-list ] end
+to-report male-lifetime-not-related-attack-cost-variance report ifelse-value ( length male-lifetime-not-related-attack-cost-list < 2 ) [ "NA" ] [ variance male-lifetime-not-related-attack-cost-list ] end
+  
+to-report female-lifetime-not-related-attack-cost-list report [ not.related.attack.cost ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
+to-report female-lifetime-not-related-attack-cost-maximum report ifelse-value ( length female-lifetime-not-related-attack-cost-list < 1 ) [ "NA" ] [ max female-lifetime-not-related-attack-cost-list ] end
+to-report female-lifetime-not-related-attack-cost-minimum report ifelse-value ( length female-lifetime-not-related-attack-cost-list < 1 ) [ "NA" ] [ min female-lifetime-not-related-attack-cost-list ] end
+to-report female-lifetime-not-related-attack-cost-mean report ifelse-value ( length female-lifetime-not-related-attack-cost-list < 1 ) [ "NA" ] [ mean female-lifetime-not-related-attack-cost-list ] end
+to-report female-lifetime-not-related-attack-cost-variance report ifelse-value ( length female-lifetime-not-related-attack-cost-list < 2 ) [ "NA" ] [ variance female-lifetime-not-related-attack-cost-list ] end
   
 to-report male-total-aid-count-list report [ length aid.history ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
 to-report male-total-aid-count-maximum report ifelse-value ( length male-total-aid-count-list < 1 ) [ "NA" ] [ max male-total-aid-count-list ] end

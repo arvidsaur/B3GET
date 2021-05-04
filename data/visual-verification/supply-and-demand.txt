@@ -15,14 +15,14 @@ false a75 y supply-to 0.2
 false a85 y supply-to 0.3
 false a95 y supply-to 0.4
 
-false i17 + demand-from 0.6
-false i27 + demand-from 0.5
-false i37 + demand-from 0.4
-false i47 + demand-from 0.3
-false i57 + demand-from 0.2
-false i67 + demand-from 0.1
-false i87 + demand-from -0.1
-false i97 + demand-from -0.2
+false i17 ¥ demand-from 0.6
+false i27 ¥ demand-from 0.5
+false i37 ¥ demand-from 0.4
+false i47 ¥ demand-from 0.3
+false i57 ¥ demand-from 0.2
+false i67 ¥ demand-from 0.1
+false i87 ¥ demand-from -0.1
+false i97 ¥ demand-from -0.2
 
 ::::::::::: GAT3S CODE :::::::::::
 
