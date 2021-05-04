@@ -1,8 +1,8 @@
 .DS_Store
 codemeta.json
-/code/.B3GET.dif*
 /code/.B3GET.tmp.nlogo
 /code/B3GET.nlogo+*
+/code/B3GET.nlogo.*
 /code/autosave*
 /code/config.cpt
 /code/program.cpt
