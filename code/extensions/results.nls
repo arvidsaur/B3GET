@@ -7,7 +7,7 @@
 ;  88       88.  ...       88 88.  .88 88   88         88 
 ;  dP       `88888P' `88888P' `88888P' dP   dP   `88888P' 
 ; 
-; © 2020 K N Crouse  
+; © 2021 K N Crouse  
 ;----------------------------------------------------------------------------------------------                                                      
 ; 
 ; READ ME: This B3GET extension contains all functions related to output results. Data collection 
@@ -20,47 +20,24 @@
 ;  
 ;----------------------------------------------------------------------------------------------
   
-to output-results
-
-  ;----------------------------------------------------------------------------------------------     
-  ; VERIFICATION : collect data on outcomes of periodic code verification checks
-  ;----------------------------------------------------------------------------------------------
   
-  if ( verification-on = true and random-float verification-rate < verification-rate ) [ record-verification  ]
-  
-  ;----------------------------------------------------------------------------------------------     
-  ; SUMMARY : collect summary data of simulations, groups, or individuals
-  ;----------------------------------------------------------------------------------------------
-  
-  if ( simulation-summary-on and member? ticks simulation-summary-ticks ) [ simulation-summary ]
-  if ( record-individuals-on ) [ ask anima1s with [ ticks.at.death > 0 and ticks = ( ticks.at.death + 1 ) and generation.number > 0 ] [ individual-summary ] ]
-  
-  ;----------------------------------------------------------------------------------------------     
-  ; SCAN : collect data on the current state of simulations, groups, or individuals
-  ;----------------------------------------------------------------------------------------------
-  
-  if ( ticks > 0 and ceiling (ticks / scan-interval) = (ticks / scan-interval) ) 
-  [ 
-    if ( simulation-scans-on ) [ scan-simulation ]
-    if ( group-scans-on and any? anima1s with [ is.alive and generation.number > 0 ] ) [ foreach remove-duplicates [ group.identity ] of anima1s with [ is.alive and generation.number > 0 ] [ g -> scan-group g ]]
-    if ( individual-scans-on and any? anima1s with [ is.alive and generation.number > 0 ] ) [ ask anima1s with [ is.alive and generation.number > 0 ] [ scan-agent ]]
-  ]
-  
-  ;----------------------------------------------------------------------------------------------     
-  ; FOCAL FOLLOW
-  ;----------------------------------------------------------------------------------------------
-  
-  ; There is a small chance to starting "following" an agent if they were born this timestep 
-  if ( focal-follows-on = true and subject = nobody ) [ if ( random-float 1.0 < focal-follow-rate and any? anima1s with [ age.in.ticks = 0 and generation.number > 0 ] ) [ follow one-of anima1s with [ age.in.ticks = 0 and generation.number > 0 ] ]]
-
-  if ( focal-follows-on = true and subject != nobody and [fully.decayed] of subject = true ) [ reset-perspective ] ; when focal subject dies and fully decays, stop following them
-  
-  ; If currently "following" an agent, take records of this subject
-  if ( focal-follows-on = true and subject != nobody ) [ 
-    ask subject [ record-actions ]
-  ]
-  
-end
+;  ["verification-on" false] √
+;["verification-rate" 1.0E-4] √
+;["simulation-summary-on" true] √
+;["simulation-summary-ticks" 5000]  √  ; just do 5000 and then set up final simulation-summary in end of simulation in behaviorspace
+;["simulation-scans-on" true] √
+;["simulation-scan-ticks" 250] √
+;["group-scans-on" true] √
+;["group-scan-ticks" 10000] √
+;["individual-scans-on" true] √
+;["individual-scan-ticks" 5000] √
+;["view-scans-on" true] √
+;["view-scan-ticks" 50000]  √
+;["genotype-scans-on" true]
+  ;["genotype-scan-ticks" 500000]
+;["focal-follows-on" true] √
+;["focal-follow-rate" 1.0E-4] √
+;["record-individuals-on" true] √√
 
 to set-simulation-id
   
@@ -80,22 +57,72 @@ to set-simulation-id
   
 end
 
-;to setup-chimp-world
-;  let id 
-;  ask patches with [ pxcor < 50 and pycor > 50 ] [
-;    set pgroup.identity one-of [group.identity] of anima1s-here
-;  ]
-;    ask patches with [ pxcor > 50 and pycor > 50 ] [
-;    set pgroup.identity one-of [group.identity] of anima1s-here
-;  ]
-;    ask patches with [ pxcor < 50 and pycor < 50 ] [
-;    set pgroup.identity one-of [group.identity] of anima1s-here
-;  ]
-;    ask patches with [ pxcor > 50 and pycor < 50 ] [
-;    set pgroup.identity one-of [group.identity] of anima1s-here
-;  ]
-;end
+to output-results
 
+  ;----------------------------------------------------------------------------------------------     
+  ; VERIFICATION : collect data on outcomes of periodic code verification checks
+  ;----------------------------------------------------------------------------------------------
+  
+  if ( verification-on and random-float verification-rate < verification-rate ) [ record-verification ]
+  
+  ;----------------------------------------------------------------------------------------------     
+  ; SUMMARY : collect summary data of simulations or individuals
+  ;----------------------------------------------------------------------------------------------
+  
+  if ( simulation-summary-on and ticks = simulation-summary-ticks ) [ simulation-summary ]
+  if ( record-individuals-on ) [ ask anima1s with [ ticks.at.death > 0 and ticks = ( ticks.at.death + 1 ) and generation.number > 0 ] [ individual-summary ] ]
+  
+  ;----------------------------------------------------------------------------------------------     
+  ; SCAN : collect data on the current state of simulations, groups, or individuals
+  ;----------------------------------------------------------------------------------------------
+  
+  if ( simulation-scans-on and ticks > 0 and ceiling ( ticks / simulation-scan-ticks ) = (ticks / simulation-scan-ticks ) ) [ 
+    if ( simulation-scans-on ) [ scan-simulation ]
+  ]
+  
+  if ( group-scans-on and ticks > 0 and ceiling ( ticks / group-scan-ticks ) = ( ticks / group-scan-ticks ) ) [ 
+    if ( group-scans-on and any? anima1s with [ is.alive and generation.number > 0 ] ) [ foreach remove-duplicates [ group.identity ] of anima1s with [ is.alive and generation.number > 0 ] [ g -> scan-group g ]]
+  ]
+  
+  if ( individual-scans-on and ticks > 0 and ceiling (ticks / individual-scan-ticks ) = (ticks / individual-scan-ticks ) ) [ 
+    if ( individual-scans-on and any? anima1s with [ is.alive and generation.number > 0 ] ) [ ask anima1s with [ is.alive and generation.number > 0 ] [ scan-agent ]]
+  ]
+  
+  if ( view-scans-on and ceiling ( ticks / view-scan-ticks ) = ( ticks / view-scan-ticks ) ) [
+    export-view ( word simulation-id "-view-" ticks )
+    output-territories
+    export-view ( word simulation-id "-view-territories" ticks )
+  ]
+  
+  if ( genotype-scans-on and ceiling ( ticks / genotype-scan-ticks ) = ( ticks / genotype-scan-ticks ) and any? anima1s with [ is.alive and generation.number > 0 ] ) [
+    ask one-of anima1s with [ is.alive and generation.number > 0 ] [ scan-genotype ]
+  ]
+  
+  ;----------------------------------------------------------------------------------------------     
+  ; FOCAL FOLLOW
+  ;----------------------------------------------------------------------------------------------
+  
+  ; There is a small chance to starting "following" an agent if they were born this timestep 
+  if ( focal-follows-on = true and subject = nobody ) [ if ( random-float 1.0 < focal-follow-rate and any? anima1s with [ age.in.ticks = 0 and generation.number > 0 ] ) [ follow one-of anima1s with [ age.in.ticks = 0 and generation.number > 0 ] ]]
+
+  if ( focal-follows-on = true and subject != nobody and [fully.decayed] of subject = true ) [ reset-perspective ] ; when focal subject dies and fully decays, stop following them
+  
+  ; If currently "following" an agent, take records of this subject
+  if ( focal-follows-on = true and subject != nobody ) [ 
+    ask subject [ record-actions ]
+  ]
+  
+end
+
+
+; --------------------------------------------------------------------------------------------------------- ;
+;                            _       _ 
+; __      __   ___    _ __  | |   __| |
+; \ \ /\ / /  / _ \  | '__| | |  / _` |
+;  \ V  V /  | (_) | | |    | | | (_| |
+;   \_/\_/    \___/  |_|    |_|  \__,_|
+;                                                                                                   
+; --------------------------------------------------------------------------------------------------------- ;
 
 to record-world
   let file-path ( word path-to-experiment "w" but-first simulation-id "-" ticks ".csv" )
@@ -103,13 +130,14 @@ to record-world
   update-metafile "world" ( word "w" but-first simulation-id "-" ticks ) ( word "WORLD SAVED" )
 end
   
-;--------------------------------------------------------------------------------------------------------------------  
-;                    _    __   _               _     _              
-; __ __  ___   _ _  (_)  / _| (_)  __   __ _  | |_  (_)  ___   _ _  
-; \ V / / -_) | '_| | | |  _| | | / _| / _` | |  _| | | / _ \ | ' \ 
-;  \_/  \___| |_|   |_| |_|   |_| \__| \__,_|  \__| |_| \___/ |_||_|
-;                                                                   
-;--------------------------------------------------------------------------------------------------------------------  
+; --------------------------------------------------------------------------------------------------------- ; 
+;                        _    __   _                  _     _                 
+; __   __   ___   _ __  (_)  / _| (_)   ___    __ _  | |_  (_)   ___    _ __  
+; \ \ / /  / _ \ | '__| | | | |_  | |  / __|  / _` | | __| | |  / _ \  | '_ \ 
+;  \ V /  |  __/ | |    | | |  _| | | | (__  | (_| | | |_  | | | (_) | | | | |
+;   \_/    \___| |_|    |_| |_|   |_|  \___|  \__,_|  \__| |_|  \___/  |_| |_|
+;                                                                             
+; --------------------------------------------------------------------------------------------------------- ;
 
 to record-verification
 
@@ -128,17 +156,112 @@ to record-verification
   
 end
 
-;--------------------------------------------------------------------------------------------------------------------  
-;              _     _                   
-;  __ _   __  | |_  (_)  ___   _ _    ___
-; / _` | / _| |  _| | | / _ \ | ' \  (_-<
-; \__,_| \__|  \__| |_| \___/ |_||_| /__/
-;
-;--------------------------------------------------------------------------------------------------------------------  
+
+; --------------------------------------------------------------------------------------------------------- ;                                                                 
+;                                 _                                                         
+;   __ _    ___   _ __     ___   | |_   _   _   _ __     ___     ___    ___    __ _   _ __  
+;  / _` |  / _ \ | '_ \   / _ \  | __| | | | | | '_ \   / _ \   / __|  / __|  / _` | | '_ \ 
+; | (_| | |  __/ | | | | | (_) | | |_  | |_| | | |_) | |  __/   \__ \ | (__  | (_| | | | | |
+;  \__, |  \___| |_| |_|  \___/   \__|  \__, | | .__/   \___|   |___/  \___|  \__,_| |_| |_|
+;  |___/                                |___/  |_|                                                       
+; --------------------------------------------------------------------------------------------------------- ; 
+
+to scan-genotype ; agent subroutine
+  
+  let file-path ( word path-to-experiment "genotypes.csv" )
+  
+  if ( not file-exists? file-path and simulation-id != 0 )
+  
+  [ file-open file-path
+    file-print csv:to-string (list 
+      
+      (sentence
+        "date-and-time"
+        "path-to-experiment"
+        "model-version"
+        "model-structure"
+        "genotype-reader"
+        "simulation-id"
+        "behaviorspace-experiment-name"
+        "population" 
+        "genotype"
+        "plant-annual-cycle" 
+        "plant-daily-cycle" 
+        "plant-seasonality" 
+        "plant-quality"
+        "plant-minimum-neighbors" 
+        "plant-maximum-neighbors" 
+        "world-width" 
+        "world-height"
+        "output-results?" 
+        "selection-on?"
+        "deterioration-rate"
+        "maximum-visual-range"
+        "base-litter-size"
+        "timesteps"
+        "my.identity"
+        "generation.number"
+        map but-last chromosome.I ))]
+  
+  file-open file-path
+  
+  let numbers-I map last chromosome.I
+  let numbers-II map last chromosome.II
+  let combined-list []
+  
+  let i 0
+  while [ i < length numbers-I ] [
+    let item-I item i numbers-I
+    let item-II item i numbers-II
+    set combined-list lput ( item-I + item-II ) combined-list
+    set i i + 1 ]
+  
+  file-print csv:to-string ( list 
+    
+    (sentence
+      date-and-time
+      path-to-experiment
+      model-version
+      model-structure
+      genotype-reader
+      simulation-id
+      behaviorspace-experiment-name
+      population
+      genotype
+      plant-annual-cycle
+      plant-daily-cycle
+      plant-seasonality
+      plant-quality
+      plant-minimum-neighbors
+      plant-maximum-neighbors
+      world-width
+      world-height
+      output-results?
+      selection-on?
+      deterioration-rate
+      maximum-visual-range
+      base-litter-size
+      ticks
+      my.identity
+      generation.number
+      combined-list ))
+  
+  file-close 
+  
+end
+
+; --------------------------------------------------------------------------------------------------------- ; 
+;                 _     _                       
+;   __ _    ___  | |_  (_)   ___    _ __    ___ 
+;  / _` |  / __| | __| | |  / _ \  | '_ \  / __|
+; | (_| | | (__  | |_  | | | (_) | | | | | \__ \
+;  \__,_|  \___|  \__| |_|  \___/  |_| |_| |___/
+;                                               
+; --------------------------------------------------------------------------------------------------------- ;
 
 to record-actions ; agent subroutine
   
-  let file-path ( word path-to-experiment meta.id "-actions.csv" )
+  let file-path ( word path-to-experiment my.identity "-actions.csv" )
   
   if ( not file-exists? file-path and simulation-id != 0 )
   
@@ -163,25 +286,29 @@ to record-actions ; agent subroutine
       "world-width" 
       "world-height"
       "output-results?" 
-      "selection-on?" 
+      "selection-on?"
       "deterioration-rate"
       "maximum-visual-range"
       "base-litter-size"
       
       "timesteps"
-      "get-solar-status"
+      "solar-status"
+      "current-season"
+      "plant-patchiness"
+      "population-density"
+      "current-plant-abundance"
       
       ; subject
       "color" 
       "heading" 
       "xcor" 
       "ycor" 
-      "meta.id" 
+      "my.identity" 
       "age.in.ticks" 
       "generation.number"
       "biological.sex" 
       "life.history" 
-      "female.fertility" 
+      "fertility.status" 
       "group.identity" 
       "is.alive" 
       "carried.items"
@@ -214,28 +341,17 @@ to record-actions ; agent subroutine
       "adulthood.chance" 
       "x.magnitude" 
       "y.magnitude"
-      "my.environment" ;
-      "decision.vectors" ;
-      "actions.completed" ;
       "distance.traveled"  
       "foraging.gains"  
       "total.energy.gains"
       "total.energy.cost"
-      "receiving.history"
       "receiving-count"
-      "carried.history"
       "carried-count"
-      "aid.history"
       "aid-count"
-      "harm.history"
       "harm-count"
-      "copulations.history" ;
       "copulations-count"
-      "conceptions.history" ;
       "conceptions-count"
-      "group.transfers.history" ;
       "group-transfers-count"
-      "infanticide.history"
       "infanticide-count"
       "whole.related.help.cost"
       "half.related.help.cost"
@@ -287,19 +403,23 @@ to record-actions ; agent subroutine
       base-litter-size
       
       ticks
-      get-solar-status
+      solar-status
+      current-season
+      plant-patchiness
+      population-density
+      current-plant-abundance
       
       ; subject
       color
       heading 
       xcor
       ycor
-      meta.id
+      my.identity
       age.in.ticks 
       generation.number
       biological.sex
       life.history
-      female.fertility 
+      fertility.status 
       group.identity
       is.alive
       carried.items
@@ -332,28 +452,17 @@ to record-actions ; agent subroutine
       adulthood.chance
       x.magnitude
       y.magnitude
-      my.environment
-      decision.vectors
-      actions.completed
       distance.traveled
       foraging.gains
       total.energy.gains
       total.energy.cost
-      receiving.history
       receiving-count
-      carried.history
       carried-count
-      aid.history
       aid-count
-      harm.history
       harm-count
-      copulations.history
       copulations-count
-      conceptions.history
       conceptions-count
-      group.transfers.history
       group-transfers-count
-      infanticide.history
       infanticide-count
       whole.related.help.cost
       half.related.help.cost
@@ -366,8 +475,8 @@ to record-actions ; agent subroutine
       eighth.related.attack.cost
       not.related.attack.cost
       
-      ifelse-value ( is-anima1? item 1 action ) [ [meta.id] of item 1 action ] [ item 1 action ]
-      ifelse-value ( is-anima1? item 2 action ) [ [meta.id] of item 2 action ] [ item 2 action ]
+      ifelse-value ( is-anima1? item 1 action ) [ [my.identity] of item 1 action ] [ item 1 action ]
+      ifelse-value ( is-anima1? item 2 action ) [ [my.identity] of item 2 action ] [ item 2 action ]
       item 3 action
       item 4 action
       
@@ -377,13 +486,14 @@ to record-actions ; agent subroutine
   
 end
 
-;--------------------------------------------------------------------------------------------------------------------  
-;                             _                             
-;  __ _   __ _   ___   _ _   | |_     ___  __   __ _   _ _  
-; / _` | / _` | / -_) | ' \  |  _|   (_-< / _| / _` | | ' \ 
-; \__,_| \__, | \___| |_||_|  \__|   /__/ \__| \__,_| |_||_|
-;        |___/                                              
-;--------------------------------------------------------------------------------------------------------------------  
+; --------------------------------------------------------------------------------------------------------- ;
+;  _               _   _           _       _                   _                                
+; (_)  _ __     __| | (_) __   __ (_)   __| |  _   _    __ _  | |    ___    ___    __ _   _ __  
+; | | | '_ \   / _` | | | \ \ / / | |  / _` | | | | |  / _` | | |   / __|  / __|  / _` | | '_ \ 
+; | | | | | | | (_| | | |  \ V /  | | | (_| | | |_| | | (_| | | |   \__ \ | (__  | (_| | | | | |
+; |_| |_| |_|  \__,_| |_|   \_/   |_|  \__,_|  \__,_|  \__,_| |_|   |___/  \___|  \__,_| |_| |_|
+;                                                                                                                                        
+; --------------------------------------------------------------------------------------------------------- ;
 
 to scan-agent
   
@@ -418,19 +528,23 @@ to scan-agent
       "base-litter-size"
       
       "timesteps"
-      "get-solar-status"
+      "solar-status"
+      "current-season"
+      "plant-patchiness"
+      "population-density"
+      "current-plant-abundance"
       
       "focal-subject"
       "color" 
       "heading" 
       "xcor" 
       "ycor" 
-      "meta.id" 
+      "my.identity" 
       "age.in.ticks" 
       "generation.number"
       "biological.sex" 
       "life.history" 
-      "female.fertility" 
+      "fertility.status" 
       "group.identity" 
       "is.alive" 
       "carried.items"
@@ -463,28 +577,17 @@ to scan-agent
       "adulthood.chance" 
       "x.magnitude" 
       "y.magnitude"
-      "my.environment"
-      "decision.vectors"
-      "actions.completed"
       "distance.traveled" 
       "foraging.gains"  
       "total.energy.gains"
       "total.energy.cost"
-      "receiving.history"
       "receiving-count"
-      "carried.history"
       "carried-count"
-      "aid.history"
       "aid-count"
-      "harm.history"
       "harm-count"
-      "copulations.history"
       "copulations-count"
-      "conceptions.history"
       "conceptions-count"
-      "group.transfers.history"
       "group-transfers-count"
-      "infanticide.history"
       "infanticide-count"
       "whole.related.help.cost"
       "half.related.help.cost"
@@ -527,19 +630,23 @@ to scan-agent
     base-litter-size
     
     ticks
-    get-solar-status
+    solar-status
+    current-season
+    plant-patchiness
+    population-density
+    current-plant-abundance
     
     focal-subject
     color
     heading 
     xcor
     ycor
-    meta.id
+    my.identity
     age.in.ticks 
     generation.number
     biological.sex
     life.history
-    female.fertility 
+    fertility.status 
     group.identity
     is.alive
     carried.items
@@ -572,28 +679,17 @@ to scan-agent
     adulthood.chance
     x.magnitude
     y.magnitude
-    my.environment
-    decision.vectors
-    actions.completed
     distance.traveled 
     foraging.gains
     total.energy.gains
     total.energy.cost
-    receiving.history
     receiving-count
-    carried.history
     carried-count
-    aid.history
     aid-count
-    harm.history
     harm-count
-    copulations.history
     copulations-count
-    conceptions.history
     conceptions-count
-    group.transfers.history
     group-transfers-count
-    infanticide.history
     infanticide-count
     whole.related.help.cost
     half.related.help.cost
@@ -613,13 +709,15 @@ to scan-agent
 end
 
   
-  ;--------------------------------------------------------------------------------------------------------------------   
-  ;                             _                                                     
-  ;  __ _   __ _   ___   _ _   | |_     ___  _  _   _ __    _ __    __ _   _ _   _  _ 
-  ; / _` | / _` | / -_) | ' \  |  _|   (_-< | || | | '  \  | '  \  / _` | | '_| | || |
-  ; \__,_| \__, | \___| |_||_|  \__|   /__/  \_,_| |_|_|_| |_|_|_| \__,_| |_|    \_, |
-  ;        |___/                                                                 |__/ 
-  ;--------------------------------------------------------------------------------------------------------------------  
+; ------------------------------------------------------------------------------------------------------------------------------ ;  
+;  _               _   _           _       _                   _                                                                
+; (_)  _ __     __| | (_) __   __ (_)   __| |  _   _    __ _  | |    ___   _   _   _ __ ___    _ __ ___     __ _   _ __   _   _ 
+; | | | '_ \   / _` | | | \ \ / / | |  / _` | | | | |  / _` | | |   / __| | | | | | '_ ` _ \  | '_ ` _ \   / _` | | '__| | | | |
+; | | | | | | | (_| | | |  \ V /  | | | (_| | | |_| | | (_| | | |   \__ \ | |_| | | | | | | | | | | | | | | (_| | | |    | |_| |
+; |_| |_| |_|  \__,_| |_|   \_/   |_|  \__,_|  \__,_|  \__,_| |_|   |___/  \__,_| |_| |_| |_| |_| |_| |_|  \__,_| |_|     \__, |
+;                                                                                                                         |___/ 
+;
+; ------------------------------------------------------------------------------------------------------------------------------- ;
   
 to individual-summary
   
@@ -658,12 +756,12 @@ to individual-summary
       "heading" 
       "xcor" 
       "ycor" 
-      "meta.id" 
+      "my.identity" 
       "age.in.ticks" 
       "generation.number"
       "biological.sex" 
       "life.history" 
-      "female.fertility" 
+      "fertility.status" 
       "group.identity" 
       "is.alive" 
       "carried.items"
@@ -696,28 +794,17 @@ to individual-summary
       "adulthood.chance" 
       "x.magnitude" 
       "y.magnitude"
-      "my.environment"
-      "decision.vectors"
-      "actions.completed"
       "distance.traveled" 
       "foraging.gains"  
       "total.energy.gains"
       "total.energy.cost"
-      "receiving.history"
       "receiving-count"
-      "carried.history"
       "carried-count"
-      "aid.history"
       "aid-count"
-      "harm.history"
       "harm-count"
-      "copulations.history"
       "copulations-count"
-      "conceptions.history"
       "conceptions-count"
-      "group.transfers.history"
       "group-transfers-count"
-      "infanticide.history"
       "infanticide-count"
       "whole.related.help.cost"
       "half.related.help.cost"
@@ -732,16 +819,19 @@ to individual-summary
       
       "mother.identity"
       "father.identity"
-      "natal.group.id"
+      "natal.group.identity"
       "natal.group.size"
+      "death.group.identity"
+      "death.group.size"
       "identity.I"
       "identity.II"
       "chromosome.I"
       "chromosome.II"
-      "ticks.at.conception" 
-      "ticks.at.birth" 
-      "ticks.at.weaning" 
-      "ticks.at.sexual.maturity"
+      "ticks.at.conception"
+      "gestation-duration"
+      "lactation-duration"
+      "juvenile-duration"
+      "lifespan"
       "ticks.at.death"
       "adult.hidden.chance"
       "adult.survival.chance"
@@ -798,12 +888,12 @@ to individual-summary
     heading 
     xcor
     ycor
-    meta.id
+    my.identity
     age.in.ticks 
     generation.number
     biological.sex
     life.history
-    female.fertility 
+    fertility.status 
     group.identity
     is.alive
     carried.items
@@ -836,28 +926,17 @@ to individual-summary
     adulthood.chance
     x.magnitude
     y.magnitude
-    "" ;my.environment
-    "" ;decision.vectors
-    "" ;actions.completed
     distance.traveled 
     foraging.gains
     total.energy.gains
     total.energy.cost
-    "" ;receiving.history
     receiving-count
-    "" ;carried.history
     carried-count
-    "" ;aid.history
     aid-count
-    "" ;harm.history
     harm-count
-    "" ;copulations.history
     copulations-count
-    "" ;conceptions.history
     conceptions-count
-    "" ;group.transfers.history
     group-transfers-count
-    "" ;infanticide.history
     infanticide-count
     whole.related.help.cost
     half.related.help.cost
@@ -872,16 +951,19 @@ to individual-summary
     
     mother.identity
     father.identity
-    natal.group.id
+    natal.group.identity
     natal.group.size
+    death.group.identity
+    death.group.size
     identity.I
     identity.II
-    "" ;chromosome.I
-    "" ;chromosome.II
+    chromosome.I
+    chromosome.II
     ticks.at.conception
-    ticks.at.birth
-    ticks.at.weaning
-    ticks.at.sexual.maturity
+    ( ticks.at.birth - ticks.at.conception ) ; gestation duration
+    ( ticks.at.weaning - ticks.at.birth ) ; lactation duration
+    ( ticks.at.sexual.maturity - ticks.at.weaning ) ; juvenile duration
+    ( ticks.at.death - ticks.at.conception ) ; lifespan 
     ticks.at.death
     adult.hidden.chance
     adult.survival.chance
@@ -910,12 +992,14 @@ to individual-summary
 
 end
 
-;--------------------------------------------------------------------------------------------------------------------                                                             
-;  __ _   _ _   ___   _  _   _ __     ___  __   __ _   _ _  
-; / _` | | '_| / _ \ | || | | '_ \   (_-< / _| / _` | | ' \ 
-; \__, | |_|   \___/  \_,_| | .__/   /__/ \__| \__,_| |_||_|
-; |___/                     |_|                               
-;--------------------------------------------------------------------------------------------------------------------  
+; --------------------------------------------------------------------------------------------------------- ;                                                           
+;                                                                      
+;   __ _   _ __    ___    _   _   _ __      ___    ___    __ _   _ __  
+;  / _` | | '__|  / _ \  | | | | | '_ \    / __|  / __|  / _` | | '_ \ 
+; | (_| | | |    | (_) | | |_| | | |_) |   \__ \ | (__  | (_| | | | | |
+;  \__, | |_|     \___/   \__,_| | .__/    |___/  \___|  \__,_| |_| |_|
+;  |___/                         |_|                                                     
+; --------------------------------------------------------------------------------------------------------- ;
 
 to scan-group [ group-id ]
   
@@ -950,12 +1034,18 @@ to scan-group [ group-id ]
       "base-litter-size"
       
       "timesteps"
-      "get-solar-status"
+      "solar-status"
       "population-density"
       "plant-abundance"
-      "plant-season"
+      "current-season"
       "plant-patchiness"
       "territory-size"
+      
+      "distance-to-centroid-minimum"
+      "distance-to-centroid-maximum"
+      "distance-to-centroid-mean"
+      "distance-to-centroid-median"
+      "distance-to-centroid-variance"
       
       "group-identity"
       "current-group-size" 
@@ -1011,11 +1101,20 @@ to scan-group [ group-id ]
   
   file-open file-path
   
+  let x-centroid mean [xcor] of living-agents with [ group.identity = group-id ]
+  let y-centroid mean [ycor] of living-agents with [ group.identity = group-id ]
+  let distance-list [ distancexy x-centroid y-centroid ] of living-agents with [ group.identity = group-id ]
+  let distance-to-centroid-minimum min distance-list 
+  let distance-to-centroid-maximum max distance-list 
+  let distance-to-centroid-mean mean distance-list 
+  let distance-to-centroid-median median distance-list 
+  let distance-to-centroid-variance variance distance-list 
+  
   let current-group-size count living-agents with [ group.identity = group-id ]
   let adult-male-count count living-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ]
-  let adult-cycling-count count living-agents with [ group.identity = group-id and life.history = "adult" and female.fertility = "cycling" ]
-  let adult-pregnant-count count living-agents with [ group.identity = group-id and life.history = "adult" and female.fertility = "pregnant" ]
-  let adult-lactating-count count living-agents with [ group.identity = group-id and life.history = "adult" and female.fertility = "lactating" ]
+  let adult-cycling-count count living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "cycling" ]
+  let adult-pregnant-count count living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "pregnant" ]
+  let adult-lactating-count count living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "lactating" ]
   let juvenile-male-count count living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "male" ]
   let juvenile-female-count count living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "female" ]
   let infant-male-count count living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "male" ]
@@ -1023,12 +1122,12 @@ to scan-group [ group-id ]
   let gestatee-male-count count living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "male" ]
   let gestatee-female-count count living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "female" ]
   
-  let dying-agents anima1s with [ is.alive = false and ticks.at.death = ticks ]
+  let dying-agents anima1s with [ is.alive = false and ticks.at.death <= ticks and ticks.at.death > ( ticks - group-scan-ticks ) ]
   let total-death-count count dying-agents with [ group.identity = group-id ]
   let adult-male-death-count count dying-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ]
-  let adult-cycling-death-count count dying-agents with [ group.identity = group-id and life.history = "adult" and female.fertility = "cycling" ]
-  let adult-pregnant-death-count count dying-agents with [ group.identity = group-id and life.history = "adult" and female.fertility = "pregnant" ]
-  let adult-lactating-death-count count dying-agents with [ group.identity = group-id and life.history = "adult" and female.fertility = "lactating" ]
+  let adult-cycling-death-count count dying-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "cycling" ]
+  let adult-pregnant-death-count count dying-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "pregnant" ]
+  let adult-lactating-death-count count dying-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "lactating" ]
   let juvenile-male-death-count count dying-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "male" ]
   let juvenile-female-death-count count dying-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "female" ]
   let infant-male-death-count count dying-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "male" ]
@@ -1038,9 +1137,9 @@ to scan-group [ group-id ]
   
   let total-energy sum [energy.supply] of living-agents with [ group.identity = group-id ]
   let adult-male-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ]
-  let adult-cycling-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "adult" and female.fertility = "cycling" ]
-  let adult-pregnant-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "adult" and female.fertility = "pregnant" ]
-  let adult-lactating-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "adult" and female.fertility = "lactating" ]
+  let adult-cycling-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "cycling" ]
+  let adult-pregnant-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "pregnant" ]
+  let adult-lactating-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "lactating" ]
   let juvenile-male-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "male" ]
   let juvenile-female-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "female" ]
   let infant-male-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "male" ]
@@ -1074,16 +1173,22 @@ to scan-group [ group-id ]
     base-litter-size
     
     ticks
-    get-solar-status
+    solar-status
     population-density
     sum [penergy.supply] of patches
-    the-season
+    current-season
     plant-patchiness
     count patches with [ pgroup.identity = group-id ]
     
+    distance-to-centroid-minimum
+    distance-to-centroid-maximum
+    distance-to-centroid-mean
+    distance-to-centroid-median
+    distance-to-centroid-variance
+    
     group-id
     current-group-size
-    ([meta.id] of living-agents with [ group.identity = group-id ])
+    ([my.identity] of living-agents with [ group.identity = group-id ])
     adult-male-count
     adult-cycling-count
     adult-pregnant-count
@@ -1137,13 +1242,14 @@ to scan-group [ group-id ]
   
 end
 
-;--------------------------------------------------------------------------------------------------------------------
-;         _                  _          _     _                                        
-;    ___ (_)  _ __    _  _  | |  __ _  | |_  (_)  ___   _ _      ___  __   __ _   _ _  
-;   (_-< | | | '  \  | || | | | / _` | |  _| | | / _ \ | ' \    (_-< / _| / _` | | ' \ 
-;   /__/ |_| |_|_|_|  \_,_| |_| \__,_|  \__| |_| \___/ |_||_|   /__/ \__| \__,_| |_||_|
-;                                                                                      
-;--------------------------------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
+;        _                       _           _     _                                                
+;  ___  (_)  _ __ ___    _   _  | |   __ _  | |_  (_)   ___    _ __      ___    ___    __ _   _ __  
+; / __| | | | '_ ` _ \  | | | | | |  / _` | | __| | |  / _ \  | '_ \    / __|  / __|  / _` | | '_ \ 
+; \__ \ | | | | | | | | | |_| | | | | (_| | | |_  | | | (_) | | | | |   \__ \ | (__  | (_| | | | | |
+; |___/ |_| |_| |_| |_|  \__,_| |_|  \__,_|  \__| |_|  \___/  |_| |_|   |___/  \___|  \__,_| |_| |_|
+;                                                                                                   
+; --------------------------------------------------------------------------------------------------------- ;
 
 to scan-simulation
   
@@ -1178,7 +1284,8 @@ to scan-simulation
       "base-litter-size"
       
       "timesteps"
-      "get-solar-status"
+      "solar-status"
+      "current-season"
       "population-density"
       
       "current-plant-abundance"
@@ -1232,7 +1339,8 @@ to scan-simulation
     base-litter-size
     
     ticks
-    get-solar-status
+    solar-status
+    current-season
     population-density
     
     current-plant-abundance
@@ -1263,13 +1371,15 @@ to scan-simulation
 
 end
 
-;--------------------------------------------------------------------------------------------------------------------
-;       _                  _          _     _                                                                
-;  ___ (_)  _ __    _  _  | |  __ _  | |_  (_)  ___   _ _      ___  _  _   _ __    _ __    __ _   _ _   _  _ 
-; (_-< | | | '  \  | || | | | / _` | |  _| | | / _ \ | ' \    (_-< | || | | '  \  | '  \  / _` | | '_| | || |
-; /__/ |_| |_|_|_|  \_,_| |_| \__,_|  \__| |_| \___/ |_||_|   /__/  \_,_| |_|_|_| |_|_|_| \__,_| |_|    \_, |
-;                                                                                                       |__/ 
-;--------------------------------------------------------------------------------------------------------------------
+; ----------------------------------------------------------------------------------------------------------------------------------- ;
+;        _                       _           _     _                                                                                
+;  ___  (_)  _ __ ___    _   _  | |   __ _  | |_  (_)   ___    _ __      ___   _   _   _ __ ___    _ __ ___     __ _   _ __   _   _ 
+; / __| | | | '_ ` _ \  | | | | | |  / _` | | __| | |  / _ \  | '_ \    / __| | | | | | '_ ` _ \  | '_ ` _ \   / _` | | '__| | | | |
+; \__ \ | | | | | | | | | |_| | | | | (_| | | |_  | | | (_) | | | | |   \__ \ | |_| | | | | | | | | | | | | | | (_| | | |    | |_| |
+; |___/ |_| |_| |_| |_|  \__,_| |_|  \__,_|  \__| |_|  \___/  |_| |_|   |___/  \__,_| |_| |_| |_| |_| |_| |_|  \__,_| |_|     \__, |
+;                                                                                                                             |___/ 
+;
+; ----------------------------------------------------------------------------------------------------------------------------------- ;
 
 to simulation-summary ; observer subroutine
   
@@ -1306,11 +1416,33 @@ to simulation-summary ; observer subroutine
       "end-date-and-time"
       "simulation-duration-seconds"
       "simulation-duration-ticks"
+      "population-went-extinct"
+      "ticks-at-extinction"
       
       ; model validation and verification
       "verification-true-count"
       "verification-false-count"
       "verification-percent-true"
+      
+      "group-size-minimum"
+      "group-size-maximum" 
+      "group-size-mean" 
+      "group-size-median" 
+      "group-size-variance" 
+      
+      "adult-males-who-disperse-count"
+      "adult-males-who-not-disperse-count" 
+      "adult-males-percent-disperse"
+      "adult-females-who-disperse-count"
+      "adult-females-who-not-disperse-count"
+      "adult-females-percent-disperse" 
+      
+      "adult-males-multiple-mates-count" 
+      "adult-males-not-multiple-mates-count" 
+      "adult-males-percent-multiple-mates" 
+      "adult-females-multiple-mates-count"
+      "adult-females-not-multiple-mates-count" 
+      "adult-females-percent-multiple-mates"
       
       "lotka-volterra-best-fit"
       "lotka-volterra-r1"
@@ -1549,6 +1681,10 @@ to simulation-summary ; observer subroutine
       "natal-group-size-minimum"
       "natal-group-size-mean"
       "natal-group-size-variance"
+      "death-group-size-maximum"
+      "death-group-size-minimum"
+      "death-group-size-mean"
+      "death-group-size-variance"
       "male-lifetime-distance-traveled-maximum"
       "male-lifetime-distance-traveled-minimum"
       "male-lifetime-distance-traveled-mean"
@@ -1858,11 +1994,33 @@ to simulation-summary ; observer subroutine
     end-date-and-time
     simulation-duration-seconds
     ticks
+    population-went-extinct
+    ticks-at-extinction
     
     ; model validation and verification
     verification-true-count
     verification-false-count
     verification-percent-true
+    
+    group-size-minimum 
+    group-size-maximum 
+    group-size-mean 
+    group-size-median 
+    group-size-variance 
+    
+    adult-males-who-disperse-count
+    adult-males-who-not-disperse-count 
+    adult-males-percent-disperse
+    adult-females-who-disperse-count
+    adult-females-who-not-disperse-count
+    adult-females-percent-disperse 
+    
+    adult-males-multiple-mates-count 
+    adult-males-not-multiple-mates-count 
+    adult-males-percent-multiple-mates 
+    adult-females-multiple-mates-count
+    adult-females-not-multiple-mates-count 
+    adult-females-percent-multiple-mates
     
     lotka-volterra-best-fit
     lotka-volterra-r1
@@ -2101,6 +2259,10 @@ to simulation-summary ; observer subroutine
     natal-group-size-minimum
     natal-group-size-mean
     natal-group-size-variance
+    death-group-size-maximum
+    death-group-size-minimum
+    death-group-size-mean
+    death-group-size-variance
     male-lifetime-distance-traveled-maximum
     male-lifetime-distance-traveled-minimum
     male-lifetime-distance-traveled-mean
@@ -2333,9 +2495,9 @@ to-report number-of-gestatees report count anima1s with [ is.alive and life.hist
 to-report number-of-infants report count anima1s with [ is.alive and life.history = "infant" ] end
 to-report number-of-juveniles report count anima1s with [ is.alive and life.history = "juvenile" ] end
 to-report number-of-adults report count anima1s with [ is.alive and life.history = "adult" ] end
-to-report number-of-cycling-females report count anima1s with [ is.alive and female.fertility = "cycling" ] end
-to-report number-of-pregnant-females report count anima1s with [ is.alive and female.fertility = "pregnant" ] end
-to-report number-of-lactating-females report count anima1s with [ is.alive and female.fertility = "lactating" ] end
+to-report number-of-cycling-females report count anima1s with [ is.alive and fertility.status = "cycling" ] end
+to-report number-of-pregnant-females report count anima1s with [ is.alive and fertility.status = "pregnant" ] end
+to-report number-of-lactating-females report count anima1s with [ is.alive and fertility.status = "lactating" ] end
 to-report number-of-fully-alive-agents report count anima1s with [ is.alive ] end
 to-report number-of-decaying-agents report count anima1s with [ is.alive = false and fully.decayed = false ] end
 to-report number-of-fully-decayed-agents report count anima1s with [ fully.decayed ] end
@@ -2345,11 +2507,34 @@ to-report number-of-groups report length remove-duplicates [ group.identity ] of
 to-report end-date-and-time report date-and-time end
 to-report simulation-duration-seconds report timer end
 to-report simulation-duration-ticks report ticks end
+to-report population-went-extinct report ifelse-value ( not any? anima1s with [ is.alive ] ) [ true ] [ false ] end
+to-report ticks-at-extinction report ifelse-value ( any? anima1s ) [ ifelse-value ( any? anima1z ) [ ticks ] [ max [ ticks.at.death ] of anima1s ]] [ 0 ] end
   
   ; model validation and verification
 to-report verification-true-count report length filter [ i -> i = true ] verification-results end
 to-report verification-false-count report length filter [ i -> i = false ] verification-results end
 to-report verification-percent-true report ifelse-value ( verification-true-count + verification-false-count = 0 ) [ "NA" ] [ verification-true-count / ( verification-true-count + verification-false-count ) ] end
+  
+to-report group-sizes report map [ i -> count living-agents with [ group.identity = i ]] remove-duplicates [group.identity] of living-agents end
+to-report group-size-minimum report min group-sizes end
+to-report group-size-maximum report max group-sizes end
+to-report group-size-mean report mean group-sizes end
+to-report group-size-median report median group-sizes end
+to-report group-size-variance report variance group-sizes end
+
+to-report adult-males-who-disperse-count report count decayed-agents with [ biological.sex = "male" and life.history = "adult" and length group.transfers.history > 0 ] end
+to-report adult-males-who-not-disperse-count report count decayed-agents with [ biological.sex = "male" and life.history = "adult" and length group.transfers.history = 0 ] end
+to-report adult-males-percent-disperse report ( adult-males-who-disperse-count / ( adult-males-who-disperse-count + adult-males-who-not-disperse-count ) ) end
+to-report adult-females-who-disperse-count report count decayed-agents with [ biological.sex = "female" and life.history = "adult" and length group.transfers.history > 0 ] end
+to-report adult-females-who-not-disperse-count report count decayed-agents with [ biological.sex = "female" and life.history = "adult" and length group.transfers.history = 0 ] end
+to-report adult-females-percent-disperse report ( adult-females-who-disperse-count / ( adult-females-who-disperse-count + adult-females-who-not-disperse-count ) ) end
+  
+to-report adult-males-multiple-mates-count report count decayed-agents with [ biological.sex = "male" and life.history = "adult" and length copulations.history > 1 ] end
+to-report adult-males-not-multiple-mates-count report count decayed-agents with [ biological.sex = "male" and life.history = "adult" and length copulations.history <= 1 ] end
+to-report adult-males-percent-multiple-mates report ( adult-males-multiple-mates-count / ( adult-males-multiple-mates-count + adult-males-not-multiple-mates-count ) ) end
+to-report adult-females-multiple-mates-count report count decayed-agents with [ biological.sex = "female" and life.history = "adult" and length copulations.history > 1 ] end
+to-report adult-females-not-multiple-mates-count report count decayed-agents with [ biological.sex = "female" and life.history = "adult" and length copulations.history <= 1 ] end
+to-report adult-females-percent-multiple-mates report ( adult-females-multiple-mates-count / ( adult-females-multiple-mates-count + adult-females-not-multiple-mates-count ) ) end
 
 ; emergent plant properties
 to-report plant-abundance-maximum report ifelse-value ( length plant-abundance-record > 0 ) [ max plant-abundance-record ] [ "NA" ] end
@@ -2590,6 +2775,12 @@ to-report natal-group-size-maximum report ifelse-value ( length natal-group-size
 to-report natal-group-size-minimum report ifelse-value ( length natal-group-size-list < 1 ) [ "NA" ] [ min natal-group-size-list ]  end
 to-report natal-group-size-mean report ifelse-value ( length natal-group-size-list < 1 ) [ "NA" ] [ mean natal-group-size-list ]  end
 to-report natal-group-size-variance report ifelse-value ( length natal-group-size-list < 2 ) [ "NA" ] [ variance natal-group-size-list ] end
+  
+to-report death-group-size-list report [ death.group.size ] of decayed-agents end
+to-report death-group-size-maximum report ifelse-value ( length death-group-size-list < 1 ) [ "NA" ] [ max death-group-size-list ]  end
+to-report death-group-size-minimum report ifelse-value ( length death-group-size-list < 1 ) [ "NA" ] [ min death-group-size-list ]  end
+to-report death-group-size-mean report ifelse-value ( length death-group-size-list < 1 ) [ "NA" ] [ mean death-group-size-list ]  end
+to-report death-group-size-variance report ifelse-value ( length death-group-size-list < 2 ) [ "NA" ] [ variance death-group-size-list ] end
   
 to-report male-lifetime-distance-traveled-list report [ distance.traveled ] of decayed-agents with [ biological.sex = "male" ] end
 to-report male-lifetime-distance-traveled-maximum report ifelse-value ( length male-lifetime-distance-traveled-list < 1 ) [ "NA" ] [ max male-lifetime-distance-traveled-list ] end
@@ -2835,193 +3026,5 @@ to-report female-infantice-count-maximum report ifelse-value ( length female-inf
 to-report female-infantice-count-minimum report ifelse-value ( length female-infantice-count-list < 1 ) [ "NA" ] [ min female-infantice-count-list ] end
 to-report female-infantice-count-mean report ifelse-value ( length female-infantice-count-list < 1 ) [ "NA" ] [ mean female-infantice-count-list ] end
 to-report female-infantice-count-variance report ifelse-value ( length female-infantice-count-list < 2 ) [ "NA" ] [ variance female-infantice-count-list ] end
-  
-;--------------------------------------------------------------------------------------------------------------------
-;
-; PARAMETER SPACE SWEEPING FOR RSN BEST FIT
-;
-;--------------------------------------------------------------------------------------------------------------------
-
-to-report calculate-lotka-volterra
-  
-  let N1a first plant-abundance-record
-  let N2a first population-size-record
-  
-  let bestparam []
-  let gmax 0
-  
-  let N1r1  500
-  let N1r2  1500
-  let N2r1  25
-  let N2r2  45
-  let r1r1   0.1
-  let r1r2   0.9
-  let r2r1  -0.9
-  let r2r2  -0.1
-  let s12r1 -0.1
-  let s12r2 -0.001
-  let s21r1 0.0001
-  let s21r2 0.002
-  let steps 10
-  
-  let N1w N1r1 - (N1r2 - N1r1) / steps
-  while [ N1w < N1r2 + (N1r2 - N1r1) / steps / 2 ]
-  [ Set N1w N1w + (N1r2 - N1r1) / steps
-    
-    let N2w N2r1 - (N2r2 - N2r1) / steps
-    while [ N2w < N2r2 + (N2r2 - N2r1) / steps / 2 ]
-    [ Set N2w N2w + (N2r2 - N2r1) / steps
-      
-      let r1w r1r1 - (r1r2 - r1r1) / steps
-      while [ r1w < r1r2 + (r1r2 - r1r1) / steps / 2 ]
-      [ Set r1w r1w + (r1r2 - r1r1) / steps
-        
-        let r2w r2r1 - (r2r2 - r2r1) / steps
-        while [ r2w < r2r2 + (r2r2 - r2r1) / steps / 2 ]
-        [ Set r2w r2w + (r2r2 - r2r1) / steps
-          
-          let s12w s12r1 - (s12r2 - s12r1) / steps
-          while [ s12w < s12r2 + (s12r2 - s12r1)/ steps / 2 ]
-          [ Set s12w s12w + (s12r2 - s12r1)/ steps
-            
-            let s21w s21r1 - (s21r2 - s21r1) / steps
-            while [ s21w < s21r2 + (s21r2 - s21r1)/ steps / 2 ]
-            [ Set s21w s21w + (s21r2 - s21r1)/ steps
-              
-              let results rsn r1w r2w 0 s12w s21w 0 N1w N2w ; Simulate the rsN equations.
-              let N1s first results
-              let N2s last  results
-              
-              let g1 fit N1a N1s                            ; Calculate goodness of fit for
-              let g2 fit N2a N2s                            ; both curves.
-              
-              let g ( g1 + g2 ) / 2                            ; Report the results.
-              if  ( g > gmax )
-              [ set bestparam ( list g r1w r2w s12w s21w N1w N2w )
-                set gmax g ]
-              
-  ] ] ] ] ] ]
-  
-  ;....display the best result....
-  report bestparam
-  
-end
-
-;--------------------------------------------------------------------------------------------------------------------
-;
-; SUBROUTINE TO SIMULATE RSN DIFFERENTIAL EQUATION
-;
-; This routine simulates two ecological populations growing according
-; to the <m>rsN</m> equations,
-;   <M> {1\over N_1}\,{dN_1\over dt} = r_1 +s_{1,1}N_1 +s_{1,2}N_2 </M>
-;   <M> {1\over N_2}\,{dN_2\over dt} = r_2 +s_{2,1}N_1 +s_{2,2}N_2 </M>
-;
-; It uses the Euler method<https://en.wikipedia.org/wiki/Euler_method/> to solve
-; the differential equations numerically. The time step <v>dt</v> should be made
-; small enough so that further decreases in its value do not significantly change
-; the solution.
-;
-; Any parameters may be supplied below to represent variations of competition,
-; predation, mutualism, or other two-species interactions such as commensalism.
-;
-; ENTRY: 'r1'  and 'r2' contain the intrinsic growth rates for each species.
-;        's11' and 's22' ('sii') contain the self-limitation or enhancement terms
-;         for each species.
-;        's12' and 's21' ('sij') contain the cross-coupling terms for species for
-;          the limiting or enhancement of the growth of species 'i' by species 'j'.
-;        'N1i' and 'N2i' contain the starting values for each species.
-;
-; EXIT:  'N1s' and 'N2s' contain the simulated results, yearly for 40 years.
-;         (The ending time should be a parameter.)
-;
-;--------------------------------------------------------------------------------------------------------------------
-  
-to-report rsn [r1 r2 s11 s12 s21 s22 N1i N2i ]
-  ;  let r1 1
-  ;  let r2 1
-  ;  let s11 -1 ; throw out?
-  ;  let s12 -.5
-  ;  let s21 1
-  ;  let s22 -1 ; throw out?
-  ;  let N1 0.4
-  ;  let N2 0.1
-  
-  Let N1 N1i                                                        ; Set the initial conditions.
-  Let N2 N2i
-  
-  Let dt 1 / 365                                                    ; Set the time step.
-  
-  Let N1s []                                                        ; Establish the output lists.
-  Let N2s []
-  
-  let y -1                                                          ; Loop through all years.
-  while [ y < 40 ]
-  [
-    Set y y + 1                                                     ; Add the present population values
-    Set N1s lput N1 N1s                                             ; to the end of the respective lists.
-    Set N2s lput N2 N2s
-    
-    let t ( 0 - dt )                                                ; Step day by day through the year,
-    while [ t < ( 1 + dt / 2 ) ]                                    ; calculating but not recording
-    [ Set t t + dt                                                  ; the intermediate results.
-      Let dN1 ( r1 + s11 * N1 + s12 * N2 ) * N1 * dt
-      Let dN2 ( r2 + s21 * N1 + s22 * N2 ) * N2 * dt
-      Set N1 N1 + dN1
-      Set N2 N2 + dN2
-      if ( N1 < 0 ) [ Set N1 0 ]
-      if ( N2 < 0 ) [ Set N2 0 ] ] ]
-  
-  report ( list N1s N2s )                                          ; Return the simulated results.
-  
-end
-
-;--------------------------------------------------------------------------------------------------------------------
-;
-; SUBROUTINE TO CALCULATE GOODNESS OF FIT                  
-;
-; This routine accepts a set of data containing observations and predictions,
-; and computes how well the predictions match the observations. Various
-; measures of how well they match could be calculated in this routine, such as
-; with least-squares, least absolute value, or other measures. The goodness of
-; fit is presented in the form of
-; <m>R^2</m>.<https://en.wikipedia.org/wiki/Coefficient_of_determination/>
-;
-; That is, it is presented as <m>1-F/E</m>, where
-; <m>F</m> is the summed deviations of the observations from the predictions, and
-; <m>E</m> is the summed deviations of the observations from the expected value
-; (mean) of the observations, assuming there were no functional relationship.
-;
-; ENTRY: 'k' specifies the number of actual values there are.
-;        'S' contains the estimated values from the simulated curve, indexed by
-;         time, starting with time 0.
-;        'A' contains the actual measured values, indexed arbitrarily from 1 to
-;         'k'.
-;        'y' defines the time index for each corresponding value in 'A', also
-;         indexed arbitrarily from 1 to 'k'
-;
-; EXIT:  'g' contains the goodness of fit measure for that data.
-;
-;--------------------------------------------------------------------------------------------------------------------
-
-to-report fit [ A S ]
-  
-  let mu mean A                                         ; Compute the mean of the data.
-  
-  let total 0                                           ; Prepare variables for loop.
-  let residual 0
-  let k length A
-  let i 0
-  
-  while [ i < k ]
-  [ set i i + 1                                         ; Compute the total squared
-    Set residual residual + ( item i A - item i S ) ^ 2 ; deviations of the actual data
-    Set total total + ( item i A - mu ) ^ 2             ; from the function and from the
-  ]                                                     ; mean.
-  
-  report 1 - residual / total                           ; Return the goodness-of-fit.
-  
-end
-
-
 
 

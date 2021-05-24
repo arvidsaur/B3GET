@@ -172,10 +172,10 @@ to import-population
             ( header = "pen-size" ) [ set pen-size value ]	
             ( header = "pen-mode" ) [ set pen-mode value ]            
             
-            ( breed = anima1s and header = "meta.id" ) [ set meta.id value ]
+            ( breed = anima1s and ( header = "my.identity" or header = "meta.id" ) ) [ set my.identity value ]
             ( breed = anima1s and header = "biological.sex" ) [ set biological.sex value ]
             ( breed = anima1s and header = "life.history" ) [ set life.history value ]
-            ( breed = anima1s and header = "female.fertility" ) [ set female.fertility value ]
+            ( breed = anima1s and ( header = "fertility.status" or header = "female.fertility" ) ) [ set fertility.status value ]
             ( breed = anima1s and header = "group.identity" ) [ set group.identity value ]
             ( breed = anima1s and header = "is.alive" ) [ set is.alive value ]
             ( breed = anima1s and header = "yellow.signal" ) [ set yellow.signal value ]
@@ -218,12 +218,12 @@ to import-population
             ( breed = anima1s and header = "age.in.ticks" ) [ set age.in.ticks value ]
             ( breed = anima1s and header = "generation.number" ) [ set generation.number value ]
             ( breed = anima1s and header = "my.mother" ) [ set my.mother value ]
-            ( breed = anima1s and header = "home-range?" ) [ foreach ( run-result value ) [ p -> ask p [ set-home-range ]]]
+            ( breed = anima1s and header = "home-range?" ) [ if ( value = true ) [ set-home-range ]]
             ( breed = anima1s and header = "mother.identity" ) [ set mother.identity value ]
             ( breed = anima1s and header = "father.identity" ) [ set father.identity value ]
-            ( breed = anima1s and header = "natal.group.id" ) [ set natal.group.id value ]
+            ( breed = anima1s and header = "natal.group.identity" ) [ set natal.group.identity value ]
             ( breed = anima1s and header = "natal.group.size" ) [ set natal.group.size value ]
-            ( breed = anima1s and header = "death.group.id" ) [ set death.group.id value ]
+            ( breed = anima1s and header = "death.group.identity" ) [ set death.group.identity value ]
             ( breed = anima1s and header = "death.group.size" ) [ set death.group.size value ]
             ( breed = anima1s and header = "ticks.at.conception" ) [ set ticks.at.conception value ]
             ( breed = anima1s and header = "ticks.at.birth" ) [ set ticks.at.birth value ]
@@ -248,7 +248,6 @@ to import-population
             ( breed = anima1s and header = "adult.red.chance" ) [ set adult.red.chance value ]
             ( breed = anima1s and header = "adult.blue.chance" ) [ set adult.blue.chance value ]
             ( breed = anima1s and header = "distance.traveled" ) [ set distance.traveled value ]
-            ( breed = anima1s and header = "cells.occupied" ) [ set cells.occupied value ]
             ( breed = anima1s and header = "mother.initiated.birth" ) [ set mother.initiated.birth value ]
             ( breed = anima1s and header = "mother.initiated.weaning" ) [ set mother.initiated.weaning value ]
             ( breed = anima1s and header = "whole.related.help.cost" ) [ set whole.related.help.cost value ]
@@ -278,28 +277,28 @@ to import-population
           set j j + 1 ] 
         set i i + 1 ] ]
     
-    ; create new meta.ids for everyone
+    ; create new my.identitys for everyone
     let table-of-ids table:make
     ask anima1s [
       
-      ifelse ( table:has-key? table-of-ids meta.id ) 
+      ifelse ( table:has-key? table-of-ids my.identity ) 
       [ let new-id random 9999999
-        table:put table-of-ids meta.id new-id
-        set meta.id new-id ]
+        table:put table-of-ids my.identity new-id
+        set my.identity new-id ]
       
-      [ table:put table-of-ids meta.id meta.id ]]
+      [ table:put table-of-ids my.identity my.identity ]]
     
     ; update carried items list
     ask anima1s [
       if ( is-string? carried.items and length carried.items > 0 ) [ set carried.items run-result carried.items ]
       if ( not is-list? carried.items ) [ set carried.items [] ]
-      foreach carried.items [ itm -> set carried.items remove itm ( lput one-of anima1s with [ meta.id  = ( table:get table-of-ids itm ) ] carried.items ) ] ]
+      foreach carried.items [ itm -> set carried.items remove itm ( lput one-of anima1s with [ my.identity  = ( table:get table-of-ids itm ) ] carried.items ) ] ]
     
     ; update mother identity
     ask anima1s [
       if ( my.mother = 0 or my.mother = "nobody" ) [ set my.mother nobody ]
       if ( member? my.mother table:keys table-of-ids ) [ 
-        set my.mother one-of anima1s with [ table:get table-of-ids [my.mother] of myself = meta.id  ] ]]
+        set my.mother one-of anima1s with [ table:get table-of-ids [my.mother] of myself = my.identity  ] ]]
     
     ; general initialization of variables
     ask anima1s [
@@ -312,7 +311,6 @@ to import-population
       set group.transfers.history []
       set copulations.history []
       set conceptions.history []
-      set cells.occupied []
       set infanticide.history []
       set decision.vectors []
       set my.environment []
@@ -345,9 +343,11 @@ to import-population
 end
 
 to set-home-range
-  ;ask patches in-radius 5 [ 
-    set pgroup.identity [group.identity] of myself set pcolor pgroup.identity + 2 
-  ;]
+  ask patches in-radius 10
+  [ 
+    set pgroup.identity [group.identity] of myself 
+    set pcolor pgroup.identity + 2 
+  ]
 end
 
 ;--------------------------------------------------------------------------------------------------------------------
@@ -356,7 +356,7 @@ end
 ;
 ; This is a turtle-only function that allows it to record any VARIABLES-TO-RECORD (state-variables and other information 
 ; it has access to) on external file FILENAME. FILENAME contains rows representing eacn turtle and columns representing 
-; the variables associated with those turtles.
+; the variables associated with those turtles. This subroutine only saves anima1s who are currently alive.
 ;
 ; CALLER: observer
 ; FILNAME: includes the full directory path to appropriate CSV file (if one does not exist, it will be created here).
@@ -404,7 +404,7 @@ to save-population
     ; list of turtle state variables to save
     set header (list 
       "breed" 
-      "meta.id" 
+      "my.identity" 
       "age"
       "color" 
       "heading" 
@@ -419,7 +419,7 @@ to save-population
       "pen-mode"
       "biological.sex" 
       "life.history" 
-      "female.fertility" 
+      "fertility.status" 
       "group.identity"    
       "is.alive" 
       "is.resting"
@@ -458,8 +458,8 @@ to save-population
       "home-range?"
     )
     
-    ask turtles [ 
-      if ( is-anima1? self ) [ set my.mother ifelse-value ( my.mother != nobody ) [ [meta.id] of my.mother ] [ nobody ] ]
+    ask anima1s with [ is.alive ] [ 
+      if ( is-anima1? self ) [ set my.mother ifelse-value ( my.mother != nobody ) [ [my.identity] of my.mother ] [ nobody ] ]
       
       let data-list []
       
@@ -467,7 +467,7 @@ to save-population
 
         let value (ifelse-value 
           ( text = "breed" ) [ breed ]
-          ( text = "meta.id" ) [ meta.id ]
+          ( text = "my.identity" ) [ my.identity ]
           ( text = "age" ) [ age.in.ticks ]
           ( text = "color" ) [ color ]
           ( text = "heading" ) [ heading ]
@@ -482,7 +482,7 @@ to save-population
           ( text = "pen-mode" ) [ pen-mode ]
           ( text = "biological.sex" ) [ biological.sex ]
           ( text = "life.history" ) [ life.history ]
-          ( text = "female.fertility" ) [ female.fertility ]
+          ( text = "fertility.status" ) [ fertility.status ]
           ( text = "group.identity" ) [ group.identity ]
           ( text = "is.alive" ) [ is.alive ]
           ( text = "is.resting" ) [ is.resting ]
@@ -495,7 +495,7 @@ to save-population
           ( text = "energy.supply" ) [ energy.supply ]
           ( text = "identity.I" ) [ identity.I ]
           ( text = "identity.II" ) [ identity.II ]
-          ( text = "carried.items" ) [ map [ i -> ifelse-value ( is-anima1? i ) [ [meta.id] of i ] [ nobody ] ] carried.items ] 
+          ( text = "carried.items" ) [ map [ i -> ifelse-value ( is-anima1? i ) [ [my.identity] of i ] [ nobody ] ] carried.items ] 
           ( text = "bite.capacity" ) [ bite.capacity ]
           ( text = "mutation.chance" ) [ mutation.chance ]
           ( text = "sex.ratio" ) [ sex.ratio ]
@@ -524,7 +524,7 @@ to save-population
       
       set body lput data-list body
       
-      if ( is-anima1? self ) [ set my.mother ifelse-value ( my.mother != nobody ) [ one-of anima1s with [ meta.id  = [my.mother] of myself ]] [ nobody ] ]
+      if ( is-anima1? self ) [ set my.mother ifelse-value ( my.mother != nobody ) [ one-of anima1s with [ my.identity  = [my.mother] of myself ]] [ nobody ] ]
       
     ]
     
@@ -635,8 +635,8 @@ end
 ;----------------------------------------------------------------------------------------------
 
 to save-genotype
-  output-header (word " SAVE GENOTYPE : organism " meta.id  )
-  if ( genotype = "" ) [ if ( subject != nobody ) [ set genotype (word [meta.id] of subject ) ]]
+  output-header (word " SAVE GENOTYPE : organism " my.identity  )
+  if ( genotype = "" ) [ if ( subject != nobody ) [ set genotype (word [my.identity] of subject ) ]]
   ( csv:to-file ( word path-to-experiment genotype ".txt" ) (sentence chromosome.I [[]] chromosome.II ) " " )
   update-metafile "genotype" genotype (word "GENOTYPE " genotype " SAVED")
   output-print " Genotype successfully saved."

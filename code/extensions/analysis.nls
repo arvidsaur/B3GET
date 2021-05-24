@@ -1,0 +1,207 @@
+;----------------------------------------------------------------------------------------------
+; 
+;                            dP                   oo          
+;                            88                               
+; .d8888b. 88d888b. .d8888b. 88 dP    dP .d8888b. dP .d8888b. 
+; 88'  `88 88'  `88 88'  `88 88 88    88 Y8ooooo. 88 Y8ooooo. 
+; 88.  .88 88    88 88.  .88 88 88.  .88       88 88       88 
+; `88888P8 dP    dP `88888P8 dP `8888P88 `88888P' dP `88888P' 
+;                                    .88                      
+;                                d8888P                       
+;
+; © 2021 K N Crouse  
+;
+;
+;----------------------------------------------------------------------------------------------
+
+  
+;--------------------------------------------------------------------------------------------------------------------
+;
+; PARAMETER SPACE SWEEPING FOR RSN BEST FIT
+;
+;--------------------------------------------------------------------------------------------------------------------
+
+to-report calculate-lotka-volterra
+  
+  let N1a first plant-abundance-record
+  let N2a first population-size-record
+  
+  let bestparam []
+  let gmax 0
+  
+  let N1r1  500
+  let N1r2  1500
+  let N2r1  25
+  let N2r2  45
+  let r1r1   0.1
+  let r1r2   0.9
+  let r2r1  -0.9
+  let r2r2  -0.1
+  let s12r1 -0.1
+  let s12r2 -0.001
+  let s21r1 0.0001
+  let s21r2 0.002
+  let steps 10
+  
+  let N1w N1r1 - (N1r2 - N1r1) / steps
+  while [ N1w < N1r2 + (N1r2 - N1r1) / steps / 2 ]
+  [ Set N1w N1w + (N1r2 - N1r1) / steps
+    
+    let N2w N2r1 - (N2r2 - N2r1) / steps
+    while [ N2w < N2r2 + (N2r2 - N2r1) / steps / 2 ]
+    [ Set N2w N2w + (N2r2 - N2r1) / steps
+      
+      let r1w r1r1 - (r1r2 - r1r1) / steps
+      while [ r1w < r1r2 + (r1r2 - r1r1) / steps / 2 ]
+      [ Set r1w r1w + (r1r2 - r1r1) / steps
+        
+        let r2w r2r1 - (r2r2 - r2r1) / steps
+        while [ r2w < r2r2 + (r2r2 - r2r1) / steps / 2 ]
+        [ Set r2w r2w + (r2r2 - r2r1) / steps
+          
+          let s12w s12r1 - (s12r2 - s12r1) / steps
+          while [ s12w < s12r2 + (s12r2 - s12r1)/ steps / 2 ]
+          [ Set s12w s12w + (s12r2 - s12r1)/ steps
+            
+            let s21w s21r1 - (s21r2 - s21r1) / steps
+            while [ s21w < s21r2 + (s21r2 - s21r1)/ steps / 2 ]
+            [ Set s21w s21w + (s21r2 - s21r1)/ steps
+              
+              let results rsn r1w r2w 0 s12w s21w 0 N1w N2w ; Simulate the rsN equations.
+              let N1s first results
+              let N2s last  results
+              
+              let g1 fit N1a N1s                            ; Calculate goodness of fit for
+              let g2 fit N2a N2s                            ; both curves.
+              
+              let g ( g1 + g2 ) / 2                            ; Report the results.
+              if  ( g > gmax )
+              [ set bestparam ( list g r1w r2w s12w s21w N1w N2w )
+                set gmax g ]
+              
+  ] ] ] ] ] ]
+  
+  ;....display the best result....
+  report bestparam
+  
+end
+
+;--------------------------------------------------------------------------------------------------------------------
+;
+; SUBROUTINE TO SIMULATE RSN DIFFERENTIAL EQUATION
+;
+; This routine simulates two ecological populations growing according
+; to the <m>rsN</m> equations,
+;   <M> {1\over N_1}\,{dN_1\over dt} = r_1 +s_{1,1}N_1 +s_{1,2}N_2 </M>
+;   <M> {1\over N_2}\,{dN_2\over dt} = r_2 +s_{2,1}N_1 +s_{2,2}N_2 </M>
+;
+; It uses the Euler method<https://en.wikipedia.org/wiki/Euler_method/> to solve
+; the differential equations numerically. The time step <v>dt</v> should be made
+; small enough so that further decreases in its value do not significantly change
+; the solution.
+;
+; Any parameters may be supplied below to represent variations of competition,
+; predation, mutualism, or other two-species interactions such as commensalism.
+;
+; ENTRY: 'r1'  and 'r2' contain the intrinsic growth rates for each species.
+;        's11' and 's22' ('sii') contain the self-limitation or enhancement terms
+;         for each species.
+;        's12' and 's21' ('sij') contain the cross-coupling terms for species for
+;          the limiting or enhancement of the growth of species 'i' by species 'j'.
+;        'N1i' and 'N2i' contain the starting values for each species.
+;
+; EXIT:  'N1s' and 'N2s' contain the simulated results, yearly for 40 years.
+;         (The ending time should be a parameter.)
+;
+;--------------------------------------------------------------------------------------------------------------------
+  
+to-report rsn [r1 r2 s11 s12 s21 s22 N1i N2i ]
+  ;  let r1 1
+  ;  let r2 1
+  ;  let s11 -1 ; throw out?
+  ;  let s12 -.5
+  ;  let s21 1
+  ;  let s22 -1 ; throw out?
+  ;  let N1 0.4
+  ;  let N2 0.1
+  
+  Let N1 N1i                                                        ; Set the initial conditions.
+  Let N2 N2i
+  
+  Let dt 1 / 365                                                    ; Set the time step.
+  
+  Let N1s []                                                        ; Establish the output lists.
+  Let N2s []
+  
+  let y -1                                                          ; Loop through all years.
+  while [ y < 40 ]
+  [
+    Set y y + 1                                                     ; Add the present population values
+    Set N1s lput N1 N1s                                             ; to the end of the respective lists.
+    Set N2s lput N2 N2s
+    
+    let t ( 0 - dt )                                                ; Step day by day through the year,
+    while [ t < ( 1 + dt / 2 ) ]                                    ; calculating but not recording
+    [ Set t t + dt                                                  ; the intermediate results.
+      Let dN1 ( r1 + s11 * N1 + s12 * N2 ) * N1 * dt
+      Let dN2 ( r2 + s21 * N1 + s22 * N2 ) * N2 * dt
+      Set N1 N1 + dN1
+      Set N2 N2 + dN2
+      if ( N1 < 0 ) [ Set N1 0 ]
+      if ( N2 < 0 ) [ Set N2 0 ] ] ]
+  
+  report ( list N1s N2s )                                          ; Return the simulated results.
+  
+end
+
+;--------------------------------------------------------------------------------------------------------------------
+;
+; SUBROUTINE TO CALCULATE GOODNESS OF FIT                  
+;
+; This routine accepts a set of data containing observations and predictions,
+; and computes how well the predictions match the observations. Various
+; measures of how well they match could be calculated in this routine, such as
+; with least-squares, least absolute value, or other measures. The goodness of
+; fit is presented in the form of
+; <m>R^2</m>.<https://en.wikipedia.org/wiki/Coefficient_of_determination/>
+;
+; That is, it is presented as <m>1-F/E</m>, where
+; <m>F</m> is the summed deviations of the observations from the predictions, and
+; <m>E</m> is the summed deviations of the observations from the expected value
+; (mean) of the observations, assuming there were no functional relationship.
+;
+; ENTRY: 'k' specifies the number of actual values there are.
+;        'S' contains the estimated values from the simulated curve, indexed by
+;         time, starting with time 0.
+;        'A' contains the actual measured values, indexed arbitrarily from 1 to
+;         'k'.
+;        'y' defines the time index for each corresponding value in 'A', also
+;         indexed arbitrarily from 1 to 'k'
+;
+; EXIT:  'g' contains the goodness of fit measure for that data.
+;
+;--------------------------------------------------------------------------------------------------------------------
+
+to-report fit [ A S ]
+  
+  let mu mean A                                         ; Compute the mean of the data.
+  
+  let total 0                                           ; Prepare variables for loop.
+  let residual 0
+  let k length A
+  let i 0
+  
+  while [ i < k ]
+  [ set i i + 1                                         ; Compute the total squared
+    Set residual residual + ( item i A - item i S ) ^ 2 ; deviations of the actual data
+    Set total total + ( item i A - mu ) ^ 2             ; from the function and from the
+  ]                                                     ; mean.
+  
+  report 1 - residual / total                           ; Return the goodness-of-fit.
+  
+end
+
+
+
+; NOTE FOR CL: if     (..condition..) [..truepart..]
+;              ifelse (..condition..) [..truepart..] [..falsepart..]

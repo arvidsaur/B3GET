@@ -1,5 +1,5 @@
-breed,meta.id,age,color,heading,xcor,ycor,label,label-color,shape,hidden?,size,pen-size,pen-mode,biological.sex,life.history,female.fertility,group.identity,is.alive,yellow.signal,red.signal,blue.signal,living.chance,body.size,body.shade,energy.supply,identity.I,identity.II,carried.items,bite.capacity,mutation.chance,sex.ratio,litter.size,conception.chance,visual.angle,visual.range,day.perception,night.perception,yellow.chance,red.chance,blue.chance,birthing.chance,weaning.chance,infancy.chance,juvenility.chance,adulthood.chance,x.magnitude,y.magnitude,chromosome.I,chromosome.II,my.mother
-anima1s,8718010,,5,0,55,59.285714285714285," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,1329865,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+breed,my.identity,age,color,heading,xcor,ycor,label,label-color,shape,hidden?,size,pen-size,pen-mode,biological.sex,life.history,female.fertility,group.identity,is.alive,yellow.signal,red.signal,blue.signal,living.chance,body.size,body.shade,energy.supply,identity.I,identity.II,carried.items,bite.capacity,mutation.chance,sex.ratio,litter.size,conception.chance,visual.angle,visual.range,day.perception,night.perception,yellow.chance,red.chance,blue.chance,birthing.chance,weaning.chance,infancy.chance,juvenility.chance,adulthood.chance,x.magnitude,y.magnitude,chromosome.I,chromosome.II,my.mother
+anima1s,8718010,,5,0,55,59.28571429, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,1329865,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -16,7 +16,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,3951210,,115,0,88,43.57142857142857," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,765635,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,3951210,,115,0,88,43.57142857, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,765635,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -33,7 +33,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,1371275,,5,0,88,59.285714285714285," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,1360805,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,1371275,,5,0,88,59.28571429, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,1360805,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -50,7 +50,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,644660,,95,0,88,46.42857142857143," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,294795,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,644660,,95,0,88,46.42857143, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,294795,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -67,7 +67,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,9466807,,85,0,44,47.85714285714286," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,390965,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,9466807,,85,0,44,47.85714286, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,390965,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -84,7 +84,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,2559802,,65,0,77,50.714285714285715," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,121025,true,false,false,false,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.05
+anima1s,2559802,,65,0,77,50.71428571, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,121025,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -101,7 +101,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,4023626,,65,0,66,50.714285714285715," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,7885845,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,4023626,,65,0,66,50.71428571, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,7885845,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -118,7 +118,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,4184420,,5,0,55,59.285714285714285," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,12745,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,4184420,,5,0,55,59.28571429, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,12745,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -135,7 +135,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,8314873,,75,0,44,49.285714285714285," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,82675,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,8314873,,75,0,44,49.28571429, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,82675,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -152,7 +152,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,5093696,,125,0,66,42.14285714285714," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,740725,true,false,false,false,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.05
+anima1s,5093696,,125,0,66,42.14285714, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,740725,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -169,7 +169,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,7058836,,95,0,11,46.42857142857143," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,235015,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,7058836,,95,0,11,46.42857143, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,235015,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -186,7 +186,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,4771518,,105,0,33,45," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,498225,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,4771518,,105,0,33,45, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,498225,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -203,7 +203,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,3187865,,85,0,55,47.85714285714286," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,137705,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,3187865,,85,0,55,47.85714286, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,137705,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -220,7 +220,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,3074152,,35,0,66,55," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,1239875,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,3074152,,35,0,66,55, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,1239875,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -237,7 +237,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,4914850,,15,0,22,57.857142857142854," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,541395,true,false,false,false,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.05
+anima1s,4914850,,15,0,22,57.85714286, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,541395,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -254,7 +254,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,9100254,,35,0,88,55," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,218155,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,9100254,,35,0,88,55, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,218155,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -271,7 +271,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,1126146,,85,0,88,47.85714285714286," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,1191765,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,1126146,,85,0,88,47.85714286, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,1191765,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -288,7 +288,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,8636548,,25,0,22,56.42857142857143," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,916745,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,8636548,,25,0,22,56.42857143, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,916745,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -305,7 +305,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,3213041,,125,0,77,42.14285714285714," ",9.9,circle323b,false,0.99999,1,up,female,adult,cycling,1139585,true,false,true,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,3213041,,125,0,77,42.14285714, ,9.9,circle323b,FALSE,0.99999,1,up,female,adult,cycling,1139585,TRUE,FALSE,TRUE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -322,7 +322,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,1819763,,95,0,44,46.42857142857143," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,942015,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,1819763,,95,0,44,46.42857143, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,942015,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -339,7 +339,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,8142986,,65,0,11,50.714285714285715," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,360985,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,8142986,,65,0,11,50.71428571, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,360985,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -356,7 +356,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,3883934,,45,0,44,53.57142857142857," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,750725,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,3883934,,45,0,44,53.57142857, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,750725,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -373,7 +373,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,1377629,,45,0,55,53.57142857142857," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,643345,true,false,false,false,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.05
+anima1s,1377629,,45,0,55,53.57142857, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,643345,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -390,7 +390,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,2645943,,85,0,88,47.85714285714286," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,662705,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,2645943,,85,0,88,47.85714286, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,662705,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -407,7 +407,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,8172889,,65,0,55,50.714285714285715," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,914685,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,8172889,,65,0,55,50.71428571, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,914685,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -424,7 +424,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,662714,,95,0,66,46.42857142857143," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,907015,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,662714,,95,0,66,46.42857143, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,907015,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -441,7 +441,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,9370911,,115,0,22,43.57142857142857," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,874695,true,false,false,false,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.05
+anima1s,9370911,,115,0,22,43.57142857, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,874695,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -458,7 +458,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,9516148,,115,0,22,43.57142857142857," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,876795,true,false,false,false,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.05
+anima1s,9516148,,115,0,22,43.57142857, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,876795,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -475,7 +475,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,306910,,75,0,88,49.285714285714285," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,1094875,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,306910,,75,0,88,49.28571429, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,1094875,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -492,7 +492,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,540164,,15,0,22,57.857142857142854," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,827135,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,540164,,15,0,22,57.85714286, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,827135,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -509,7 +509,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,9988676,,65,0,44,50.714285714285715," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,9883085,true,false,false,false,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.05
+anima1s,9988676,,65,0,44,50.71428571, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,9883085,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -526,7 +526,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,2250614,,85,0,55,47.85714285714286," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,1208145,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,2250614,,85,0,55,47.85714286, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,1208145,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -543,7 +543,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,7256260,,25,0,33,56.42857142857143," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,562825,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,7256260,,25,0,33,56.42857143, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,562825,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -560,7 +560,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,3726589,,15,0,55,57.857142857142854," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,1125195,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,3726589,,15,0,55,57.85714286, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,1125195,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -577,7 +577,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,2530462,,85,0,66,47.85714285714286," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,109145,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,2530462,,85,0,66,47.85714286, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,109145,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -594,7 +594,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,5214054,,115,0,44,43.57142857142857," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,1064535,true,false,false,false,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.05
+anima1s,5214054,,115,0,44,43.57142857, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,1064535,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -611,7 +611,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,6249710,,125,0,66,42.14285714285714," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,732885,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,6249710,,125,0,66,42.14285714, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,732885,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -628,7 +628,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,603464,,5,0,55,59.285714285714285," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,445065,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,603464,,5,0,55,59.28571429, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,445065,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -645,7 +645,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,1270984,,15,0,88,57.857142857142854," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,1049315,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,1270984,,15,0,88,57.85714286, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,1049315,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -662,7 +662,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,3492726,,15,0,55,57.857142857142854," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,1210035,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,3492726,,15,0,55,57.85714286, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,1210035,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -679,7 +679,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,6280133,,125,0,33,42.14285714285714," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,309385,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,6280133,,125,0,33,42.14285714, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,309385,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -696,7 +696,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,3976804,,135,0,22,40.714285714285715," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,911955,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,3976804,,135,0,22,40.71428571, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,911955,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -713,7 +713,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,6314802,,125,0,11,42.14285714285714," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,1382345,true,false,false,false,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.05
+anima1s,6314802,,125,0,11,42.14285714, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,1382345,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -730,7 +730,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,5197135,,15,0,11,57.857142857142854," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,1302295,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,5197135,,15,0,11,57.85714286, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,1302295,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -747,7 +747,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,8009136,,85,0,11,47.85714285714286," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,655425,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,8009136,,85,0,11,47.85714286, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,655425,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -764,7 +764,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,6041613,,95,0,77,46.42857142857143," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,195955,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,6041613,,95,0,77,46.42857143, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,195955,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -781,7 +781,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,5461746,,65,0,44,50.714285714285715," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,12430525,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,5461746,,65,0,44,50.71428571, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,12430525,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -798,7 +798,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,1605070,,65,0,11,50.714285714285715," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,11848265,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,1605070,,65,0,11,50.71428571, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,11848265,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -815,7 +815,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,2323341,,5,0,88,59.285714285714285," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,433865,true,false,false,false,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.05
+anima1s,2323341,,5,0,88,59.28571429, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,433865,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -832,7 +832,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,3438660,,135,0,44,40.714285714285715," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,880035,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,3438660,,135,0,44,40.71428571, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,880035,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -849,7 +849,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,527033,,35,0,77,55," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,365715,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,527033,,35,0,77,55, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,365715,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -866,7 +866,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,5994375,,105,0,22,45," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,398965,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,5994375,,105,0,22,45, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,398965,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -883,7 +883,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,4914944,,65,0,44,50.714285714285715," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,758165,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,4914944,,65,0,44,50.71428571, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,758165,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -900,7 +900,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,2345463,,85,0,77,47.85714285714286," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,892725,true,false,false,false,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.05
+anima1s,2345463,,85,0,77,47.85714286, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,892725,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -917,7 +917,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,5724192,,15,0,44,57.857142857142854," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,342875,true,false,false,false,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.05
+anima1s,5724192,,15,0,44,57.85714286, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,342875,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -934,7 +934,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,6110624,,45,0,44,53.57142857142857," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,982285,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,6110624,,45,0,44,53.57142857, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,982285,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -951,7 +951,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,8125315,,45,0,33,53.57142857142857," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,966605,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,8125315,,45,0,33,53.57142857, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,966605,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -968,7 +968,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,9285626,,5,0,11,59.285714285714285," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,240525,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,9285626,,5,0,11,59.28571429, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,240525,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -985,7 +985,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,2179482,,65,0,33,50.714285714285715," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,13703825,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,2179482,,65,0,33,50.71428571, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,13703825,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1002,7 +1002,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,6260240,,65,0,88,50.714285714285715," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,917625,true,false,false,false,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.05
+anima1s,6260240,,65,0,88,50.71428571, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,917625,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1019,7 +1019,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,1281827,,115,0,33,43.57142857142857," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,1004195,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,1281827,,115,0,33,43.57142857, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,1004195,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1036,7 +1036,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,779890,,125,0,33,42.14285714285714," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,1107385,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,779890,,125,0,33,42.14285714, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,1107385,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1053,7 +1053,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,484805,,65,0,77,50.714285714285715," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,6106025,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,484805,,65,0,77,50.71428571, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,6106025,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1070,7 +1070,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,4281257,,85,0,66,47.85714285714286," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,1219345,true,false,false,false,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.05
+anima1s,4281257,,85,0,66,47.85714286, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,1219345,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1087,7 +1087,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,6973117,,85,0,11,47.85714285714286," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,68685,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,6973117,,85,0,11,47.85714286, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,68685,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1104,7 +1104,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,9380173,,125,0,11,42.14285714285714," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,971305,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,9380173,,125,0,11,42.14285714, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,971305,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1121,7 +1121,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,6605097,,95,0,77,46.42857142857143," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,496955,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,6605097,,95,0,77,46.42857143, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,496955,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1138,7 +1138,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,9937648,,95,0,66,46.42857142857143," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,21095,true,false,false,false,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.05
+anima1s,9937648,,95,0,66,46.42857143, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,21095,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1155,7 +1155,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,469162,,125,0,22,42.14285714285714," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,1234925,true,false,false,false,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.05
+anima1s,469162,,125,0,22,42.14285714, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,1234925,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1172,7 +1172,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,291496,,105,0,88,45," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,622965,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,291496,,105,0,88,45, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,622965,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1189,7 +1189,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,4260248,,115,0,77,43.57142857142857," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,39875,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,4260248,,115,0,77,43.57142857, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,39875,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1206,7 +1206,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,5311073,,65,0,88,50.714285714285715," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,502105,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,5311073,,65,0,88,50.71428571, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,502105,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1223,7 +1223,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,7068554,,65,0,66,50.714285714285715," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,8166265,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,7068554,,65,0,66,50.71428571, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,8166265,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1240,7 +1240,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,6970237,,105,0,44,45," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,324765,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,6970237,,105,0,44,45, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,324765,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1257,7 +1257,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,7690366,,35,0,88,55," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,112735,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,7690366,,35,0,88,55, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,112735,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1274,7 +1274,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,3170951,,115,0,33,43.57142857142857," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,666655,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,3170951,,115,0,33,43.57142857, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,666655,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1291,7 +1291,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,3084575,,135,0,77,40.714285714285715," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,30375,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,3084575,,135,0,77,40.71428571, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,30375,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1308,7 +1308,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,3779811,,105,0,11,45," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,213465,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,3779811,,105,0,11,45, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,213465,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1325,7 +1325,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,5492057,,65,0,22,50.714285714285715," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,536825,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,5492057,,65,0,22,50.71428571, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,536825,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1342,7 +1342,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,9220249,,25,0,22,56.42857142857143," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,862985,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,9220249,,25,0,22,56.42857143, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,862985,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1359,7 +1359,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,8889804,,45,0,55,53.57142857142857," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,345145,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,8889804,,45,0,55,53.57142857, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,345145,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1376,7 +1376,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,709584,,75,0,22,49.285714285714285," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,187115,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,709584,,75,0,22,49.28571429, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,187115,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1393,7 +1393,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,9968655,,35,0,11,55," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,884555,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,9968655,,35,0,11,55, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,884555,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1410,7 +1410,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,6234291,,95,0,11,46.42857142857143," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,911355,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,6234291,,95,0,11,46.42857143, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,911355,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1427,7 +1427,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,928198,,65,0,77,50.714285714285715," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,1305705,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,928198,,65,0,77,50.71428571, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,1305705,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1444,7 +1444,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,8186016,,25,0,11,56.42857142857143," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,96485,true,false,false,false,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.05
+anima1s,8186016,,25,0,11,56.42857143, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,96485,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1461,7 +1461,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,3520985,,75,0,88,49.285714285714285," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,957535,true,false,false,false,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.05
+anima1s,3520985,,75,0,88,49.28571429, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,957535,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1478,7 +1478,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,4418586,,65,0,55,50.714285714285715," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,10637965,true,false,false,false,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.05
+anima1s,4418586,,65,0,55,50.71428571, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,10637965,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1495,7 +1495,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,473650,,65,0,33,50.714285714285715," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,10287545,true,false,false,false,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.05
+anima1s,473650,,65,0,33,50.71428571, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,10287545,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1512,7 +1512,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,1735978,,35,0,11,55," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,1316455,true,false,false,false,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.05
+anima1s,1735978,,35,0,11,55, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,1316455,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1529,7 +1529,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,8634809,,75,0,88,49.285714285714285," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,1219895,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,8634809,,75,0,88,49.28571429, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,1219895,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1546,7 +1546,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,1944107,,15,0,55,57.857142857142854," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,594035,true,false,false,false,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.05
+anima1s,1944107,,15,0,55,57.85714286, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,594035,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1563,7 +1563,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,8582062,,115,0,11,43.57142857142857," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,497815,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,8582062,,115,0,11,43.57142857, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,497815,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1580,7 +1580,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,9954676,,95,0,55,46.42857142857143," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,1078235,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,9954676,,95,0,55,46.42857143, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,1078235,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1597,7 +1597,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,790761,,35,0,55,55," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,1062775,true,false,false,false,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.05
+anima1s,790761,,35,0,55,55, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,1062775,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9
@@ -1614,7 +1614,7 @@ false,f85,f75,move-toward,0.9
 false,f85,f75,hide,-1
 false,f95,f85,move-toward,0.9
 false,f95,f85,hide,-1",nobody
-anima1s,7728289,,65,0,33,50.714285714285715," ",9.9,circle323,false,0.99999,1,up,female,adult,cycling,714905,true,false,false,false,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.05
+anima1s,7728289,,65,0,33,50.71428571, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,cycling,714905,TRUE,FALSE,FALSE,FALSE,1,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,0.5,1,1,1,0.99999,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.05
 false,f,of,hide,0.05","false,f,e,go-forward,0.1
 false,f,e,set-heading-random,0.05
 false,f25,f15,move-toward,0.9

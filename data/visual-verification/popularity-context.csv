@@ -1,5 +1,5 @@
-breed,meta.id,age,color,heading,xcor,ycor,label,label-color,shape,hidden?,size,pen-size,pen-mode,biological.sex,life.history,female.fertility,group.identity,is.alive,yellow.signal,red.signal,blue.signal,living.chance,body.size,body.shade,energy.supply,identity.I,identity.II,carried.items,bite.capacity,mutation.chance,sex.ratio,litter.size,conception.chance,visual.angle,visual.range,day.perception,night.perception,yellow.chance,red.chance,blue.chance,birthing.chance,weaning.chance,infancy.chance,juvenility.chance,adulthood.chance,x.magnitude,y.magnitude,chromosome.I,chromosome.II,my.mother
-anima1s,8515570,,14,73.37542115757996,23.549399873927907,24.360332336543312," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",1848435,true,false,false,false,0.9999901375,0.99999,0.8,999996.0801699999,wzxrtkilvp,aydrjklevd,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+breed,my.identity,age,color,heading,xcor,ycor,label,label-color,shape,hidden?,size,pen-size,pen-mode,biological.sex,life.history,female.fertility,group.identity,is.alive,yellow.signal,red.signal,blue.signal,living.chance,body.size,body.shade,energy.supply,identity.I,identity.II,carried.items,bite.capacity,mutation.chance,sex.ratio,litter.size,conception.chance,visual.angle,visual.range,day.perception,night.perception,yellow.chance,red.chance,blue.chance,birthing.chance,weaning.chance,infancy.chance,juvenility.chance,adulthood.chance,x.magnitude,y.magnitude,chromosome.I,chromosome.II,my.mother
+anima1s,8515570,,14,73.37542116,23.54939987,24.36033234, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,1848435,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.0802,wzxrtkilvp,aydrjklevd,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -11,7 +11,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,7508379,,94,220.72118027623682,76.4035819382311,25.822631811931693," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",912475,true,false,false,false,0.9999901375,0.99999,0.8,999996.0800299997,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,7508379,,94,220.7211803,76.40358194,25.82263181, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,912475,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.08,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -23,7 +23,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,9558497,,94,325.1770315220152,75.74002570256842,23.60113716499779," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",1376855,true,false,false,false,0.9999901375,0.99999,0.8,999996.0799899998,czxrjkyekp,wzxrjkflkp,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,9558497,,94,325.1770315,75.7400257,23.60113716, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,1376855,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.08,czxrjkyekp,wzxrjkflkp,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -35,7 +35,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,3688527,,24,351.17179458353434,76.05065781410154,73.66373074720308," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",3218485,true,false,false,false,0.9999901375,0.99999,0.8,999996.0800299998,wzxrtkilvp,aydrjklevd,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,3688527,,24,351.1717946,76.05065781,73.66373075, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,3218485,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.08,wzxrtkilvp,aydrjklevd,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -47,7 +47,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,7163020,,24,220.6754913962066,75.75994686841788,76.41198918665955," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",3218485,true,false,false,false,0.9999901375,0.99999,0.8,999996.0804499998,wzxrtkilvp,aydrjklevd,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,7163020,,24,220.6754914,75.75994687,76.41198919, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,3218485,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.0804,wzxrtkilvp,aydrjklevd,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -59,7 +59,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,4791746,,14,296.07256431680435,26.487832367363993,24.45982379395914," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",1848435,true,false,false,false,0.9999901375,0.99999,0.8,999996.0800999998,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,4791746,,14,296.0725643,26.48783237,24.45982379, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,1848435,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.0801,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -71,7 +71,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,355116,,94,159.59969272915703,74.31948441999911,26.429351655003195," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",7788435,true,false,false,false,0.9999901375,0.99999,0.8,999996.0801399999,wzxrtkilvp,aydrjklevd,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,355116,,94,159.5996927,74.31948442,26.42935166, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,7788435,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.0801,wzxrtkilvp,aydrjklevd,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -83,7 +83,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,4666014,,24,43.70964707644743,74.21437187347631,73.59668380596719," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",3218485,true,false,false,false,0.9999901375,0.99999,0.8,999996.0801099997,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,4666014,,24,43.70964708,74.21437187,73.59668381, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,3218485,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.0801,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -95,7 +95,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,5879128,,24,164.31826103239916,75.00155978216577,76.61123238661408," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",3218485,true,false,false,false,0.9999901375,0.99999,0.8,999996.1465099999,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,5879128,,24,164.318261,75.00155978,76.61123239, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,3218485,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.1465,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -107,7 +107,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,1610533,,64,161.6641192131158,23.505696899882114,75.99148220390701," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",2330925,true,false,false,false,0.9999901375,0.99999,0.8,999996.0801599999,czxrjkyekp,wzxrjkflkp,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,1610533,,64,161.6641192,23.5056969,75.9914822, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,2330925,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.0802,czxrjkyekp,wzxrjkflkp,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -119,7 +119,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,6395288,,14,303.03326016896887,26.353927117980017,24.185473628770577," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",1848435,true,false,false,false,0.9999901375,0.99999,0.8,999996.0802199998,czxrjkyekp,wzxrjkflkp,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,6395288,,14,303.0332602,26.35392712,24.18547363, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,1848435,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.0802,czxrjkyekp,wzxrjkflkp,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -131,7 +131,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,9455209,,64,105.98244431925623,23.832154033568457,76.27562830709783," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",2330925,true,false,false,false,0.9999901375,0.99999,0.8,999996.1468399997,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,9455209,,64,105.9824443,23.83215403,76.27562831, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,2330925,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.1468,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -143,7 +143,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,9453155,,65,0,25,75," ",9.9,circle133,false,0.99999,1,up,female,adult,cycling,2330925,true,false,false,false,0.9999901375,0.99999,0.7,999999.0099999999,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,9453155,,65,0,25,75, ,9.9,circle133,FALSE,0.99999,1,up,female,adult,cycling,2330925,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.7,999999.01,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -155,7 +155,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,416455,,94,34.685170535380195,73.5410036035957,24.178310595475516," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",2525415,true,false,false,false,0.9999901375,0.99999,0.8,999996.0801399996,czxrjkyekp,wzxrjkflkp,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,416455,,94,34.68517054,73.5410036,24.1783106, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,2525415,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.0801,czxrjkyekp,wzxrjkflkp,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -167,7 +167,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,9800030,,25,0,75,75," ",9.9,circle133,false,0.99999,1,up,female,adult,cycling,3218485,true,false,false,false,0.9999901375,0.99999,0.7,999999.0099999999,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,9800030,,25,0,75,75, ,9.9,circle133,FALSE,0.99999,1,up,female,adult,cycling,3218485,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.7,999999.01,amsztbxkvz,czxrjkfekp,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -179,7 +179,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,8677423,,24,281.37342685113475,76.49953104504146,74.45976027246722," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",3218485,true,false,false,false,0.9999901375,0.99999,0.8,999996.0804999997,czxrjkyekp,wzxrjkflkp,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,8677423,,24,281.3734269,76.49953105,74.45976027, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,3218485,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.0805,czxrjkyekp,wzxrjkflkp,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -191,7 +191,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,2461656,,15,0,25,25," ",9.9,circle133,false,0.99999,1,up,female,adult,cycling,1848435,true,false,false,false,0.9999901375,0.99999,0.7,999999.0099999999,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,2461656,,15,0,25,25, ,9.9,circle133,FALSE,0.99999,1,up,female,adult,cycling,1848435,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.7,999999.01,cyszjkxkkz,azdrtklevd,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -203,7 +203,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,2996750,,95,0,75,25," ",9.9,circle133,false,0.99999,1,up,female,adult,cycling,9474875,true,false,false,false,0.9999901375,0.99999,0.7,999999.0099999999,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,2996750,,95,0,75,25, ,9.9,circle133,FALSE,0.99999,1,up,female,adult,cycling,9474875,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.7,999999.01,wzxzykadyu,amdltbyukz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -215,7 +215,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,1729081,,64,339.4737976209274,25.106201755070913,73.38723758168197," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",2330925,true,false,false,false,0.9999901375,0.99999,0.8,999996.0800299997,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,1729081,,64,339.4737976,25.10620176,73.38723758, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,2330925,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.08,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -227,7 +227,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,143728,,14,153.44206730860196,23.663094868381094,26.015044512262048," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",1848435,true,false,false,false,0.9999901375,0.99999,0.8,999996.0802399998,wzxrtkilvp,aydrjklevd,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,143728,,14,153.4420673,23.66309487,26.01504451, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,1848435,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.0802,wzxrtkilvp,aydrjklevd,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -239,7 +239,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,1214535,,14,212.37233315096196,25.938801151221032,26.268861944206307," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",1848435,true,false,false,false,0.9999901375,0.99999,0.8,999996.0800099998,wzxrtkilvp,aydrjklevd,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,1214535,,14,212.3723332,25.93880115,26.26886194, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,1848435,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.08,wzxrtkilvp,aydrjklevd,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -251,7 +251,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,7151300,,14,38.317476356440935,24.94170055525754,23.226636061920193," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",1848435,true,false,false,false,0.9999901375,0.99999,0.8,999996.0802399998,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,7151300,,14,38.31747636,24.94170056,23.22663606, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,1848435,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.0802,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -263,7 +263,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,9608336,,14,324.915277859817,25.60609145348107,23.516701445123203," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",1848435,true,false,false,false,0.9999901375,0.99999,0.8,999996.1420099997,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,9608336,,14,324.9152779,25.60609145,23.51670145, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,1848435,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.142,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -275,7 +275,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,9152245,,64,154.9236541055832,25.237763564764634,76.7185168365981," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",2330925,true,false,false,false,0.9999901375,0.99999,0.8,999996.0800999998,wzxrtkilvp,aydrjklevd,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,9152245,,64,154.9236541,25.23776356,76.71851684, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,2330925,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.0801,wzxrtkilvp,aydrjklevd,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -287,7 +287,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,8592741,,24,80.06442245373906,73.46129320398164,74.63486982866466," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",3218485,true,false,false,false,0.9999901375,0.99999,0.8,999996.0801599998,czxrjkyekp,wzxrjkflkp,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,8592741,,24,80.06442245,73.4612932,74.63486983, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,3218485,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.0802,czxrjkyekp,wzxrjkflkp,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -299,7 +299,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,6220031,,64,179.34835446487585,25.46442355901074,76.55014854472327," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",2330925,true,false,false,false,0.9999901375,0.99999,0.8,999996.0799999997,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,6220031,,64,179.3483545,25.46442356,76.55014854, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,2330925,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.08,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -311,7 +311,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,4886094,,94,304.8866454360407,76.12309008445294,23.87333467441085," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",11910735,true,false,false,false,0.9999901375,0.99999,0.8,999996.1516499998,czxrjkyekp,wzxrjkflkp,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,4886094,,94,304.8866454,76.12309008,23.87333467, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,11910735,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.1516,czxrjkyekp,wzxrjkflkp,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -323,7 +323,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,4927586,,64,322.0542258684531,26.007452514347243,73.78331516939257," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",2330925,true,false,false,false,0.9999901375,0.99999,0.8,999996.1516899999,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,4927586,,64,322.0542259,26.00745251,73.78331517, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,2330925,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.1517,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -335,7 +335,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,3673551,,24,16.017842322078025,74.81672794967186,73.42167389515413," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",3218485,true,false,false,false,0.9999901375,0.99999,0.8,999996.0800399998,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,3673551,,24,16.01784232,74.81672795,73.4216739, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,3218485,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.08,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -347,7 +347,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,3541351,,14,256.1249294650363,26.60742853209959,24.986533843312895," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",1848435,true,false,false,false,0.9999901375,0.99999,0.8,999996.0801999997,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,3541351,,14,256.1249295,26.60742853,24.98653384, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,1848435,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.0802,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -359,7 +359,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,3819331,,24,151.99649922032495,73.4450275513583,75.80709307820634," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",3218485,true,false,false,false,0.9999901375,0.99999,0.8,999996.0801099997,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,3819331,,24,151.9964992,73.44502755,75.80709308, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,3218485,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.0801,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -371,7 +371,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,7820449,,64,304.8256956189982,26.688792120051954,74.82508168168272," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",2330925,true,false,false,false,0.9999901375,0.99999,0.8,999996.0801199998,czxrjkyekp,wzxrjkflkp,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,7820449,,64,304.8256956,26.68879212,74.82508168, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,2330925,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.0801,czxrjkyekp,wzxrjkflkp,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -383,7 +383,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,8113730,,64,65.78205176456248,23.67576659982881,74.12357464056483," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",2330925,true,false,false,false,0.9999901375,0.99999,0.8,999996.0799899998,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,8113730,,64,65.78205176,23.6757666,74.12357464, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,2330925,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.08,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -395,7 +395,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,1723947,,14,101.12431589813482,23.418574720771872,25.102711562346798," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",1848435,true,false,false,false,0.9999901375,0.99999,0.8,999996.0800699998,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,1723947,,14,101.1243159,23.41857472,25.10271156, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,1848435,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.0801,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -407,7 +407,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,3381598,,94,257.38179042917943,76.58971760618006,25.089855133146244," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",13587935,true,false,false,false,0.9999901375,0.99999,0.8,999996.0801599998,wzxrtkilvp,aydrjklevd,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,3381598,,94,257.3817904,76.58971761,25.08985513, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,13587935,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.0802,wzxrtkilvp,aydrjklevd,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -419,7 +419,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,2441383,,24,95.19090105930941,73.42335781086314,75.0975901951571," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",3218485,true,false,false,false,0.9999901375,0.99999,0.8,999996.0802399997,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,2441383,,24,95.19090106,73.42335781,75.0975902, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,3218485,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.0802,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -431,7 +431,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,250575,,64,245.13220398067253,26.4024341904719,75.72255951601352," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",2330925,true,false,false,false,0.9999901375,0.99999,0.8,999996.1516699998,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,250575,,64,245.132204,26.40243419,75.72255952, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,2330925,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.1517,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -443,7 +443,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,1258867,,94,192.44516027156712,75.20696304645557,26.570731121143783," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",7769255,true,false,false,false,0.9999901375,0.99999,0.8,999996.1422299996,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,1258867,,94,192.4451603,75.20696305,26.57073112, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,7769255,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.1422,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -455,7 +455,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,2942773,,94,166.8855869439164,75.43296715916934,26.636746923116217," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",11501655,true,false,false,false,0.9999901375,0.99999,0.8,999996.0802599997,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,2942773,,94,166.8855869,75.43296716,26.63674692, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,11501655,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.0803,cmxltkygkd,azdrtklevz,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5
@@ -467,7 +467,7 @@ false,m,e,set-heading,0
 false,m64,e,set-heading,0.25
 false,m24,e,set-heading,0.5
 false,m94,e,set-heading,0.75",nobody
-anima1s,3857458,,94,101.61804463381392,73.6323326454268,25.917551634365477," ",9.9,triangle133,false,0.99999,1,up,male,adult," ",1319875,true,false,false,false,0.9999901375,0.99999,0.8,999996.0800699997,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
+anima1s,3857458,,94,101.6180446,73.63233265,25.91755163, ,9.9,triangle133,FALSE,0.99999,1,up,male,adult, ,1319875,TRUE,FALSE,FALSE,FALSE,0.999990138,0.99999,0.8,999996.0801,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.03","false,m,om,recruit,0.5
 false,f65,m,recruit,0.5
 false,m64,f25,join,0.5
 false,f95,m24,recruit,0.5

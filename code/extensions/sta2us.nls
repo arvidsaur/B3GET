@@ -126,8 +126,8 @@ to-report sta7us-get-decisions [ my-environment ]
 
   let status-table table:make
   foreach my-environment [ obj ->
-    if ( is-patch? obj ) [ table:put status-table ( [pmeta.id] of obj ) ( status-of obj ) ]
-    if ( is-anima1? obj ) [ table:put status-table ( [meta.id] of obj ) ( status-of obj ) ]
+    if ( is-patch? obj ) [ table:put status-table ( [pmy.identity] of obj ) ( status-of obj ) ]
+    if ( is-anima1? obj ) [ table:put status-table ( [my.identity] of obj ) ( status-of obj ) ]
   ]
   
   foreach (sentence chromosome.I chromosome.II) [ g ->
@@ -143,7 +143,7 @@ to-report sta7us-get-decisions [ my-environment ]
         
         ; Consider status-of others in the environment
         foreach my-environment [ other-guy ->
-          let other-status table:get status-table ifelse-value ( is-patch? other-guy ) [ [pmeta.id] of other-guy ] [ [meta.id] of other-guy ]
+          let other-status table:get status-table ifelse-value ( is-patch? other-guy ) [ [pmy.identity] of other-guy ] [ [my.identity] of other-guy ]
           
           ; Check that second CODON matches other
           if first-string-is-part-of-last? ( gene-other ) ( other-status ) [
@@ -272,7 +272,7 @@ end
 to-report status-of [ target ]
   let status-report ""
 
-  set status-report ( word status-report ifelse-value ( get-solar-status = "DAY" ) [ "*" ][ "-" ] )
+  set status-report ( word status-report ifelse-value ( solar-status = "DAY" ) [ "*" ][ "-" ] )
   let distance-to-target distance target
   
   if (is-anima1? target) [ ; ANIMALS
@@ -281,10 +281,10 @@ to-report status-of [ target ]
     let target-alive ifelse-value ( is.alive ) [ "v" ] [ "w" ]
     let target-sex first [biological.sex] of target
     let target-life-history first [life.history] of target
-    let target-fertility first [female.fertility] of target
+    let target-fertility first [fertility.status] of target
     let target-size ifelse-value ( [size] of target < size ) [ "r" ] [ "b" ]
     let target-health ifelse-value ( [survival.chance] of target > survival.chance ) [ "h" ] [ "x" ]
-    let target-kin ifelse-value ( relatedness-with target > 0.2 ) [ "k" ] [ "q" ]
+    let target-kin ifelse-value ( relatedness-with target > 0.0156 ) [ "k" ] [ "q" ]
     let target-group ifelse-value ( [group.identity] of target = group.identity ) [ "n" ] [ "u" ] 
     let target-carry ifelse-value ( member? target carried.items ) [ "y" ] [ ifelse-value ( member? self [carried.items] of target ) [ "¥" ] [ "t" ] ]
     let target-signal (word ifelse-value [yellow.signal] of target [ "α" ][ "å" ] ifelse-value [red.signal] of target [ "β" ][ "ß" ] ifelse-value [blue.signal] of target [ "ɣ" ][ "œ" ] )

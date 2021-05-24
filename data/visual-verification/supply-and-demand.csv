@@ -1,5 +1,5 @@
-breed,meta.id,age,color,heading,xcor,ycor,label,label-color,shape,hidden?,size,pen-size,pen-mode,biological.sex,life.history,female.fertility,group.identity,is.alive,yellow.signal,red.signal,blue.signal,living.chance,body.size,body.shade,energy.supply,identity.I,identity.II,carried.items,bite.capacity,mutation.chance,sex.ratio,litter.size,conception.chance,visual.angle,visual.range,day.perception,night.perception,yellow.chance,red.chance,blue.chance,birthing.chance,weaning.chance,infancy.chance,juvenility.chance,adulthood.chance,x.magnitude,y.magnitude,chromosome.I,chromosome.II,my.mother
-anima1s,9413962,,37,0,10,70," ",9.9,triangle333,false,0.6,1,up,male,infant," ",1035475,true,false,false,false,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.6E-5,0,0,0,0,"false,e,e,living-chance,0.03
+breed,my.identity,age,color,heading,xcor,ycor,label,label-color,shape,hidden?,size,pen-size,pen-mode,biological.sex,life.history,female.fertility,group.identity,is.alive,yellow.signal,red.signal,blue.signal,living.chance,body.size,body.shade,energy.supply,identity.I,identity.II,carried.items,bite.capacity,mutation.chance,sex.ratio,litter.size,conception.chance,visual.angle,visual.range,day.perception,night.perception,yellow.chance,red.chance,blue.chance,birthing.chance,weaning.chance,infancy.chance,juvenility.chance,adulthood.chance,x.magnitude,y.magnitude,chromosome.I,chromosome.II,my.mother
+anima1s,9413962,,37,0,10,70, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,1035475,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.60E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -18,8 +18,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",224719
-turtles,,,35,90,30.5,57,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,5605220,,85,0,80,50," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,343645,true,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[8459594],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.03
+turtles,,,35,90,30.5,57,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,5605220,,85,0,80,50, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,343645,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[8459594],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -38,7 +38,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,431460,,75,0,70,80," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,875915,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[7273889],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,431460,,75,0,70,80, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,875915,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[7273889],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -57,7 +57,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,5907871,,77,0,50,30," ",9.9,triangle333,false,0.6,1,up,male,infant," ",1067295,true,false,false,false,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.6E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,5907871,,77,0,50,30, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,1067295,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.60E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -76,8 +76,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",3970596
-turtles,,,15,90,10.5,67,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,4466673,,47,0,40,60," ",9.9,circle333,false,0.6,1,up,female,infant," ",601485,true,false,false,false,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,15,90,10.5,67,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,4466673,,47,0,40,60, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,601485,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -96,8 +96,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",2366594
-turtles,,,75,90,70.5,57,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,6913804,,55,0,50,10," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1376255,true,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[2577843],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.03
+turtles,,,75,90,70.5,57,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,6913804,,55,0,50,10, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1376255,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[2577843],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -116,7 +116,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,423627,,97,0,20,10," ",9.9,triangle333,false,0.6,1,up,male,infant," ",979675,true,false,false,false,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,423627,,97,0,20,10, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,979675,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -135,10 +135,10 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",8952833
-turtles,,,65,90,60.5,47,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,55,90,50.5,17,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,55,90,50.5,67,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,1465260,,95,0,90,50," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,195535,true,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[5928610],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.03
+turtles,,,65,90,60.5,47,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,55,90,50.5,17,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,55,90,50.5,67,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,1465260,,95,0,90,50, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,195535,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[5928610],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -157,7 +157,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,4496953,,15,0,10,90," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,216315,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[7914024],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,4496953,,15,0,10,90, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,216315,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[7914024],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -176,7 +176,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,4594477,,17,0,90,90," ",9.9,circle333,false,0.6,1,up,female,infant," ",641215,true,false,false,false,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,4594477,,17,0,90,90, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,641215,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -195,7 +195,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",6543542
-anima1s,6903334,,55,0,50,70," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,386875,true,false,false,false,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[8012758],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.03
+anima1s,6903334,,55,0,50,70, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,386875,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[8012758],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -214,7 +214,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,5153832,,87,0,20,20," ",9.9,circle333,false,0.6,1,up,female,infant," ",834345,true,false,false,false,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,5153832,,87,0,20,20, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,834345,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -233,8 +233,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",4103456
-turtles,,,85,90,80.5,27,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,889146,,45,0,40,90," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,673165,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[6287786],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+turtles,,,85,90,80.5,27,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,889146,,45,0,40,90, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,673165,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[6287786],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -253,7 +253,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,5414811,,35,0,30,80," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,544775,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[8352391],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,5414811,,35,0,30,80, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,544775,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[8352391],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -272,8 +272,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-turtles,,,95,90,90.5,37,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,1969247,,87,0,10,20," ",9.9,circle333,false,0.6,1,up,female,infant," ",467125,true,false,false,false,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,95,90,90.5,37,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,1969247,,87,0,10,20, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,467125,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -292,9 +292,9 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",6717119
-turtles,,,35,90,30.5,7,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,55,90,50.5,7,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,322500,,27,0,20,80," ",9.9,circle333,false,0.6,1,up,female,infant," ",1192125,true,false,false,false,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,35,90,30.5,7,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,55,90,50.5,7,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,322500,,27,0,20,80, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,1192125,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -313,7 +313,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",6308452
-anima1s,2343042,,45,0,40,20," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1330045,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[8406897],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,2343042,,45,0,40,20, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1330045,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[8406897],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -332,7 +332,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,213673,,95,0,90,30," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,734115,true,false,false,false,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[4281432],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.03
+anima1s,213673,,95,0,90,30, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,734115,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[4281432],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -351,10 +351,10 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-turtles,,,135,86,7,69.5,+0.4,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,25,90,20.5,77,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,15,90,10.5,37,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,9654345,,35,0,30,20," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,915635,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[8770214],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+turtles,,,135,86,7,69.5,0.4,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,25,90,20.5,77,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,15,90,10.5,37,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,9654345,,35,0,30,20, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,915635,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[8770214],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -373,7 +373,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,7260842,,95,0,90,20," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,125115,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[3984191],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,7260842,,95,0,90,20, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,125115,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[3984191],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -392,7 +392,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,6444044,,45,0,40,40," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,421445,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[22872],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,6444044,,45,0,40,40, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,421445,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[22872],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -411,7 +411,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,8244729,,37,0,30,70," ",9.9,triangle333,false,0.6,1,up,male,infant," ",687015,true,false,false,false,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.6E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,8244729,,37,0,30,70, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,687015,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.60E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -430,10 +430,10 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",6893678
-turtles,,,85,90,80.5,17,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,55,90,50.5,77,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,85,90,80.5,87,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,5876923,,45,0,40,10," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,930065,true,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[5345810],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.03
+turtles,,,85,90,80.5,17,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,55,90,50.5,77,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,85,90,80.5,87,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,5876923,,45,0,40,10, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,930065,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[5345810],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -452,7 +452,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,2577843,,97,0,50,10," ",9.9,triangle333,false,0.6,1,up,male,infant," ",646615,true,false,false,false,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,2577843,,97,0,50,10, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,646615,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -471,8 +471,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",6913804
-turtles,,,55,90,50.5,27,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,9547572,,47,0,20,60," ",9.9,circle333,false,0.6,1,up,female,infant," ",1038005,true,false,false,false,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,55,90,50.5,27,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,9547572,,47,0,20,60, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,1038005,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -491,8 +491,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",9766018
-turtles,,,15,90,10.5,17,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,6758884,,75,0,70,70," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,56635,true,false,false,false,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[8341364],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.03
+turtles,,,15,90,10.5,17,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,6758884,,75,0,70,70, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,56635,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[8341364],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -511,7 +511,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,1184204,,85,0,80,70," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1377265,true,false,false,false,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[7873965],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.03
+anima1s,1184204,,85,0,80,70, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1377265,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[7873965],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -530,7 +530,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,9556496,,55,0,50,90," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,533455,true,false,false,false,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[1499461],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.03
+anima1s,9556496,,55,0,50,90, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,533455,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[1499461],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -549,7 +549,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,8459594,,57,0,80,50," ",9.9,triangle333,false,0.6,1,up,male,infant," ",406475,true,false,false,false,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,8459594,,57,0,80,50, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,406475,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -568,7 +568,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",5605220
-anima1s,4329501,,57,0,50,50," ",9.9,triangle333,false,0.6,1,up,male,infant," ",23155,true,false,false,false,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,4329501,,57,0,50,50, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,23155,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -587,9 +587,9 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",7635952
-turtles,,,75,90,70.5,27,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,35,90,30.5,17,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,6287786,,17,0,40,90," ",9.9,circle333,false,0.6,1,up,female,infant," ",1050575,true,false,false,false,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,75,90,70.5,27,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,35,90,30.5,17,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,6287786,,17,0,40,90, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,1050575,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -608,8 +608,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",889146
-turtles,,,95,31,61,4,+0.1,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,3693418,,87,0,70,20," ",9.9,circle333,false,0.6,1,up,female,infant," ",507725,true,false,false,false,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,95,31,61,4,0.1,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,3693418,,87,0,70,20, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,507725,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -628,7 +628,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",7457855
-anima1s,2366594,,45,0,40,60," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,259605,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[4466673],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,2366594,,45,0,40,60, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,259605,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[4466673],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -647,8 +647,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-turtles,,,65,90,60.5,67,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,5395627,,25,0,20,40," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,282405,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[9910823],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+turtles,,,65,90,60.5,67,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,5395627,,25,0,20,40, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,282405,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[9910823],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -667,7 +667,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,6467375,,25,0,20,90," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,725225,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[8157308],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,6467375,,25,0,20,90, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,725225,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[8157308],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -686,7 +686,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,4281432,,77,0,90,30," ",9.9,triangle333,false,0.6,1,up,male,infant," ",367855,true,false,false,false,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.6E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,4281432,,77,0,90,30, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,367855,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.60E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -705,8 +705,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",213673
-turtles,,,55,90,50.5,87,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,7034641,,35,0,30,40," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,703115,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[1672720],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+turtles,,,55,90,50.5,87,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,7034641,,35,0,30,40, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,703115,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[1672720],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -725,7 +725,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,1499461,,17,0,50,90," ",9.9,triangle333,false,0.6,1,up,male,infant," ",13455,true,false,false,false,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.6E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,1499461,,17,0,50,90, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,13455,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.60E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -744,9 +744,9 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",9556496
-turtles,,,65,90,60.5,37,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,95,90,90.5,87,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,511722,,47,0,70,60," ",9.9,circle333,false,0.6,1,up,female,infant," ",744005,true,false,false,false,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,65,90,60.5,37,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,95,90,90.5,87,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,511722,,47,0,70,60, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,744005,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -765,8 +765,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",1293313
-turtles,,,65,90,60.5,7,D,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,7396443,,47,0,60,60," ",9.9,circle333,false,0.6,1,up,female,infant," ",608905,true,false,false,false,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,65,90,60.5,7,D,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,7396443,,47,0,60,60, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,608905,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -785,8 +785,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",3737997
-turtles,,,95,90,90.5,17,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,8352391,,27,0,30,80," ",9.9,circle333,false,0.6,1,up,female,infant," ",261545,true,false,false,false,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,95,90,90.5,17,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,8352391,,27,0,30,80, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,261545,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -805,7 +805,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",5414811
-anima1s,8852710,,97,0,60,10," ",9.9,triangle333,false,0.6,1,up,male,infant," ",463495,true,false,false,false,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,8852710,,97,0,60,10, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,463495,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -824,7 +824,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",4719437
-anima1s,4201177,,25,0,20,70," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,887065,true,false,false,false,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[8937261],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.03
+anima1s,4201177,,25,0,20,70, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,887065,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[8937261],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -843,8 +843,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-turtles,,,95,90,90.5,7,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,751127,,97,0,90,10," ",9.9,triangle333,false,0.6,1,up,male,infant," ",854515,true,false,false,false,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,95,90,90.5,7,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,751127,,97,0,90,10, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,854515,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -863,7 +863,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",8486506
-anima1s,1802281,,65,0,60,70," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1104385,true,false,false,false,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[7275846],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.03
+anima1s,1802281,,65,0,60,70, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1104385,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[7275846],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -882,8 +882,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-turtles,,,35,90,30.5,37,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,7782473,,27,0,40,80," ",9.9,circle333,false,0.6,1,up,female,infant," ",271345,true,false,false,false,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,35,90,30.5,37,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,7782473,,27,0,40,80, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,271345,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -902,7 +902,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",1259005
-anima1s,6308452,,25,0,20,80," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1012225,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[322500],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,6308452,,25,0,20,80, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1012225,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[322500],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -921,11 +921,11 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-turtles,,,35,90,30.5,27,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,45,90,40.5,37,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,95,90,90.5,77,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,95,90,90.5,67,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,851114,,75,0,70,50," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,894115,true,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[1632214],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.03
+turtles,,,35,90,30.5,27,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,45,90,40.5,37,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,95,90,90.5,77,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,95,90,90.5,67,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,851114,,75,0,70,50, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,894115,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[1632214],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -944,8 +944,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-turtles,,,65,90,60.5,87,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,1626134,,27,0,10,80," ",9.9,circle333,false,0.6,1,up,female,infant," ",538745,true,false,false,false,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,65,90,60.5,87,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,1626134,,27,0,10,80, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,538745,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -964,9 +964,9 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",2861880
-turtles,,,65,90,60.5,77,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,85,90,80.5,67,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,9548804,,25,0,20,30," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,919825,true,false,false,false,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[8548232],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.03
+turtles,,,65,90,60.5,77,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,85,90,80.5,67,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,9548804,,25,0,20,30, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,919825,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[8548232],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -985,9 +985,9 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-turtles,,,95,90,90.5,47,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,15,277,11,4,-0.4,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,22872,,67,0,40,40," ",9.9,circle333,false,0.6,1,up,female,infant," ",728205,true,false,false,false,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,95,90,90.5,47,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,15,277,11,4,-0.4,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,22872,,67,0,40,40, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,728205,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1006,7 +1006,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",6444044
-anima1s,9910823,,67,0,20,40," ",9.9,circle333,false,0.6,1,up,female,infant," ",297985,true,false,false,false,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,9910823,,67,0,20,40, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,297985,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1025,7 +1025,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",5395627
-anima1s,1672720,,67,0,30,40," ",9.9,circle333,false,0.6,1,up,female,infant," ",387445,true,false,false,false,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,1672720,,67,0,30,40, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,387445,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1044,7 +1044,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",7034641
-anima1s,271210,,77,0,10,30," ",9.9,triangle333,false,0.6,1,up,male,infant," ",1222555,true,false,false,false,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.6E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,271210,,77,0,10,30, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,1222555,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.60E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1063,7 +1063,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",6411883
-anima1s,6498030,,75,0,70,40," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,512195,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[4214392],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,6498030,,75,0,70,40, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,512195,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[4214392],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1082,7 +1082,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,7965775,,27,0,90,80," ",9.9,circle333,false,0.6,1,up,female,infant," ",581725,true,false,false,false,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,7965775,,27,0,90,80, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,581725,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1101,7 +1101,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",332005
-anima1s,6235257,,57,0,30,50," ",9.9,triangle333,false,0.6,1,up,male,infant," ",805475,true,false,false,false,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,6235257,,57,0,30,50, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,805475,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1120,7 +1120,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",53539
-anima1s,7914024,,17,0,10,90," ",9.9,circle333,false,0.6,1,up,female,infant," ",618115,true,false,false,false,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,7914024,,17,0,10,90, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,618115,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1139,7 +1139,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",4496953
-anima1s,8486506,,95,0,90,10," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1100215,true,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[751127],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.03
+anima1s,8486506,,95,0,90,10, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1100215,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[751127],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1158,7 +1158,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,1094382,,85,0,80,20," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,742505,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[7086900],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,1094382,,85,0,80,20, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,742505,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[7086900],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1177,7 +1177,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,1947338,,85,0,80,90," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,818805,true,false,false,false,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[3652939],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.03
+anima1s,1947338,,85,0,80,90, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,818805,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[3652939],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1196,7 +1196,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,4054280,,47,0,10,60," ",9.9,circle333,false,0.6,1,up,female,infant," ",648945,true,false,false,false,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,4054280,,47,0,10,60, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,648945,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1215,8 +1215,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",7804109
-turtles,,,75,90,70.5,87,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,4557920,,95,0,90,60," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1122615,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[7049966],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+turtles,,,75,90,70.5,87,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,4557920,,95,0,90,60, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1122615,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[7049966],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1235,9 +1235,9 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-turtles,,,105,205,7,9.5,-0.2,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,15,90,10.5,77,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,6411883,,15,0,10,30," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,801515,true,false,false,false,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[271210],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.03
+turtles,,,105,205,7,9.5,-0.2,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,15,90,10.5,77,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,6411883,,15,0,10,30, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,801515,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[271210],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1256,7 +1256,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,9904960,,27,0,50,80," ",9.9,circle333,false,0.6,1,up,female,infant," ",74225,true,false,false,false,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,9904960,,27,0,50,80, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,74225,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1275,7 +1275,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",3855560
-anima1s,3855560,,55,0,50,80," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,573355,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[9904960],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,3855560,,55,0,50,80, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,573355,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[9904960],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1294,7 +1294,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,9462018,,95,0,90,40," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1014535,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[2091889],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,9462018,,95,0,90,40, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1014535,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[2091889],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1313,7 +1313,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,3970596,,55,0,50,30," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1002875,true,false,false,false,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[5907871],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.03
+anima1s,3970596,,55,0,50,30, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1002875,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[5907871],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1332,7 +1332,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,53539,,35,0,30,50," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,612395,true,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[6235257],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.03
+anima1s,53539,,35,0,30,50, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,612395,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[6235257],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1351,8 +1351,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-turtles,,,15,113,7,39.5,+0.1,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,8797024,,17,0,30,90," ",9.9,circle333,false,0.6,1,up,female,infant," ",1363335,true,false,false,false,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,15,113,7,39.5,0.1,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,8797024,,17,0,30,90, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,1363335,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1371,7 +1371,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",7948194
-anima1s,3569969,,45,0,40,70," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1193125,true,false,false,false,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[6666946],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.03
+anima1s,3569969,,45,0,40,70, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1193125,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[6666946],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1390,7 +1390,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,7275846,,37,0,60,70," ",9.9,triangle333,false,0.6,1,up,male,infant," ",1193675,true,false,false,false,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.6E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,7275846,,37,0,60,70, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,1193675,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.60E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1409,7 +1409,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",1802281
-anima1s,2426254,,15,0,10,50," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,924435,true,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[8238567],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.03
+anima1s,2426254,,15,0,10,50, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,924435,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[8238567],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1428,9 +1428,9 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-turtles,,,65,44,51,4,0,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,25,90,20.5,57,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,9014240,,77,0,70,30," ",9.9,triangle333,false,0.6,1,up,male,infant," ",1139815,true,false,false,false,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.6E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,65,44,51,4,0,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,25,90,20.5,57,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,9014240,,77,0,70,30, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,1139815,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.60E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1449,7 +1449,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",7567805
-anima1s,5035275,,65,0,60,50," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,192425,true,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[126504],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.03
+anima1s,5035275,,65,0,60,50, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,192425,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[126504],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1468,9 +1468,9 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-turtles,,,25,90,20.5,47,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,35,90,30.5,67,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,6974828,,55,0,50,20," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,757875,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[6108592],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+turtles,,,25,90,20.5,47,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,35,90,30.5,67,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,6974828,,55,0,50,20, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,757875,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[6108592],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1489,7 +1489,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,6717119,,15,0,10,20," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,324255,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[1969247],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,6717119,,15,0,10,20, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,324255,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[1969247],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1508,7 +1508,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,8801047,,55,0,50,40," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,121435,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[5494255],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,8801047,,55,0,50,40, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,121435,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[5494255],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1527,7 +1527,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,9532801,,65,0,60,20," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1126925,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[99463],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,9532801,,65,0,60,20, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1126925,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[99463],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1546,7 +1546,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,6614126,,35,0,30,30," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,20195,true,false,false,false,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[4912080],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.03
+anima1s,6614126,,35,0,30,30, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,20195,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[4912080],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1565,7 +1565,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,8770214,,87,0,30,20," ",9.9,circle333,false,0.6,1,up,female,infant," ",432685,true,false,false,false,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,8770214,,87,0,30,20, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,432685,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1584,7 +1584,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",9654345
-anima1s,126504,,57,0,60,50," ",9.9,triangle333,false,0.6,1,up,male,infant," ",60535,true,false,false,false,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,126504,,57,0,60,50, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,60535,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1603,7 +1603,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",5035275
-anima1s,99463,,87,0,60,20," ",9.9,circle333,false,0.6,1,up,female,infant," ",543705,true,false,false,false,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,99463,,87,0,60,20, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,543705,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1622,8 +1622,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",9532801
-turtles,,,45,90,40.5,17,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,2091889,,67,0,90,40," ",9.9,circle333,false,0.6,1,up,female,infant," ",1082685,true,false,false,false,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,45,90,40.5,17,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,2091889,,67,0,90,40, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,1082685,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1642,7 +1642,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",9462018
-anima1s,8548232,,77,0,20,30," ",9.9,triangle333,false,0.6,1,up,male,infant," ",1016755,true,false,false,false,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.6E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,8548232,,77,0,20,30, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,1016755,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.60E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1661,7 +1661,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",9548804
-anima1s,7635952,,55,0,50,50," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1149595,true,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[4329501],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.03
+anima1s,7635952,,55,0,50,50, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1149595,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[4329501],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1680,7 +1680,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,4912080,,77,0,30,30," ",9.9,triangle333,false,0.6,1,up,male,infant," ",886415,true,false,false,false,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.6E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,4912080,,77,0,30,30, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,886415,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.60E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1699,7 +1699,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",6614126
-anima1s,4010027,,47,0,50,60," ",9.9,circle333,false,0.6,1,up,female,infant," ",344445,true,false,false,false,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,4010027,,47,0,50,60, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,344445,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1718,10 +1718,10 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",1997742
-turtles,,,95,90,90.5,57,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,15,90,10.5,27,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,25,90,20.5,27,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,7948194,,35,0,30,90," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,126455,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[8797024],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+turtles,,,95,90,90.5,57,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,15,90,10.5,27,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,25,90,20.5,27,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,7948194,,35,0,30,90, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,126455,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[8797024],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1740,11 +1740,11 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-turtles,,,15,90,10.5,87,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,125,228,7,49.5,+0.2,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,65,90,60.5,57,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,25,90,20.5,37,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,6893678,,35,0,30,70," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,577255,true,false,false,false,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[8244729],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.03
+turtles,,,15,90,10.5,87,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,125,228,7,49.5,0.2,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,65,90,60.5,57,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,25,90,20.5,37,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,6893678,,35,0,30,70, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,577255,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[8244729],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1763,7 +1763,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,8012758,,37,0,50,70," ",9.9,triangle333,false,0.6,1,up,male,infant," ",177695,true,false,false,false,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.6E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,8012758,,37,0,50,70, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,177695,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.60E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1782,7 +1782,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",6903334
-anima1s,5404584,,25,0,20,50," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,607485,true,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[6961325],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.03
+anima1s,5404584,,25,0,20,50, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,607485,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[6961325],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1801,7 +1801,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,8341364,,37,0,70,70," ",9.9,triangle333,false,0.6,1,up,male,infant," ",44555,true,false,false,false,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.6E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,8341364,,37,0,70,70, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,44555,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.60E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1820,8 +1820,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",6758884
-turtles,,,75,90,70.5,7,D,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,1144078,,27,0,80,80," ",9.9,circle333,false,0.6,1,up,female,infant," ",394965,true,false,false,false,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,75,90,70.5,7,D,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,1144078,,27,0,80,80, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,394965,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1840,7 +1840,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",3258680
-anima1s,6961325,,57,0,20,50," ",9.9,triangle333,false,0.6,1,up,male,infant," ",1248015,true,false,false,false,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,6961325,,57,0,20,50, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,1248015,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1859,7 +1859,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",5404584
-anima1s,6239166,,95,0,90,70," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,671675,true,false,false,false,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[3109984],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.03
+anima1s,6239166,,95,0,90,70, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,671675,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[3109984],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1878,7 +1878,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,7567805,,75,0,70,30," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1070515,true,false,false,false,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[9014240],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.03
+anima1s,7567805,,75,0,70,30, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1070515,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[9014240],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1897,7 +1897,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,2861880,,15,0,10,80," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,38375,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[1626134],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,2861880,,15,0,10,80, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,38375,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[1626134],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1916,8 +1916,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-turtles,,,85,90,80.5,77,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,1293313,,75,0,70,60," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,780155,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[511722],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+turtles,,,85,90,80.5,77,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,1293313,,75,0,70,60, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,780155,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[511722],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1936,8 +1936,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-turtles,,,75,90,70.5,77,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,4331404,,85,0,80,60," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1261065,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[132942],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+turtles,,,75,90,70.5,77,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,4331404,,85,0,80,60, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1261065,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[132942],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1956,8 +1956,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-turtles,,,25,171,7,29.5,0,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,4830583,,97,0,70,10," ",9.9,triangle333,false,0.6,1,up,male,infant," ",189655,true,false,false,false,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,25,171,7,29.5,0,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,4830583,,97,0,70,10, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,189655,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1976,9 +1976,9 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",950164
-turtles,,,75,90,70.5,17,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,85,90,80.5,47,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,4556097,,85,0,80,30," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1390425,true,false,false,false,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[7395513],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.03
+turtles,,,75,90,70.5,17,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,85,90,80.5,47,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,4556097,,85,0,80,30, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1390425,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[7395513],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -1997,8 +1997,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-turtles,,,15,90,10.5,7,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,224719,,15,0,10,70," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,913795,true,false,false,false,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[9413962],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.03
+turtles,,,15,90,10.5,7,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,224719,,15,0,10,70, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,913795,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[9413962],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2017,7 +2017,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,2490216,,97,0,30,10," ",9.9,triangle333,false,0.6,1,up,male,infant," ",1157755,true,false,false,false,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,2490216,,97,0,30,10, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,1157755,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2036,8 +2036,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",4042362
-turtles,,,85,90,80.5,57,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,3165689,,35,0,30,60," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,404495,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[7889803],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+turtles,,,85,90,80.5,57,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,3165689,,35,0,30,60, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,404495,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[7889803],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2056,7 +2056,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,4621084,,45,0,40,50," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,873645,true,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[5308976],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.03
+anima1s,4621084,,45,0,40,50, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,873645,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[5308976],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2075,7 +2075,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,4214392,,67,0,70,40," ",9.9,circle333,false,0.6,1,up,female,infant," ",420625,true,false,false,false,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,4214392,,67,0,70,40, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,420625,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2094,10 +2094,10 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",6498030
-turtles,,,35,243,7,59.5,+0.3,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,105,327,41,4,-0.1,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,5,45,21,4,-0.3,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,9766018,,25,0,20,60," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,361785,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[9547572],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+turtles,,,35,243,7,59.5,0.3,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,105,327,41,4,-0.1,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,5,45,21,4,-0.3,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,9766018,,25,0,20,60, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,361785,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[9547572],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2116,7 +2116,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,3258680,,85,0,80,80," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,294505,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[1144078],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,3258680,,85,0,80,80, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,294505,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[1144078],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2135,10 +2135,10 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-turtles,,,95,90,90.5,27,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,45,90,40.5,47,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,25,90,20.5,7,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,7666569,,67,0,80,40," ",9.9,circle333,false,0.6,1,up,female,infant," ",346285,true,false,false,false,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,95,90,90.5,27,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,45,90,40.5,47,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,25,90,20.5,7,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,7666569,,67,0,80,40, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,346285,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2157,7 +2157,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",1148917
-anima1s,5345810,,97,0,40,10," ",9.9,triangle333,false,0.6,1,up,male,infant," ",995915,true,false,false,false,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,5345810,,97,0,40,10, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,995915,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2176,7 +2176,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",5876923
-anima1s,5928610,,57,0,90,50," ",9.9,triangle333,false,0.6,1,up,male,infant," ",516235,true,false,false,false,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,5928610,,57,0,90,50, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,516235,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2195,7 +2195,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",1465260
-anima1s,7804109,,15,0,10,60," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1288015,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[4054280],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,7804109,,15,0,10,60, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1288015,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[4054280],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2214,7 +2214,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,1632214,,57,0,70,50," ",9.9,triangle333,false,0.6,1,up,male,infant," ",1060975,true,false,false,false,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,1632214,,57,0,70,50, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,1060975,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2233,8 +2233,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",851114
-turtles,,,35,90,30.5,77,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,5308976,,57,0,40,50," ",9.9,triangle333,false,0.6,1,up,male,infant," ",844955,true,false,false,false,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,35,90,30.5,77,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,5308976,,57,0,40,50, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,844955,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2253,7 +2253,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",4621084
-anima1s,9149063,,67,0,60,40," ",9.9,circle333,false,0.6,1,up,female,infant," ",67265,true,false,false,false,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,9149063,,67,0,60,40, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,67265,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2272,8 +2272,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",1786876
-turtles,,,75,90,70.5,37,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,7395513,,77,0,80,30," ",9.9,triangle333,false,0.6,1,up,male,infant," ",1138415,true,false,false,false,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.6E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,75,90,70.5,37,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,7395513,,77,0,80,30, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,1138415,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.60E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2292,8 +2292,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",4556097
-turtles,,,95,100,71,4,+0.2,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,6761472,,15,0,10,10," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,230455,true,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[2936502],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.03
+turtles,,,95,100,71,4,0.2,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,6761472,,15,0,10,10, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,230455,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[2936502],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2312,7 +2312,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,3109984,,37,0,90,70," ",9.9,triangle333,false,0.6,1,up,male,infant," ",1373155,true,false,false,false,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.6E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,3109984,,37,0,90,70, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,1373155,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.60E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2331,7 +2331,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",6239166
-anima1s,6108592,,87,0,50,20," ",9.9,circle333,false,0.6,1,up,female,infant," ",991285,true,false,false,false,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,6108592,,87,0,50,20, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,991285,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2350,7 +2350,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",6974828
-anima1s,3831949,,75,0,70,90," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,218055,true,false,false,false,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[5273410],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.03
+anima1s,3831949,,75,0,70,90, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,218055,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[5273410],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2369,7 +2369,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,8121750,,65,0,60,30," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1117685,true,false,false,false,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[4003387],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.03
+anima1s,8121750,,65,0,60,30, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1117685,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[4003387],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2388,7 +2388,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,4794966,,85,0,80,10," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,659065,true,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[2077421],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.03
+anima1s,4794966,,85,0,80,10, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,659065,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[2077421],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2407,7 +2407,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,4042362,,35,0,30,10," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1111775,true,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[2490216],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.03
+anima1s,4042362,,35,0,30,10, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1111775,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[2490216],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2426,8 +2426,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-turtles,,,25,291,81,4,+0.3,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,2936502,,97,0,10,10," ",9.9,triangle333,false,0.6,1,up,male,infant," ",627715,true,false,false,false,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,25,291,81,4,0.3,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,2936502,,97,0,10,10, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,627715,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2446,10 +2446,10 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",6761472
-turtles,,,65,90,60.5,17,D,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,65,185,31,4,-0.2,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,75,90,70.5,67,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,7086900,,87,0,80,20," ",9.9,circle333,false,0.6,1,up,female,infant," ",630785,true,false,false,false,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,65,90,60.5,17,D,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,65,185,31,4,-0.2,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,75,90,70.5,67,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,7086900,,87,0,80,20, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,630785,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2468,7 +2468,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",1094382
-anima1s,3652939,,17,0,80,90," ",9.9,triangle333,false,0.6,1,up,male,infant," ",38375,true,false,false,false,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.6E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,3652939,,17,0,80,90, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,38375,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.60E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2487,11 +2487,11 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",1947338
-turtles,,,45,90,40.5,87,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,45,90,40.5,27,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,75,90,70.5,47,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,35,158,7,19.5,-0.1,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,7457855,,75,0,70,20," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,129295,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[3693418],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+turtles,,,45,90,40.5,87,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,45,90,40.5,27,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,75,90,70.5,47,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,35,158,7,19.5,-0.1,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,7457855,,75,0,70,20, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,129295,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[3693418],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2510,8 +2510,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-turtles,,,35,90,30.5,47,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,9974472,,17,0,60,90," ",9.9,triangle333,false,0.6,1,up,male,infant," ",467055,true,false,false,false,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.6E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,35,90,30.5,47,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,9974472,,17,0,60,90, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,467055,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.60E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2530,8 +2530,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",2574896
-turtles,,,35,90,30.5,87,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,332005,,95,0,90,80," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,383695,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[7965775],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+turtles,,,35,90,30.5,87,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,332005,,95,0,90,80, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,383695,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[7965775],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2550,7 +2550,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,4103456,,25,0,20,20," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1201505,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[5153832],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,4103456,,25,0,20,20, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1201505,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[5153832],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2569,7 +2569,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,3984191,,87,0,90,20," ",9.9,circle333,false,0.6,1,up,female,infant," ",848625,true,false,false,false,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,3984191,,87,0,90,20, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,848625,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2588,7 +2588,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",7260842
-anima1s,6543542,,95,0,90,90," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,991855,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[4594477],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,6543542,,95,0,90,90, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,991855,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[4594477],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2607,7 +2607,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,7049966,,47,0,90,60," ",9.9,circle333,false,0.6,1,up,female,infant," ",257225,true,false,false,false,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,7049966,,47,0,90,60, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,257225,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2626,7 +2626,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",4557920
-anima1s,7889803,,47,0,30,60," ",9.9,circle333,false,0.6,1,up,female,infant," ",815545,true,false,false,false,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,7889803,,47,0,30,60, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,815545,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2645,10 +2645,10 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",3165689
-turtles,,,85,90,80.5,37,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,55,90,50.5,57,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,95,349,7,89.5,+0.5,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,7273889,,27,0,70,80," ",9.9,circle333,false,0.6,1,up,female,infant," ",79545,true,false,false,false,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,85,90,80.5,37,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,55,90,50.5,57,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,95,349,7,89.5,0.5,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,7273889,,27,0,70,80, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,79545,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2667,10 +2667,10 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",431460
-turtles,,,85,90,80.5,7,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,45,90,40.5,7,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,25,90,20.5,67,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,9521353,,45,0,40,30," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1396405,true,false,false,false,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[5851113],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.03
+turtles,,,85,90,80.5,7,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,45,90,40.5,7,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,25,90,20.5,67,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,9521353,,45,0,40,30, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1396405,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[5851113],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2689,7 +2689,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,6666946,,37,0,40,70," ",9.9,triangle333,false,0.6,1,up,male,infant," ",360395,true,false,false,false,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.6E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,6666946,,37,0,40,70, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,360395,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.60E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2708,7 +2708,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",3569969
-anima1s,8238567,,57,0,10,50," ",9.9,triangle333,false,0.6,1,up,male,infant," ",128575,true,false,false,false,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,8238567,,57,0,10,50, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,128575,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2727,7 +2727,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",2426254
-anima1s,1148917,,85,0,80,40," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,380605,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[7666569],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,1148917,,85,0,80,40, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,380605,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[7666569],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2746,7 +2746,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,1997742,,55,0,50,60," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1100455,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[4010027],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,1997742,,55,0,50,60, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1100455,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[4010027],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2765,7 +2765,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,3737997,,65,0,60,60," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1251945,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[7396443],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,3737997,,65,0,60,60, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1251945,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[7396443],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2784,7 +2784,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,5851113,,77,0,40,30," ",9.9,triangle333,false,0.6,1,up,male,infant," ",189355,true,false,false,false,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.6E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,5851113,,77,0,40,30, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,189355,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.60E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2803,8 +2803,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",9521353
-turtles,,,45,90,40.5,77,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,8406897,,87,0,40,20," ",9.9,circle333,false,0.6,1,up,female,infant," ",668165,true,false,false,false,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,45,90,40.5,77,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,8406897,,87,0,40,20, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,668165,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2823,8 +2823,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",2343042
-turtles,,,25,90,20.5,17,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,4719437,,65,0,60,10," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1248305,true,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[8852710],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.03
+turtles,,,25,90,20.5,17,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,4719437,,65,0,60,10, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1248305,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[8852710],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2843,7 +2843,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,3855943,,67,0,10,40," ",9.9,circle333,false,0.6,1,up,female,infant," ",937365,true,false,false,false,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,3855943,,67,0,10,40, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,937365,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2862,7 +2862,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",3737834
-anima1s,132942,,47,0,80,60," ",9.9,circle333,false,0.6,1,up,female,infant," ",332685,true,false,false,false,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,132942,,47,0,80,60, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,332685,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wzxrtkilvp,aydrjklevd,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.17E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2881,8 +2881,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",4331404
-turtles,,,85,205,91,4,+0.4,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,950164,,75,0,70,10," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,562315,true,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[4830583],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.03
+turtles,,,85,205,91,4,0.4,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,950164,,75,0,70,10, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,562315,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[4830583],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2901,8 +2901,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-turtles,,,15,90,10.5,57,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,1259005,,45,0,40,80," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1058445,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[7782473],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+turtles,,,15,90,10.5,57,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,1259005,,45,0,40,80, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1058445,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[7782473],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2921,7 +2921,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,5273410,,17,0,70,90," ",9.9,triangle333,false,0.6,1,up,male,infant," ",305495,true,false,false,false,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.6E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,5273410,,17,0,70,90, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,305495,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.60E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2940,7 +2940,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",3831949
-anima1s,8952833,,25,0,20,10," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1251345,true,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[423627],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-5,1.08E-4,0.025021047,0,0,"false,e,e,living-chance,0.03
+anima1s,8952833,,25,0,20,10, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1251345,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[423627],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.32E-05,1.08E-04,0.025021047,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2959,7 +2959,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,5494255,,67,0,50,40," ",9.9,circle333,false,0.6,1,up,female,infant," ",497485,true,false,false,false,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,5494255,,67,0,50,40, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,497485,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2978,7 +2978,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",8801047
-anima1s,2574896,,65,0,60,90," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,403265,true,false,false,false,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[9974472],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-5,9.99E-6,0.011077159,0,0,"false,e,e,living-chance,0.03
+anima1s,2574896,,65,0,60,90, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,403265,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,amsztbxkvz,czxrjkfekp,[9974472],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.21E-05,9.99E-06,0.011077159,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -2997,7 +2997,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,6879470,,27,0,60,80," ",9.9,circle333,false,0.6,1,up,female,infant," ",117065,true,false,false,false,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,6879470,,27,0,60,80, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,117065,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -3016,7 +3016,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",811095
-anima1s,811095,,65,0,60,80," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1018705,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[6879470],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,811095,,65,0,60,80, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1018705,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[6879470],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -3035,7 +3035,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-anima1s,2077421,,97,0,80,10," ",9.9,triangle333,false,0.6,1,up,male,infant," ",880555,true,false,false,false,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,2077421,,97,0,80,10, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,880555,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,wmxztkagyz,czxlykydku,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.26E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -3054,7 +3054,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",4794966
-anima1s,1786876,,65,0,60,40," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,1134765,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[9149063],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,1786876,,65,0,60,40, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,1134765,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[9149063],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -3073,8 +3073,8 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-turtles,,,25,90,20.5,87,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,8937261,,37,0,20,70," ",9.9,triangle333,false,0.6,1,up,male,infant," ",359415,true,false,false,false,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.6E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,25,90,20.5,87,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,8937261,,37,0,20,70, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,359415,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.60E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -3093,12 +3093,12 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",4201177
-turtles,,,55,90,50.5,47,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,15,90,10.5,47,X,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,35,354,7,79.5,+0.5,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,45,90,40.5,57,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,45,90,40.5,67,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,7873965,,37,0,80,70," ",9.9,triangle333,false,0.6,1,up,male,infant," ",1067115,true,false,false,false,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.6E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,55,90,50.5,47,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,15,90,10.5,47,X,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,35,354,7,79.5,0.5,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,45,90,40.5,57,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,45,90,40.5,67,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,7873965,,37,0,80,70, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,1067115,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.60E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -3117,7 +3117,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",1184204
-anima1s,4003387,,77,0,60,30," ",9.9,triangle333,false,0.6,1,up,male,infant," ",396135,true,false,false,false,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.6E-5,0,0,0,0,"false,e,e,living-chance,0.03
+anima1s,4003387,,77,0,60,30, ,9.9,triangle333,FALSE,0.6,1,up,male,infant, ,396135,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,czxrjkyekp,wzxrjkflkp,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.60E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -3136,7 +3136,7 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",8121750
-anima1s,3737834,,15,0,10,40," ",9.9,circle333,false,0.99999,1,up,female,adult,lactating,421975,true,false,false,false,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[3855943],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.0E-5,1.23E-5,0.003560316,0,0,"false,e,e,living-chance,0.03
+anima1s,3737834,,15,0,10,40, ,9.9,circle333,FALSE,0.99999,1,up,female,adult,lactating,421975,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,cyszjkxkkz,azdrtklevd,[3855943],1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,1.00E-05,1.23E-05,0.003560316,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4
@@ -3155,9 +3155,9 @@ false,i57,+,demand-from,0.2
 false,i67,+,demand-from,0.1
 false,i87,+,demand-from,-0.1
 false,i97,+,demand-from,-0.2",nobody
-turtles,,,65,90,60.5,27,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,55,90,50.5,37,O,9.9,default,false,1.0E-4,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,8157308,,17,0,20,90," ",9.9,circle333,false,0.6,1,up,female,infant," ",756435,true,false,false,false,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-5,0,0,0,0,"false,e,e,living-chance,0.03
+turtles,,,65,90,60.5,27,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+turtles,,,55,90,50.5,37,O,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+anima1s,8157308,,17,0,20,90, ,9.9,circle333,FALSE,0.6,1,up,female,infant, ,756435,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.5,1,cmxltkygkd,azdrtklevz,,1,0.1,0.5,0,0.99999,1,1,1,1,0,0,0,0,0,2.04E-05,0,0,0,0,"false,e,e,living-chance,0.03
 false,i,e,check-juvenility,0.05
 false,a,jy,hide,1
 false,j,e,hide,1","false,a15,y,supply-to,-0.4

@@ -190,7 +190,7 @@ to environment-check
 end
 
 to output-territories
-  ask patches [ if ( pgroup.identity != 0 ) [ set pcolor pgroup.identity ]]
+  ask patches [ if ( pgroup.identity != 0 ) [ set pcolor pgroup.identity + 2 ]]
   
   foreach remove-duplicates [ group.identity ] of anima1s [ grp ->
     print ( word grp " " count patches with [ pgroup.identity = grp ] ) 
@@ -453,14 +453,16 @@ end
 
 to output-actions
   let anima1-to-inspect one-of anima1s with [ self = subject ]
-  output-header (word " ACTIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [meta.id ] of anima1-to-inspect ) ] )
+  output-header (word " ACTIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [my.identity ] of anima1-to-inspect ) ] )
   clear-output
   ifelse ( anima1-to-inspect != nobody ) 
   
   [ ask anima1-to-inspect [
     foreach actions.completed [ action -> output-print action ]]]
   
-  [ foreach recent-actions-completed [ action -> output-print-action action ]]
+  [ 
+    foreach recent-actions-completed [ action -> output-print-action action ]
+  ]
   
 end
 
@@ -474,7 +476,7 @@ end
 
 to output-decisions
   let anima1-to-inspect one-of anima1s with [ self = subject ]
-  output-header (word " DECISIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [meta.id ] of anima1-to-inspect ) ] )
+  output-header (word " DECISIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [my.identity ] of anima1-to-inspect ) ] )
   clear-output
   ifelse ( anima1-to-inspect != nobody ) 
   
@@ -482,8 +484,10 @@ to output-decisions
     foreach decision.vectors [ decision ->
       output-print ( word " " decision )]]]
   
-  [ foreach recent-decisions-made [ d -> 
-      output-print (word "  " d ) ]]
+  [ 
+    foreach recent-decisions-made [ d -> 
+      output-print (word "  " d ) ]
+  ]
 end
 
 ;-----------------------------------------------------------------------------       
@@ -500,7 +504,7 @@ end
 
 to output-genotype
   let anima1-to-inspect one-of anima1s with [ self = subject ]
-  output-header (word " GENOTYPE : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [meta.id ] of anima1-to-inspect ) ] )
+  output-header (word " GENOTYPE : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [my.identity ] of anima1-to-inspect ) ] )
   ifelse ( anima1-to-inspect = nobody ) [
     ;set observation-notes (word "Organism " read-from-string command-input " not found.")
     ;output-print (word " Organism " read-from-string command-input " not found.")
@@ -553,11 +557,11 @@ to plot-individuals-columns
   let plot-list []                                                  ; initialize list of values to be plotted
   let row-list []
   foreach individual-list [ i ->
-    set row-list lput [meta.id] of i row-list
+    set row-list lput [my.identity] of i row-list
     set plot-list lput ( [ get-column-list input ] of i ) plot-list ]
   plot-colored-histogram 1 plot-list life-history-color-list 1                   ; update plot based on plot list
  
-  ;output-window input "" (list "column" "meta.id" input ) row-list plot-list 0 0 0
+  ;output-window input "" (list "column" "my.identity" input ) row-list plot-list 0 0 0
 end
 
 to-report get-column-list [ input-string ] ; used if you want to separate by life history and sex colors
@@ -568,9 +572,9 @@ to-report get-column-list [ input-string ] ; used if you want to separate by lif
   set report-list lput (ifelse-value ( life.history = "infant" and biological.sex = "male" ) [ get-result-from-selected-display ] [ 0 ]) report-list
   set report-list lput (ifelse-value ( life.history = "juvenile" and biological.sex = "female" ) [ get-result-from-selected-display ] [ 0 ]) report-list
   set report-list lput (ifelse-value ( life.history = "juvenile" and biological.sex = "male" ) [ get-result-from-selected-display ] [ 0 ]) report-list
-  set report-list lput (ifelse-value ( female.fertility = "cycling" and biological.sex = "female" ) [ get-result-from-selected-display ] [ 0 ]) report-list
-  set report-list lput (ifelse-value ( female.fertility = "pregnant" and biological.sex = "female" ) [ get-result-from-selected-display ] [ 0 ]) report-list
-  set report-list lput (ifelse-value ( female.fertility = "lactating" and biological.sex = "female" ) [ get-result-from-selected-display ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( fertility.status = "cycling" and biological.sex = "female" ) [ get-result-from-selected-display ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( fertility.status = "pregnant" and biological.sex = "female" ) [ get-result-from-selected-display ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( fertility.status = "lactating" and biological.sex = "female" ) [ get-result-from-selected-display ] [ 0 ]) report-list
   set report-list lput (ifelse-value ( life.history = "adult" and biological.sex = "male" ) [ get-result-from-selected-display ] [ 0 ]) report-list
   report report-list
 end
@@ -612,7 +616,7 @@ to plot-groups-columns
   ; print plot-list
   plot-colored-histogram 1 plot-list color-list 1
   
-  ;output-window input "" (list "column" "meta.id" input ) row-list plot-list 0 0 0
+  ;output-window input "" (list "column" "my.identity" input ) row-list plot-list 0 0 0
 end
 
 to-report get-sorted-groups
@@ -678,7 +682,7 @@ to-report get-result-from-selected-display
     ( useful-commands = "-- survival-chance" ) [ survival.chance ]
     ( useful-commands = "-- body-size" ) [ body.size ]
     ( useful-commands = "-- body-shade" ) [ body.shade ]
-    ( useful-commands = "-- female-fertility" ) [ (ifelse-value (female.fertility = "lactating") [ 3 ] ( female.fertility = "pregnant" ) [ 2 ] ( female.fertility = "cycling" ) [ 1 ] [ 0 ]) ]
+    ( useful-commands = "-- female-fertility" ) [ (ifelse-value (fertility.status = "lactating") [ 3 ] ( fertility.status = "pregnant" ) [ 2 ] ( fertility.status = "cycling" ) [ 1 ] [ 0 ]) ]
     ( useful-commands = "-- hidden-chance" ) [ hidden.chance ]
     ( useful-commands = "-- bite-capacity" ) [ bite.capacity ]    
     ( useful-commands = "-- mutation-chance" ) [ mutation.chance ]
@@ -1191,7 +1195,7 @@ end
 ;;
 ;;to output-history
 ;;  let anima1-to-inspect one-of anima1s with [ self = subject ]
-;;  output-header (word " HISTORY : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [meta.id ] of anima1-to-inspect ) ] )
+;;  output-header (word " HISTORY : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [my.identity ] of anima1-to-inspect ) ] )
 ;;  
 ;;  output-print ( word " Total energy gained: "
 ;;    ifelse-value ( anima1-to-inspect != nobody ) 
@@ -1246,7 +1250,7 @@ end
 ;;
 ;;to output-status
 ;;  let anima1-to-inspect one-of anima1s with [ self = subject ]
-;;  output-header (word " STATUS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [ meta.id ] of anima1-to-inspect ) ] )
+;;  output-header (word " STATUS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [ my.identity ] of anima1-to-inspect ) ] )
 ;;  
 ;;  ;output-print ( word " Number of individuals: " count anima1z )
 ;;  output-print ( word " Number of females: " count anima1z with [ biological.sex = "female" ] )
@@ -1318,5 +1322,23 @@ to set-random-identity-chromosomes [ length-of-chromosomes ]
   ] 
 end
 
-
+;to plot-plants [ current-season plant-density ]
+;
+;  repeat 1000 [
+;
+;    let x random-float 8
+;
+;    let seasonal-factor ( ( plant-seasonality * current-season + 1 ) / 2 )
+;    let optimal-neighbor-energy ( plant-minimum-neighbors + plant-maximum-neighbors ) / 2
+;    let neighbor-energy-sd ( optimal-neighbor-energy - plant-minimum-neighbors )
+;    let neighbor-energy x ;( ( sum [penergy.supply] of neighbors ) / plant-quality )
+;
+;    let probability-up ifelse-value ( neighbor-energy-sd = 0 ) [ 0 ] [ ( seasonal-factor * e ^ ( - (( neighbor-energy - optimal-neighbor-energy ) ^ 2 ) / ( 2 * ( neighbor-energy-sd ^ 2 ) )) ) ]
+;    let y ( ( plant-daily-cycle * plant-quality ) / plant-annual-cycle ) * ( plant-density * ( 2 * probability-up - 1 ) + seasonal-factor - plant-density )
+;
+;    plotxy x y
+;
+;  ]
+;
+;end
 

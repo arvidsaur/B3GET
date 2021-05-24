@@ -278,12 +278,12 @@ to-report generate-verification-tape
   set header lput "Not any agents with no day.perception who can see their environment during the day?" header 
   set verification lput "dynamic-check" verification 
   set function lput "consider-environment" function
-  set boolean lput ( ifelse-value ( get-solar-status = "DAY" ) [ not any? anima1z with [ life.history != "gestatee" and day.perception = 0 and is-list? my.environment and length my.environment > 1 ] ] [ true ] ) boolean
+  set boolean lput ( ifelse-value ( solar-status = "DAY" ) [ not any? anima1z with [ life.history != "gestatee" and day.perception = 0 and is-list? my.environment and length my.environment > 1 ] ] [ true ] ) boolean
   
   set header lput "Not any agents with no night.perception who can see their environment during the night?" header
   set verification lput "dynamic-check" verification 
   set function lput "consider-environment" function
-  set boolean lput ( ifelse-value ( get-solar-status = "NIGHT" ) [ not any? anima1z with [ life.history != "gestatee" and night.perception = 0 and is-list? my.environment and length my.environment > 1 ] ] [ true ] ) boolean
+  set boolean lput ( ifelse-value ( solar-status = "NIGHT" ) [ not any? anima1z with [ life.history != "gestatee" and night.perception = 0 and is-list? my.environment and length my.environment > 1 ] ] [ true ] ) boolean
   
   set header lput "Not any agents with no visual.range who can see their environment?" header 
   set verification lput "dynamic-check" verification 
@@ -314,7 +314,12 @@ to-report generate-verification-tape
   set verification lput "dynamic-check" verification 
   set function lput "consider-environment" function
   set boolean lput ( not any? anima1z with [ not is.alive and length my.environment > 0 ] ) boolean
- 
+  
+  set header lput "Not any fully decayed individuals in someone's environment?" header 
+  set verification lput "dynamic-check" verification 
+  set function lput "consider-environment" function
+  set boolean lput ( not any? anima1s with [ fully.decayed and member? self [my.environment] of anima1z ] ) boolean
+  
   ; --------------------------------------------------------------------------------------------------------------------
   ; MAKE-DECISIONS
   ; --------------------------------------------------------------------------------------------------------------------
@@ -886,12 +891,12 @@ to-report generate-verification-tape
   set header lput "Pregnant agents generally have higher birthing.chance than non-pregnant agents?" header 
   set verification lput "dynamic-check" verification 
   set function lput "check-birth" function
-  set boolean lput ( (ifelse-value ( any? anima1z with [ female.fertility = "pregnant" ] ) [ mean [birthing.chance] of anima1z with [ female.fertility = "pregnant" ]] [0] ) >= (ifelse-value ( any? anima1z with [ female.fertility != "pregnant" ] ) [ mean [birthing.chance] of anima1z with [ female.fertility != "pregnant" ]] [0] )) boolean
+  set boolean lput ( (ifelse-value ( any? anima1z with [ fertility.status = "pregnant" ] ) [ mean [birthing.chance] of anima1z with [ fertility.status = "pregnant" ]] [0] ) >= (ifelse-value ( any? anima1z with [ fertility.status != "pregnant" ] ) [ mean [birthing.chance] of anima1z with [ fertility.status != "pregnant" ]] [0] )) boolean
 
   set header lput "There is at least one pregnant agent?" header 
   set verification lput "dynamic-check" verification 
   set function lput "check-birth" function
-  set boolean lput ( count anima1z with [ female.fertility = "pregnant" ] > 0 ) boolean
+  set boolean lput ( count anima1z with [ fertility.status = "pregnant" ] > 0 ) boolean
   
   set header lput "Infants do not check-birth?" header 
   set verification lput "dynamic-check" verification 
@@ -920,7 +925,7 @@ to-report generate-verification-tape
   set header lput "All agents who are not pregnant do not give birth?" header 
   set verification lput "dynamic-check" verification 
   set function lput "check-birth" function
-  set boolean lput ( not any? anima1z with [ female.fertility != "pregnant" and my-actions-include "give-birth" ] ) boolean
+  set boolean lput ( not any? anima1z with [ fertility.status != "pregnant" and my-actions-include "give-birth" ] ) boolean
   
   ; --------------------------------------------------------------------------------------------------------------------
   ; UPDATE-TO-INFANT
@@ -997,7 +1002,7 @@ to-report generate-verification-tape
   set header lput "There is at least one lactating female?" header
   set verification lput "dynamic-check" verification 
   set function lput "check-weaning" function
-  let any-lactating-females any? anima1z with [ female.fertility = "lactating" ]
+  let any-lactating-females any? anima1z with [ fertility.status = "lactating" ]
   set boolean lput ( any-lactating-females ) boolean   
   
   set header lput "All agents have a weaning chance between zero and one?" header
@@ -1008,34 +1013,34 @@ to-report generate-verification-tape
 ;  set header lput "All lactating females have infant offspring?" header 
 ;  set verification lput "dynamic-check" verification 
 ;  set function lput "check-weaning" function
-;  set boolean lput ( ifelse-value any-lactating-females [ not any? anima1z with [ female.fertility = "lactating" and not any? my-offspring with [ life.history = "infant" ]] ] [ true ] ) boolean
+;  set boolean lput ( ifelse-value any-lactating-females [ not any? anima1z with [ fertility.status = "lactating" and not any? my-offspring with [ life.history = "infant" ]] ] [ true ] ) boolean
   
   ; all lactating females do not have gestatee?
   
   set header lput "All mothers of infants are lactating?" header 
   set verification lput "dynamic-check" verification 
   set function lput "check-weaning" function
-  set boolean lput ( not any? anima1z with [ female.fertility != "lactating" and any? anima1z with [ life.history = "infant" and my.mother = myself ] ] ) boolean
+  set boolean lput ( not any? anima1z with [ fertility.status != "lactating" and any? anima1z with [ life.history = "infant" and my.mother = myself ] ] ) boolean
   
   set header lput "There are no gestatees with mothers who are not pregnant?" header 
   set verification lput "dynamic-check" verification 
   set function lput "check-weaning" function
-  set boolean lput ( not any? anima1z with [ life.history = "gestatee" and my.mother != nobody and [female.fertility] of my.mother != "pregnant" ]) boolean
+  set boolean lput ( not any? anima1z with [ life.history = "gestatee" and my.mother != nobody and [fertility.status] of my.mother != "pregnant" ]) boolean
   
   set header lput "Only adult females are lactating?" header 
   set verification lput "dynamic-check" verification 
   set function lput "check-weaning" function
-  set boolean lput ( not any? anima1z with [ female.fertility = "lactating" and ( life.history != "adult" or biological.sex = "male" ) ] ) boolean
+  set boolean lput ( not any? anima1z with [ fertility.status = "lactating" and ( life.history != "adult" or biological.sex = "male" ) ] ) boolean
   
   set header lput "Lactating agents generally have higher weaning chance than non-lactating agents?" header
   set verification lput "dynamic-check" verification 
   set function lput "check-weaning" function
-  set boolean lput ( (ifelse-value ( any? anima1z with [ female.fertility = "lactating" ] ) [ mean [weaning.chance] of anima1z with [ female.fertility = "lactating" ]] [0] ) >= (ifelse-value ( any? anima1z with [ female.fertility != "lactating" ] ) [ mean [weaning.chance] of anima1z with [ female.fertility != "lactating" ]] [0] )) boolean
+  set boolean lput ( (ifelse-value ( any? anima1z with [ fertility.status = "lactating" ] ) [ mean [weaning.chance] of anima1z with [ fertility.status = "lactating" ]] [0] ) >= (ifelse-value ( any? anima1z with [ fertility.status != "lactating" ] ) [ mean [weaning.chance] of anima1z with [ fertility.status != "lactating" ]] [0] )) boolean
   
 ;  set header lput "Not any agents who are not lactating and check weaning?" header 
 ;  set verification lput "dynamic-check" verification 
 ;  set function lput "check-weaning" function
-;  set boolean lput ( not any? anima1z with [ female.fertility != "lactating" and my-actions-include "check-weaning" ] ) boolean
+;  set boolean lput ( not any? anima1z with [ fertility.status != "lactating" and my-actions-include "check-weaning" ] ) boolean
 
   set header lput "Infants do not check-weaning?" header 
   set verification lput "dynamic-check" verification 
@@ -1121,27 +1126,27 @@ to-report generate-verification-tape
   set header lput "All adult females have one of fertility options?" header 
   set verification lput "dynamic-check" verification 
   set function lput "update-to-adult" function
-  set boolean lput ( not any? anima1z with [ life.history = "adult" and biological.sex = "female" and (female.fertility != "cycling" and female.fertility != "pregnant" and female.fertility != "lactating") ] ) boolean
+  set boolean lput ( not any? anima1z with [ life.history = "adult" and biological.sex = "female" and (fertility.status != "cycling" and fertility.status != "pregnant" and fertility.status != "lactating") ] ) boolean
   
   set header lput "There are no agents who have a fertility status who are not adult females?" header 
   set verification lput "dynamic-check" verification 
   set function lput "update-to-adult" function
-  set boolean lput ( not any? anima1z with [ biological.sex = "female" and life.history = "adult" and female.fertility = " " ] ) boolean
+  set boolean lput ( not any? anima1z with [ biological.sex = "female" and life.history = "adult" and fertility.status = " " ] ) boolean
   
   set header lput "Only adult females can be cycling?" header 
   set verification lput "dynamic-check" verification 
   set function lput "update-to-adult" function
-  set boolean lput ( not any? anima1z with [ ( life.history != "adult" or biological.sex = "male" ) and female.fertility = "cycling" ] ) boolean
+  set boolean lput ( not any? anima1z with [ ( life.history != "adult" or biological.sex = "male" ) and fertility.status = "cycling" ] ) boolean
   
   set header lput "Cycling females do not have any infants?" header
   set verification lput "dynamic-check" verification 
   set function lput "update-to-adult" function
-  set boolean lput ( not any? anima1z with [ female.fertility = "cycling" and any? anima1z with [ life.history = "infant" and my.mother = myself ]]  ) boolean
+  set boolean lput ( not any? anima1z with [ fertility.status = "cycling" and any? anima1z with [ life.history = "infant" and my.mother = myself ]]  ) boolean
   
   set header lput "Cycling females do not have any gestatees? " header 
   set verification lput "dynamic-check" verification 
   set function lput "update-to-adult" function
-  set boolean lput ( not any? anima1z with [ female.fertility = "cycling" and any? anima1z with [ life.history = "gestatee" and my.mother = myself ]] ) boolean
+  set boolean lput ( not any? anima1z with [ fertility.status = "cycling" and any? anima1z with [ life.history = "gestatee" and my.mother = myself ]] ) boolean
   
   set header lput "Adults have a timestamp for adulthood?" header 
   set verification lput "" verification 
@@ -1181,7 +1186,7 @@ to-report generate-verification-tape
   set header lput "All agents who are not pregnant or lactating do not supply to other agents?" header 
   set verification lput "dynamic-check" verification 
   set function lput "supply-to" function
-  set boolean lput ( not any? anima1z with [ ( female.fertility != "pregnant" and female.fertility != "lactating" ) and my-actions-include "supply-to" ] ) boolean
+  set boolean lput ( not any? anima1z with [ ( fertility.status != "pregnant" and fertility.status != "lactating" ) and my-actions-include "supply-to" ] ) boolean
 
   set header lput "Infants do not supply-to?" header 
   set verification lput "dynamic-check" verification 
@@ -1441,12 +1446,12 @@ to-report generate-verification-tape
   set header lput "Pregnant females carry their gestatees?" header 
   set verification lput "dynamic-check" verification 
   set function lput "carry" function
-  set boolean lput ( not any? anima1z with [ female.fertility = "pregnant" and any? my-offspring with [ life.history = "gestatee" and not member? self [carried.items] of myself ] ] ) boolean
+  set boolean lput ( not any? anima1z with [ fertility.status = "pregnant" and any? my-offspring with [ life.history = "gestatee" and not member? self [carried.items] of myself ] ] ) boolean
   
   set header lput "Lactating females carry their infants?" header 
   set verification lput "dynamic-check" verification 
   set function lput "carry" function
-  set boolean lput ( not any? anima1z with [ female.fertility = "lactating" and any? my-offspring with [ life.history = "infant" and not member? self [carried.items] of myself ] ] ) boolean
+  set boolean lput ( not any? anima1z with [ fertility.status = "lactating" and any? my-offspring with [ life.history = "infant" and not member? self [carried.items] of myself ] ] ) boolean
   
 ;  set header lput "All gestatees are carried by their mothers?" header 
 ;  set verification lput "dynamic-check" verification 
@@ -1594,17 +1599,17 @@ to-report generate-verification-tape
   set header lput "All pregnant females have a gestatee offspring? " header 
   set verification lput "dynamic-check" verification 
   set function lput "conceive-with" function
-  set boolean lput ( not any? anima1z with [ female.fertility = "pregnant" and not any? my-offspring with [ life.history = "gestatee" ] ] ) boolean
+  set boolean lput ( not any? anima1z with [ fertility.status = "pregnant" and not any? my-offspring with [ life.history = "gestatee" ] ] ) boolean
   
   set header lput "All living mothers of gestatees are pregnant? " header 
   set verification lput "dynamic-check" verification 
   set function lput "conceive-with" function
-  set boolean lput ( not any? anima1z with [ life.history = "gestatee" and my.mother != nobody and [female.fertility] of my.mother != "pregnant" ]  ) boolean
+  set boolean lput ( not any? anima1z with [ life.history = "gestatee" and my.mother != nobody and [fertility.status] of my.mother != "pregnant" ]  ) boolean
   
   set header lput "Only adult females can be pregnant? " header 
   set verification lput "dynamic-check" verification 
   set function lput "conceive-with" function
-  set boolean lput ( not any? anima1z with [ not ( life.history = "adult" and biological.sex = "female" ) and female.fertility = "pregnant" ] ) boolean
+  set boolean lput ( not any? anima1z with [ not ( life.history = "adult" and biological.sex = "female" ) and fertility.status = "pregnant" ] ) boolean
   
   set header lput "The only males who can conceive-with are adults?" header 
   set verification lput "dynamic-check" verification 
@@ -1638,7 +1643,7 @@ to-report generate-verification-tape
   set header lput "All agents have an identity?" header 
   set verification lput "dynamic-check" verification 
   set function lput "initialize-from-parents" function
-  set boolean lput ( not any? anima1z with [ not is-number? meta.id or meta.id = 0 ] ) boolean
+  set boolean lput ( not any? anima1z with [ not is-number? my.identity or my.identity = 0 ] ) boolean
   
   set header lput "All gestatees are hidden?" header 
   set verification lput "dynamic-check" verification 

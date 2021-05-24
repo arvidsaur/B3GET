@@ -92,7 +92,7 @@
 ; ESX   2019-09-XX   ego's biological.sex
 ; ESD   2019-09-XX   ego's body.shade
 ; ELH   2019-09-XX   ego's life.history
-; EFR   2019-09-XX   ego's female.fertility
+; EFR   2019-09-XX   ego's fertility.status
 ; EGP   2019-09-XX   ego's group.identity
 ; EYW   2019-09-XX   ego's yellow signal is on?
 ; ERD   2019-09-XX   ego's red signal is on?
@@ -448,10 +448,10 @@ to-report read-code [ code target ]
     ( code = "EGO" ) [ target = self ] 
     ( code = "ISA" ) [ is-anima1? target ]
     ( code = "ISP" ) [ is-patch? target ]
-    ( code = "MID" and is-anima1? target ) [ [meta.id] of target ]
+    ( code = "MID" and is-anima1? target ) [ [my.identity] of target ]
     ( code = "SEX" and is-anima1? target ) [ [biological.sex] of target ]
     ( code = "LFH" and is-anima1? target ) [ [life.history] of target ] 
-    ( code = "FER" and is-anima1? target ) [ [female.fertility] of target ]  
+    ( code = "FER" and is-anima1? target ) [ ifelse-value ( member? "show-fertility" model-structure ) [ [fertility.status] of target ] [ "" ]]  
     ( code = "GRP" and is-anima1? target ) [ [group.identity] of target ]  
     ( code = "ALV" and is-anima1? target ) [ [is.alive] of target ] 
     ( code = "YON" and is-anima1? target ) [ [yellow.signal] of target ] 
@@ -472,10 +472,10 @@ to-report read-code [ code target ]
 
     ; what only EGO can see about ITSELF
     ; It does not matter who the target is
-    ( code = "EMI" ) [ meta.id ]
+    ( code = "EMI" ) [ my.identity ]
     ( code = "ESX" ) [ biological.sex ]
     ( code = "ELH" ) [ life.history ] 
-    ( code = "EFR" ) [ female.fertility ]
+    ( code = "EFR" ) [ fertility.status ]
     ( code = "EGP" ) [ group.identity ]  
     ( code = "EYW" ) [ yellow.signal ]  
     ( code = "ERD" ) [ red.signal ]  
@@ -531,8 +531,8 @@ to-report read-code [ code target ]
     ( code = "LAC" ) [ "lactating" ]
     ( code = "RNM" ) [ random-float 1.0 ]
     ( code = "RNB" ) [ one-of [ true false ] ]
-    ( code = "DAY" ) [ get-solar-status = "DAY" ] ; runtime
-    ( code = "NGT" ) [ get-solar-status = "NIGHT" ] ; runtime
+    ( code = "DAY" ) [ solar-status = "DAY" ] ; runtime
+    ( code = "NGT" ) [ solar-status = "NIGHT" ] ; runtime
     
     [ false ])
 end

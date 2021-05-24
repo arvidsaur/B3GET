@@ -33,8 +33,8 @@
 [0] e *e rest -1.00E-09
 [0] e -e rest 1.00E-09           
 [1] e ovn move-toward 1E-4  ;  Ch    
-[1] am βv move-toward 1.00E-05
-[1] c amv move-toward 1.00E-03
+[1] am βv move-toward 1.00E-05 ;
+[1] c amv move-toward 1.00E-03 ;
 [1] j d53 move-toward 1.00E-03
 [1] j d54 move-toward 1.00E-04
 [1] j d55 move-toward 1.00E-05
@@ -86,11 +86,11 @@
 [1] af oafk attack 0
 [1] af oafq attack 0
 [1] am ik attack 0
-[1] am iq attack 0.001 ;;; G
+[1] am iq attack 0.001 ;;; 
 [1] am jk attack 0
 [1] am jq attack 0
-[1] am oamk attack 0.001 ;;; G
-[1] am oamq attack 0.001 ;;; G
+[1] am oamk attack 0.001 ;;; 
+[1] am oamq attack 0.001 ;;; 
 [1] am oafk attack 0
 [1] am oafq attack 0
 [1] am βqnv mate-with 1.00E-05
