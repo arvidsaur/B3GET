@@ -205,3 +205,249 @@ end
 
 ; NOTE FOR CL: if     (..condition..) [..truepart..]
 ;              ifelse (..condition..) [..truepart..] [..falsepart..]
+
+
+;    lotka-volterra-best-fit
+;    lotka-volterra-r1
+;    lotka-volterra-r2
+;    lotka-volterra-s12
+;    lotka-volterra-s21
+;    lotka-volterra-N1
+;    lotka-volterra-N2
+;    
+;    optimal-foraging-regression-constant
+;    optimal-foraging-regression-coeff
+;    optimal-foraging-r-squared
+;    optimal-foraging-adj-r-squared
+;    optimal-foraging-F-statistic
+;    optimal-foraging-probability-of-F
+;    optimal-foraging-standard-error
+;    optimal-foraging-tot-degrees-of-freedom
+;    optimal-foraging-reg-degrees-of-freedom
+;    optimal-foraging-err-degrees-of-freedom
+;    optimal-foraging-tot-sum-of-squares
+;    optimal-foraging-reg-sum-of-squares
+;    optimal-foraging-err-sum-of-squares
+;    
+;    mother-initiated-birth-regression-constant
+;    mother-initiated-birth-regression-coeff
+;    mother-initiated-birth-r-squared
+;    mother-initiated-birth-adj-r-squared
+;    mother-initiated-birth-F-statistic
+;    mother-initiated-birth-probability-of-F
+;    mother-initiated-birth-standard-error
+;    mother-initiated-birth-tot-degrees-of-freedom
+;    mother-initiated-birth-reg-degrees-of-freedom
+;    mother-initiated-birth-err-degrees-of-freedom
+;    mother-initiated-birth-tot-sum-of-squares
+;    mother-initiated-birth-reg-sum-of-squares
+;    mother-initiated-birth-err-sum-of-squares
+;    
+;    mother-initiated-wean-regression-constant
+;    mother-initiated-wean-regression-coeff
+;    mother-initiated-wean-r-squared
+;    mother-initiated-wean-adj-r-squared
+;    mother-initiated-wean-F-statistic
+;    mother-initiated-wean-probability-of-F
+;    mother-initiated-wean-standard-error
+;    mother-initiated-wean-tot-degrees-of-freedom
+;    mother-initiated-wean-reg-degrees-of-freedom
+;    mother-initiated-wean-err-degrees-of-freedom
+;    mother-initiated-wean-tot-sum-of-squares
+;    mother-initiated-wean-reg-sum-of-squares
+;    mother-initiated-wean-err-sum-of-squares
+;    
+;    hamiltons-rule-regression-constant
+;    hamiltons-rule-regression-coeff
+;    hamiltons-rule-r-squared
+;    hamiltons-rule-adj-r-squared
+;    hamiltons-rule-F-statistic
+;    hamiltons-rule-probability-of-F
+;    hamiltons-rule-standard-error
+;    hamiltons-rule-tot-degrees-of-freedom
+;    hamiltons-rule-reg-degrees-of-freedom
+;    hamiltons-rule-err-degrees-of-freedom
+;    hamiltons-rule-tot-sum-of-squares
+;    hamiltons-rule-reg-sum-of-squares
+;    hamiltons-rule-err-sum-of-squares
+    
+;      
+;      "lotka-volterra-best-fit"
+;      "lotka-volterra-r1"
+;      "lotka-volterra-r2"
+;      "lotka-volterra-s12"
+;      "lotka-volterra-s21"
+;      "lotka-volterra-N1"
+;      "lotka-volterra-N2"
+;      
+;      "optimal-foraging-regression-constant"
+;      "optimal-foraging-regression-coeff"
+;      "optimal-foraging-r-squared"
+;      "optimal-foraging-adj-r-squared"
+;      "optimal-foraging-F-statistic"
+;      "optimal-foraging-probability-of-F"
+;      "optimal-foraging-standard-error"
+;      "optimal-foraging-tot-degrees-of-freedom"
+;      "optimal-foraging-reg-degrees-of-freedom"
+;      "optimal-foraging-err-degrees-of-freedom"
+;      "optimal-foraging-tot-sum-of-squares"
+;      "optimal-foraging-reg-sum-of-squares"
+;      "optimal-foraging-err-sum-of-squares"
+;      
+;      "mother-initiated-birth-regression-constant"
+;      "mother-initiated-birth-regression-coeff"
+;      "mother-initiated-birth-r-squared"
+;      "mother-initiated-birth-adj-r-squared"
+;      "mother-initiated-birth-F-statistic"
+;      "mother-initiated-birth-probability-of-F"
+;      "mother-initiated-birth-standard-error"
+;      "mother-initiated-birth-tot-degrees-of-freedom"
+;      "mother-initiated-birth-reg-degrees-of-freedom"
+;      "mother-initiated-birth-err-degrees-of-freedom"
+;      "mother-initiated-birth-tot-sum-of-squares"
+;      "mother-initiated-birth-reg-sum-of-squares"
+;      "mother-initiated-birth-err-sum-of-squares"
+;      
+;      "mother-initiated-wean-regression-constant"
+;      "mother-initiated-wean-regression-coeff"
+;      "mother-initiated-wean-r-squared"
+;      "mother-initiated-wean-adj-r-squared"
+;      "mother-initiated-wean-F-statistic"
+;      "mother-initiated-wean-probability-of-F"
+;      "mother-initiated-wean-standard-error"
+;      "mother-initiated-wean-tot-degrees-of-freedom"
+;      "mother-initiated-wean-reg-degrees-of-freedom"
+;      "mother-initiated-wean-err-degrees-of-freedom"
+;      "mother-initiated-wean-tot-sum-of-squares"
+;      "mother-initiated-wean-reg-sum-of-squares"
+;      "mother-initiated-wean-err-sum-of-squares"
+;      
+;      "hamiltons-rule-regression-constant"
+;      "hamiltons-rule-regression-coeff"
+;      "hamiltons-rule-r-squared"
+;      "hamiltons-rule-adj-r-squared"
+;      "hamiltons-rule-F-statistic"
+;      "hamiltons-rule-probability-of-F"
+;      "hamiltons-rule-standard-error"
+;      "hamiltons-rule-tot-degrees-of-freedom"
+;      "hamiltons-rule-reg-degrees-of-freedom"
+;      "hamiltons-rule-err-degrees-of-freedom"
+;      "hamiltons-rule-tot-sum-of-squares"
+;      "hamiltons-rule-reg-sum-of-squares"
+;      "hamiltons-rule-err-sum-of-squares"
+      
+      
+;  ; STATISTICAL CALCULATIONS
+;  
+;  ; lotka volterra
+;  let lotka-volterra-results (list 0 0 0 0 0 0 0 ) ; calculate-lotka-volterra
+;  let lotka-volterra-best-fit item 0 lotka-volterra-results
+;  let lotka-volterra-r1 item 1 lotka-volterra-results
+;  let lotka-volterra-r2 item 2 lotka-volterra-results
+;  let lotka-volterra-s12 item 3 lotka-volterra-results
+;  let lotka-volterra-s21 item 4 lotka-volterra-results
+;  let lotka-volterra-N1 item 5 lotka-volterra-results
+;  let lotka-volterra-N2 item 6 lotka-volterra-results
+;  
+;  ; stats table with generation number in first column as dependent variable
+;  ;let generation-table stats:newtable
+;  ;stats:set-names generation-table ( list "generation-number" "optimal-foraging-index"  "mother-initiated-birth-percent" "mother-initiated-wean-percent" "hamiltons-rule-percent" )
+;  
+;  let stop-generation 10
+;  let g 1
+;  
+;  while [ g < stop-generation ] [
+;    
+;    let sum-foraging-gains sum [foraging.gains] of anima1s with [ generation.number = g ]
+;    let sum-energy-cost sum [total.energy.cost] of anima1s with [ generation.number = g ]
+;    let generation-size count anima1s with [ generation.number = g ]
+;    
+;    let optimal-foraging-index ifelse-value ( sum-energy-cost > 0 ) [ sum-foraging-gains / sum-energy-cost ] [ 0 ]
+;    let mother-initiated-birth-percent ifelse-value ( generation-size > 0 ) [ count anima1s with [ generation.number = g and mother.initiated.birth ] / generation-size ] [ 0 ]
+;    let mother-initiated-wean-percent ifelse-value ( generation-size > 0 ) [ count anima1s with [ generation.number = g and mother.initiated.weaning ] / generation-size ] [ 0 ]
+;    let hamiltons-rule-percent ifelse-value ( generation-size > 0 ) [ count anima1s with [ whole.related.help.cost > half.related.help.cost and half.related.help.cost > fourth.related.help.cost and fourth.related.help.cost > eighth.related.help.cost and generation.number = g ] / generation-size ] [ 0 ]
+;    
+;    ;stats:add generation-table ( list g optimal-foraging-index mother-initiated-birth-percent mother-initiated-wean-percent hamiltons-rule-percent )
+;    
+;    set g g + 1 ]
+;
+;  ; calculate correlations
+;  let correlation-matrix 0 ;stats:correlation generation-table
+;  
+;  ; optimal foraging
+;  let optimal-foraging-correlation 0 ;item 0 item 1 correlation-matrix
+;  let optimal-foraging-regression-coeffs 0 ;stats:regress-on generation-table [ "generation-number" "optimal-foraging-index" ]
+;  let optimal-foraging-regression-constant 0;first optimal-foraging-regression-coeffs
+;  let optimal-foraging-regression-coeff 0 ;last optimal-foraging-regression-coeffs
+;  let regression-stats 0 ;stats:get-rstats generation-table
+;  let optimal-foraging-r-squared 0 ;item 0 regression-stats
+;  let optimal-foraging-adj-r-squared 0 ;item 1 regression-stats
+;  let optimal-foraging-F-statistic 0 ;item 2 regression-stats
+;  let optimal-foraging-probability-of-F 0 ;item 3 regression-stats
+;  let optimal-foraging-standard-error 0 ;item 4 regression-stats
+;  let optimal-foraging-tot-degrees-of-freedom 0 ;item 5 regression-stats
+;  let optimal-foraging-reg-degrees-of-freedom 0 ;item 6 regression-stats
+;  let optimal-foraging-err-degrees-of-freedom 0 ;item 7 regression-stats
+;  let optimal-foraging-tot-sum-of-squares 0 ;item 8 regression-stats
+;  let optimal-foraging-reg-sum-of-squares 0 ;item 9 regression-stats
+;  let optimal-foraging-err-sum-of-squares 0 ;item 10 regression-stats
+;  
+;  ; parent-offspring conflict at birth
+;  let mother-initiated-birth-correlation 0 ;item 0 item 2 correlation-matrix
+;  let mother-initiated-birth-regression-coeffs 0 ;stats:regress-on generation-table [ "generation-number" "mother-initiated-birth-percent" ]
+;  let mother-initiated-birth-regression-constant 0 ;first mother-initiated-birth-regression-coeffs
+;  let mother-initiated-birth-regression-coeff 0 ;last mother-initiated-birth-regression-coeffs
+;  set regression-stats 0 ;stats:get-rstats 0 ;generation-table
+;  let mother-initiated-birth-r-squared 0 ;item 0 regression-stats
+;  let mother-initiated-birth-adj-r-squared 0 ;item 1 regression-stats
+;  let mother-initiated-birth-F-statistic 0 ;item 2 regression-stats
+;  let mother-initiated-birth-probability-of-F 0 ;item 3 regression-stats
+;  let mother-initiated-birth-standard-error 0 ;item 4 regression-stats
+;  let mother-initiated-birth-tot-degrees-of-freedom 0 ;item 5 regression-stats
+;  let mother-initiated-birth-reg-degrees-of-freedom 0 ;item 6 regression-stats
+;  let mother-initiated-birth-err-degrees-of-freedom 0 ;item 7 regression-stats
+;  let mother-initiated-birth-tot-sum-of-squares 0 ;item 8 regression-stats
+;  let mother-initiated-birth-reg-sum-of-squares 0 ;item 9 regression-stats
+;  let mother-initiated-birth-err-sum-of-squares 0 ;item 10 regression-stats
+;  
+;  ; parent-offspring conflict at weaning
+;  let mother-initiated-wean-correlation 0 ;item 0 item 3 correlation-matrix
+;  let mother-initiated-wean-regression-coeffs 0 ;stats:regress-on generation-table [ "generation-number" "mother-initiated-wean-percent" ]
+;  let mother-initiated-wean-regression-constant 0 ;first mother-initiated-wean-regression-coeffs
+;  let mother-initiated-wean-regression-coeff 0 ;last mother-initiated-wean-regression-coeffs
+;  set regression-stats 0 ;stats:get-rstats generation-table
+;  let mother-initiated-wean-r-squared 0 ;item 0 regression-stats
+;  let mother-initiated-wean-adj-r-squared 0 ;item 1 regression-stats
+;  let mother-initiated-wean-F-statistic 0 ;item 2 regression-stats
+;  let mother-initiated-wean-probability-of-F 0 ;item 3 regression-stats
+;  let mother-initiated-wean-standard-error 0 ;item 4 regression-stats
+;  let mother-initiated-wean-tot-degrees-of-freedom 0 ;item 5 regression-stats
+;  let mother-initiated-wean-reg-degrees-of-freedom 0 ;item 6 regression-stats
+;  let mother-initiated-wean-err-degrees-of-freedom 0 ;item 7 regression-stats
+;  let mother-initiated-wean-tot-sum-of-squares 0 ;item 8 regression-stats
+;  let mother-initiated-wean-reg-sum-of-squares 0 ;item 9 regression-stats
+;  let mother-initiated-wean-err-sum-of-squares 0 ;item 10 regression-stats
+; 
+;  ; hamilton's rule
+;  let hamiltons-rule-correlation 0 ;item 0 item 4 correlation-matrix
+;  let hamiltons-rule-regression-coeffs 0; stats:regress-on generation-table [ "generation-number" "hamiltons-rule-percent" ]
+;  let hamiltons-rule-regression-constant 0;  first hamiltons-rule-regression-coeffs
+;  let hamiltons-rule-regression-coeff 0;  last hamiltons-rule-regression-coeffs
+;  set regression-stats 0;  stats:get-rstats generation-table
+;  let hamiltons-rule-r-squared 0;  item 0 regression-stats
+;  let hamiltons-rule-adj-r-squared 0;  item 1 regression-stats
+;  let hamiltons-rule-F-statistic 0;  item 2 regression-stats
+;  let hamiltons-rule-probability-of-F 0;  item 3 regression-stats
+;  let hamiltons-rule-standard-error  0; item 4 regression-stats
+;  let hamiltons-rule-tot-degrees-of-freedom 0;  item 5 regression-stats
+;  let hamiltons-rule-reg-degrees-of-freedom 0;  item 6 regression-stats
+;  let hamiltons-rule-err-degrees-of-freedom 0;  item 7 regression-stats
+;  let hamiltons-rule-tot-sum-of-squares 0;  item 8 regression-stats
+;  let hamiltons-rule-reg-sum-of-squares 0;  item 9 regression-stats
+;  let hamiltons-rule-err-sum-of-squares 0;  item 10 regression-stats
+  
+
+;to-report max-proximity [ target ] ; the max distance between two individuals (based on their body size - bigger individuals are in proximity from farther away)
+;  ; distance measured between centers of bodies
+;  report ( size / 2 + ( ifelse-value ( is-patch? target ) [ 1 ] [[size] of target / 2 ]))
+;end

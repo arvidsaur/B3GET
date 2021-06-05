@@ -57,6 +57,8 @@
 ; XXXX-XX-XX    <    is within near range
 ; XXXX-XX-XX    |    is neither too near or far
 ; XXXX-XX-XX    >    is close to edge of 
+; XXXX-XX-XX    '    is alone
+; XXXX-XX-XX    "    is not alone
 ;         
 ; 2019-08-26   --> survival-chance
 ; 2019-08-26   --> body-size
@@ -115,7 +117,9 @@
 ; ENVIRONMENT: list of turtles (both plants and anima1s) observed by the caller.
 ;----------------------------------------------------------------------------------------------
 
-to-report sta7us-get-decisions [ my-environment ]
+; original subroutine (working but need code to call reduce-to-unique-vectors) :
+
+to-report sta7us-get-decisions [ my-environment ] ; 300ms incl time / timestep
   
   let meself self
   let current-energy energy.supply
@@ -151,7 +155,7 @@ to-report sta7us-get-decisions [ my-environment ]
             let distance-to-target distance other-guy
             set distance-to-target ifelse-value ( distance-to-target > 1 ) [ distance-to-target ] [ 1 ]
             set decision-vectors lput (list meself other-guy ( sta7us-get-action gene-action ) precision ( gene-weight / ( distance-to-target ^ 2 )) 10 false ) decision-vectors 
-            
+
           ]
         ]
       ]
@@ -161,34 +165,137 @@ to-report sta7us-get-decisions [ my-environment ]
   report decision-vectors
 end
 
-to get-decision [ g ]
-  let my-environment my.environment
-  let ego-status status-of self
-  if ( length g = 5 and is-string? item 1 g and is-string? item 2 g and is-string? item 3 g and is-number? item 4 g ) [ ; checks that allele correctly organized
-    let gene-ego item 1 g
-    let gene-other item 2 g
-    let gene-action item 3 g
-    let gene-weight item 4 g
-    
-    ; Check that first CODON matches self
-    if first-string-is-part-of-last? ( gene-ego ) ( ego-status ) [
-      
-      ; Consider status-of others in the environment
-      foreach my-environment [ other-guy ->
-        let other-status status-of other-guy 
-        
-        ; Check that second CODON matches other
-        if first-string-is-part-of-last? ( gene-other ) ( other-status ) [
-          
-          let distance-to-target distance other-guy
-          set distance-to-target ifelse-value ( distance-to-target > 1 ) [ distance-to-target ] [ 1 ]
-          print (list self other-guy ( sta7us-get-action gene-action ) precision ( gene-weight / ( distance-to-target ^ 2 )) 10 false ) 
-          
-        ]
-      ]
-    ]
-  ]  
-end
+;to-report sta7us-get-decisions [ my-environment ] ; 300ms incl time / timestep
+;  
+;  let meself self
+;  let current-energy energy.supply
+;  let ego-status status-of meself
+;  let decision-vectors []
+;  let conspecifics-list []
+;  let status-list []
+;
+;  let status-table table:make
+;  foreach my-environment [ obj ->
+;    if ( is-patch? obj ) [ table:put status-table ( [pmy.identity] of obj ) ( status-of obj ) ]
+;    if ( is-anima1? obj ) [ table:put status-table ( [my.identity] of obj ) ( status-of obj ) ]
+;  ]
+;  
+;  foreach (sentence chromosome.I chromosome.II) [ g ->
+;    
+;    if ( length g = 5 and is-string? item 1 g and is-string? item 2 g and is-string? item 3 g and is-number? item 4 g ) [ ; checks that allele correctly organized
+;      let gene-ego item 1 g
+;      let gene-other item 2 g
+;      let gene-action item 3 g
+;      let gene-weight item 4 g
+;      
+;      ; Check that first CODON matches self
+;      if first-string-is-part-of-last? ( gene-ego ) ( ego-status ) [
+;        
+;        ; Consider status-of others in the environment
+;        foreach my-environment [ other-guy ->
+;          let other-status table:get status-table ifelse-value ( is-patch? other-guy ) [ [pmy.identity] of other-guy ] [ [my.identity] of other-guy ]
+;          
+;          ; Check that second CODON matches other
+;          if first-string-is-part-of-last? ( gene-other ) ( other-status ) [
+;            
+;            let distance-to-target distance other-guy
+;            set distance-to-target ifelse-value ( distance-to-target > 1 ) [ distance-to-target ] [ 1 ]
+;            
+;            let new-ego meself
+;            let new-target other-guy
+;            let new-action ( sta7us-get-action gene-action )
+;            let new-weight precision ( gene-weight / ( distance-to-target ^ 2 )) 10
+;            
+;            let vector-doesnt-exist true
+;            let index 0
+;            foreach decision-vectors [ vector ->
+;              let vector-ego item 0 vector
+;              let vector-target item 1 vector
+;              let vector-action item 2 vector
+;              let vector-weight item 3 vector
+;              
+;              if ( vector-ego = new-ego ) and ( vector-target = new-target ) and ( vector-action = new-action ) [
+;                set vector-doesnt-exist false
+;                set vector-weight ifelse-value ( is-number? vector-weight ) [ vector-weight ] [ 0 ]
+;                set new-weight ifelse-value ( is-number? new-weight ) [ new-weight ] [ 0 ]
+;                let new-vector ( list new-ego new-target new-action ( vector-weight + new-weight ) false )
+;                set decision-vectors remove-item index decision-vectors
+;                set decision-vectors lput new-vector decision-vectors ]
+;              set index index + 1
+;            ]
+;            if vector-doesnt-exist [ set decision-vectors lput ( list new-ego new-target new-action new-weight false ) decision-vectors ]
+;            
+;          ]
+;        ]
+;      ]
+;    ]
+;  ]
+;  
+;  report decision-vectors
+;end
+
+;to reduce-to-unique-vectors
+;
+;  let initial-decisions decision.vectors
+;  let reduced-decisions []
+;
+;  foreach initial-decisions [ original-vector ->
+;    let original-ego item 0 original-vector
+;    let original-target item 1 original-vector
+;    let original-action item 2 original-vector
+;    let original-weight item 3 original-vector
+;    let vector-doesnt-exist true
+;
+;    let index 0
+;    foreach reduced-decisions [ reduced-vector ->
+;      let reduced-ego item 0 reduced-vector
+;      let reduced-target item 1 reduced-vector
+;      let reduced-action item 2 reduced-vector
+;      let reduced-weight item 3 reduced-vector
+;
+;      if ( reduced-ego = original-ego ) and ( reduced-target = original-target ) and ( reduced-action = original-action ) [
+;        set vector-doesnt-exist false
+;        set reduced-weight ifelse-value ( is-number? reduced-weight ) [ reduced-weight ] [ 0 ]
+;        set original-weight ifelse-value ( is-number? original-weight ) [ original-weight ] [ 0 ]
+;        let new-vector ( list self reduced-target reduced-action ( reduced-weight + original-weight ) false )
+;        set reduced-decisions remove-item index reduced-decisions
+;        set reduced-decisions lput new-vector reduced-decisions ]
+;      set index index + 1
+;    ]
+;    if vector-doesnt-exist [ set reduced-decisions lput ( list self original-target original-action original-weight false ) reduced-decisions ]
+;  ]
+;  set decision.vectors reduced-decisions
+;end
+
+
+;to get-decision [ g ]
+;  let my-environment my.environment
+;  let ego-status status-of self
+;  if ( length g = 5 and is-string? item 1 g and is-string? item 2 g and is-string? item 3 g and is-number? item 4 g ) [ ; checks that allele correctly organized
+;    let gene-ego item 1 g
+;    let gene-other item 2 g
+;    let gene-action item 3 g
+;    let gene-weight item 4 g
+;    
+;    ; Check that first CODON matches self
+;    if first-string-is-part-of-last? ( gene-ego ) ( ego-status ) [
+;      
+;      ; Consider status-of others in the environment
+;      foreach my-environment [ other-guy ->
+;        let other-status status-of other-guy 
+;        
+;        ; Check that second CODON matches other
+;        if first-string-is-part-of-last? ( gene-other ) ( other-status ) [
+;          
+;          let distance-to-target distance other-guy
+;          set distance-to-target ifelse-value ( distance-to-target > 1 ) [ distance-to-target ] [ 1 ]
+;          print (list self other-guy ( sta7us-get-action gene-action ) precision ( gene-weight / ( distance-to-target ^ 2 )) 10 false ) 
+;          
+;        ]
+;      ]
+;    ]
+;  ]  
+;end
 
 ;----------------------------------------------------------------------------------------------
 ; GET MUTATION
@@ -284,20 +391,21 @@ to-report status-of [ target ]
     let target-fertility first [fertility.status] of target
     let target-size ifelse-value ( [size] of target < size ) [ "r" ] [ "b" ]
     let target-health ifelse-value ( [survival.chance] of target > survival.chance ) [ "h" ] [ "x" ]
-    let target-kin ifelse-value ( relatedness-with target > 0.0156 ) [ "k" ] [ "q" ]
+    let target-kin ifelse-value ( relatedness-with target > 0.2 ) [ "k" ] [ "q" ]
     let target-group ifelse-value ( [group.identity] of target = group.identity ) [ "n" ] [ "u" ] 
     let target-carry ifelse-value ( member? target carried.items ) [ "y" ] [ ifelse-value ( member? self [carried.items] of target ) [ "¥" ] [ "t" ] ]
     let target-signal (word ifelse-value [yellow.signal] of target [ "α" ][ "å" ] ifelse-value [red.signal] of target [ "β" ][ "ß" ] ifelse-value [blue.signal] of target [ "ɣ" ][ "œ" ] )
     let target-rest ifelse-value ( [is.resting] of target = true ) [ "s" ] [ "." ]
     let target-color (word "" round [color] of target "" ifelse-value ( shade-of? color [color] of target) [ "#" ] [ "" ])
-    let target-proximity (ifelse-value ( distance-to-target < max-proximity target ) [ "<" ] ( distance-to-target > 0.5 * maximum-visual-range * visual.range ) [ ">" ] [ "|" ] )
+    ;let target-proximity (ifelse-value ( distance-to-target < max-proximity target ) [ "<" ] ( distance-to-target > 0.5 * maximum-visual-range * visual.range ) [ ">" ] [ "|" ] )
+    let target-alone ifelse-value ( count anima1s with [ group.identity = [group.identity] of target ] > 1 ) [ "∴" ] [ "⋅" ]
     set status-report (word status-report 
       target-kind 
       target-self 
       target-alive 
       target-sex 
       target-life-history
-      ifelse-value ( target = self or model-structure = "show-fertility" ) [ target-fertility ] [ "" ]
+      ifelse-value ( target = self ) [ target-fertility ] [ "" ]
       target-size 
       target-health 
       target-kin 
@@ -306,7 +414,9 @@ to-report status-of [ target ]
       target-signal
       target-rest 
       target-color 
-      target-proximity ) ]
+      ;target-proximity 
+      target-alone
+  ) ]
     
   if ( is-patch? target ) [ ; PATCHES
     let target-kind "d" 
@@ -337,7 +447,8 @@ to-report status-code-list
     "v" "w" "x" "y" "z" "¥" "α" 
     "å" "β" "ß" "ɣ" "œ" "*" "-" 
     "#" "$" "~" "1" "2" "3" "4" 
-    "5" "6" "7" "8" "9" "0" "." ]
+    "5" "6" "7" "8" "9" "0" "." 
+    "∴" "⋅"]
 end
 
 to-report action-code-list

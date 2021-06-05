@@ -113,18 +113,18 @@ to-report anima1z report anima1s with [ is.alive ] end
 
 to-report generate-verification-tape
   
-  profiler:reset
-  profiler:start
-  
-  let count-alive-agents 0
-  let count-all-agents 0
-  
-  repeat how-many-ticks? [ 
-    
-    set count-alive-agents count-alive-agents + count anima1z with [ is.alive ]
-    set count-all-agents count-all-agents + count anima1z
-    
-    go ]
+;  profiler:reset
+;  profiler:start
+;  
+;  let count-alive-agents 0
+;  let count-all-agents 0
+;  
+;  repeat how-many-ticks? [ 
+;    
+;    set count-alive-agents count-alive-agents + count anima1z with [ is.alive ]
+;    set count-all-agents count-all-agents + count anima1z
+;    
+;    go ]
   
   let header (list "date-and-time" "model-version" "simulation-id" "ticks" )
   let verification (list "" "" "" "" )
@@ -135,15 +135,15 @@ to-report generate-verification-tape
   ; GO
   ;--------------------------------------------------------------------------------------------------------------------
   
-  set header lput "The runtime of go subroutine is less than 10 milliseconds per timestep per agent?" header
-  set verification lput "runtime-boundaries" verification
-  set function lput "go" function
-  set boolean lput ( ifelse-value ( count-alive-agents = 0 ) [ false ] [ ( profiler:inclusive-time "go" / count-alive-agents ) < 10 ] ) boolean
-  
-  set header lput "The runtime of go subroutine is less than 500 milliseconds per timestep?" header
-  set verification lput "runtime-boundaries" verification
-  set function lput "go" function
-  set boolean lput ( ( profiler:inclusive-time "go" / how-many-ticks? ) < 500 ) boolean
+;  set header lput "The runtime of go subroutine is less than 10 milliseconds per timestep per agent?" header
+;  set verification lput "runtime-boundaries" verification
+;  set function lput "go" function
+;  set boolean lput ( ifelse-value ( count-alive-agents = 0 ) [ false ] [ ( profiler:inclusive-time "go" / count-alive-agents ) < 10 ] ) boolean
+;  
+;  set header lput "The runtime of go subroutine is less than 500 milliseconds per timestep?" header
+;  set verification lput "runtime-boundaries" verification
+;  set function lput "go" function
+;  set boolean lput ( ( profiler:inclusive-time "go" / how-many-ticks? ) < 500 ) boolean
   
   set header lput "All agents are designated as one of the life history options?" header
   set verification lput "dynamic-check" verification
@@ -208,7 +208,7 @@ to-report generate-verification-tape
   set header lput "Calls to update-patches same as length of timesteps for verification?" header 
   set verification lput "runtime-boundaries" verification 
   set function lput "update-patches" function
-  set boolean lput ( profiler:calls "update-patches" = how-many-ticks? ) boolean   
+  set boolean lput ( profiler:calls "update-patches" = 1 ) boolean   
   
   set header lput "No plants have an energy supply that exceeds their terminal energy?" header 
   set verification lput "dynamic-check" verification 
@@ -219,28 +219,28 @@ to-report generate-verification-tape
   ; DETERIORATE
   ;--------------------------------------------------------------------------------------------------------------------
   
-  set header lput "Calls to deteriorate are the same as population size?" header 
-  set verification lput "runtime-boundaries" verification 
-  set function lput "deteriorate" function
-  set boolean lput ( profiler:calls "deteriorate" = count-all-agents ) boolean
+;  set header lput "Calls to deteriorate are the same as population size?" header 
+;  set verification lput "runtime-boundaries" verification 
+;  set function lput "deteriorate" function
+;  set boolean lput ( profiler:calls "deteriorate" = count-all-agents ) boolean
   
   ;--------------------------------------------------------------------------------------------------------------------
   ; CHECK-MORTALITY
   ;--------------------------------------------------------------------------------------------------------------------
   
-  set header lput "Calls to check-mortality are the same as population size?" header 
-  set verification lput "runtime-boundaries" verification 
-  set function lput "check-mortality" function
-  set boolean lput ( profiler:calls "check-mortality" = count-all-agents ) boolean 
+;  set header lput "Calls to check-mortality are the same as population size?" header 
+;  set verification lput "runtime-boundaries" verification 
+;  set function lput "check-mortality" function
+;  set boolean lput ( profiler:calls "check-mortality" = count-all-agents ) boolean 
   
   ;--------------------------------------------------------------------------------------------------------------------
   ; UPDATE-APPEARANCE
   ;--------------------------------------------------------------------------------------------------------------------
   
-  set header lput "Calls to update-appearance are the same as population size?" header 
-  set verification lput "runtime-boundaries" verification 
-  set function lput "update-appearance" function
-  set boolean lput ( profiler:calls "update-appearance" = count-all-agents ) boolean   
+;  set header lput "Calls to update-appearance are the same as population size?" header 
+;  set verification lput "runtime-boundaries" verification 
+;  set function lput "update-appearance" function
+;  set boolean lput ( profiler:calls "update-appearance" = count-all-agents ) boolean   
   
   set header lput "All agents have a size between 0 and 1?" header 
   set verification lput "dynamic-check" verification 
@@ -265,10 +265,10 @@ to-report generate-verification-tape
   ; CONSIDER-ENVIRONMENT
   ; --------------------------------------------------------------------------------------------------------------------
   
-  set header lput "Agent calls to consider-environment same number as agent count?" header
-  set verification lput "runtime-boundaries" verification 
-  set function lput "consider-environment" function
-  set boolean lput ( profiler:calls "consider-environment" = count-alive-agents ) boolean
+;  set header lput "Agent calls to consider-environment same number as agent count?" header
+;  set verification lput "runtime-boundaries" verification 
+;  set function lput "consider-environment" function
+;  set boolean lput ( profiler:calls "consider-environment" = count-alive-agents ) boolean
   
   set header lput "The environment of agents does not contain turtles breed?" header 
   set verification lput "dynamic-check" verification 
@@ -359,10 +359,10 @@ to-report generate-verification-tape
   ; DO-ACTIONS
   ; --------------------------------------------------------------------------------------------------------------------
   
-  set header lput "Agent calls to do-actions same number as agent count?" header 
-  set verification lput "runtime-boundaries" verification 
-  set function lput "do-actions" function
-  set boolean lput ( profiler:calls "do-actions" = count-alive-agents ) boolean 
+;  set header lput "Agent calls to do-actions same number as agent count?" header 
+;  set verification lput "runtime-boundaries" verification 
+;  set function lput "do-actions" function
+;  set boolean lput ( profiler:calls "do-actions" = count-alive-agents ) boolean 
   
   set header lput "No one is doing an action with energy of 0?" header
   set verification lput "dynamic-check" verification 
@@ -1565,7 +1565,7 @@ to-report generate-verification-tape
   set header lput "Calls to mate-with non-zero if agent born during verification?" header 
   set verification lput "runtime-boundaries" verification
   set function lput "mate-with" function
-  set boolean lput ( ifelse-value ( any? anima1z with [ life.history = "gestatee" and age.in.ticks <= how-many-ticks? ] ) [ profiler:calls "mate-with" > 0 ] [ true ] ) boolean
+  set boolean lput ( ifelse-value ( any? anima1z with [ life.history = "gestatee" and age.in.ticks <= 1 ] ) [ profiler:calls "mate-with" > 0 ] [ true ] ) boolean
   
   ; --------------------------------------------------------------------------------------------------------------------
   ; CONCEIVE-WITH
@@ -1738,7 +1738,7 @@ to-report generate-verification-tape
   set verification-results ( sentence verification-results boolean )
   
   report (list header verification function boolean )
-  profiler:stop 
+ ; profiler:stop 
   
 end
 

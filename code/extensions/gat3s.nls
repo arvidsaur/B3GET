@@ -67,7 +67,6 @@
 ; SEX   2019-09-XX   target's sex
 ; SHD   2019-09-XX   target's body.shade
 ; LFH   2019-09-XX   target's life.history
-; FER   2019-09-XX   target's fertility
 ; GRP   2019-09-XX   target's group.identity
 ; YON   2019-09-XX   target's yellow signal is on?
 ; RON   2019-09-XX   target's red signal is on?
@@ -451,7 +450,7 @@ to-report read-code [ code target ]
     ( code = "MID" and is-anima1? target ) [ [my.identity] of target ]
     ( code = "SEX" and is-anima1? target ) [ [biological.sex] of target ]
     ( code = "LFH" and is-anima1? target ) [ [life.history] of target ] 
-    ( code = "FER" and is-anima1? target ) [ ifelse-value ( member? "show-fertility" model-structure ) [ [fertility.status] of target ] [ "" ]]  
+;    ( code = "FER" and is-anima1? target ) [ ifelse-value ( member? "show-fertility" model-structure ) [ [fertility.status] of target ] [ "" ]]  
     ( code = "GRP" and is-anima1? target ) [ [group.identity] of target ]  
     ( code = "ALV" and is-anima1? target ) [ [is.alive] of target ] 
     ( code = "YON" and is-anima1? target ) [ [yellow.signal] of target ] 
@@ -583,7 +582,7 @@ to-report reporter-codons
     "CYC" "PRG" "LAC" "RNM" "RNB" 
     
     "MID" "SIZ" "COL" "HDG" "IRG" "SEX" "SHD"
-    "LFH" "FER" "GRP" "YON" "RON"
+    "LFH" "GRP" "YON" "RON"
     "BON" "SIG" "EGO" "DSE" "ISA"
     "ISP" "ALV" "CRD" "MYO" "MOM" "CRG" 
     "REL"

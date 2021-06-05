@@ -19,43 +19,6 @@
 ; collection preferences.
 ;  
 ;----------------------------------------------------------------------------------------------
-  
-  
-;  ["verification-on" false] √
-;["verification-rate" 1.0E-4] √
-;["simulation-summary-on" true] √
-;["simulation-summary-ticks" 5000]  √  ; just do 5000 and then set up final simulation-summary in end of simulation in behaviorspace
-;["simulation-scans-on" true] √
-;["simulation-scan-ticks" 250] √
-;["group-scans-on" true] √
-;["group-scan-ticks" 10000] √
-;["individual-scans-on" true] √
-;["individual-scan-ticks" 5000] √
-;["view-scans-on" true] √
-;["view-scan-ticks" 50000]  √
-;["genotype-scans-on" true]
-  ;["genotype-scan-ticks" 500000]
-;["focal-follows-on" true] √
-;["focal-follow-rate" 1.0E-4] √
-;["record-individuals-on" true] √√
-
-to set-simulation-id
-  
-  ; give simulation-id specific configuration: sDO17B means
-  ; simulation of WORLD-D, Baboons seed population,
-  ; run B (instead of A), plant-minimum-neighbors = 1 and
-  ; plant-maximum-neighbors = 7
-  ifelse ( plant-minimum-neighbors < plant-maximum-neighbors ) [
-    set simulation-id ( word but-last behaviorspace-experiment-name plant-minimum-neighbors plant-maximum-neighbors "A" )
-  ][
-    let min-holder plant-minimum-neighbors
-    let max-holder plant-maximum-neighbors
-    set plant-minimum-neighbors max-holder - 1
-    set plant-maximum-neighbors min-holder
-    set simulation-id ( word but-last behaviorspace-experiment-name plant-minimum-neighbors plant-maximum-neighbors "B" )
-  ]
-  
-end
 
 to output-results
 
@@ -63,7 +26,14 @@ to output-results
   ; VERIFICATION : collect data on outcomes of periodic code verification checks
   ;----------------------------------------------------------------------------------------------
   
-  if ( verification-on and random-float verification-rate < verification-rate ) [ record-verification ]
+  if ( verification-on and ( random-float 1.0 < verification-rate ) ) [   ; If user wants to collect verification data and dice-roll wins
+    profiler:start ]           ; and start a new profiler recording
+  
+  if ( profiler:calls "go" >= 1 ) [  ; If profiler is running
+    record-verification              ; Record dynamic verification data
+    profiler:stop                    ; and stop the profiler
+    profiler:reset             ; reset the profiler data
+  ]                  
   
   ;----------------------------------------------------------------------------------------------     
   ; SUMMARY : collect summary data of simulations or individuals
@@ -89,9 +59,9 @@ to output-results
   ]
   
   if ( view-scans-on and ceiling ( ticks / view-scan-ticks ) = ( ticks / view-scan-ticks ) ) [
-    export-view ( word simulation-id "-view-" ticks )
+    export-view ( word path-to-experiment "view-" simulation-id "-" ticks ".png")
     output-territories
-    export-view ( word simulation-id "-view-territories" ticks )
+    export-view ( word path-to-experiment "territories-" simulation-id "-" ticks ".png")
   ]
   
   if ( genotype-scans-on and ceiling ( ticks / genotype-scan-ticks ) = ( ticks / genotype-scan-ticks ) and any? anima1s with [ is.alive and generation.number > 0 ] ) [
@@ -168,7 +138,7 @@ end
 
 to scan-genotype ; agent subroutine
   
-  let file-path ( word path-to-experiment "genotypes.csv" )
+  let file-path ( word path-to-experiment "genotypes-" genotype ".csv" )
   
   if ( not file-exists? file-path and simulation-id != 0 )
   
@@ -213,6 +183,8 @@ to scan-genotype ; agent subroutine
   while [ i < length numbers-I ] [
     let item-I item i numbers-I
     let item-II item i numbers-II
+    if ( not is-number? item-I ) [ set item-I 0 ]
+    if ( not is-number? item-II ) [ set item-II 0 ]
     set combined-list lput ( item-I + item-II ) combined-list
     set i i + 1 ]
   
@@ -261,7 +233,7 @@ end
 
 to record-actions ; agent subroutine
   
-  let file-path ( word path-to-experiment my.identity "-actions.csv" )
+  let file-path ( word path-to-experiment "actions-" my.identity ".csv" )
   
   if ( not file-exists? file-path and simulation-id != 0 )
   
@@ -527,12 +499,12 @@ to scan-agent
       "maximum-visual-range"
       "base-litter-size"
       
-      "timesteps"
-      "solar-status"
+      "current-timesteps"
+      "current-solar-status"
       "current-season"
-      "plant-patchiness"
-      "population-density"
+      "current-plant-patchiness"
       "current-plant-abundance"
+      "current-population-density"
       
       "focal-subject"
       "color" 
@@ -628,13 +600,14 @@ to scan-agent
     deterioration-rate
     maximum-visual-range
     base-litter-size
-    
+
     ticks
     solar-status
     current-season
     plant-patchiness
-    population-density
     current-plant-abundance
+    population-density
+
     
     focal-subject
     color
@@ -721,7 +694,7 @@ end
   
 to individual-summary
   
-  let file-path ( word path-to-experiment "individuals.csv" )
+  let file-path ( word path-to-experiment "individuals-" population ".csv" )
   
   if ( not file-exists? file-path and simulation-id != 0 )
   
@@ -828,11 +801,15 @@ to individual-summary
       "chromosome.I"
       "chromosome.II"
       "ticks.at.conception"
+      "ticks.at.birth"
+      "ticks.at.weaning"
+      "ticks.at.sexual.maturity"
+      "ticks.at.death"
+      "cause.of.death"
       "gestation-duration"
       "lactation-duration"
       "juvenile-duration"
       "lifespan"
-      "ticks.at.death"
       "adult.hidden.chance"
       "adult.survival.chance"
       "adult.body.size"
@@ -852,8 +829,11 @@ to individual-summary
       "adult.blue.chance"
       "mother.initiated.birth"
       "mother.initiated.weaning"
-      "cause.of.death"
       
+      "lifetime-plant-abundance"
+      "lifetime-plant-patchiness"
+      "lifetime-population-size"
+
   )) ]
   
   file-open file-path
@@ -960,11 +940,15 @@ to individual-summary
     chromosome.I
     chromosome.II
     ticks.at.conception
-    ( ticks.at.birth - ticks.at.conception ) ; gestation duration
-    ( ticks.at.weaning - ticks.at.birth ) ; lactation duration
-    ( ticks.at.sexual.maturity - ticks.at.weaning ) ; juvenile duration
-    ( ticks.at.death - ticks.at.conception ) ; lifespan 
+    ticks.at.birth
+    ticks.at.weaning
+    ticks.at.sexual.maturity
     ticks.at.death
+    cause.of.death
+    gestation-duration
+    lactation-duration
+    juvenile-duration
+    lifespan
     adult.hidden.chance
     adult.survival.chance
     adult.body.size
@@ -984,8 +968,11 @@ to individual-summary
     adult.blue.chance
     mother.initiated.birth
     mother.initiated.weaning
-    cause.of.death
     
+    lifetime-plant-abundance
+    lifetime-plant-patchiness
+    lifetime-population-size
+
   ))
   
   file-close
@@ -1003,7 +990,7 @@ end
 
 to scan-group [ group-id ]
   
-  let file-path ( word path-to-experiment "group-scans.csv" )
+  let file-path ( word path-to-experiment "group-scans-" population ".csv" )
   
   if ( not file-exists? file-path and simulation-id != 0 )
   
@@ -1032,14 +1019,14 @@ to scan-group [ group-id ]
       "deterioration-rate"
       "maximum-visual-range"
       "base-litter-size"
-      
-      "timesteps"
-      "solar-status"
-      "population-density"
-      "plant-abundance"
+
+      "current-timesteps"
+      "current-solar-status"
       "current-season"
-      "plant-patchiness"
-      "territory-size"
+      "current-plant-patchiness"
+      "current-plant-abundance"
+      "current-population-density"
+      "current-territory-size"
       
       "distance-to-centroid-minimum"
       "distance-to-centroid-maximum"
@@ -1104,12 +1091,12 @@ to scan-group [ group-id ]
   let x-centroid mean [xcor] of living-agents with [ group.identity = group-id ]
   let y-centroid mean [ycor] of living-agents with [ group.identity = group-id ]
   let distance-list [ distancexy x-centroid y-centroid ] of living-agents with [ group.identity = group-id ]
-  let distance-to-centroid-minimum min distance-list 
-  let distance-to-centroid-maximum max distance-list 
-  let distance-to-centroid-mean mean distance-list 
-  let distance-to-centroid-median median distance-list 
-  let distance-to-centroid-variance variance distance-list 
-  
+  let distance-to-centroid-minimum ifelse-value ( length distance-list < 1 ) [ "NA" ] [ min distance-list ]
+  let distance-to-centroid-maximum ifelse-value ( length distance-list < 1 ) [ "NA" ] [ max distance-list ] 
+  let distance-to-centroid-mean ifelse-value ( length distance-list < 1 ) [ "NA" ] [ mean distance-list ]
+  let distance-to-centroid-median ifelse-value ( length distance-list < 1 ) [ "NA" ] [ median distance-list ]
+  let distance-to-centroid-variance ifelse-value ( length distance-list < 2 ) [ "NA" ] [ variance distance-list ] 
+ 
   let current-group-size count living-agents with [ group.identity = group-id ]
   let adult-male-count count living-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ]
   let adult-cycling-count count living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "cycling" ]
@@ -1174,10 +1161,10 @@ to scan-group [ group-id ]
     
     ticks
     solar-status
-    population-density
-    sum [penergy.supply] of patches
     current-season
     plant-patchiness
+    current-plant-abundance
+    population-density
     count patches with [ pgroup.identity = group-id ]
     
     distance-to-centroid-minimum
@@ -1253,7 +1240,7 @@ end
 
 to scan-simulation
   
-  let file-path ( word path-to-experiment simulation-id ".csv" )
+  let file-path ( word path-to-experiment simulation-id "-scans.csv" )
   
   if ( not file-exists? file-path and simulation-id != 0 )
   
@@ -1443,70 +1430,6 @@ to simulation-summary ; observer subroutine
       "adult-females-multiple-mates-count"
       "adult-females-not-multiple-mates-count" 
       "adult-females-percent-multiple-mates"
-      
-      "lotka-volterra-best-fit"
-      "lotka-volterra-r1"
-      "lotka-volterra-r2"
-      "lotka-volterra-s12"
-      "lotka-volterra-s21"
-      "lotka-volterra-N1"
-      "lotka-volterra-N2"
-      
-      "optimal-foraging-regression-constant"
-      "optimal-foraging-regression-coeff"
-      "optimal-foraging-r-squared"
-      "optimal-foraging-adj-r-squared"
-      "optimal-foraging-F-statistic"
-      "optimal-foraging-probability-of-F"
-      "optimal-foraging-standard-error"
-      "optimal-foraging-tot-degrees-of-freedom"
-      "optimal-foraging-reg-degrees-of-freedom"
-      "optimal-foraging-err-degrees-of-freedom"
-      "optimal-foraging-tot-sum-of-squares"
-      "optimal-foraging-reg-sum-of-squares"
-      "optimal-foraging-err-sum-of-squares"
-      
-      "mother-initiated-birth-regression-constant"
-      "mother-initiated-birth-regression-coeff"
-      "mother-initiated-birth-r-squared"
-      "mother-initiated-birth-adj-r-squared"
-      "mother-initiated-birth-F-statistic"
-      "mother-initiated-birth-probability-of-F"
-      "mother-initiated-birth-standard-error"
-      "mother-initiated-birth-tot-degrees-of-freedom"
-      "mother-initiated-birth-reg-degrees-of-freedom"
-      "mother-initiated-birth-err-degrees-of-freedom"
-      "mother-initiated-birth-tot-sum-of-squares"
-      "mother-initiated-birth-reg-sum-of-squares"
-      "mother-initiated-birth-err-sum-of-squares"
-      
-      "mother-initiated-wean-regression-constant"
-      "mother-initiated-wean-regression-coeff"
-      "mother-initiated-wean-r-squared"
-      "mother-initiated-wean-adj-r-squared"
-      "mother-initiated-wean-F-statistic"
-      "mother-initiated-wean-probability-of-F"
-      "mother-initiated-wean-standard-error"
-      "mother-initiated-wean-tot-degrees-of-freedom"
-      "mother-initiated-wean-reg-degrees-of-freedom"
-      "mother-initiated-wean-err-degrees-of-freedom"
-      "mother-initiated-wean-tot-sum-of-squares"
-      "mother-initiated-wean-reg-sum-of-squares"
-      "mother-initiated-wean-err-sum-of-squares"
-      
-      "hamiltons-rule-regression-constant"
-      "hamiltons-rule-regression-coeff"
-      "hamiltons-rule-r-squared"
-      "hamiltons-rule-adj-r-squared"
-      "hamiltons-rule-F-statistic"
-      "hamiltons-rule-probability-of-F"
-      "hamiltons-rule-standard-error"
-      "hamiltons-rule-tot-degrees-of-freedom"
-      "hamiltons-rule-reg-degrees-of-freedom"
-      "hamiltons-rule-err-degrees-of-freedom"
-      "hamiltons-rule-tot-sum-of-squares"
-      "hamiltons-rule-reg-sum-of-squares"
-      "hamiltons-rule-err-sum-of-squares"
       
       ; emergent properties of plants
       "plant-abundance-maximum" 
@@ -1855,116 +1778,6 @@ to simulation-summary ; observer subroutine
   )) ]
   
   file-open simulations-file-path
-
-  ; STATISTICAL CALCULATIONS
-  
-  ; lotka volterra
-  let lotka-volterra-results (list 0 0 0 0 0 0 0 ) ; calculate-lotka-volterra
-  let lotka-volterra-best-fit item 0 lotka-volterra-results
-  let lotka-volterra-r1 item 1 lotka-volterra-results
-  let lotka-volterra-r2 item 2 lotka-volterra-results
-  let lotka-volterra-s12 item 3 lotka-volterra-results
-  let lotka-volterra-s21 item 4 lotka-volterra-results
-  let lotka-volterra-N1 item 5 lotka-volterra-results
-  let lotka-volterra-N2 item 6 lotka-volterra-results
-  
-  ; stats table with generation number in first column as dependent variable
-  ;let generation-table stats:newtable
-  ;stats:set-names generation-table ( list "generation-number" "optimal-foraging-index"  "mother-initiated-birth-percent" "mother-initiated-wean-percent" "hamiltons-rule-percent" )
-  
-  let stop-generation 10
-  let g 1
-  
-  while [ g < stop-generation ] [
-    
-    let sum-foraging-gains sum [foraging.gains] of anima1s with [ generation.number = g ]
-    let sum-energy-cost sum [total.energy.cost] of anima1s with [ generation.number = g ]
-    let generation-size count anima1s with [ generation.number = g ]
-    
-    let optimal-foraging-index ifelse-value ( sum-energy-cost > 0 ) [ sum-foraging-gains / sum-energy-cost ] [ 0 ]
-    let mother-initiated-birth-percent ifelse-value ( generation-size > 0 ) [ count anima1s with [ generation.number = g and mother.initiated.birth ] / generation-size ] [ 0 ]
-    let mother-initiated-wean-percent ifelse-value ( generation-size > 0 ) [ count anima1s with [ generation.number = g and mother.initiated.weaning ] / generation-size ] [ 0 ]
-    let hamiltons-rule-percent ifelse-value ( generation-size > 0 ) [ count anima1s with [ whole.related.help.cost > half.related.help.cost and half.related.help.cost > fourth.related.help.cost and fourth.related.help.cost > eighth.related.help.cost and generation.number = g ] / generation-size ] [ 0 ]
-    
-    ;stats:add generation-table ( list g optimal-foraging-index mother-initiated-birth-percent mother-initiated-wean-percent hamiltons-rule-percent )
-    
-    set g g + 1 ]
-
-  ; calculate correlations
-  let correlation-matrix 0 ;stats:correlation generation-table
-  
-  ; optimal foraging
-  let optimal-foraging-correlation 0 ;item 0 item 1 correlation-matrix
-  let optimal-foraging-regression-coeffs 0 ;stats:regress-on generation-table [ "generation-number" "optimal-foraging-index" ]
-  let optimal-foraging-regression-constant 0;first optimal-foraging-regression-coeffs
-  let optimal-foraging-regression-coeff 0 ;last optimal-foraging-regression-coeffs
-  let regression-stats 0 ;stats:get-rstats generation-table
-  let optimal-foraging-r-squared 0 ;item 0 regression-stats
-  let optimal-foraging-adj-r-squared 0 ;item 1 regression-stats
-  let optimal-foraging-F-statistic 0 ;item 2 regression-stats
-  let optimal-foraging-probability-of-F 0 ;item 3 regression-stats
-  let optimal-foraging-standard-error 0 ;item 4 regression-stats
-  let optimal-foraging-tot-degrees-of-freedom 0 ;item 5 regression-stats
-  let optimal-foraging-reg-degrees-of-freedom 0 ;item 6 regression-stats
-  let optimal-foraging-err-degrees-of-freedom 0 ;item 7 regression-stats
-  let optimal-foraging-tot-sum-of-squares 0 ;item 8 regression-stats
-  let optimal-foraging-reg-sum-of-squares 0 ;item 9 regression-stats
-  let optimal-foraging-err-sum-of-squares 0 ;item 10 regression-stats
-  
-  ; parent-offspring conflict at birth
-  let mother-initiated-birth-correlation 0 ;item 0 item 2 correlation-matrix
-  let mother-initiated-birth-regression-coeffs 0 ;stats:regress-on generation-table [ "generation-number" "mother-initiated-birth-percent" ]
-  let mother-initiated-birth-regression-constant 0 ;first mother-initiated-birth-regression-coeffs
-  let mother-initiated-birth-regression-coeff 0 ;last mother-initiated-birth-regression-coeffs
-  set regression-stats 0 ;stats:get-rstats 0 ;generation-table
-  let mother-initiated-birth-r-squared 0 ;item 0 regression-stats
-  let mother-initiated-birth-adj-r-squared 0 ;item 1 regression-stats
-  let mother-initiated-birth-F-statistic 0 ;item 2 regression-stats
-  let mother-initiated-birth-probability-of-F 0 ;item 3 regression-stats
-  let mother-initiated-birth-standard-error 0 ;item 4 regression-stats
-  let mother-initiated-birth-tot-degrees-of-freedom 0 ;item 5 regression-stats
-  let mother-initiated-birth-reg-degrees-of-freedom 0 ;item 6 regression-stats
-  let mother-initiated-birth-err-degrees-of-freedom 0 ;item 7 regression-stats
-  let mother-initiated-birth-tot-sum-of-squares 0 ;item 8 regression-stats
-  let mother-initiated-birth-reg-sum-of-squares 0 ;item 9 regression-stats
-  let mother-initiated-birth-err-sum-of-squares 0 ;item 10 regression-stats
-  
-  ; parent-offspring conflict at weaning
-  let mother-initiated-wean-correlation 0 ;item 0 item 3 correlation-matrix
-  let mother-initiated-wean-regression-coeffs 0 ;stats:regress-on generation-table [ "generation-number" "mother-initiated-wean-percent" ]
-  let mother-initiated-wean-regression-constant 0 ;first mother-initiated-wean-regression-coeffs
-  let mother-initiated-wean-regression-coeff 0 ;last mother-initiated-wean-regression-coeffs
-  set regression-stats 0 ;stats:get-rstats generation-table
-  let mother-initiated-wean-r-squared 0 ;item 0 regression-stats
-  let mother-initiated-wean-adj-r-squared 0 ;item 1 regression-stats
-  let mother-initiated-wean-F-statistic 0 ;item 2 regression-stats
-  let mother-initiated-wean-probability-of-F 0 ;item 3 regression-stats
-  let mother-initiated-wean-standard-error 0 ;item 4 regression-stats
-  let mother-initiated-wean-tot-degrees-of-freedom 0 ;item 5 regression-stats
-  let mother-initiated-wean-reg-degrees-of-freedom 0 ;item 6 regression-stats
-  let mother-initiated-wean-err-degrees-of-freedom 0 ;item 7 regression-stats
-  let mother-initiated-wean-tot-sum-of-squares 0 ;item 8 regression-stats
-  let mother-initiated-wean-reg-sum-of-squares 0 ;item 9 regression-stats
-  let mother-initiated-wean-err-sum-of-squares 0 ;item 10 regression-stats
- 
-  ; hamilton's rule
-  let hamiltons-rule-correlation 0 ;item 0 item 4 correlation-matrix
-  let hamiltons-rule-regression-coeffs 0; stats:regress-on generation-table [ "generation-number" "hamiltons-rule-percent" ]
-  let hamiltons-rule-regression-constant 0;  first hamiltons-rule-regression-coeffs
-  let hamiltons-rule-regression-coeff 0;  last hamiltons-rule-regression-coeffs
-  set regression-stats 0;  stats:get-rstats generation-table
-  let hamiltons-rule-r-squared 0;  item 0 regression-stats
-  let hamiltons-rule-adj-r-squared 0;  item 1 regression-stats
-  let hamiltons-rule-F-statistic 0;  item 2 regression-stats
-  let hamiltons-rule-probability-of-F 0;  item 3 regression-stats
-  let hamiltons-rule-standard-error  0; item 4 regression-stats
-  let hamiltons-rule-tot-degrees-of-freedom 0;  item 5 regression-stats
-  let hamiltons-rule-reg-degrees-of-freedom 0;  item 6 regression-stats
-  let hamiltons-rule-err-degrees-of-freedom 0;  item 7 regression-stats
-  let hamiltons-rule-tot-sum-of-squares 0;  item 8 regression-stats
-  let hamiltons-rule-reg-sum-of-squares 0;  item 9 regression-stats
-  let hamiltons-rule-err-sum-of-squares 0;  item 10 regression-stats
-  
   
   file-print csv:to-string ( list ( list
     
@@ -2019,72 +1832,8 @@ to simulation-summary ; observer subroutine
     adult-males-not-multiple-mates-count 
     adult-males-percent-multiple-mates 
     adult-females-multiple-mates-count
-    adult-females-not-multiple-mates-count 
+    adult-females-not-multiple-mates-count
     adult-females-percent-multiple-mates
-    
-    lotka-volterra-best-fit
-    lotka-volterra-r1
-    lotka-volterra-r2
-    lotka-volterra-s12
-    lotka-volterra-s21
-    lotka-volterra-N1
-    lotka-volterra-N2
-    
-    optimal-foraging-regression-constant
-    optimal-foraging-regression-coeff
-    optimal-foraging-r-squared
-    optimal-foraging-adj-r-squared
-    optimal-foraging-F-statistic
-    optimal-foraging-probability-of-F
-    optimal-foraging-standard-error
-    optimal-foraging-tot-degrees-of-freedom
-    optimal-foraging-reg-degrees-of-freedom
-    optimal-foraging-err-degrees-of-freedom
-    optimal-foraging-tot-sum-of-squares
-    optimal-foraging-reg-sum-of-squares
-    optimal-foraging-err-sum-of-squares
-    
-    mother-initiated-birth-regression-constant
-    mother-initiated-birth-regression-coeff
-    mother-initiated-birth-r-squared
-    mother-initiated-birth-adj-r-squared
-    mother-initiated-birth-F-statistic
-    mother-initiated-birth-probability-of-F
-    mother-initiated-birth-standard-error
-    mother-initiated-birth-tot-degrees-of-freedom
-    mother-initiated-birth-reg-degrees-of-freedom
-    mother-initiated-birth-err-degrees-of-freedom
-    mother-initiated-birth-tot-sum-of-squares
-    mother-initiated-birth-reg-sum-of-squares
-    mother-initiated-birth-err-sum-of-squares
-    
-    mother-initiated-wean-regression-constant
-    mother-initiated-wean-regression-coeff
-    mother-initiated-wean-r-squared
-    mother-initiated-wean-adj-r-squared
-    mother-initiated-wean-F-statistic
-    mother-initiated-wean-probability-of-F
-    mother-initiated-wean-standard-error
-    mother-initiated-wean-tot-degrees-of-freedom
-    mother-initiated-wean-reg-degrees-of-freedom
-    mother-initiated-wean-err-degrees-of-freedom
-    mother-initiated-wean-tot-sum-of-squares
-    mother-initiated-wean-reg-sum-of-squares
-    mother-initiated-wean-err-sum-of-squares
-    
-    hamiltons-rule-regression-constant
-    hamiltons-rule-regression-coeff
-    hamiltons-rule-r-squared
-    hamiltons-rule-adj-r-squared
-    hamiltons-rule-F-statistic
-    hamiltons-rule-probability-of-F
-    hamiltons-rule-standard-error
-    hamiltons-rule-tot-degrees-of-freedom
-    hamiltons-rule-reg-degrees-of-freedom
-    hamiltons-rule-err-degrees-of-freedom
-    hamiltons-rule-tot-sum-of-squares
-    hamiltons-rule-reg-sum-of-squares
-    hamiltons-rule-err-sum-of-squares
     
     ; emergent properties of plants
     plant-abundance-maximum 
@@ -2448,9 +2197,25 @@ to-report harm-count report length harm.history end
 to-report copulations-count report length copulations.history end
 to-report conceptions-count report length conceptions.history end
 to-report group-transfers-count report length group.transfers.history end
-to-report infanticide-count report length infanticide.history end
+
+to-report infanticide-count 
+  ; must remove individual infants who are still alive at the time of this individual's death
+  report length infanticide.history
+end
+
+to-report gestation-duration report ifelse-value ( ticks.at.birth = 0 ) [ 0 ] [ ( ticks.at.birth - ticks.at.conception ) ] end
+to-report lactation-duration report ifelse-value ( ticks.at.weaning = 0 or ticks.at.birth = 0 ) [ 0 ] [ ( ticks.at.weaning - ticks.at.birth ) ] end
+to-report juvenile-duration report ifelse-value ( ticks.at.sexual.maturity = 0 or ticks.at.weaning = 0 ) [ 0 ] [ ( ticks.at.sexual.maturity - ticks.at.weaning ) ] end
+to-report lifespan report ( ticks.at.death - ticks.at.conception ) end
+
+  ; defensive programming needed here
+to-report lifetime-plant-abundance report mean sublist plant-abundance-record ( length plant-abundance-record - how-many-records ) ( length plant-abundance-record )  end
+to-report lifetime-plant-patchiness report mean sublist plant-patchiness-record  ( length plant-patchiness-record  - how-many-records ) ( length plant-patchiness-record  ) end
+to-report lifetime-population-size report mean sublist population-size-record ( length population-size-record - how-many-records ) ( length population-size-record ) end
   
-;--------------------------------------------------------------------------------------------------------------------
+to-report how-many-records report ceiling (( ticks.at.death - ticks.at.conception ) / record-tick-interval ) end
+  
+  ;--------------------------------------------------------------------------------------------------------------------
 ; OBSERVER FUNCTIONS
 ;--------------------------------------------------------------------------------------------------------------------
   
@@ -2516,25 +2281,25 @@ to-report verification-false-count report length filter [ i -> i = false ] verif
 to-report verification-percent-true report ifelse-value ( verification-true-count + verification-false-count = 0 ) [ "NA" ] [ verification-true-count / ( verification-true-count + verification-false-count ) ] end
   
 to-report group-sizes report map [ i -> count living-agents with [ group.identity = i ]] remove-duplicates [group.identity] of living-agents end
-to-report group-size-minimum report min group-sizes end
-to-report group-size-maximum report max group-sizes end
-to-report group-size-mean report mean group-sizes end
-to-report group-size-median report median group-sizes end
-to-report group-size-variance report variance group-sizes end
+to-report group-size-minimum report ifelse-value ( length group-sizes < 1 ) [ "NA" ] [ min group-sizes ] end
+to-report group-size-maximum report ifelse-value ( length group-sizes < 1 ) [ "NA" ] [ max group-sizes ]  end
+to-report group-size-mean report ifelse-value ( length group-sizes < 1 ) [ "NA" ] [ mean group-sizes ]  end
+to-report group-size-median report ifelse-value ( length group-sizes < 1 ) [ "NA" ] [ median group-sizes ] end
+to-report group-size-variance report ifelse-value ( length group-sizes < 2 ) [ "NA" ] [ variance group-sizes ]  end
 
 to-report adult-males-who-disperse-count report count decayed-agents with [ biological.sex = "male" and life.history = "adult" and length group.transfers.history > 0 ] end
 to-report adult-males-who-not-disperse-count report count decayed-agents with [ biological.sex = "male" and life.history = "adult" and length group.transfers.history = 0 ] end
-to-report adult-males-percent-disperse report ( adult-males-who-disperse-count / ( adult-males-who-disperse-count + adult-males-who-not-disperse-count ) ) end
+to-report adult-males-percent-disperse report ( adult-males-who-disperse-count / ( adult-males-who-disperse-count + adult-males-who-not-disperse-count + 0.0000000001 ) ) end
 to-report adult-females-who-disperse-count report count decayed-agents with [ biological.sex = "female" and life.history = "adult" and length group.transfers.history > 0 ] end
 to-report adult-females-who-not-disperse-count report count decayed-agents with [ biological.sex = "female" and life.history = "adult" and length group.transfers.history = 0 ] end
-to-report adult-females-percent-disperse report ( adult-females-who-disperse-count / ( adult-females-who-disperse-count + adult-females-who-not-disperse-count ) ) end
+to-report adult-females-percent-disperse report ( adult-females-who-disperse-count / ( adult-females-who-disperse-count + adult-females-who-not-disperse-count + 0.0000000001 ) ) end
   
 to-report adult-males-multiple-mates-count report count decayed-agents with [ biological.sex = "male" and life.history = "adult" and length copulations.history > 1 ] end
 to-report adult-males-not-multiple-mates-count report count decayed-agents with [ biological.sex = "male" and life.history = "adult" and length copulations.history <= 1 ] end
-to-report adult-males-percent-multiple-mates report ( adult-males-multiple-mates-count / ( adult-males-multiple-mates-count + adult-males-not-multiple-mates-count ) ) end
+to-report adult-males-percent-multiple-mates report ( adult-males-multiple-mates-count / ( adult-males-multiple-mates-count + adult-males-not-multiple-mates-count  + 0.0000000001 ) ) end
 to-report adult-females-multiple-mates-count report count decayed-agents with [ biological.sex = "female" and life.history = "adult" and length copulations.history > 1 ] end
 to-report adult-females-not-multiple-mates-count report count decayed-agents with [ biological.sex = "female" and life.history = "adult" and length copulations.history <= 1 ] end
-to-report adult-females-percent-multiple-mates report ( adult-females-multiple-mates-count / ( adult-females-multiple-mates-count + adult-females-not-multiple-mates-count ) ) end
+to-report adult-females-percent-multiple-mates report ( adult-females-multiple-mates-count / ( adult-females-multiple-mates-count + adult-females-not-multiple-mates-count + 0.0000000001 ) ) end
 
 ; emergent plant properties
 to-report plant-abundance-maximum report ifelse-value ( length plant-abundance-record > 0 ) [ max plant-abundance-record ] [ "NA" ] end

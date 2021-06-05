@@ -8,6 +8,31 @@
 ;   88888888P d88888P  `88888'   88888888P    dP
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
+;
+; This program is to simulate ...
+;
+; The program is divided into four main sections:
+;
+;  1. Setup. Prepares for operation of the program.
+;
+;  2. Go. Advance one time step all across the enviroment, calling subroutine
+;       within 'engine' for individual ...
+;
+;  3. Engine. A collection of subroutines allowing living agents assess their
+;       environments and advance on time step accordingly.
+;
+;  4. Actions. A collection of subroutines to carry out necessary steps, as
+;       called for in 'engine' subroutines.
+;
+;  5. Genotype reader. Converts environmental and genotype information into a
+;       set of decision vectors -- who is targeted, action to be taken, energy
+;       for such action, and so forth (sta2us and gat3s).
+;
+; 6. Service. Includes necessary processing for the interface -- button clicks,
+;       output, internal operation checking, and so forth. (analysis, data, interface,
+;       commands, plots, results, selection, verification)
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 extensions [ csv profiler table time ]
 
@@ -26,7 +51,7 @@ __includes [
 ;
 ; CHARACTERISTICS OF MOVABLE AGENTS IN THE PROGRAM
 ;
-; In this program, plants are part of the patch structure of the system but characteristics animals are
+; In this program, plants are part of the patch structure of the system and characteristics animals are
 ; defined here. The term "anima1" is used with the digit "1" instead of an "l" to mark these
 ; as virtual animals.
 ;
@@ -182,6 +207,8 @@ globals [
   ; TRACKING VARIABLES
   start-date-and-time              ;
   verification-results             ;
+
+  record-tick-interval
   plant-abundance-record           ;
   plant-patchiness-record          ;
   population-size-record           ;
@@ -190,26 +217,6 @@ globals [
 
   solar-status                     ;
   current-season                   ;
-
-  ; SETTING TO OUTPUT DATA
-  verification-on                  ; TRUE = runs periodic code verification checks set by the VERIFICATION-RATE
-  verification-rate                ;
-  simulation-summary-on            ; TRUE = records the simulation ;
-  simulation-summary-ticks         ;
-  simulation-scans-on              ; TRUE = scans the simulation every SCAN-INTERVAL and records population-level phenomena ;
-  simulation-scan-ticks            ;
-  group-scans-on                   ; TRUE = scans all groups every SCAN-INTERVAL and records group-level phenomena
-  group-scan-ticks                 ;
-  individual-scans-on              ;
-  individual-scan-ticks            ; TRUE = scans all agents every SCAN-INTERVAL and records individual-level phenomena
-  view-scans-on                    ;
-  view-scan-ticks                  ;
-  genotype-scans-on                ;
-  genotype-scan-ticks              ;
-  record-individuals-on            ; TRUE = records every agent upon its death
-  focal-follows-on                 ; TRUE = small chance to record an individual's entire life
-  focal-follow-rate                ;
-
 
   selected-display
 ]
@@ -233,6 +240,7 @@ to setup-parameters
   set base-litter-size 10
   set model-structure [ "baseline" ]
   set verification-results []
+  set record-tick-interval 100
   set plant-abundance-record []
   set plant-patchiness-record []
   set population-size-record []
@@ -283,7 +291,7 @@ end
 ;
 ; MAIN SUBROUTINE CALLED ONCE EACH TIMESTEP
 ;
-; This is the main entry for the program. Time in this program is measured in
+; This is the main repetitive entry for the program. Time in this program is measured in
 ; abstract years and divided into abstract days, then further divided into
 ; abstract hours. For decimal simplicity, there are 100 days per year and 10
 ; hours per day. These divisions are arbitrary and can be modified as
@@ -336,25 +344,25 @@ end
 
 to go
 
-  if ( ticks = 0 ) [                                              ; Update metafile when a
-    update-metafile                                               ; new simulation starts.
+  if ( ticks = 0 ) [                                           ; Update metafile when a
+    update-metafile                                            ; new simulation starts.
     "simulation"
     simulation-id
     "SIMULATION STARTED" ]
 
-  global-update                                                   ; Update the current state of the
-  plants-update                                                   ; plants and animals in the
-  animals-update                                                  ; world.
+  global-update                                                ; Update the current state of the
+  plants-update                                                ; plants and animals in the
+  animals-update                                               ; world.
 
-  ask anima1s with [ is.alive ] [ consider-environment ]          ; Living animals view their environment and
-  ask anima1s with [ is.alive ] [ make-decisions ]                ; make decisions according to their genotype and
-  ask anima1s with [ is.alive ] [ do-actions ]                    ; perform those actions if they have enough energy.
+  ask anima1s with [ is.alive ] [ consider-environment ]       ; Living animals view their environment and
+  ask anima1s with [ is.alive ] [ make-decisions ]             ; make decisions according to their genotype and
+  ask anima1s with [ is.alive ] [ do-actions ]                 ; perform those actions if they have enough energy.
 
-  if selection-on? [ artificial-selection ]                       ; Impose artificial selection on animals.
-  if output-results? [ output-results ]                           ; Generate data from current simulation state.
-  print-out-simulation-status                                     ; Print out simulation status.
+  if selection-on? [ artificial-selection ]                    ; Impose artificial selection on animals.
+  if output-results? [ output-results ]                        ; Generate data from current simulation state.
+  print-out-simulation-status                                  ; Print out simulation status.
 
-  tick                                                            ; Move forward one simulated hour.
+  tick                                                         ; Move forward one simulated hour.
 
 end
 
@@ -375,7 +383,7 @@ to global-update
   recent-decisions-made
 
   set recent-actions-completed filter [ vector -> item 0 vector > ( ticks - how-many-ticks? ) ] recent-actions-completed
-  if ( ticks > 0 and ceiling (ticks / 100) = (ticks / 100) ) [
+  if ( ceiling (ticks / record-tick-interval) = (ticks / record-tick-interval) ) [ ; must include first tick
     set plant-abundance-record lput sum [penergy.supply] of patches plant-abundance-record
     set plant-patchiness-record lput plant-patchiness plant-patchiness-record
     set population-size-record lput count anima1s with [ is.alive ] population-size-record
@@ -384,6 +392,16 @@ to global-update
   set solar-status get-solar-status
   set current-season ( cos (( 360 / plant-annual-cycle ) * ticks ))
 end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; PERFORM ALL GLOBAL UPDATES FOR ANIMA1S
+;
+; ENTRY:
+;
+; EXIT:
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to animals-update
 
@@ -421,7 +439,8 @@ to animals-update
       ]
     ]
 
-    ask patch-here [ set pgroup.identity [group.identity] of myself ] ; update territories of groups
+    if ( [pgroup.identity] of patch-here != group.identity and count anima1s with [ group.identity = [group.identity] of myself ] > 1 ) [ ; is this code costly?
+      ask patch-here [ set pgroup.identity [group.identity] of myself ]] ; update territories of groups
   ]
 end
 
@@ -460,7 +479,9 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to print-out-simulation-status
-  if ( ticks > 0 and ceiling (ticks / 100) = (ticks / 100) ) [
+  if ( ticks > 0 and
+    ceiling (ticks / record-tick-interval) = (ticks / record-tick-interval) ) [
+
     let print-text ( word
       "Simulation " simulation-id
       " is now at " precision (ticks / plant-annual-cycle) 3 " years, "
@@ -532,7 +553,6 @@ end
 ; plant growth, and decreases by plants being consumed by animals, and also can
 ; decrease by reductions in the maximum energy allowed.
 ;
-; ETC ETC.
 ;
 ; ENTRY: 'ticks' defines the time steps thus far (standard in NetLogo).
 ;        'plant-annual-cycle' defines the number of time steps in an abstract
@@ -567,7 +587,6 @@ to update-patches
 
 end
 
-
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
 ; INCREASE OR DECREASE A PLANT'S TERMINAL ENERGY VALUE
@@ -591,7 +610,7 @@ to update-terminal-energy [ plant-season plant-density ]
   let seasonal-factor ( ( plant-seasonality * plant-season + 1 ) / 2 )
   let optimal-neighbor-energy ( plant-minimum-neighbors + plant-maximum-neighbors ) / 2
   let neighbor-energy-sd ( optimal-neighbor-energy - plant-minimum-neighbors )
-  let neighbor-energy ( ( sum [penergy.supply] of neighbors ) / plant-quality )
+  let neighbor-energy ( mean (list (sum [penergy.supply] of neighbors) (sum [pterminal.energy] of neighbors) ) / plant-quality ) ; fix language in ch 2?
 
   let probability-up ifelse-value ( neighbor-energy-sd = 0 ) [ 0 ] [ ( 1 * e ^ ( - (( neighbor-energy - optimal-neighbor-energy ) ^ 2 ) / ( 2 * ( neighbor-energy-sd ^ 2 ) )) ) ]
   let y ( ( plant-daily-cycle * plant-quality ) / plant-annual-cycle ) * ( plant-density * ( 2 * probability-up - 1 ) + seasonal-factor - plant-density )
@@ -689,7 +708,7 @@ to update-energy [ update ]
   [ set total.energy.cost total.energy.cost + abs update ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ========================================================================================================= ;
 ;
 ;                             oo
 ;
@@ -700,21 +719,21 @@ end
 ;                         .88
 ;                     d8888P
 ;
-; This is the "engine" of the simulation, where all living agents assess their environments and then make
+; This is the "engine" of the running simulation, where all living agents assess their environments and then make
 ; decisions based upon this assessment and also upon their genotypes. If they have enough energy they perform
-; actions that correspond to the decisions that they made. A specific case includes mothers and gestatees,
-; who always include each other in their sets of environmental objects. The main subroutines used in each
+; actions that correspond to the decisions that they made. The main subroutines used in each
 ; timestep for each individual are:
 ;
 ; consider-environment > make-decisions > check-energy > do-actions
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ========================================================================================================= ;
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
 ; SET CURRENT ENVIRONMENT OF ANIMALS AND PLANTS FROM CURRENT FIELD OF VIEW
 ;
-; This routine runs once per time step for each animal.
+; This routine runs once per time step for each animal. A specific case includes mothers and gestatees,
+; who always include each other in their sets of environmental objects.
 ;
 ; ENTRY: The collection of patches defines the status of all individuals at the end of the previous time step.
 ;
@@ -731,13 +750,13 @@ to consider-environment
   ifelse ( member? "aspatial" model-structure )                ; If this world is aspatial,
   [ let patch-count count patches                              ; count the number of patches
     in-cone                                                    ; that would be in the field of
-    ( maximum-visual-range * visual.range )                    ; view were the world spatial,
+    ( ceiling ( maximum-visual-range * visual.range ) )        ; view were the world spatial,
     ( 360 * visual.angle )                                     ; then randomly select a set of
     ask n-of patch-count patches                               ; patches to match the size of
     [ ask myself                                               ; that field of view.
       [ set my.environment lput myself my.environment ] ]
 
-    if ( life.history != "gestatee" ) [                        ; If the individual is not a gestatee,
+    if ( life.history != "gestatee" ) [                         ; If the individual is not a gestatee,
       ask other anima1s with                                   ; put all the visible individuals in
       [ member? patch-here [my.environment] of myself ]        ; the randomly selected patches into
       [ if ( not hidden? )                                     ; the current environment.
@@ -747,7 +766,7 @@ to consider-environment
                                                                ; SPATIAL WORLD
 
   [ ask patches in-cone                                        ; If this world is spatial,
-    ( maximum-visual-range * visual.range )                    ; select all the patches that
+    ( ceiling ( maximum-visual-range * visual.range ) )        ; select all the patches that
     ( 360 * visual.angle )                                     ; actually are in the field of
     [ ask myself                                               ; view.
       [ set my.environment lput myself my.environment ] ]
@@ -764,7 +783,7 @@ to consider-environment
   let current-perception ifelse-value ( solar-status = "DAY" ) ; Current perceptive abilities are based own
   [ day.perception ] [ night.perception ]                      ; visual attributes and on whether it is day or night.
   set my.environment up-to-n-of                                ; If current perceptive abilities are
-  ( current-perception * length my.environment )               ; less than 100%, randomly remove some objects
+  ceiling ( current-perception * length my.environment )       ; less than 100%, randomly remove some objects
   my.environment                                               ; from environment to correspond with limited perceptive abilities.
 
   if ( life.history = "gestatee" )                             ; If the individual is a gestatee,
@@ -790,27 +809,36 @@ end
 ;
 ; GENERATE LIST OF DECISIONS FROM CURRENT ENVIRONMENT AND GENOTYPE
 ;
-; Description of subroutine....
+; The main purpose of this subroutine is to access the appropriate subroutines to translate a genotype into
+; decision vectors, based on the current environment. There are two languages that genotypes can be written
+; in: sta2us and gat3s. The appropriate subrotuines in B3GET vary according to which genotype language is
+; used. The user can manually set which genotype reader to use by selecting the genotype-reader in the interface,
+; otherwise B3GET will use the sta2us genotype reader by default.
 ;
-; ENTRY:
+; ENTRY: genotype-reader | Either "sta2us" or "gat3s" based on genotype language used.
 ;
-; EXIT:
+;        my.enivornment | The current environment of the caller.
+;
+;
+; EXIT: decision.vectors | This list includes all decisions that the caller made from its genotype and environment.
+;
+;       recent-decisions-made | The global record of decisions is updated with caller's decisions.
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to make-decisions
 
-  set decision.vectors ( ifelse-value                          ; Get decisions from selected genotype reader
+  set decision.vectors ( ifelse-value                          ; Get decisions from selected genotype reader.
     ( genotype-reader = "sta2us" )                             ; If genotype reader is sta2us,
-    [ sta7us-get-decisions my.environment ]                    ;
-    ( genotype-reader = "gat3s" )                              ;
-    [ gat3s-get-decisions my.environment ]                     ;
-    [ sta7us-get-decisions my.environment ] )                  ; If not specified, assume current genotype reader is sta2us
+    [ sta7us-get-decisions my.environment ]                    ; get decisions based on a sta2us genotype.
+    ( genotype-reader = "gat3s" )                              ; If gentoype reader is gat3s,
+    [ gat3s-get-decisions my.environment ]                     ; get decisions based on a gat3s genotype.
+    [ sta7us-get-decisions my.environment ] )                  ; If not specified, assume current genotype reader is sta2us.
 
-  reduce-to-unique-vectors                                     ;
+  reduce-to-unique-vectors                                     ; Reduce to unique set of decision vectors
 
   foreach decision.vectors [ d ->                              ; Record these decisions into global pool
-    set recent-decisions-made lput                             ; for tracking purposes.
+    set recent-decisions-made lput                             ; for user tracking purposes.
     ( sentence ticks but-last d )
     recent-decisions-made ]
 
@@ -818,7 +846,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; REDUCE LIST OF DECISIONS TO UNIQUE COMBINATIONS OF TARGET AND ACTION
+; HELPER SUBROUTINE TO REDUCE LIST OF DECISIONS TO UNIQUE COMBINATIONS OF TARGET AND ACTION
 ;
 ; This subroutine reduces the current list of decision vectors into a list of unique vectors such that
 ; there is only one vector for each combination of target and action. During this reduction processes, the
@@ -832,62 +860,111 @@ end
 
 to reduce-to-unique-vectors
 
-  let initial-decisions decision.vectors
-  let reduced-decisions []
+  let initial-decisions decision.vectors                       ; Initially, there is a full list of decisions
+  let reduced-decisions []                                     ; and an empty list.
 
-  foreach initial-decisions [ original-vector ->
-    let original-ego item 0 original-vector
-    let original-target item 1 original-vector
-    let original-action item 2 original-vector
-    let original-weight item 3 original-vector
-    let vector-doesnt-exist true
+  foreach initial-decisions [ original-vector ->               ; Looping through the full list of decisions,
+    let original-ego item 0 original-vector                    ; identify the caller,
+    let original-target item 1 original-vector                 ; identity the target,
+    let original-action item 2 original-vector                 ; identity the action,
+    let original-weight item 3 original-vector                 ; identify the cost.
 
-    let index 0
-    foreach reduced-decisions [ reduced-vector ->
-      let reduced-ego item 0 reduced-vector
-      let reduced-target item 1 reduced-vector
-      let reduced-action item 2 reduced-vector
-      let reduced-weight item 3 reduced-vector
+    let vector-doesnt-exist true                               ;
 
-      if ( reduced-ego = original-ego ) and ( reduced-target = original-target ) and ( reduced-action = original-action ) [
-        set vector-doesnt-exist false
-        set reduced-weight ifelse-value ( is-number? reduced-weight ) [ reduced-weight ] [ 0 ]
-        set original-weight ifelse-value ( is-number? original-weight ) [ original-weight ] [ 0 ]
-        let new-vector ( list self reduced-target reduced-action ( reduced-weight + original-weight ) false )
-        set reduced-decisions remove-item index reduced-decisions
-        set reduced-decisions lput new-vector reduced-decisions ]
-      set index index + 1
+    let index 0                                                ;
+    foreach reduced-decisions [ reduced-vector ->              ;
+      let reduced-ego item 0 reduced-vector                    ;
+      let reduced-target item 1 reduced-vector                 ;
+      let reduced-action item 2 reduced-vector                 ;
+      let reduced-weight item 3 reduced-vector                 ;
+
+      if ( reduced-ego = original-ego )                        ;
+      and ( reduced-target = original-target )                 ;
+      and ( reduced-action = original-action ) [               ;
+
+        set vector-doesnt-exist false                          ;
+
+        set reduced-weight ifelse-value                        ;
+        ( is-number? reduced-weight )                          ;
+        [ reduced-weight ]                                     ;
+        [ 0 ]                                                  ;
+
+        set original-weight ifelse-value                       ;
+        ( is-number? original-weight )                         ;
+        [ original-weight ]                                    ;
+        [ 0 ]                                                  ;
+
+        let new-vector ( list                                  ;
+          self                                                 ;
+          reduced-target                                       ;
+          reduced-action                                       ;
+          ( reduced-weight + original-weight )                 ;
+          false )                                              ;
+
+        set reduced-decisions                                  ;
+        remove-item index reduced-decisions                    ;
+
+        set reduced-decisions                                  ;
+        lput new-vector reduced-decisions ]                    ;
+
+      set index index + 1                                      ;
     ]
-    if vector-doesnt-exist [ set reduced-decisions lput ( list self original-target original-action original-weight false ) reduced-decisions ]
+
+    if vector-doesnt-exist [                                   ;
+      set reduced-decisions lput                               ;
+      ( list                                                   ;
+        self                                                   ;
+        original-target                                        ;
+        original-action                                        ;
+        original-weight                                        ;
+        false )                                                ;
+      reduced-decisions ]                                      ;
   ]
-  set decision.vectors reduced-decisions
+  set decision.vectors reduced-decisions                       ;
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; PERFORM EACH ACTION IN THE LIST OF DECISION VECTORS IF THERE IS SUFFICIENT ENERGY
+; CALLER PERFORMS EACH ACTION LISTED IN ITS DECISION VECTORS IF IT HAS SUFFICIENT ENERGY
 ;
-; Description of subroutine....
+; The caller performs each that action that corresponds to each decision in its current list of decision
+; vectors. The caller will pay an energy cost to perform each action based on the value listed in the
+; corresponding decision. However, the caller will not be able to perform the action if it does not have
+; sufficient energy to do so. If the caller does have enough energy, this subroutine triggers the appropriate
+; subroutine that corresponds to the action. For clarity, the names of each action exactly match the corresponding
+; name for each subroutine. The caller is also prohibited from performing certain actions if they are currently
+; resting.
 ;
-; ENTRY:
+; ENTRY: List of decisions vectors for the caller.
 ;
-; EXIT:
+;        Current energy.supply of the caller, which is how much energy they have to perform actions.
+;
+; EXIT: The actions that the caller performs may alter the simulation environment in various ways. See the
+;       descriptions for each action subroutine below for more details.
+;
+;       The actions.completed list is updated with the actions that the caller performed during this
+;       subroutine.
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to do-actions
 
-  foreach decision.vectors [ vector ->
-    let done item 4 vector
+  foreach decision.vectors [ vector ->                         ; For each decision vector
+    let done item 4 vector                                     ; first determine if this decision has already
+                                                               ; been acted upon.
 
-    if ( not done and check-energy vector ) [
-      let target item 1 vector
-      let action item 2 vector
-      let cost item 3 vector ; must put check here to only call if cost not 0
+    if ( not done and                                          ; If the decision has not already been acted upon
+      check-energy vector ) [                                  ; and the caller has sufficient energy to perform
+                                                               ; the action, then the action can be performed.
 
-      if ( is.resting = false )
+      let target item 1 vector                                 ; Identify the target of the decision.
+      let action item 2 vector                                 ; Identify which action the caller has decided to take.
+      let cost item 3 vector                                   ; Identify how much the action will cost.
 
-      [ ( ifelse  ; these actions can only be performed when not resting
+      if ( is.resting = false )                                ; These actions can only be performed if the caller
+                                                               ; is not resting.
+
+      [ ( ifelse                                               ; Call the subroutine that corresponds with the action name.
 
         action = "move-toward" [ move-toward target cost ]
         action = "move-away-from" [ move-toward target ( - cost ) ]
@@ -907,11 +984,12 @@ to do-actions
         action = "cling-to" [ if ( check-distance target ) [ cling-to target cost ] ]
         action = "squirm-from" [ if ( check-distance target ) [ squirm-from target cost ] ]
         action = "help" [ if ( check-distance target ) [ help target cost ] ]
-        action = "attack" [ if ( check-distance target ) [ hurt target cost ] ]
+        action = "attack" [ if ( check-distance target ) [ attack target cost ] ]
         action = "mate-with" [ if ( check-distance target ) [ mate-with target cost ] ]
         [])]
 
-      ( ifelse ; these actions can be performed resting or not resting
+      ( ifelse                                                 ; These actions can be performed resting or not resting.
+
         action = "hide" [ hide cost ]
         action = "rest" [ rest cost ]
         action = "survival-chance" [ survival-chance cost ]
@@ -943,9 +1021,92 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; CHECK THAT DISTANCE TO TARGET IS CLOSE ENOUGH TO INTERACT
+; CHECK THAT DISTANCE BETWEEN CALLER AND TARGET IS CLOSE ENOUGH TO INTERACT
 ;
-; Description of subroutine....
+; Individuals can only perform interactions that target another individual if they are close enough. This
+; subroutine checks that the caller and target are close enough to perform the interaction. This subroutine
+; returns TRUE, meaning they are close enough, if the distance between them is less than the maximum possible
+; distance defined by the sum of the radius of both individuals. If the model-structure is currently "aspatial"
+; then two individuals are always within proximity.
+;
+; ENTRY: model-structure | If currently aspatial then always returns true
+;
+;        Current spatial coordinates of the caller.
+;
+;        Current spatial coordinates of the target.
+;
+;
+; EXIT:  Returns true or false depending on if distance between caller and target is within bounds.
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to-report check-distance [ target ]
+  let target-radius ifelse-value ( is-patch? target )          ; The radius of the target
+  [ 0.5 ]                                                      ; is 1/2 if target is a plant
+  [[size] of target / 2 ]                                      ; and half its size if target is an anima1.
+
+  let my-radius ( size / 2 )                                   ; The radius of the caller is half its size.
+
+  report ( ifelse-value
+    ( member? "aspatial" model-structure )                     ; If current simulation is "aspatial" then
+    [ true ]                                                   ; distance to target is within bounds.
+
+    ( target = nobody )                                        ; If there is no target then distance
+    [ false ]                                                  ; to target is not within bounds.
+
+    [ distance target < target-radius + my-radius ])           ; In all other cases, the distance to
+                                                               ; target is within bounds if it is less
+                                                               ; than the sum of caller and target radii.
+end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; CHECK THAT CALLER HAS SUFFICIENT ENERGY TO ACT UPON DECISION
+;
+; The caller can only perform an action if it has sufficient energy allocated for that purpose. In this
+; subroutine, the caller looks at a single decision vector
+;
+; ENTRY: model-structure | If currently aspatial then always returns true
+;
+;        Current spatial coordinates of the caller.
+;
+;        Current spatial coordinates of the target.
+;
+;
+; EXIT:  Returns true or false depending on if distance between caller and target is within bounds.
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to-report check-energy [ vector ]
+  let cost item 3 vector                                       ; Identify the cost of the decision.
+  let passes-energy-check ifelse-value                         ; Confirm if caller's energy is sufficient for cost.
+  ( member? "free-lunch" model-structure )                     ; If B3GET is set to "free lunch"
+  [ true ]                                                     ; then any amount of energy is sufficient.
+  [ energy.supply > abs cost and abs cost > 0 ]                ; Otherwise, the energy is sufficient if
+                                                               ; it is greater than the cost, and the cost
+                                                               ; is greater than 0.
+
+  if ( passes-energy-check ) [                                 ; If the energy is sufficient,
+    update-energy ( - abs cost )                               ; reduce the caller's energy supply by the cost.
+
+    let new-vector lput true but-last vector                   ; Update this decision in the caller's
+    let vector-index position vector decision.vectors          ; decision.vectors to be marked as
+    if ( is-number? vector-index ) [                           ; having been acted upon.
+      set decision.vectors                                     ; This ensures that the same decision
+      remove-item vector-index decision.vectors                ; will not be acted upon twice.
+      set decision.vectors
+      lput new-vector decision.vectors ]]
+
+  report passes-energy-check                                   ; Report whether the energy check passed,
+                                                               ; therby allowing the decision to be acted upon.
+end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; DETERMINE IF TARGET HAS COUNTERACTED AN ACTION OF CALLER
+;
+; This can only be called for certain actions, as specified within the code below, and include actions
+; where no further action beyond paying for it is needed
 ;
 ; ENTRY:
 ;
@@ -953,57 +1114,69 @@ end
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
-to-report check-distance [ target ]
-  report ( ifelse-value
-    ( member? "aspatial" model-structure ) [ true ]
-    ( target = nobody ) [ false ]
-    [ distance target < max-proximity target ])
-end
+to-report get-action-cost-of [ target action-name ]
+                                                               ; ask target to complete actions from incomplete related decisions
+  let not-done-decisions filter [ vector ->                    ; Identify
+    item 1 vector = self and                                   ;
+    item 2 vector = action-name and                            ;
+    item 4 vector = false ]                                    ;
+  [decision.vectors] of target                                 ;
 
-to-report max-proximity [ target ] ; the max distance between two individuals (based on their body size - bigger individuals are in proximity from farther away)
-  ; distance measured between centers of bodies
-  report ( size / 2 + ( ifelse-value ( is-patch? target ) [ 1 ] [[size] of target / 2 ]))
-end
+  ask target [                                                 ;
+    foreach not-done-decisions [ vector ->                     ;
+      if ( check-energy vector ) [                             ;
+        complete-action                                        ;
+        ( item 1 vector )                                      ;
+        ( item 2 vector )                                      ;
+        ( item 3 vector ) ]]]                                  ;
 
-to-report check-energy [ vector ]
-  let cost item 3 vector
-  let passes-energy-check ifelse-value ( member? "free-lunch" model-structure ) [ true ] [ energy.supply > abs cost and abs cost > 0 ] ; FREE LUNCH always passes energy check
+                                                               ; get summation of target related cost and report
+  let action-cost sum                                          ;
+  map [ vector -> item 3 vector ]                              ;
+  filter [ vector ->                                           ;
+    item 1 vector = self and                                   ;
+    item 2 vector = action-name ]                              ;
+  [ actions.completed] of target                               ;
 
-  if ( passes-energy-check ) [
-    update-energy ( - abs cost )
-    let new-vector lput true but-last vector
-    let vector-index position vector decision.vectors
-    if ( is-number? vector-index ) [
-      set decision.vectors remove-item vector-index decision.vectors
-      set decision.vectors lput new-vector decision.vectors ]]
-
-  report passes-energy-check
-end
-
-to-report get-action-cost-of [ target action-name ] ; This can only be called for certain actions, as specified within the code below, and include actions where no further action beyond paying for it is needed
-
-  ; ask target to complete actions from incomplete related decisions
-  let not-done-decisions filter [ vector -> item 1 vector = self and item 2 vector = action-name and item 4 vector = false ] [decision.vectors] of target
-  ask target [
-    foreach not-done-decisions [ vector ->
-      if ( check-energy vector ) [
-        complete-action ( item 1 vector ) ( item 2 vector ) ( item 3 vector ) ]]]
-
-  ; get summation of target related cost and report
-  let action-cost sum map [ vector -> item 3 vector ] filter [ vector -> item 1 vector = self and item 2 vector = action-name ] [actions.completed] of target
-  report action-cost
-
-end
-
-to complete-action [ target action cost ]
-  let completed-action ( list self target action precision cost 10 )
-  set actions.completed lput completed-action actions.completed
-
-  ; RECORD ACTIONS
-  set recent-actions-completed lput ( sentence ticks completed-action ) recent-actions-completed
+  report action-cost                                           ;
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
+;
+; CALLER KEEPS A RECORD FOR EACH ACTION THAT THEY COMPLETE
+;
+; Each action subroutine calls this subroutine to keep a record of each action that has been taken
+; for each individual.
+;
+; ENTRY: target | Whoever the caller has targeted when performing action.
+;
+;        action | The type of action that the caller has completed.
+;
+;        cost | The amount
+;
+; EXIT:  The action is added to the caller's completed actions.
+;
+;        The action is also added to the global record of completed actions.
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to complete-action [ target action cost ]
+  let completed-action ( list                                  ;
+    self                                                       ;
+    target                                                     ;
+    action                                                     ;
+    precision cost 10 )                                        ;
+
+  set actions.completed                                        ;
+  lput completed-action                                        ;
+  actions.completed                                            ;
+
+  set recent-actions-completed                                 ;
+  lput ( sentence ticks completed-action )                     ;
+  recent-actions-completed                                     ;
+end
+
+; ========================================================================================================= ;
 ;
 ;                      dP   oo
 ;                      88
@@ -1019,6 +1192,19 @@ end
 ;
 ; The 'Info' tab contains a summary of possible actions.
 ;
+; ========================================================================================================= ;
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; CALLER UPDATES ITS SURVIVAL CHANCE ATTRIBUTE
+;
+; ENTRY: cost | The amount of energy spent to update this attribute.
+;
+; EXIT: The survival.chance value increases if cost is positive or decreases if cost is negative based
+;       on the get-updated-value subroutine.
+;
+;       This subroutine also calls the complete-action subroutine to keep a record of this action.
+;
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to survival-chance [ cost ]
@@ -1026,10 +1212,36 @@ to survival-chance [ cost ]
   set survival.chance get-updated-value survival.chance cost
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; CALLER UPDATES ITS BODY SIZE ATTRIBUTE
+;
+; ENTRY: cost | The amount of energy spent to update this attribute.
+;
+; EXIT: The body.size value increases if cost is positive or decreases if cost is negative based
+;       on the get-updated-value subroutine.
+;
+;       This subroutine also calls the complete-action subroutine to keep a record of this action.
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to body-size [ cost ]
   complete-action self "body-size" cost
   set body.size get-updated-value body.size cost
 end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; CALLER UPDATES ITS BODY SHADE ATTRIBUTE
+;
+; ENTRY: cost | The amount of energy spent to update this attribute.
+;
+; EXIT: The body.shade value increases if cost is positive or decreases if cost is negative based
+;       on the get-updated-value subroutine.
+;
+;       This subroutine also calls the complete-action subroutine to keep a record of this action.
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to body-shade [ cost ]
   complete-action self "body-shade" cost
@@ -1195,7 +1407,15 @@ end
 
 to set-heading-random [ cost ]
   complete-action self "set-heading-random" cost
-  set heading heading + cost * ( random 360 ) - cost * ( random 360 )
+  let x-difference 2 * x.magnitude * 100000 * cost
+  if ( x-difference = 0 ) [ set x-difference 100000 * cost ]
+  if ( x-difference > 1E10 ) [ set x-difference 1E10 ]
+  set x.magnitude x.magnitude + random-float x-difference - random-float x-difference
+  let y-difference 2 * y.magnitude * 100000 * cost
+  if ( y-difference = 0 ) [ set y-difference 100000 * cost ]
+  if ( y-difference > 1E10 ) [ set y-difference 1E10 ]
+  set y.magnitude y.magnitude + random-float y-difference - random-float y-difference
+  set heading ifelse-value ( x.magnitude = 0 and y.magnitude = 0 ) [ heading ] [ ( atan x.magnitude y.magnitude ) ]
 end
 
 to hide [ cost ]
@@ -1463,7 +1683,7 @@ to join [ target cost ]
   complete-action target "join" cost
   if ( is-anima1? target and [ is.alive ] of target = true ) [
     if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "join"
+    [ let target-cost get-action-cost-of target "recruit"
       let probability ( cost - abs target-cost ) / cost
       if ( random-float 1.0 <= probability ) [ join-group ([group.identity] of target) ]]]
 end
@@ -1472,7 +1692,7 @@ to leave [ target cost ]
   complete-action target "leave" cost
   if ( is-anima1? target and [ is.alive ] of target = true ) [
     if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "leave"
+    [ let target-cost get-action-cost-of target "expel"
       let probability ( cost - abs target-cost ) / cost
       if ( random-float 1.0 <= probability ) [ leave-group ]]]
 end
@@ -1481,7 +1701,7 @@ to recruit [ target cost ]
   complete-action target "recruit" cost
   if ( is-anima1? target and [ is.alive ] of target = true ) [
     if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "recruit"
+    [ let target-cost get-action-cost-of target "join"
       let probability ( cost - abs target-cost ) / cost
       if ( random-float 1.0 <= probability ) [ ask target [ join-group [group.identity] of myself ]]]]
 end
@@ -1490,7 +1710,7 @@ to expel [ target cost ]
   complete-action target "expel" cost
   if ( is-anima1? target and [ is.alive ] of target = true ) [
     if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "expel"
+    [ let target-cost get-action-cost-of target "leave"
       let probability ( cost - abs target-cost ) / cost
       if ( random-float 1.0 <= probability ) [ ask target [ leave-group ]]]]
 end
@@ -1579,7 +1799,7 @@ to help [ target cost ]
 end
 
 to aid [ target cost ]
-  complete-action target "aid" cost
+  complete-action target "aid" 0
   if ( is-anima1? target and [ is.alive ] of target = true ) [
     complete-action target "aid-complete" cost
     ask target [ survival-chance cost ]
@@ -1587,11 +1807,11 @@ to aid [ target cost ]
     set label "+"
     ; recording kin selection
     let relatedness-with-target relatedness-with target
-    if ( relatedness-with-target > 0.75 ) [ set whole.related.help.cost whole.related.help.cost + cost ]
-    if ( relatedness-with-target <= 0.75 and relatedness-with-target > 0.375 ) [ set half.related.help.cost half.related.help.cost + cost ]
-    if ( relatedness-with-target <= 0.375 and relatedness-with-target > 0.1875 ) [ set fourth.related.help.cost fourth.related.help.cost + cost ]
-    if ( relatedness-with-target <= 0.1875 and relatedness-with-target > 0.0156 ) [ set eighth.related.help.cost eighth.related.help.cost + cost ]
-    if ( relatedness-with-target <= 0.0156 ) [ set not.related.help.cost not.related.help.cost + cost ]
+    if ( relatedness-with-target > 0.90 ) [ set whole.related.help.cost whole.related.help.cost + cost ]
+    if ( relatedness-with-target <= 0.90 and relatedness-with-target > 0.40 ) [ set half.related.help.cost half.related.help.cost + cost ]
+    if ( relatedness-with-target <= 0.40 and relatedness-with-target > 0.15 ) [ set fourth.related.help.cost fourth.related.help.cost + cost ]
+    if ( relatedness-with-target <= 0.15 and relatedness-with-target > 0.05 ) [ set eighth.related.help.cost eighth.related.help.cost + cost ]
+    if ( relatedness-with-target <= 0.05 ) [ set not.related.help.cost not.related.help.cost + cost ]
   ]
 end
 
@@ -1649,11 +1869,11 @@ to-report relatedness-with [ target ]
   report matching / ( matching + not-matching )
 end
 
-to hurt [ target cost ]
-  complete-action target "hurt" cost
+to attack [ target cost ]
+  complete-action target "attack" cost
   if ( is-anima1? target and [ is.alive ] of target = true ) [
     if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "hurt"
+    [ let target-cost get-action-cost-of target "attack"
       let cost-probability ( cost + target-cost ) / cost
       let size-probability ( size / ( size + [size] of target ) )
       let net-cost cost + target-cost
@@ -1661,12 +1881,20 @@ to hurt [ target cost ]
 end
 
 to harm [ target cost ]
-  complete-action target "harm" cost
+  complete-action target "harm" 0
   if ( is-anima1? target and [ is.alive ] of target = true ) [
     complete-action target "harm-complete" cost
     ask target [ survival-chance ( - cost ) ]
     set harm.history lput [my.identity] of target harm.history
     set label "-"
+    ; recording kin selection
+    let relatedness-with-target relatedness-with target
+    if ( relatedness-with-target > 0.90 ) [ set whole.related.attack.cost whole.related.attack.cost + cost ]
+    if ( relatedness-with-target <= 0.90 and relatedness-with-target > 0.40 ) [ set half.related.attack.cost half.related.attack.cost + cost ]
+    if ( relatedness-with-target <= 0.40 and relatedness-with-target > 0.15 ) [ set fourth.related.attack.cost fourth.related.attack.cost + cost ]
+    if ( relatedness-with-target <= 0.15 and relatedness-with-target > 0.05 ) [ set eighth.related.attack.cost eighth.related.attack.cost + cost ]
+    if ( relatedness-with-target <= 0.05 ) [ set not.related.attack.cost not.related.attack.cost + cost ]
+    ; infanticide
     if ( [ life.history ] of target = "infant" and target != self ) [ set infanticide.history lput [my.identity] of target infanticide.history ]
   ]
 end
@@ -2139,7 +2367,7 @@ INPUTBOX
 354
 79
 path-to-experiment
-../data/
+../results/thesis/
 1
 0
 String
@@ -2209,7 +2437,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-0.0
+4.0
 .1
 1
 NIL
@@ -2377,8 +2605,8 @@ CHOOSER
 588
 useful-commands
 useful-commands
-"help-me" "meta-report" "show-territories" "---------------------" " > OPERATIONS   " "---------------------" "parameter-settings" "default-settings" "model-structure" "-- aspatial" "-- free-lunch" "-- ideal-form" "-- no-evolution" "-- no-plants" "-- reaper" "-- signal-fertility" "-- stork" "-- uninvadable" "clear-population" "new-population" "reset-plants" "save-world" "import-world" "save-simulation" "output-results" "---------------------" " > VERIFICATION " "---------------------" "dynamic-check" "-- true" "-- false" "runtime-check" "visual-check" "-- attack-pattern" "-- dine-and-dash" "-- life-history-channel" "-- musical-pairs" "-- night-and-day" "-- popularity-context" "-- speed-mating" "-- square-dance" "-- supply-and-demand" "---------------------" " > DISPLAY RESULTS   " "---------------------" "age" "generations" "life-history" "genotype" "phenotype" "-- survival-chance" "-- body-size" "-- body-shade" "-- female-fertility" "-- hidden-chance" "-- bite-capacity" "-- mutation-chance" "-- sex-ratio" "-- litter-size" "-- conception-chance" "-- visual-angle" "-- visual-range" "-- day-perception" "-- night-perception" "-- yellow-chance" "-- red-chance" "-- blue-chance" "-- birthing-chance" "-- weaning-chance" "-- infancy-chance" "-- juvenility-chance" "-- adulthood-chance" "carried-items" "energy-supply" "behaviors" "-- environment" "-- decisions" "-- actions" "-- birthing" "-- weaning" "-- matings" "-- mating-partners" "-- conceptions" "-- infanticide" "-- group-transfers" "-- travel-distance" "-- foraging-gains" "-- total-energy-gains" "-- total-energy-cost" "-- receiving-history" "-- carried-history" "-- aid-history" "-- harm-history"
-2
+"help-me" "meta-report" "show-territories" "---------------------" " > OPERATIONS   " "---------------------" "parameter-settings" "default-settings" "model-structure" "-- aspatial" "-- free-lunch" "-- ideal-form" "-- no-evolution" "-- no-plants" "-- reaper" "-- signal-fertility" "-- stork" "-- uninvadable" "clear-population" "new-population" "reset-plants" "save-world" "import-world" "save-simulation" "output-results" "---------------------" " > VERIFICATION " "---------------------" "dynamic-check" "-- true" "-- false" "runtime-check" "visual-check" "-- attack-pattern" "-- dine-and-dash" "-- life-history-channel" "-- musical-pairs" "-- night-and-day" "-- popularity-context" "-- speed-mating" "-- square-dance" "-- supply-and-demand" "---------------------" " > DISPLAY RESULTS   " "---------------------" "age" "generations" "life-history" "genotype" "phenotype" "-- survival-chance" "-- body-size" "-- body-shade" "-- fertility-status" "-- hidden-chance" "-- bite-capacity" "-- mutation-chance" "-- sex-ratio" "-- litter-size" "-- conception-chance" "-- visual-angle" "-- visual-range" "-- day-perception" "-- night-perception" "-- yellow-chance" "-- red-chance" "-- blue-chance" "-- birthing-chance" "-- weaning-chance" "-- infancy-chance" "-- juvenility-chance" "-- adulthood-chance" "carried-items" "energy-supply" "behaviors" "-- environment" "-- decisions" "-- actions" "-- birthing" "-- weaning" "-- matings" "-- mating-partners" "-- conceptions" "-- infanticide" "-- group-transfers" "-- travel-distance" "-- foraging-gains" "-- total-energy-gains" "-- total-energy-cost" "-- receiving-history" "-- carried-history" "-- aid-history" "-- harm-history"
+92
 
 BUTTON
 1063
@@ -2457,7 +2685,7 @@ plant-quality
 plant-quality
 .1
 100
-5.0
+3.0
 .1
 1
 NIL
@@ -2470,7 +2698,7 @@ SWITCH
 79
 output-results?
 output-results?
-1
+0
 1
 -1000
 
@@ -2485,15 +2713,8 @@ selection-on?
 1
 -1000
 
-OUTPUT
-1130
-10
-1696
-588
-12
-
 PLOT
-850
+849
 646
 1696
 878
@@ -2563,7 +2784,7 @@ infants
 -1000
 
 SWITCH
-850
+849
 885
 985
 918
@@ -2615,6 +2836,232 @@ plot-information
 17
 1
 11
+
+SWITCH
+1194
+95
+1404
+128
+simulation-summary-on
+simulation-summary-on
+0
+1
+-1000
+
+SLIDER
+1194
+132
+1404
+165
+simulation-summary-ticks
+simulation-summary-ticks
+0
+10000
+6000.0
+500
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1194
+213
+1404
+246
+verification-rate
+verification-rate
+0
+1
+0.005
+0.001
+1
+NIL
+HORIZONTAL
+
+SWITCH
+1194
+176
+1404
+209
+verification-on
+verification-on
+0
+1
+-1000
+
+SWITCH
+1415
+95
+1625
+128
+simulation-scans-on
+simulation-scans-on
+0
+1
+-1000
+
+SWITCH
+1194
+338
+1404
+371
+record-individuals-on
+record-individuals-on
+0
+1
+-1000
+
+SLIDER
+1415
+132
+1625
+165
+simulation-scan-ticks
+simulation-scan-ticks
+0
+10000
+3000.0
+1
+1
+NIL
+HORIZONTAL
+
+SWITCH
+1415
+252
+1625
+285
+group-scans-on
+group-scans-on
+0
+1
+-1000
+
+SLIDER
+1415
+289
+1625
+322
+group-scan-ticks
+group-scan-ticks
+0
+10000
+3000.0
+100
+1
+NIL
+HORIZONTAL
+
+SWITCH
+1415
+174
+1625
+207
+individual-scans-on
+individual-scans-on
+1
+1
+-1000
+
+SLIDER
+1414
+211
+1624
+244
+individual-scan-ticks
+individual-scan-ticks
+0
+100
+100.0
+1
+1
+NIL
+HORIZONTAL
+
+SWITCH
+1415
+331
+1625
+364
+view-scans-on
+view-scans-on
+0
+1
+-1000
+
+SLIDER
+1415
+368
+1625
+401
+view-scan-ticks
+view-scan-ticks
+0
+10000
+1000.0
+100
+1
+NIL
+HORIZONTAL
+
+SWITCH
+1415
+408
+1625
+441
+genotype-scans-on
+genotype-scans-on
+0
+1
+-1000
+
+SLIDER
+1415
+445
+1625
+478
+genotype-scan-ticks
+genotype-scan-ticks
+0
+100000
+4000.0
+100
+1
+NIL
+HORIZONTAL
+
+SWITCH
+1194
+258
+1404
+291
+focal-follows-on
+focal-follows-on
+0
+1
+-1000
+
+SLIDER
+1194
+295
+1404
+328
+focal-follow-rate
+focal-follow-rate
+0
+1
+1.0E-4
+0.0001
+1
+NIL
+HORIZONTAL
+
+OUTPUT
+1130
+10
+1696
+587
+12
 
 @#$#@#$#@
 # B3GET 1.2.0 INFORMATION
@@ -8327,9 +8774,22 @@ record-world</final>
   </experiment>
   <experiment name="AC1" repetitions="1" runMetricsEveryStep="false">
     <setup>setup
-set-simulation-id</setup>
+; give simulation-id specific configuration: sDO17B means
+; simulation of WORLD-D, Baboons seed population,
+; run B (instead of A), plant-minimum-neighbors = 1 and
+; plant-maximum-neighbors = 7
+ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
+  set simulation-id ( word "s" but-last behaviorspace-experiment-name plant-minimum-neighbors plant-maximum-neighbors "A" )
+][
+  let min-holder plant-minimum-neighbors
+  let max-holder plant-maximum-neighbors
+  set plant-minimum-neighbors max-holder - 1
+  set plant-maximum-neighbors min-holder
+  set simulation-id ( word "s" but-last behaviorspace-experiment-name plant-minimum-neighbors plant-maximum-neighbors "B" )
+]</setup>
     <go>go</go>
-    <final>record-world</final>
+    <final>record-world
+simulation-summary</final>
     <timeLimit steps="500000"/>
     <enumeratedValueSet variable="path-to-experiment">
       <value value="&quot;../results/thesis/&quot;"/>
@@ -8377,6 +8837,361 @@ set-simulation-id</setup>
     </enumeratedValueSet>
     <enumeratedValueSet variable="plant-maximum-neighbors">
       <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="verification-on">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="verification-rate">
+      <value value="1.0E-6"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="simulation-summary-on">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="simulation-summary-ticks">
+      <value value="5000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="simulation-scans-on">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="simulation-scan-ticks">
+      <value value="250"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="group-scans-on">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="group-scan-ticks">
+      <value value="100000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="individual-scans-on">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="individual-scan-ticks">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="view-scans-on">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="view-scan-ticks">
+      <value value="50000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-scans-on">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-scan-ticks">
+      <value value="500000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="focal-follows-on">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="focal-follow-rate">
+      <value value="1.0E-4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="record-individuals-on">
+      <value value="true"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="experiment" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>count turtles</metric>
+    <enumeratedValueSet variable="observation-notes">
+      <value value="&quot;&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-quality">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="males">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="infants">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="population">
+      <value value="&quot;Chimpanzees&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-seasonality">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-reader">
+      <value value="&quot;sta2us&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="juveniles">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="selection-on?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="gestatees">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="useful-commands">
+      <value value="&quot;age&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="females">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-annual-cycle">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-daily-cycle">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plot-type">
+      <value value="&quot;individuals&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="adults">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-maximum-neighbors">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="output-results?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype">
+      <value value="&quot;chimpanzees&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="path-to-experiment">
+      <value value="&quot;../results/thesis/&quot;"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="ACX" repetitions="1" runMetricsEveryStep="false">
+    <setup>setup
+; give simulation-id specific configuration: sDO17B means
+; simulation of WORLD-D, Baboons seed population,
+; run B (instead of A), plant-minimum-neighbors = 1 and
+; plant-maximum-neighbors = 7
+ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
+  set simulation-id ( word "s" but-last behaviorspace-experiment-name plant-minimum-neighbors plant-maximum-neighbors "A" )
+][
+  let min-holder plant-minimum-neighbors
+  let max-holder plant-maximum-neighbors
+  set plant-minimum-neighbors max-holder - 1
+  set plant-maximum-neighbors min-holder
+  set simulation-id ( word "s" but-last behaviorspace-experiment-name plant-minimum-neighbors plant-maximum-neighbors "B" )
+]</setup>
+    <go>go</go>
+    <final>record-world
+simulation-summary</final>
+    <timeLimit steps="5000"/>
+    <enumeratedValueSet variable="path-to-experiment">
+      <value value="&quot;../results/thesis/&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="deterioration-rate">
+      <value value="-0.01"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="output-results?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="selection-on?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="population">
+      <value value="&quot;Chimpanzees&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype">
+      <value value="&quot;chimpanzees&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-reader">
+      <value value="&quot;sta2us&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-annual-cycle">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-daily-cycle">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-seasonality">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-quality">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-maximum-neighbors">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="verification-on">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="verification-rate">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="simulation-summary-on">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="simulation-summary-ticks">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="simulation-scans-on">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="simulation-scan-ticks">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="group-scans-on">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="group-scan-ticks">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="individual-scans-on">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="individual-scan-ticks">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="view-scans-on">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="view-scan-ticks">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-scans-on">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-scan-ticks">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="focal-follows-on">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="focal-follow-rate">
+      <value value="0.001"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="record-individuals-on">
+      <value value="true"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="ACY" repetitions="1" runMetricsEveryStep="false">
+    <setup>setup
+; give simulation-id specific configuration: sDO17B means
+; simulation of WORLD-D, Baboons seed population,
+; run B (instead of A), plant-minimum-neighbors = 1 and
+; plant-maximum-neighbors = 7
+ifelse ( plant-minimum-neighbors &lt; plant-maximum-neighbors ) [
+  set simulation-id ( word "s" but-last behaviorspace-experiment-name plant-minimum-neighbors plant-maximum-neighbors "A" )
+][
+  let min-holder plant-minimum-neighbors
+  let max-holder plant-maximum-neighbors
+  set plant-minimum-neighbors max-holder - 1
+  set plant-maximum-neighbors min-holder
+  set simulation-id ( word "s" but-last behaviorspace-experiment-name plant-minimum-neighbors plant-maximum-neighbors "B" )
+]</setup>
+    <go>go</go>
+    <final>record-world
+simulation-summary</final>
+    <timeLimit steps="5000"/>
+    <enumeratedValueSet variable="path-to-experiment">
+      <value value="&quot;../results/thesis/&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="deterioration-rate">
+      <value value="-0.01"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="output-results?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="selection-on?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="population">
+      <value value="&quot;Chimpanzees&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype">
+      <value value="&quot;chimpanzees&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-reader">
+      <value value="&quot;sta2us&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-annual-cycle">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-daily-cycle">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-seasonality">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-quality">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-maximum-neighbors">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="verification-on">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="verification-rate">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="simulation-summary-on">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="simulation-summary-ticks">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="simulation-scans-on">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="simulation-scan-ticks">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="group-scans-on">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="group-scan-ticks">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="individual-scans-on">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="individual-scan-ticks">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="view-scans-on">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="view-scan-ticks">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-scans-on">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-scan-ticks">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="focal-follows-on">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="focal-follow-rate">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="record-individuals-on">
+      <value value="false"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>

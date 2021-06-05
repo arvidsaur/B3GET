@@ -410,10 +410,10 @@ end
 ;-----------------------------------------------------------------------------     
 
 to runtime-verification
-    output-header (word "CHECK RUNTIME : " how-many-ticks? " timesteps")
+    output-header (word "CHECK RUNTIME : 1 timesteps")
     profiler:reset
     profiler:start
-    repeat how-many-ticks? [ go ]
+    repeat 1 [ go ]
     output-print profiler:report 
     profiler:stop
 end
@@ -682,7 +682,7 @@ to-report get-result-from-selected-display
     ( useful-commands = "-- survival-chance" ) [ survival.chance ]
     ( useful-commands = "-- body-size" ) [ body.size ]
     ( useful-commands = "-- body-shade" ) [ body.shade ]
-    ( useful-commands = "-- female-fertility" ) [ (ifelse-value (fertility.status = "lactating") [ 3 ] ( fertility.status = "pregnant" ) [ 2 ] ( fertility.status = "cycling" ) [ 1 ] [ 0 ]) ]
+    ( useful-commands = "-- fertility-status" ) [ (ifelse-value (fertility.status = "lactating") [ 3 ] ( fertility.status = "pregnant" ) [ 2 ] ( fertility.status = "cycling" ) [ 1 ] [ 0 ]) ]
     ( useful-commands = "-- hidden-chance" ) [ hidden.chance ]
     ( useful-commands = "-- bite-capacity" ) [ bite.capacity ]    
     ( useful-commands = "-- mutation-chance" ) [ mutation.chance ]
