@@ -14,6 +14,28 @@
 ;
 ;----------------------------------------------------------------------------------------------
 
+
+
+
+  
+  ;-------------------------------------------------------------------------------------------------
+  ; SPOT CHECK FUNCTIONS
+  ;-------------------------------------------------------------------------------------------------
+  
+to reset-chromosomes
+  ;  if ( mother != nobody and father != nobody ) [
+  ;    ask mother [ 
+  ;      set chromosome.I [ [ true "A" "B" "C" ] [ true "D" "E" "F" ] [ true "G" "H" "I" ] [ true "X" "Y" "Z" ] [ true "E" 0.1 0.2 0.3 ]] 
+  ;      set chromosome.II [ [ true "A2" "B2" "C2" ] [ true "D2" "E2" "F2" ] [ true "G2" "H2" "I2" ] ] 
+  ;    ]
+  ;    ask father [ 
+  ;      set chromosome.I [ [ true "J" "K" "L" ] [ true "M" "N" "O" ] [ true "P" "Q" "R" ] ] 
+  ;      set chromosome.II [ [ true "J2" "K2" "L2" ] [ true "M2" "N2" "O2" ] [ true "P2" "Q2" "R2" ]  ] 
+  ;    ]
+  ;    setup-chromosomes-from mother father
+  ;  ]
+end
+
   
 ;--------------------------------------------------------------------------------------------------------------------
 ;
@@ -451,3 +473,9 @@ end
 ;  ; distance measured between centers of bodies
 ;  report ( size / 2 + ( ifelse-value ( is-patch? target ) [ 1 ] [[size] of target / 2 ]))
 ;end
+
+to attack-victims 
+  ask anima1s with [ member? [my.identity] of myself attack.from.history ] [
+    inspect self 
+  ]
+end

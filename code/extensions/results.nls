@@ -10,7 +10,7 @@
 ; © 2021 K N Crouse  
 ;----------------------------------------------------------------------------------------------                                                      
 ; 
-; READ ME: This B3GET extension contains all functions related to output results. Data collection 
+; This B3GET extension contains all functions related to output results. Data collection 
 ; can be turned ON or OFF with the OUTPUT-RESULTS? switch on the user interface. When ON is selected, 
 ; the OUTPUT-RESULTS function is applied once every timestep. Agent state variables are accessible 
 ; during data collection to record complete agent histories. This extension uses the IMPORT-EXPORT
@@ -21,66 +21,73 @@
 ;----------------------------------------------------------------------------------------------
 
 to output-results
-
-  ;----------------------------------------------------------------------------------------------     
-  ; VERIFICATION : collect data on outcomes of periodic code verification checks
-  ;----------------------------------------------------------------------------------------------
   
-  if ( verification-on and ( random-float 1.0 < verification-rate ) ) [   ; If user wants to collect verification data and dice-roll wins
-    profiler:start ]           ; and start a new profiler recording
-  
-  if ( profiler:calls "go" >= 1 ) [  ; If profiler is running
-    record-verification              ; Record dynamic verification data
-    profiler:stop                    ; and stop the profiler
-    profiler:reset             ; reset the profiler data
-  ]                  
-  
-  ;----------------------------------------------------------------------------------------------     
-  ; SUMMARY : collect summary data of simulations or individuals
-  ;----------------------------------------------------------------------------------------------
-  
-  if ( simulation-summary-on and ticks = simulation-summary-ticks ) [ simulation-summary ]
-  if ( record-individuals-on ) [ ask anima1s with [ ticks.at.death > 0 and ticks = ( ticks.at.death + 1 ) and generation.number > 0 ] [ individual-summary ] ]
-  
-  ;----------------------------------------------------------------------------------------------     
-  ; SCAN : collect data on the current state of simulations, groups, or individuals
-  ;----------------------------------------------------------------------------------------------
-  
-  if ( simulation-scans-on and ticks > 0 and ceiling ( ticks / simulation-scan-ticks ) = (ticks / simulation-scan-ticks ) ) [ 
-    if ( simulation-scans-on ) [ scan-simulation ]
-  ]
-  
-  if ( group-scans-on and ticks > 0 and ceiling ( ticks / group-scan-ticks ) = ( ticks / group-scan-ticks ) ) [ 
-    if ( group-scans-on and any? anima1s with [ is.alive and generation.number > 0 ] ) [ foreach remove-duplicates [ group.identity ] of anima1s with [ is.alive and generation.number > 0 ] [ g -> scan-group g ]]
-  ]
-  
-  if ( individual-scans-on and ticks > 0 and ceiling (ticks / individual-scan-ticks ) = (ticks / individual-scan-ticks ) ) [ 
-    if ( individual-scans-on and any? anima1s with [ is.alive and generation.number > 0 ] ) [ ask anima1s with [ is.alive and generation.number > 0 ] [ scan-agent ]]
-  ]
-  
-  if ( view-scans-on and ceiling ( ticks / view-scan-ticks ) = ( ticks / view-scan-ticks ) ) [
-    export-view ( word path-to-experiment "view-" simulation-id "-" ticks ".png")
-    output-territories
-    export-view ( word path-to-experiment "territories-" simulation-id "-" ticks ".png")
-  ]
-  
-  if ( genotype-scans-on and ceiling ( ticks / genotype-scan-ticks ) = ( ticks / genotype-scan-ticks ) and any? anima1s with [ is.alive and generation.number > 0 ] ) [
-    ask one-of anima1s with [ is.alive and generation.number > 0 ] [ scan-genotype ]
-  ]
-  
-  ;----------------------------------------------------------------------------------------------     
-  ; FOCAL FOLLOW
-  ;----------------------------------------------------------------------------------------------
-  
-  ; There is a small chance to starting "following" an agent if they were born this timestep 
-  if ( focal-follows-on = true and subject = nobody ) [ if ( random-float 1.0 < focal-follow-rate and any? anima1s with [ age.in.ticks = 0 and generation.number > 0 ] ) [ follow one-of anima1s with [ age.in.ticks = 0 and generation.number > 0 ] ]]
-
-  if ( focal-follows-on = true and subject != nobody and [fully.decayed] of subject = true ) [ reset-perspective ] ; when focal subject dies and fully decays, stop following them
-  
-  ; If currently "following" an agent, take records of this subject
-  if ( focal-follows-on = true and subject != nobody ) [ 
-    ask subject [ record-actions ]
-  ]
+  carefully [
+    
+    ;----------------------------------------------------------------------------------------------     
+    ; VERIFICATION : collect data on outcomes of periodic code verification checks
+    ;----------------------------------------------------------------------------------------------
+    
+    if ( verification-rate > 0 and ( random-float 1.0 < verification-rate ) ) [   ; If user wants to collect verification data and dice-roll wins
+      profiler:start ]           ; and start a new profiler recording
+    
+    if ( profiler:calls "go" >= 1 ) [  ; If profiler is running
+      record-verification              ; Record dynamic verification data
+      profiler:stop                    ; and stop the profiler
+      profiler:reset             ; reset the profiler data
+    ]                  
+    
+    ;----------------------------------------------------------------------------------------------     
+    ; SUMMARY : collect summary data of simulations or individuals
+    ;----------------------------------------------------------------------------------------------
+    
+    if ( simulation-summary-ticks > 0 and ticks = simulation-summary-ticks ) [ simulation-summary ]
+    if ( record-individuals-on ) [ ask anima1s with [ ticks.at.death > 0 and ticks = ( ticks.at.death + 1 ) ] [ individual-summary ] ]
+    
+    ;----------------------------------------------------------------------------------------------     
+    ; SCAN : collect data on the current state of simulations, groups, or individuals
+    ;----------------------------------------------------------------------------------------------
+    
+    if ( simulation-scan-ticks > 0 and ticks > 0 and ceiling ( ticks / simulation-scan-ticks ) = (ticks / simulation-scan-ticks ) ) [ 
+      scan-simulation
+    ]
+    
+    if ( group-scan-ticks > 0 and ticks > 0 and ceiling ( ticks / group-scan-ticks ) = ( ticks / group-scan-ticks ) ) [ 
+      if ( any? anima1s with [ is.alive ] ) [ foreach remove-duplicates [ group.identity ] of anima1s with [ is.alive ] [ g -> scan-group g ]]
+    ]
+    
+    if ( individual-scan-ticks > 0 and ticks > 0 and ceiling (ticks / individual-scan-ticks ) = (ticks / individual-scan-ticks ) ) [ 
+      if ( any? anima1s with [ is.alive ] ) [ ask anima1s with [ is.alive ] [ scan-agent ]]
+    ]
+    
+    if ( view-scan-ticks > 0 and ceiling ( ticks / view-scan-ticks ) = ( ticks / view-scan-ticks ) ) [
+      let saved-subject subject
+      reset-perspective
+      export-view ( word path-to-experiment "view-" simulation-id "-" ticks ".png")
+      output-territories
+      export-view ( word path-to-experiment "territories-" simulation-id "-" ticks ".png")
+      if ( saved-subject != nobody ) [ watch saved-subject ]
+    ]
+    
+    if ( genotype-scan-ticks > 0 and ceiling ( ticks / genotype-scan-ticks ) = ( ticks / genotype-scan-ticks ) and any? anima1s with [ is.alive ] ) [
+      scan-genotype
+    ]
+    
+    ;----------------------------------------------------------------------------------------------     
+    ; FOCAL FOLLOW
+    ;----------------------------------------------------------------------------------------------
+    
+    ; There is a small chance to starting "following" an agent if they were born this timestep 
+    if ( focal-follow-rate > 0 and subject = nobody ) [ if ( random-float 1.0 < focal-follow-rate and any? anima1s with [ age.in.ticks = 0 ] ) [ watch one-of anima1s with [ age.in.ticks = 0 ] ]]
+    
+    if ( focal-follow-rate > 0 and subject != nobody and [fully.decayed] of subject = true ) [ reset-perspective ] ; when focal subject dies and fully decays, stop following them
+    
+    ; If currently "following" an agent, take records of this subject
+    if ( focal-follow-rate > 0 and subject != nobody ) [ 
+      ask subject [ record-actions ]
+    ]
+    
+  ] [ print ( word "OUTPUT RESULTS ERROR: " error-message ) ]
   
 end
 
@@ -136,89 +143,88 @@ end
 ;  |___/                                |___/  |_|                                                       
 ; --------------------------------------------------------------------------------------------------------- ; 
 
-to scan-genotype ; agent subroutine
+to scan-genotype ; agent subroutine, sta2us only
   
-  let file-path ( word path-to-experiment "genotypes-" genotype ".csv" )
-  
-  if ( not file-exists? file-path and simulation-id != 0 )
-  
-  [ file-open file-path
-    file-print csv:to-string (list 
+  if ( any? anima1s ) [
+    
+    let file-path ( word path-to-experiment "genotypes-" genotype ".csv" )
+    
+    if ( not file-exists? file-path and simulation-id != 0 )
+    
+    [ file-open file-path
+      file-print csv:to-string (list 
+        
+        (sentence
+          "date-and-time"
+          "path-to-experiment"
+          "model-version"
+          "model-structure"
+          "genotype-reader"
+          "simulation-id"
+          "behaviorspace-experiment-name"
+          "population" 
+          "genotype"
+          "plant-annual-cycle" 
+          "plant-daily-cycle" 
+          "plant-seasonality" 
+          "plant-quality"
+          "plant-minimum-neighbors" 
+          "plant-maximum-neighbors" 
+          "world-width" 
+          "world-height"
+          "output-results?" 
+          "selection-on?"
+          "deterioration-rate"
+          "maximum-visual-range"
+          "base-litter-size"
+          "timesteps"
+          map but-last [chromosome.I] of min-one-of anima1s [ generation.number ] ))]
+    
+    file-open file-path
+
+    let combined-list []
+    
+    let i 0
+    let chrome-length max [ length chromosome.I ] of anima1s
+    while [ i < chrome-length ] [
+      let list-i [ last item i chromosome.I ] of anima1s with [ is.alive and length chromosome.I > i and is-number? last item i chromosome.I ]
+      let list-ii [ last item i chromosome.II ] of anima1s with [ is.alive and length chromosome.II > i and is-number? last item i chromosome.II ]
+      let item-I ifelse-value ( length list-i < 1 ) [ 0 ] [ mean list-i ]
+      let item-II ifelse-value ( length list-ii < 1 ) [ 0 ] [ mean list-ii ]
+      set combined-list lput ( item-I + item-II ) combined-list
+      set i i + 1 ]
+    
+    file-print csv:to-string ( list 
       
       (sentence
-        "date-and-time"
-        "path-to-experiment"
-        "model-version"
-        "model-structure"
-        "genotype-reader"
-        "simulation-id"
-        "behaviorspace-experiment-name"
-        "population" 
-        "genotype"
-        "plant-annual-cycle" 
-        "plant-daily-cycle" 
-        "plant-seasonality" 
-        "plant-quality"
-        "plant-minimum-neighbors" 
-        "plant-maximum-neighbors" 
-        "world-width" 
-        "world-height"
-        "output-results?" 
-        "selection-on?"
-        "deterioration-rate"
-        "maximum-visual-range"
-        "base-litter-size"
-        "timesteps"
-        "my.identity"
-        "generation.number"
-        map but-last chromosome.I ))]
-  
-  file-open file-path
-  
-  let numbers-I map last chromosome.I
-  let numbers-II map last chromosome.II
-  let combined-list []
-  
-  let i 0
-  while [ i < length numbers-I ] [
-    let item-I item i numbers-I
-    let item-II item i numbers-II
-    if ( not is-number? item-I ) [ set item-I 0 ]
-    if ( not is-number? item-II ) [ set item-II 0 ]
-    set combined-list lput ( item-I + item-II ) combined-list
-    set i i + 1 ]
-  
-  file-print csv:to-string ( list 
+        date-and-time
+        path-to-experiment
+        model-version
+        model-structure
+        genotype-reader
+        simulation-id
+        behaviorspace-experiment-name
+        population
+        genotype
+        plant-annual-cycle
+        plant-daily-cycle
+        plant-seasonality
+        plant-quality
+        plant-minimum-neighbors
+        plant-maximum-neighbors
+        world-width
+        world-height
+        output-results?
+        selection-on?
+        deterioration-rate
+        maximum-visual-range
+        base-litter-size
+        ticks
+        combined-list ))
     
-    (sentence
-      date-and-time
-      path-to-experiment
-      model-version
-      model-structure
-      genotype-reader
-      simulation-id
-      behaviorspace-experiment-name
-      population
-      genotype
-      plant-annual-cycle
-      plant-daily-cycle
-      plant-seasonality
-      plant-quality
-      plant-minimum-neighbors
-      plant-maximum-neighbors
-      world-width
-      world-height
-      output-results?
-      selection-on?
-      deterioration-rate
-      maximum-visual-range
-      base-litter-size
-      ticks
-      my.identity
-      generation.number
-      combined-list ))
-  
-  file-close 
+    file-close 
+    
+  ] 
   
 end
 
@@ -233,7 +239,7 @@ end
 
 to record-actions ; agent subroutine
   
-  let file-path ( word path-to-experiment "actions-" my.identity ".csv" )
+  let file-path ( word path-to-experiment "actions-" simulation-id "-" my.identity ".csv" )
   
   if ( not file-exists? file-path and simulation-id != 0 )
   
@@ -317,11 +323,10 @@ to record-actions ; agent subroutine
       "foraging.gains"  
       "total.energy.gains"
       "total.energy.cost"
-      "receiving-count"
-      "carried-count"
-      "aid-count"
-      "harm-count"
+      "help-from-count"
+      "attack-from-count"
       "copulations-count"
+      "unique-mates-count"
       "conceptions-count"
       "group-transfers-count"
       "infanticide-count"
@@ -349,110 +354,113 @@ to record-actions ; agent subroutine
   
   foreach action-list [ action ->
     
-    file-print csv:to-string ( list ( list
+    if ( is-anima1? item 1 action ) [
       
-      date-and-time
-      path-to-experiment
-      model-version
-      model-structure
-      genotype-reader
-      simulation-id
-      behaviorspace-experiment-name
-      population
-      genotype
-      plant-annual-cycle
-      plant-daily-cycle
-      plant-seasonality
-      plant-quality
-      plant-minimum-neighbors
-      plant-maximum-neighbors
-      world-width
-      world-height
-      output-results?
-      selection-on?
-      deterioration-rate
-      maximum-visual-range
-      base-litter-size
-      
-      ticks
-      solar-status
-      current-season
-      plant-patchiness
-      population-density
-      current-plant-abundance
-      
-      ; subject
-      color
-      heading 
-      xcor
-      ycor
-      my.identity
-      age.in.ticks 
-      generation.number
-      biological.sex
-      life.history
-      fertility.status 
-      group.identity
-      is.alive
-      carried.items
-      yellow.signal
-      red.signal
-      blue.signal
-      body.size
-      body.shade
-      is.resting
-      hidden.chance
-      fully.decayed
-      survival.chance 
-      energy.supply
-      bite.capacity
-      mutation.chance
-      sex.ratio
-      litter.size
-      conception.chance
-      visual.angle
-      visual.range
-      day.perception
-      night.perception
-      yellow.chance
-      red.chance
-      blue.chance
-      birthing.chance
-      weaning.chance 
-      infancy.chance
-      juvenility.chance
-      adulthood.chance
-      x.magnitude
-      y.magnitude
-      distance.traveled
-      foraging.gains
-      total.energy.gains
-      total.energy.cost
-      receiving-count
-      carried-count
-      aid-count
-      harm-count
-      copulations-count
-      conceptions-count
-      group-transfers-count
-      infanticide-count
-      whole.related.help.cost
-      half.related.help.cost
-      fourth.related.help.cost
-      eighth.related.help.cost
-      not.related.help.cost
-      whole.related.attack.cost
-      half.related.attack.cost
-      fourth.related.attack.cost
-      eighth.related.attack.cost
-      not.related.attack.cost
-      
-      ifelse-value ( is-anima1? item 1 action ) [ [my.identity] of item 1 action ] [ item 1 action ]
-      ifelse-value ( is-anima1? item 2 action ) [ [my.identity] of item 2 action ] [ item 2 action ]
-      item 3 action
-      item 4 action
-      
-    ))]
+      ask ( item 1 action ) [
+        
+        file-print csv:to-string ( list ( list
+          
+          date-and-time
+          path-to-experiment
+          model-version
+          model-structure
+          genotype-reader
+          simulation-id
+          behaviorspace-experiment-name
+          population
+          genotype
+          plant-annual-cycle
+          plant-daily-cycle
+          plant-seasonality
+          plant-quality
+          plant-minimum-neighbors
+          plant-maximum-neighbors
+          world-width
+          world-height
+          output-results?
+          selection-on?
+          deterioration-rate
+          maximum-visual-range
+          base-litter-size
+          
+          ticks
+          solar-status
+          current-season
+          plant-patchiness
+          population-density
+          current-plant-abundance
+          
+          ; subject
+          color
+          heading 
+          xcor
+          ycor
+          my.identity
+          age.in.ticks 
+          generation.number
+          biological.sex
+          life.history
+          fertility.status 
+          group.identity
+          is.alive
+          carried.items
+          yellow.signal
+          red.signal
+          blue.signal
+          body.size
+          body.shade
+          is.resting
+          hidden.chance
+          fully.decayed
+          survival.chance 
+          energy.supply
+          bite.capacity
+          mutation.chance
+          sex.ratio
+          litter.size
+          conception.chance
+          visual.angle
+          visual.range
+          day.perception
+          night.perception
+          yellow.chance
+          red.chance
+          blue.chance
+          birthing.chance
+          weaning.chance 
+          infancy.chance
+          juvenility.chance
+          adulthood.chance
+          x.magnitude
+          y.magnitude
+          distance.traveled
+          foraging.gains
+          total.energy.gains
+          total.energy.cost
+          help-from-count
+          attack-from-count
+          copulations-count
+          unique-mates-count
+          conceptions-count
+          group-transfers-count
+          infanticide-count
+          whole.related.help.cost
+          half.related.help.cost
+          fourth.related.help.cost
+          eighth.related.help.cost
+          not.related.help.cost
+          whole.related.attack.cost
+          half.related.attack.cost
+          fourth.related.attack.cost
+          eighth.related.attack.cost
+          not.related.attack.cost
+          
+          ifelse-value ( is-anima1? item 1 action ) [ [my.identity] of item 1 action ] [ item 1 action ]
+          ifelse-value ( is-anima1? item 2 action ) [ [my.identity] of item 2 action ] [ item 2 action ]
+          item 3 action
+          item 4 action
+          
+  ))]]]
   
   file-close 
   
@@ -553,11 +561,10 @@ to scan-agent
       "foraging.gains"  
       "total.energy.gains"
       "total.energy.cost"
-      "receiving-count"
-      "carried-count"
-      "aid-count"
-      "harm-count"
+      "help-from-count"
+      "attack-from-count"
       "copulations-count"
+      "unique-mates-count"
       "conceptions-count"
       "group-transfers-count"
       "infanticide-count"
@@ -607,8 +614,7 @@ to scan-agent
     plant-patchiness
     current-plant-abundance
     population-density
-
-    
+   
     focal-subject
     color
     heading 
@@ -656,11 +662,10 @@ to scan-agent
     foraging.gains
     total.energy.gains
     total.energy.cost
-    receiving-count
-    carried-count
-    aid-count
-    harm-count
+    help-from-count
+    attack-from-count
     copulations-count
+    unique-mates-count
     conceptions-count
     group-transfers-count
     infanticide-count
@@ -771,11 +776,10 @@ to individual-summary
       "foraging.gains"  
       "total.energy.gains"
       "total.energy.cost"
-      "receiving-count"
-      "carried-count"
-      "aid-count"
-      "harm-count"
+      "help-from-count"
+      "attack-from-count"
       "copulations-count"
+      "unique-mates-count"
       "conceptions-count"
       "group-transfers-count"
       "infanticide-count"
@@ -910,11 +914,10 @@ to individual-summary
     foraging.gains
     total.energy.gains
     total.energy.cost
-    receiving-count
-    carried-count
-    aid-count
-    harm-count
+    help-from-count
+    attack-from-count
     copulations-count
+    unique-mates-count
     conceptions-count
     group-transfers-count
     infanticide-count
@@ -1028,15 +1031,17 @@ to scan-group [ group-id ]
       "current-population-density"
       "current-territory-size"
       
+      "group-identity"
+      "current-group-size" 
+      "current-group-members"
+      "current-territory-energy"
+      
       "distance-to-centroid-minimum"
       "distance-to-centroid-maximum"
       "distance-to-centroid-mean"
       "distance-to-centroid-median"
       "distance-to-centroid-variance"
       
-      "group-identity"
-      "current-group-size" 
-      "group-members"
       "adult-male-count"
       "adult-cycling-count"
       "adult-pregnant-count"
@@ -1048,6 +1053,7 @@ to scan-group [ group-id ]
       "gestatee-male-count"
       "gestatee-female-count"
       
+      "total-birth-count"
       "total-death-count"
       "adult-male-death-count"
       "adult-cycling-death-count"
@@ -1059,6 +1065,19 @@ to scan-group [ group-id ]
       "infant-female-death-count"
       "gestatee-male-death-count"
       "gestatee-female-death-count"
+      
+      "per-capita-birth" 
+      "per-capita-death"
+      "per-capita-adult-male-death"
+      "per-capita-adult-cycling-death"
+      "per-capita-adult-pregnant-death"
+      "per-capita-adult-lactating-death"
+      "per-capita-juvenile-male-death"
+      "per-capita-juvenile-female-death"
+      "per-capita-infant-male-death"
+      "per-capita-infant-female-death"
+      "per-capita-gestatee-male-death"
+      "per-capita-gestatee-female-death"
       
       "total-energy"
       "adult-male-energy"
@@ -1109,6 +1128,8 @@ to scan-group [ group-id ]
   let gestatee-male-count count living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "male" ]
   let gestatee-female-count count living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "female" ]
   
+  let newly-born-agents anima1s with [ is.alive = true and ticks.at.birth <= ticks and ticks.at.birth > ( ticks - group-scan-ticks ) ]
+  let total-birth-count count newly-born-agents with [ group.identity = group-id ]
   let dying-agents anima1s with [ is.alive = false and ticks.at.death <= ticks and ticks.at.death > ( ticks - group-scan-ticks ) ]
   let total-death-count count dying-agents with [ group.identity = group-id ]
   let adult-male-death-count count dying-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ]
@@ -1166,16 +1187,18 @@ to scan-group [ group-id ]
     current-plant-abundance
     population-density
     count patches with [ pgroup.identity = group-id ]
+        
+    group-id
+    current-group-size
+    ([my.identity] of living-agents with [ group.identity = group-id ])
+    (sum [penergy.supply] of patches with [ pgroup.identity = group-id ])
     
     distance-to-centroid-minimum
     distance-to-centroid-maximum
     distance-to-centroid-mean
     distance-to-centroid-median
     distance-to-centroid-variance
-    
-    group-id
-    current-group-size
-    ([my.identity] of living-agents with [ group.identity = group-id ])
+
     adult-male-count
     adult-cycling-count
     adult-pregnant-count
@@ -1187,6 +1210,7 @@ to scan-group [ group-id ]
     gestatee-male-count
     gestatee-female-count
     
+    total-birth-count
     total-death-count
     adult-male-death-count
     adult-cycling-death-count
@@ -1198,6 +1222,19 @@ to scan-group [ group-id ]
     infant-female-death-count
     gestatee-male-death-count
     gestatee-female-death-count
+    
+    ifelse-value ( current-group-size > 0 ) [ ( total-birth-count / current-group-size) ] [ "NA" ]
+    ifelse-value ( current-group-size > 0 ) [ ( total-death-count / current-group-size) ] [ "NA" ]
+    ifelse-value ( adult-male-count > 0 ) [ (adult-male-death-count / adult-male-count) ] [ "NA" ]
+    ifelse-value ( adult-cycling-count > 0 ) [ (adult-cycling-death-count / adult-cycling-count) ] [ "NA" ]
+    ifelse-value ( adult-pregnant-count > 0 ) [ (adult-pregnant-death-count / adult-pregnant-count) ] [ "NA" ]
+    ifelse-value ( adult-lactating-count > 0 ) [ (adult-lactating-death-count / adult-lactating-count) ] [ "NA" ]
+    ifelse-value ( juvenile-male-count > 0 ) [ (juvenile-male-death-count / juvenile-male-count) ] [ "NA" ]
+    ifelse-value ( juvenile-female-count > 0 ) [ (juvenile-female-death-count / juvenile-female-count) ] [ "NA" ]
+    ifelse-value ( infant-male-count > 0 ) [ (infant-male-death-count / infant-male-count) ] [ "NA" ]
+    ifelse-value ( infant-female-count > 0 ) [ (infant-female-death-count / infant-female-count) ] [ "NA" ]
+    ifelse-value ( gestatee-male-count > 0 ) [ (gestatee-male-death-count / gestatee-male-count) ] [ "NA" ]
+    ifelse-value ( gestatee-female-count > 0 ) [ (gestatee-female-death-count / gestatee-female-count) ] [ "NA" ]
     
     total-energy
     adult-male-energy
@@ -1411,11 +1448,23 @@ to simulation-summary ; observer subroutine
       "verification-false-count"
       "verification-percent-true"
       
-      "group-size-minimum"
-      "group-size-maximum" 
-      "group-size-mean" 
-      "group-size-median" 
-      "group-size-variance" 
+      "total-group-size-minimum"
+      "total-group-size-maximum" 
+      "total-group-size-mean" 
+      "total-group-size-median" 
+      "total-group-size-variance" 
+      
+      "adult-group-size-minimum"
+      "adult-group-size-maximum" 
+      "adult-group-size-mean" 
+      "adult-group-size-median" 
+      "adult-group-size-variance" 
+      
+      "groups-distance-to-centroid-minimum"
+      "groups-distance-to-centroid-maximum"
+      "groups-distance-to-centroid-mean"
+      "groups-distance-to-centroid-median"
+      "groups-distance-to-centroid-variance"
       
       "adult-males-who-disperse-count"
       "adult-males-who-not-disperse-count" 
@@ -1425,10 +1474,12 @@ to simulation-summary ; observer subroutine
       "adult-females-percent-disperse" 
       
       "adult-males-multiple-mates-count" 
-      "adult-males-not-multiple-mates-count" 
+      "adult-males-single-mate-count" 
+      "adult-males-no-mates-count" 
       "adult-males-percent-multiple-mates" 
       "adult-females-multiple-mates-count"
-      "adult-females-not-multiple-mates-count" 
+      "adult-females-single-mate-count" 
+      "adult-females-no-mates-count" 
       "adult-females-percent-multiple-mates"
       
       ; emergent properties of plants
@@ -1618,162 +1669,202 @@ to simulation-summary ; observer subroutine
       "female-lifetime-distance-traveled-variance"
       "mother-initiated-birth-count"
       "offspring-initiated-birth-count"
+      "mother-initiated-birth-percent"
       "mother-initiated-weaning-count"
       "offspring-initiated-weaning-count"
+      "mother-initiated-weaning-percent"
       "male-lifetime-foraging-gains-maximum"  
       "male-lifetime-foraging-gains-minimum"
       "male-lifetime-foraging-gains-mean"
       "male-lifetime-foraging-gains-variance"
+      "total-population-male-lifetime-foraging-gains"
       "female-lifetime-foraging-gains-maximum"
       "female-lifetime-foraging-gains-minimum"
       "female-lifetime-foraging-gains-mean"
-      "female-lifetime-foraging-gains-variance"
+      "female-lifetime-foraging-gains-variance"       
+      "total-population-female-lifetime-foraging-gains"
       "male-lifetime-energy-gains-maximum"  
       "male-lifetime-energy-gains-minimum"
       "male-lifetime-energy-gains-mean"
-      "male-lifetime-energy-gains-variance"
+      "male-lifetime-energy-gains-variance"       
+      "total-population-male-lifetime-energy-gains"
       "female-lifetime-energy-gains-maximum"
       "female-lifetime-energy-gains-minimum"
       "female-lifetime-energy-gains-mean"
-      "female-lifetime-energy-gains-variance"
+      "female-lifetime-energy-gains-variance"       
+      "total-population-female-lifetime-energy-gains"
       "male-lifetime-energy-cost-maximum"  
       "male-lifetime-energy-cost-minimum"
       "male-lifetime-energy-cost-mean"
-      "male-lifetime-energy-cost-variance"
+      "male-lifetime-energy-cost-variance"      
+      "total-population-male-lifetime-energy-cost"
       "female-lifetime-energy-cost-maximum"
       "female-lifetime-energy-cost-minimum"
       "female-lifetime-energy-cost-mean"
-      "female-lifetime-energy-cost-variance"
+      "female-lifetime-energy-cost-variance"       
+      "total-population-female-lifetime-energy-cost"
       
       "male-lifetime-whole-related-help-cost-maximum"
       "male-lifetime-whole-related-help-cost-minimum"
       "male-lifetime-whole-related-help-cost-mean"
-      "male-lifetime-whole-related-help-cost-variance"
+      "male-lifetime-whole-related-help-cost-variance"       
+      "total-population-male-lifetime-whole-related-help-cost"
       "female-lifetime-whole-related-help-cost-maximum"
       "female-lifetime-whole-related-help-cost-minimum"
       "female-lifetime-whole-related-help-cost-mean"
-      "female-lifetime-whole-related-help-cost-variance"
+      "female-lifetime-whole-related-help-cost-variance"       
+      "total-population-female-lifetime-whole-related-help-cost"
       "male-lifetime-half-related-help-cost-maximum"
       "male-lifetime-half-related-help-cost-minimum"
       "male-lifetime-half-related-help-cost-mean"
-      "male-lifetime-half-related-help-cost-variance"
+      "male-lifetime-half-related-help-cost-variance"       
+      "total-population-male-lifetime-half-related-help-cost"
       "female-lifetime-half-related-help-cost-maximum"
       "female-lifetime-half-related-help-cost-minimum"
       "female-lifetime-half-related-help-cost-mean"
-      "female-lifetime-half-related-help-cost-variance"
+      "female-lifetime-half-related-help-cost-variance"       
+      "total-population-female-lifetime-half-related-help-cost"
       "male-lifetime-fourth-related-help-cost-maximum"
       "male-lifetime-fourth-related-help-cost-minimum"
       "male-lifetime-fourth-related-help-cost-mean"
-      "male-lifetime-fourth-related-help-cost-variance"
+      "male-lifetime-fourth-related-help-cost-variance"       
+      "total-population-male-lifetime-fourth-related-help-cost"
       "female-lifetime-fourth-related-help-cost-maximum"
       "female-lifetime-fourth-related-help-cost-minimum"
       "female-lifetime-fourth-related-help-cost-mean"
-      "female-lifetime-fourth-related-help-cost-variance"
+      "female-lifetime-fourth-related-help-cost-variance"       
+      "total-population-female-lifetime-fourth-related-help-cost"
       "male-lifetime-eighth-related-help-cost-maximum"
       "male-lifetime-eighth-related-help-cost-minimum"
       "male-lifetime-eighth-related-help-cost-mean"
-      "male-lifetime-eighth-related-help-cost-variance"
+      "male-lifetime-eighth-related-help-cost-variance"       
+      "total-population-male-lifetime-eighth-related-help-cost"
       "female-lifetime-eighth-related-help-cost-maximum"
       "female-lifetime-eighth-related-help-cost-minimum"
       "female-lifetime-eighth-related-help-cost-mean"
-      "female-lifetime-eighth-related-help-cost-variance"
+      "female-lifetime-eighth-related-help-cost-variance"       
+      "total-population-female-lifetime-eighth-related-help-cost"
       "male-lifetime-not-related-help-cost-maximum"
       "male-lifetime-not-related-help-cost-minimum"
       "male-lifetime-not-related-help-cost-mean"
-      "male-lifetime-not-related-help-cost-variance"
+      "male-lifetime-not-related-help-cost-variance"       
+      "total-population-male-lifetime-not-related-help-cost"
       "female-lifetime-not-related-help-cost-maximum"
       "female-lifetime-not-related-help-cost-minimum"
       "female-lifetime-not-related-help-cost-mean"
-      "female-lifetime-not-related-help-cost-variance"
+      "female-lifetime-not-related-help-cost-variance"       
+      "total-population-female-lifetime-not-related-help-cost"
       "male-lifetime-whole-related-attack-cost-maximum"
       "male-lifetime-whole-related-attack-cost-minimum"
       "male-lifetime-whole-related-attack-cost-mean"
-      "male-lifetime-whole-related-attack-cost-variance"
+      "male-lifetime-whole-related-attack-cost-variance"       
+      "total-population-male-lifetime-whole-related-attack-cost"
       "female-lifetime-whole-related-attack-cost-maximum"
       "female-lifetime-whole-related-attack-cost-minimum"
       "female-lifetime-whole-related-attack-cost-mean"
-      "female-lifetime-whole-related-attack-cost-variance"
+      "female-lifetime-whole-related-attack-cost-variance"       
+      "total-population-female-lifetime-whole-related-attack-cost"
       "male-lifetime-half-related-attack-cost-maximum"
       "male-lifetime-half-related-attack-cost-minimum"
       "male-lifetime-half-related-attack-cost-mean"
-      "male-lifetime-half-related-attack-cost-variance"
+      "male-lifetime-half-related-attack-cost-variance"       
+      "total-population-male-lifetime-half-related-attack-cost"
       "female-lifetime-half-related-attack-cost-maximum"
       "female-lifetime-half-related-attack-cost-minimum"
       "female-lifetime-half-related-attack-cost-mean"
-      "female-lifetime-half-related-attack-cost-variance"
+      "female-lifetime-half-related-attack-cost-variance"       
+      "total-population-female-lifetime-half-related-attack-cost"
       "male-lifetime-fourth-related-attack-cost-maximum"
       "male-lifetime-fourth-related-attack-cost-minimum"
       "male-lifetime-fourth-related-attack-cost-mean"
-      "male-lifetime-fourth-related-attack-cost-variance"
+      "male-lifetime-fourth-related-attack-cost-variance"       
+      "total-population-male-lifetime-fourth-related-attack-cost"
       "female-lifetime-fourth-related-attack-cost-maximum"
       "female-lifetime-fourth-related-attack-cost-minimum"
       "female-lifetime-fourth-related-attack-cost-mean"
-      "female-lifetime-fourth-related-attack-cost-variance"
+      "female-lifetime-fourth-related-attack-cost-variance"       
+      "total-population-female-lifetime-fourth-related-attack-cost"
       "male-lifetime-eighth-related-attack-cost-maximum"
       "male-lifetime-eighth-related-attack-cost-minimum"
       "male-lifetime-eighth-related-attack-cost-mean"
-      "male-lifetime-eighth-related-attack-cost-variance"
+      "male-lifetime-eighth-related-attack-cost-variance"       
+      "total-population-male-lifetime-eighth-related-attack-cost"
       "female-lifetime-eighth-related-attack-cost-maximum"
       "female-lifetime-eighth-related-attack-cost-minimum"
       "female-lifetime-eighth-related-attack-cost-mean"
-      "female-lifetime-eighth-related-attack-cost-variance"
+      "female-lifetime-eighth-related-attack-cost-variance"       
+      "total-population-female-lifetime-eighth-related-attack-cost"
       "male-lifetime-not-related-attack-cost-maximum"
       "male-lifetime-not-related-attack-cost-minimum"
       "male-lifetime-not-related-attack-cost-mean"
-      "male-lifetime-not-related-attack-cost-variance"
+      "male-lifetime-not-related-attack-cost-variance"       
+      "total-population-male-lifetime-not-related-attack-cost"
       "female-lifetime-not-related-attack-cost-maximum"
       "female-lifetime-not-related-attack-cost-minimum"
       "female-lifetime-not-related-attack-cost-mean"
-      "female-lifetime-not-related-attack-cost-variance"
+      "female-lifetime-not-related-attack-cost-variance"       
+      "total-population-female-lifetime-not-related-attack-cost"
       
-      "male-total-aid-count-maximum"
-      "male-total-aid-count-minimum"
-      "male-total-aid-count-mean"
-      "male-total-aid-count-variance"
-      "female-total-aid-count-maximum"
-      "female-total-aid-count-minimum"
-      "female-total-aid-count-mean"
-      "female-total-aid-count-variance"
-      "male-total-harm-count-maximum"
-      "male-total-harm-count-minimum"
-      "male-total-harm-count-mean"
-      "male-total-harm-count-variance"
-      "female-total-harm-count-maximum"
-      "female-total-harm-count-minimum"
-      "female-total-harm-count-mean"
-      "female-total-harm-count-variance"
+      "male-total-help-from-count-maximum"
+      "male-total-help-from-count-minimum"
+      "male-total-help-from-count-mean"
+      "male-total-help-from-count-variance"       
+      "total-population-male-total-help-from-count"
+      "female-total-help-from-count-maximum"
+      "female-total-help-from-count-minimum"
+      "female-total-help-from-count-mean"
+      "female-total-help-from-count-variance"       
+      "total-population-female-total-help-from-count"
+      "male-total-attack-from-count-maximum"
+      "male-total-attack-from-count-minimum"
+      "male-total-attack-from-count-mean"
+      "male-total-attack-from-count-variance"       
+      "total-population-male-total-attack-from-count"
+      "female-total-attack-from-count-maximum"
+      "female-total-attack-from-count-minimum"
+      "female-total-attack-from-count-mean"
+      "female-total-attack-from-count-variance"       
+      "total-population-female-total-attack-from-count"
       "male-total-matings-maximum"
       "male-total-matings-minimum"
       "male-total-matings-mean"
-      "male-total-matings-variance"
+      "male-total-matings-variance"       
+      "total-population-male-total-matings"
       "male-unique-female-matings-maximum"
       "male-unique-female-matings-minimum"
       "male-unique-female-matings-mean"
-      "male-unique-female-matings-variance"
+      "male-unique-female-matings-variance"       
+      "total-population-male-unique-female-matings"
       "female-total-matings-maximum"
       "female-total-matings-minimum"
       "female-total-matings-mean"
-      "female-total-matings-variance"
+      "female-total-matings-variance"       
+      "total-population-female-total-matings"
       "female-unique-male-matings-maximum"
       "female-unique-male-matings-minimum"
       "female-unique-male-matings-mean"
-      "female-unique-male-matings-variance"
+      "female-unique-male-matings-variance"       
+      "total-population-female-unique-male-matings"
       "male-total-group-transfers-maximum"
       "male-total-group-transfers-minimum"
       "male-total-group-transfers-mean"
-      "male-total-group-transfers-variance"
+      "male-total-group-transfers-variance"       
+      "total-population-male-total-group-transfers"
       "female-total-group-transfers-maximum"
       "female-total-group-transfers-minimum"
       "female-total-group-transfers-mean"
-      "female-total-group-transfers-variance"
-      "male-infantice-count-maximum"
-      "male-infantice-count-minimum"
-      "male-infantice-count-mean"
-      "male-infantice-count-variance"
-      "female-infantice-count-maximum"
-      "female-infantice-count-minimum"
-      "female-infantice-count-mean"
-      "female-infantice-count-variance"
+      "female-total-group-transfers-variance"      
+      "total-population-female-total-group-transfers"
+      "male-infanticide-count-maximum"
+      "male-infanticide-count-minimum"
+      "male-infanticide-count-mean"
+      "male-infanticide-count-variance"       
+      "total-population-male-infanticide-count"
+      "female-infanticide-count-maximum"
+      "female-infanticide-count-minimum"
+      "female-infanticide-count-mean"
+      "female-infanticide-count-variance"       
+      "total-population-female-infanticide-count"
       
   )) ]
   
@@ -1815,11 +1906,23 @@ to simulation-summary ; observer subroutine
     verification-false-count
     verification-percent-true
     
-    group-size-minimum 
-    group-size-maximum 
-    group-size-mean 
-    group-size-median 
-    group-size-variance 
+    total-group-size-minimum 
+    total-group-size-maximum 
+    total-group-size-mean 
+    total-group-size-median 
+    total-group-size-variance 
+    
+    adult-group-size-minimum 
+    adult-group-size-maximum 
+    adult-group-size-mean 
+    adult-group-size-median 
+    adult-group-size-variance 
+    
+    groups-distance-to-centroid-minimum
+    groups-distance-to-centroid-maximum
+    groups-distance-to-centroid-mean
+    groups-distance-to-centroid-median
+    groups-distance-to-centroid-variance
     
     adult-males-who-disperse-count
     adult-males-who-not-disperse-count 
@@ -1827,12 +1930,14 @@ to simulation-summary ; observer subroutine
     adult-females-who-disperse-count
     adult-females-who-not-disperse-count
     adult-females-percent-disperse 
-    
+
     adult-males-multiple-mates-count 
-    adult-males-not-multiple-mates-count 
+    adult-males-single-mate-count 
+    adult-males-no-mates-count
     adult-males-percent-multiple-mates 
     adult-females-multiple-mates-count
-    adult-females-not-multiple-mates-count
+    adult-females-single-mate-count
+    adult-females-no-mates-count
     adult-females-percent-multiple-mates
     
     ; emergent properties of plants
@@ -2022,162 +2127,202 @@ to simulation-summary ; observer subroutine
     female-lifetime-distance-traveled-variance
     mother-initiated-birth-count
     offspring-initiated-birth-count
+    mother-initiated-birth-percent
     mother-initiated-weaning-count
     offspring-initiated-weaning-count
+    mother-initiated-weaning-percent
     male-lifetime-foraging-gains-maximum  
     male-lifetime-foraging-gains-minimum
     male-lifetime-foraging-gains-mean
-    male-lifetime-foraging-gains-variance
+    male-lifetime-foraging-gains-variance       
+    total-population-male-lifetime-foraging-gains
     female-lifetime-foraging-gains-maximum
     female-lifetime-foraging-gains-minimum
     female-lifetime-foraging-gains-mean
-    female-lifetime-foraging-gains-variance
+    female-lifetime-foraging-gains-variance       
+    total-population-female-lifetime-foraging-gains
     male-lifetime-energy-gains-maximum  
     male-lifetime-energy-gains-minimum
     male-lifetime-energy-gains-mean
-    male-lifetime-energy-gains-variance
+    male-lifetime-energy-gains-variance       
+    total-population-male-lifetime-energy-gains
     female-lifetime-energy-gains-maximum
     female-lifetime-energy-gains-minimum
     female-lifetime-energy-gains-mean
-    female-lifetime-energy-gains-variance
+    female-lifetime-energy-gains-variance       
+    total-population-female-lifetime-energy-gains
     male-lifetime-energy-cost-maximum  
     male-lifetime-energy-cost-minimum
     male-lifetime-energy-cost-mean
-    male-lifetime-energy-cost-variance
+    male-lifetime-energy-cost-variance       
+    total-population-male-lifetime-energy-cost
     female-lifetime-energy-cost-maximum
     female-lifetime-energy-cost-minimum
     female-lifetime-energy-cost-mean
-    female-lifetime-energy-cost-variance
+    female-lifetime-energy-cost-variance       
+    total-population-female-lifetime-energy-cost
     
     male-lifetime-whole-related-help-cost-maximum
     male-lifetime-whole-related-help-cost-minimum
     male-lifetime-whole-related-help-cost-mean
-    male-lifetime-whole-related-help-cost-variance
+    male-lifetime-whole-related-help-cost-variance       
+    total-population-male-lifetime-whole-related-help-cost
     female-lifetime-whole-related-help-cost-maximum
     female-lifetime-whole-related-help-cost-minimum
     female-lifetime-whole-related-help-cost-mean
-    female-lifetime-whole-related-help-cost-variance
+    female-lifetime-whole-related-help-cost-variance       
+    total-population-female-lifetime-whole-related-help-cost
     male-lifetime-half-related-help-cost-maximum
     male-lifetime-half-related-help-cost-minimum
     male-lifetime-half-related-help-cost-mean
-    male-lifetime-half-related-help-cost-variance
+    male-lifetime-half-related-help-cost-variance       
+    total-population-male-lifetime-half-related-help-cost
     female-lifetime-half-related-help-cost-maximum
     female-lifetime-half-related-help-cost-minimum
     female-lifetime-half-related-help-cost-mean
-    female-lifetime-half-related-help-cost-variance
+    female-lifetime-half-related-help-cost-variance       
+    total-population-female-lifetime-half-related-help-cost
     male-lifetime-fourth-related-help-cost-maximum
     male-lifetime-fourth-related-help-cost-minimum
     male-lifetime-fourth-related-help-cost-mean
-    male-lifetime-fourth-related-help-cost-variance
+    male-lifetime-fourth-related-help-cost-variance       
+    total-population-male-lifetime-fourth-related-help-cost
     female-lifetime-fourth-related-help-cost-maximum
     female-lifetime-fourth-related-help-cost-minimum
     female-lifetime-fourth-related-help-cost-mean
-    female-lifetime-fourth-related-help-cost-variance
+    female-lifetime-fourth-related-help-cost-variance       
+    total-population-female-lifetime-fourth-related-help-cost
     male-lifetime-eighth-related-help-cost-maximum
     male-lifetime-eighth-related-help-cost-minimum
     male-lifetime-eighth-related-help-cost-mean
-    male-lifetime-eighth-related-help-cost-variance
+    male-lifetime-eighth-related-help-cost-variance       
+    total-population-male-lifetime-eighth-related-help-cost
     female-lifetime-eighth-related-help-cost-maximum
     female-lifetime-eighth-related-help-cost-minimum
     female-lifetime-eighth-related-help-cost-mean
-    female-lifetime-eighth-related-help-cost-variance
+    female-lifetime-eighth-related-help-cost-variance       
+    total-population-female-lifetime-eighth-related-help-cost
     male-lifetime-not-related-help-cost-maximum
     male-lifetime-not-related-help-cost-minimum
     male-lifetime-not-related-help-cost-mean
-    male-lifetime-not-related-help-cost-variance
+    male-lifetime-not-related-help-cost-variance       
+    total-population-male-lifetime-not-related-help-cost
     female-lifetime-not-related-help-cost-maximum
     female-lifetime-not-related-help-cost-minimum
     female-lifetime-not-related-help-cost-mean
-    female-lifetime-not-related-help-cost-variance
+    female-lifetime-not-related-help-cost-variance       
+    total-population-female-lifetime-not-related-help-cost
     male-lifetime-whole-related-attack-cost-maximum
     male-lifetime-whole-related-attack-cost-minimum
     male-lifetime-whole-related-attack-cost-mean
-    male-lifetime-whole-related-attack-cost-variance
+    male-lifetime-whole-related-attack-cost-variance       
+    total-population-male-lifetime-whole-related-attack-cost
     female-lifetime-whole-related-attack-cost-maximum
     female-lifetime-whole-related-attack-cost-minimum
     female-lifetime-whole-related-attack-cost-mean
-    female-lifetime-whole-related-attack-cost-variance
+    female-lifetime-whole-related-attack-cost-variance       
+    total-population-female-lifetime-whole-related-attack-cost
     male-lifetime-half-related-attack-cost-maximum
     male-lifetime-half-related-attack-cost-minimum
     male-lifetime-half-related-attack-cost-mean
-    male-lifetime-half-related-attack-cost-variance
+    male-lifetime-half-related-attack-cost-variance       
+    total-population-male-lifetime-half-related-attack-cost
     female-lifetime-half-related-attack-cost-maximum
     female-lifetime-half-related-attack-cost-minimum
     female-lifetime-half-related-attack-cost-mean
-    female-lifetime-half-related-attack-cost-variance
+    female-lifetime-half-related-attack-cost-variance       
+    total-population-female-lifetime-half-related-attack-cost
     male-lifetime-fourth-related-attack-cost-maximum
     male-lifetime-fourth-related-attack-cost-minimum
     male-lifetime-fourth-related-attack-cost-mean
-    male-lifetime-fourth-related-attack-cost-variance
+    male-lifetime-fourth-related-attack-cost-variance       
+    total-population-male-lifetime-fourth-related-attack-cost
     female-lifetime-fourth-related-attack-cost-maximum
     female-lifetime-fourth-related-attack-cost-minimum
     female-lifetime-fourth-related-attack-cost-mean
-    female-lifetime-fourth-related-attack-cost-variance
+    female-lifetime-fourth-related-attack-cost-variance       
+    total-population-female-lifetime-fourth-related-attack-cost
     male-lifetime-eighth-related-attack-cost-maximum
     male-lifetime-eighth-related-attack-cost-minimum
     male-lifetime-eighth-related-attack-cost-mean
-    male-lifetime-eighth-related-attack-cost-variance
+    male-lifetime-eighth-related-attack-cost-variance       
+    total-population-male-lifetime-eighth-related-attack-cost
     female-lifetime-eighth-related-attack-cost-maximum
     female-lifetime-eighth-related-attack-cost-minimum
     female-lifetime-eighth-related-attack-cost-mean
-    female-lifetime-eighth-related-attack-cost-variance
+    female-lifetime-eighth-related-attack-cost-variance       
+    total-population-female-lifetime-eighth-related-attack-cost
     male-lifetime-not-related-attack-cost-maximum
     male-lifetime-not-related-attack-cost-minimum
     male-lifetime-not-related-attack-cost-mean
-    male-lifetime-not-related-attack-cost-variance
+    male-lifetime-not-related-attack-cost-variance       
+    total-population-male-lifetime-not-related-attack-cost
     female-lifetime-not-related-attack-cost-maximum
     female-lifetime-not-related-attack-cost-minimum
     female-lifetime-not-related-attack-cost-mean
-    female-lifetime-not-related-attack-cost-variance
+    female-lifetime-not-related-attack-cost-variance       
+    total-population-female-lifetime-not-related-attack-cost
     
-    male-total-aid-count-maximum
-    male-total-aid-count-minimum
-    male-total-aid-count-mean
-    male-total-aid-count-variance
-    female-total-aid-count-maximum
-    female-total-aid-count-minimum
-    female-total-aid-count-mean
-    female-total-aid-count-variance
-    male-total-harm-count-maximum
-    male-total-harm-count-minimum
-    male-total-harm-count-mean
-    male-total-harm-count-variance
-    female-total-harm-count-maximum
-    female-total-harm-count-minimum
-    female-total-harm-count-mean
-    female-total-harm-count-variance
+    male-total-help-from-count-maximum
+    male-total-help-from-count-minimum
+    male-total-help-from-count-mean
+    male-total-help-from-count-variance       
+    total-population-male-total-help-from-count
+    female-total-help-from-count-maximum
+    female-total-help-from-count-minimum
+    female-total-help-from-count-mean
+    female-total-help-from-count-variance       
+    total-population-female-total-help-from-count
+    male-total-attack-from-count-maximum
+    male-total-attack-from-count-minimum
+    male-total-attack-from-count-mean
+    male-total-attack-from-count-variance       
+    total-population-male-total-attack-from-count
+    female-total-attack-from-count-maximum
+    female-total-attack-from-count-minimum
+    female-total-attack-from-count-mean
+    female-total-attack-from-count-variance       
+    total-population-female-total-attack-from-count
     male-total-matings-maximum
     male-total-matings-minimum
     male-total-matings-mean
-    male-total-matings-variance
+    male-total-matings-variance       
+    total-population-male-total-matings
     male-unique-female-matings-maximum
     male-unique-female-matings-minimum
     male-unique-female-matings-mean
-    male-unique-female-matings-variance
+    male-unique-female-matings-variance       
+    total-population-male-unique-female-matings
     female-total-matings-maximum
     female-total-matings-minimum
     female-total-matings-mean
-    female-total-matings-variance
+    female-total-matings-variance       
+    total-population-female-total-matings
     female-unique-male-matings-maximum
     female-unique-male-matings-minimum
     female-unique-male-matings-mean
-    female-unique-male-matings-variance
+    female-unique-male-matings-variance       
+    total-population-female-unique-male-matings
     male-total-group-transfers-maximum
     male-total-group-transfers-minimum
     male-total-group-transfers-mean
-    male-total-group-transfers-variance
+    male-total-group-transfers-variance       
+    total-population-male-total-group-transfers
     female-total-group-transfers-maximum
     female-total-group-transfers-minimum
     female-total-group-transfers-mean
-    female-total-group-transfers-variance
-    male-infantice-count-maximum
-    male-infantice-count-minimum
-    male-infantice-count-mean
-    male-infantice-count-variance
-    female-infantice-count-maximum
-    female-infantice-count-minimum
-    female-infantice-count-mean
-    female-infantice-count-variance
+    female-total-group-transfers-variance       
+    total-population-female-total-group-transfers
+    male-infanticide-count-maximum
+    male-infanticide-count-minimum
+    male-infanticide-count-mean
+    male-infanticide-count-variance       
+    total-population-male-infanticide-count
+    female-infanticide-count-maximum
+    female-infanticide-count-minimum
+    female-infanticide-count-mean
+    female-infanticide-count-variance       
+    total-population-female-infanticide-count
     
   ))
   
@@ -2190,17 +2335,16 @@ end
 ;--------------------------------------------------------------------------------------------------------------------
 
 to-report focal-subject report self = subject end
-to-report receiving-count report length receiving.history end
-to-report carried-count report length carried.history end
-to-report aid-count report length aid.history end
-to-report harm-count report length harm.history end
+to-report help-from-count report length help.from.history end
+to-report attack-from-count report length attack.from.history end
 to-report copulations-count report length copulations.history end
+to-report unique-mates-count report length remove-duplicates copulations.history end
 to-report conceptions-count report length conceptions.history end
 to-report group-transfers-count report length group.transfers.history end
 
 to-report infanticide-count 
-  ; must remove individual infants who are still alive at the time of this individual's death
-  report length infanticide.history
+  let current-infanticide-history filter [ i -> any? anima1s with [ not is.alive and my.identity = i ] ] remove-duplicates infanticide.history   ; must remove individual infants who are still alive at the time of this individual's death ; only count ids from dead anima1s
+  report length current-infanticide-history
 end
 
 to-report gestation-duration report ifelse-value ( ticks.at.birth = 0 ) [ 0 ] [ ( ticks.at.birth - ticks.at.conception ) ] end
@@ -2215,15 +2359,15 @@ to-report lifetime-population-size report mean sublist population-size-record ( 
   
 to-report how-many-records report ceiling (( ticks.at.death - ticks.at.conception ) / record-tick-interval ) end
   
-  ;--------------------------------------------------------------------------------------------------------------------
+;--------------------------------------------------------------------------------------------------------------------
 ; OBSERVER FUNCTIONS
 ;--------------------------------------------------------------------------------------------------------------------
   
-to-report living-agents report anima1s with [ is.alive and generation.number > 0 ] end
+to-report living-agents report anima1s with [ is.alive ] end
 to-report decayed-agents report anima1s with [ fully.decayed and generation.number > 0 ] end
   
 to-report plant-patchiness
-  let patch-diameter 5
+  let patch-diameter 2 * maximum-visual-range          ; Patch size is set to visual diameter
   let patch-list []
   
   let i 0
@@ -2266,40 +2410,56 @@ to-report number-of-lactating-females report count anima1s with [ is.alive and f
 to-report number-of-fully-alive-agents report count anima1s with [ is.alive ] end
 to-report number-of-decaying-agents report count anima1s with [ is.alive = false and fully.decayed = false ] end
 to-report number-of-fully-decayed-agents report count anima1s with [ fully.decayed ] end
-to-report number-of-groups report length remove-duplicates [ group.identity ] of anima1s end
+to-report number-of-groups report length remove-duplicates [ group.identity ] of anima1s with [ is.alive and count anima1s with [ is.alive and group.identity = [group.identity] of myself ] > 1 ] end
 
   ; simulation parameters and settings
 to-report end-date-and-time report date-and-time end
 to-report simulation-duration-seconds report timer end
 to-report simulation-duration-ticks report ticks end
 to-report population-went-extinct report ifelse-value ( not any? anima1s with [ is.alive ] ) [ true ] [ false ] end
-to-report ticks-at-extinction report ifelse-value ( any? anima1s ) [ ifelse-value ( any? anima1z ) [ ticks ] [ max [ ticks.at.death ] of anima1s ]] [ 0 ] end
+to-report ticks-at-extinction report ifelse-value ( any? anima1s ) [ ifelse-value ( any? living-agents ) [ "NA" ] [ max [ ticks.at.death ] of anima1s ]] [ "NA" ] end
   
   ; model validation and verification
 to-report verification-true-count report length filter [ i -> i = true ] verification-results end
 to-report verification-false-count report length filter [ i -> i = false ] verification-results end
 to-report verification-percent-true report ifelse-value ( verification-true-count + verification-false-count = 0 ) [ "NA" ] [ verification-true-count / ( verification-true-count + verification-false-count ) ] end
   
-to-report group-sizes report map [ i -> count living-agents with [ group.identity = i ]] remove-duplicates [group.identity] of living-agents end
-to-report group-size-minimum report ifelse-value ( length group-sizes < 1 ) [ "NA" ] [ min group-sizes ] end
-to-report group-size-maximum report ifelse-value ( length group-sizes < 1 ) [ "NA" ] [ max group-sizes ]  end
-to-report group-size-mean report ifelse-value ( length group-sizes < 1 ) [ "NA" ] [ mean group-sizes ]  end
-to-report group-size-median report ifelse-value ( length group-sizes < 1 ) [ "NA" ] [ median group-sizes ] end
-to-report group-size-variance report ifelse-value ( length group-sizes < 2 ) [ "NA" ] [ variance group-sizes ]  end
-
-to-report adult-males-who-disperse-count report count decayed-agents with [ biological.sex = "male" and life.history = "adult" and length group.transfers.history > 0 ] end
-to-report adult-males-who-not-disperse-count report count decayed-agents with [ biological.sex = "male" and life.history = "adult" and length group.transfers.history = 0 ] end
+to-report group-sizes report filter [ j -> j > 1 ] map [ i -> count living-agents with [ group.identity = i ]] remove-duplicates [group.identity] of living-agents end
+to-report total-group-size-minimum report ifelse-value ( length group-sizes < 1 ) [ "NA" ] [ min group-sizes ] end
+to-report total-group-size-maximum report ifelse-value ( length group-sizes < 1 ) [ "NA" ] [ max group-sizes ]  end
+to-report total-group-size-mean report ifelse-value ( length group-sizes < 1 ) [ "NA" ] [ mean group-sizes ]  end
+to-report total-group-size-median report ifelse-value ( length group-sizes < 1 ) [ "NA" ] [ median group-sizes ] end
+to-report total-group-size-variance report ifelse-value ( length group-sizes < 2 ) [ "NA" ] [ variance group-sizes ]  end
+  
+to-report group-distance-list report [ distancexy (mean [xcor] of living-agents with [ group.identity = [group.identity] of myself ]) (mean [ycor] of living-agents with [ group.identity = [group.identity] of myself ]) ] of living-agents end
+to-report groups-distance-to-centroid-minimum report ifelse-value ( length group-distance-list < 1 ) [ "NA" ] [ min group-distance-list ] end
+to-report groups-distance-to-centroid-maximum report ifelse-value ( length group-distance-list < 1 ) [ "NA" ] [ max group-distance-list ] end 
+to-report groups-distance-to-centroid-mean report ifelse-value ( length group-distance-list < 1 ) [ "NA" ] [ mean group-distance-list ] end
+to-report groups-distance-to-centroid-median report ifelse-value ( length group-distance-list < 1 ) [ "NA" ] [ median group-distance-list ] end
+to-report groups-distance-to-centroid-variance report ifelse-value ( length group-distance-list < 2 ) [ "NA" ] [ variance group-distance-list ] end
+  
+to-report adult-group-sizes report filter [ j -> j > 1 ] map [ i -> count living-agents with [ group.identity = i and life.history = "adult" ]] remove-duplicates [group.identity] of living-agents end
+to-report adult-group-size-minimum report ifelse-value ( length adult-group-sizes < 1 ) [ "NA" ] [ min adult-group-sizes ] end
+to-report adult-group-size-maximum report ifelse-value ( length adult-group-sizes < 1 ) [ "NA" ] [ max adult-group-sizes ]  end
+to-report adult-group-size-mean report ifelse-value ( length adult-group-sizes < 1 ) [ "NA" ] [ mean adult-group-sizes ]  end
+to-report adult-group-size-median report ifelse-value ( length adult-group-sizes < 1 ) [ "NA" ] [ median adult-group-sizes ] end
+to-report adult-group-size-variance report ifelse-value ( length adult-group-sizes < 2 ) [ "NA" ] [ variance adult-group-sizes ]  end
+  
+to-report adult-males-who-disperse-count report count decayed-agents with [ biological.sex = "male" and life.history = "adult" and length group.transfers.history > 0 and death.group.identity != natal.group.identity ] end
+to-report adult-males-who-not-disperse-count report count decayed-agents with [ biological.sex = "male" and life.history = "adult" ] -  adult-males-who-disperse-count end
 to-report adult-males-percent-disperse report ( adult-males-who-disperse-count / ( adult-males-who-disperse-count + adult-males-who-not-disperse-count + 0.0000000001 ) ) end
-to-report adult-females-who-disperse-count report count decayed-agents with [ biological.sex = "female" and life.history = "adult" and length group.transfers.history > 0 ] end
-to-report adult-females-who-not-disperse-count report count decayed-agents with [ biological.sex = "female" and life.history = "adult" and length group.transfers.history = 0 ] end
+to-report adult-females-who-disperse-count report count decayed-agents with [ biological.sex = "female" and life.history = "adult" and length group.transfers.history > 0 and death.group.identity != natal.group.identity ] end
+to-report adult-females-who-not-disperse-count report count decayed-agents with [ biological.sex = "female" and life.history = "adult" ] - adult-females-who-disperse-count end
 to-report adult-females-percent-disperse report ( adult-females-who-disperse-count / ( adult-females-who-disperse-count + adult-females-who-not-disperse-count + 0.0000000001 ) ) end
   
-to-report adult-males-multiple-mates-count report count decayed-agents with [ biological.sex = "male" and life.history = "adult" and length copulations.history > 1 ] end
-to-report adult-males-not-multiple-mates-count report count decayed-agents with [ biological.sex = "male" and life.history = "adult" and length copulations.history <= 1 ] end
-to-report adult-males-percent-multiple-mates report ( adult-males-multiple-mates-count / ( adult-males-multiple-mates-count + adult-males-not-multiple-mates-count  + 0.0000000001 ) ) end
-to-report adult-females-multiple-mates-count report count decayed-agents with [ biological.sex = "female" and life.history = "adult" and length copulations.history > 1 ] end
-to-report adult-females-not-multiple-mates-count report count decayed-agents with [ biological.sex = "female" and life.history = "adult" and length copulations.history <= 1 ] end
-to-report adult-females-percent-multiple-mates report ( adult-females-multiple-mates-count / ( adult-females-multiple-mates-count + adult-females-not-multiple-mates-count + 0.0000000001 ) ) end
+to-report adult-males-multiple-mates-count report count decayed-agents with [ biological.sex = "male" and life.history = "adult" and length remove-duplicates copulations.history > 1 ] end
+to-report adult-males-single-mate-count report count decayed-agents with [ biological.sex = "male" and life.history = "adult" and length remove-duplicates copulations.history = 1 ] end
+to-report adult-males-no-mates-count report count decayed-agents with [ biological.sex = "male" and life.history = "adult" and length remove-duplicates copulations.history = 0 ] end
+to-report adult-males-percent-multiple-mates report ( adult-males-multiple-mates-count / ( adult-males-multiple-mates-count + adult-males-single-mate-count + adult-males-no-mates-count + 0.0000000001 ) ) end
+to-report adult-females-multiple-mates-count report count decayed-agents with [ biological.sex = "female" and life.history = "adult" and length remove-duplicates copulations.history > 1 ] end
+to-report adult-females-single-mate-count report count decayed-agents with [ biological.sex = "female" and life.history = "adult" and length remove-duplicates copulations.history = 1 ] end
+to-report adult-females-no-mates-count report count decayed-agents with [ biological.sex = "female" and life.history = "adult" and length remove-duplicates copulations.history = 0 ] end
+to-report adult-females-percent-multiple-mates report ( adult-females-multiple-mates-count / ( adult-females-multiple-mates-count + adult-females-single-mate-count + adult-females-no-mates-count + 0.0000000001 ) ) end
 
 ; emergent plant properties
 to-report plant-abundance-maximum report ifelse-value ( length plant-abundance-record > 0 ) [ max plant-abundance-record ] [ "NA" ] end
@@ -2312,8 +2472,7 @@ to-report plant-patchiness-mean report ifelse-value ( length plant-patchiness-re
 to-report plant-patchiness-variance report ifelse-value ( length plant-patchiness-record > 1 ) [ variance plant-patchiness-record ] [ "NA" ] end
   
   ; population level
-to-report generations-transpired report ifelse-value ( any? decayed-agents ) [ max [generation.number] of decayed-agents ] [ "NA" ] end 
-to-report total-simulated-individuals report ifelse-value ( any? decayed-agents ) [ count decayed-agents ] [ "NA" ] end
+to-report total-simulated-individuals report ifelse-value ( any? decayed-agents ) [ count decayed-agents ] [ "NA" ] end  
 to-report total-simulated-males report ifelse-value ( any? decayed-agents ) [ count decayed-agents with [ biological.sex = "male" ] ] [ "NA" ] end 
 to-report total-simulated-females report ifelse-value ( any? decayed-agents ) [ count decayed-agents with [ biological.sex = "female" ] ] [ "NA" ] end 
 to-report total-simulated-adults report ifelse-value ( any? decayed-agents ) [ count decayed-agents with [ life.history = "adult" ] ] [ "NA" ] end 
@@ -2541,19 +2700,19 @@ to-report natal-group-size-minimum report ifelse-value ( length natal-group-size
 to-report natal-group-size-mean report ifelse-value ( length natal-group-size-list < 1 ) [ "NA" ] [ mean natal-group-size-list ]  end
 to-report natal-group-size-variance report ifelse-value ( length natal-group-size-list < 2 ) [ "NA" ] [ variance natal-group-size-list ] end
   
-to-report death-group-size-list report [ death.group.size ] of decayed-agents end
+to-report death-group-size-list report [ death.group.size ] of decayed-agents with [ death.group.size > 1 ] end
 to-report death-group-size-maximum report ifelse-value ( length death-group-size-list < 1 ) [ "NA" ] [ max death-group-size-list ]  end
 to-report death-group-size-minimum report ifelse-value ( length death-group-size-list < 1 ) [ "NA" ] [ min death-group-size-list ]  end
 to-report death-group-size-mean report ifelse-value ( length death-group-size-list < 1 ) [ "NA" ] [ mean death-group-size-list ]  end
 to-report death-group-size-variance report ifelse-value ( length death-group-size-list < 2 ) [ "NA" ] [ variance death-group-size-list ] end
   
-to-report male-lifetime-distance-traveled-list report [ distance.traveled ] of decayed-agents with [ biological.sex = "male" ] end
+to-report male-lifetime-distance-traveled-list report [ distance.traveled ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
 to-report male-lifetime-distance-traveled-maximum report ifelse-value ( length male-lifetime-distance-traveled-list < 1 ) [ "NA" ] [ max male-lifetime-distance-traveled-list ] end
 to-report male-lifetime-distance-traveled-minimum report ifelse-value ( length male-lifetime-distance-traveled-list < 1 ) [ "NA" ] [ min male-lifetime-distance-traveled-list ] end
 to-report male-lifetime-distance-traveled-mean report ifelse-value ( length male-lifetime-distance-traveled-list < 1 ) [ "NA" ] [ mean male-lifetime-distance-traveled-list ] end
 to-report male-lifetime-distance-traveled-variance report ifelse-value ( length male-lifetime-distance-traveled-list < 2 ) [ "NA" ] [ variance male-lifetime-distance-traveled-list ] end
   
-to-report female-lifetime-distance-traveled-list report [ distance.traveled ] of decayed-agents with [ biological.sex = "female" ] end
+to-report female-lifetime-distance-traveled-list report [ distance.traveled ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
 to-report female-lifetime-distance-traveled-maximum report ifelse-value ( length female-lifetime-distance-traveled-list < 1 ) [ "NA" ] [ max female-lifetime-distance-traveled-list ] end
 to-report female-lifetime-distance-traveled-minimum report ifelse-value ( length female-lifetime-distance-traveled-list < 1 ) [ "NA" ] [ min female-lifetime-distance-traveled-list ] end
 to-report female-lifetime-distance-traveled-mean report ifelse-value ( length female-lifetime-distance-traveled-list < 1 ) [ "NA" ] [ mean female-lifetime-distance-traveled-list ] end
@@ -2561,235 +2720,275 @@ to-report female-lifetime-distance-traveled-variance report ifelse-value ( lengt
   
 to-report mother-initiated-birth-count report count decayed-agents with [ mother.initiated.birth ] end
 to-report offspring-initiated-birth-count report count decayed-agents with [ not mother.initiated.birth ] end
+to-report mother-initiated-birth-percent report mother-initiated-birth-count / ( mother-initiated-birth-count + offspring-initiated-birth-count + 0.0000000001 ) end
 to-report mother-initiated-weaning-count report count decayed-agents with [ mother.initiated.weaning ] end
 to-report offspring-initiated-weaning-count report count decayed-agents with [ not mother.initiated.weaning ] end
+to-report mother-initiated-weaning-percent report mother-initiated-weaning-count / ( mother-initiated-weaning-count + offspring-initiated-weaning-count + 0.0000000001 ) end
   
 to-report male-lifetime-foraging-gains-list report [ foraging.gains ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
 to-report male-lifetime-foraging-gains-maximum report ifelse-value ( length male-lifetime-foraging-gains-list < 1 ) [ "NA" ] [ max male-lifetime-foraging-gains-list ] end  
 to-report male-lifetime-foraging-gains-minimum report ifelse-value ( length male-lifetime-foraging-gains-list < 1 ) [ "NA" ] [ min male-lifetime-foraging-gains-list ] end
 to-report male-lifetime-foraging-gains-mean report ifelse-value ( length male-lifetime-foraging-gains-list < 1 ) [ "NA" ] [ mean male-lifetime-foraging-gains-list ] end
 to-report male-lifetime-foraging-gains-variance report ifelse-value ( length male-lifetime-foraging-gains-list < 2 ) [ "NA" ] [ variance male-lifetime-foraging-gains-list ] end
-  
+to-report total-population-male-lifetime-foraging-gains report sum male-lifetime-foraging-gains-list end
+    
 to-report female-lifetime-foraging-gains-list report [ foraging.gains ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
 to-report female-lifetime-foraging-gains-maximum report ifelse-value ( length female-lifetime-foraging-gains-list < 1 ) [ "NA" ] [ max female-lifetime-foraging-gains-list ] end
 to-report female-lifetime-foraging-gains-minimum report ifelse-value ( length female-lifetime-foraging-gains-list < 1 ) [ "NA" ] [ min female-lifetime-foraging-gains-list ] end
 to-report female-lifetime-foraging-gains-mean report ifelse-value ( length female-lifetime-foraging-gains-list < 1 ) [ "NA" ] [ mean female-lifetime-foraging-gains-list ] end
 to-report female-lifetime-foraging-gains-variance report ifelse-value ( length female-lifetime-foraging-gains-list < 2 ) [ "NA" ] [ variance female-lifetime-foraging-gains-list ] end
+to-report total-population-female-lifetime-foraging-gains report sum female-lifetime-foraging-gains-list end
   
 to-report male-lifetime-energy-gains-list report [ total.energy.gains ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
 to-report male-lifetime-energy-gains-maximum report ifelse-value ( length male-lifetime-energy-gains-list < 1 ) [ "NA" ] [ max male-lifetime-energy-gains-list ] end  
 to-report male-lifetime-energy-gains-minimum report ifelse-value ( length male-lifetime-energy-gains-list < 1 ) [ "NA" ] [ min male-lifetime-energy-gains-list ] end
 to-report male-lifetime-energy-gains-mean report ifelse-value ( length male-lifetime-energy-gains-list < 1 ) [ "NA" ] [ mean male-lifetime-energy-gains-list ] end
 to-report male-lifetime-energy-gains-variance report ifelse-value ( length male-lifetime-energy-gains-list < 2 ) [ "NA" ] [ variance male-lifetime-energy-gains-list ] end
-  
+to-report total-population-male-lifetime-energy-gains report sum male-lifetime-energy-gains-list end
+      
 to-report female-lifetime-energy-gains-list report [ total.energy.gains ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
 to-report female-lifetime-energy-gains-maximum report ifelse-value ( length female-lifetime-energy-gains-list < 1 ) [ "NA" ] [ max female-lifetime-energy-gains-list ] end
 to-report female-lifetime-energy-gains-minimum report ifelse-value ( length female-lifetime-energy-gains-list < 1 ) [ "NA" ] [ min female-lifetime-energy-gains-list ] end
 to-report female-lifetime-energy-gains-mean report ifelse-value ( length female-lifetime-energy-gains-list < 1 ) [ "NA" ] [ mean female-lifetime-energy-gains-list ] end
 to-report female-lifetime-energy-gains-variance report ifelse-value ( length female-lifetime-energy-gains-list < 2 ) [ "NA" ] [ variance female-lifetime-energy-gains-list ] end
-  
+to-report total-population-female-lifetime-energy-gains report sum female-lifetime-energy-gains-list end
+      
 to-report male-lifetime-energy-cost-list report [ total.energy.cost ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
 to-report male-lifetime-energy-cost-maximum report ifelse-value ( length male-lifetime-energy-cost-list < 1 ) [ "NA" ] [ max male-lifetime-energy-cost-list ] end  
 to-report male-lifetime-energy-cost-minimum report ifelse-value ( length male-lifetime-energy-cost-list < 1 ) [ "NA" ] [ min male-lifetime-energy-cost-list ] end
 to-report male-lifetime-energy-cost-mean report ifelse-value ( length male-lifetime-energy-cost-list < 1 ) [ "NA" ] [ mean male-lifetime-energy-cost-list ] end
 to-report male-lifetime-energy-cost-variance report ifelse-value ( length male-lifetime-energy-cost-list < 2 ) [ "NA" ] [ variance male-lifetime-energy-cost-list ] end
-  
+to-report total-population-male-lifetime-energy-cost report sum male-lifetime-energy-cost-list end
+      
 to-report female-lifetime-energy-cost-list report [ total.energy.cost ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
 to-report female-lifetime-energy-cost-maximum report ifelse-value ( length female-lifetime-energy-cost-list < 1 ) [ "NA" ] [ max female-lifetime-energy-cost-list ] end
 to-report female-lifetime-energy-cost-minimum report ifelse-value ( length female-lifetime-energy-cost-list < 1 ) [ "NA" ] [ min female-lifetime-energy-cost-list ] end
 to-report female-lifetime-energy-cost-mean report ifelse-value ( length female-lifetime-energy-cost-list < 1 ) [ "NA" ] [ mean female-lifetime-energy-cost-list ] end
 to-report female-lifetime-energy-cost-variance report ifelse-value ( length female-lifetime-energy-cost-list < 2 ) [ "NA" ] [ variance female-lifetime-energy-cost-list ] end
-  
+to-report total-population-female-lifetime-energy-cost report sum female-lifetime-energy-cost-list end
+      
 to-report male-lifetime-whole-related-help-cost-list report [ whole.related.help.cost ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
 to-report male-lifetime-whole-related-help-cost-maximum report ifelse-value ( length male-lifetime-whole-related-help-cost-list < 1 ) [ "NA" ] [ max male-lifetime-whole-related-help-cost-list ] end
 to-report male-lifetime-whole-related-help-cost-minimum report ifelse-value ( length male-lifetime-whole-related-help-cost-list < 1 ) [ "NA" ] [ min male-lifetime-whole-related-help-cost-list ] end
 to-report male-lifetime-whole-related-help-cost-mean report ifelse-value ( length male-lifetime-whole-related-help-cost-list < 1 ) [ "NA" ] [ mean male-lifetime-whole-related-help-cost-list ] end
 to-report male-lifetime-whole-related-help-cost-variance report ifelse-value ( length male-lifetime-whole-related-help-cost-list < 2 ) [ "NA" ] [ variance male-lifetime-whole-related-help-cost-list ] end
+to-report total-population-male-lifetime-whole-related-help-cost report sum male-lifetime-whole-related-help-cost-list end
   
 to-report female-lifetime-whole-related-help-cost-list report [ whole.related.help.cost ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
 to-report female-lifetime-whole-related-help-cost-maximum report ifelse-value ( length female-lifetime-whole-related-help-cost-list < 1 ) [ "NA" ] [ max female-lifetime-whole-related-help-cost-list ] end
 to-report female-lifetime-whole-related-help-cost-minimum report ifelse-value ( length female-lifetime-whole-related-help-cost-list < 1 ) [ "NA" ] [ min female-lifetime-whole-related-help-cost-list ] end
 to-report female-lifetime-whole-related-help-cost-mean report ifelse-value ( length female-lifetime-whole-related-help-cost-list < 1 ) [ "NA" ] [ mean female-lifetime-whole-related-help-cost-list ] end
 to-report female-lifetime-whole-related-help-cost-variance report ifelse-value ( length female-lifetime-whole-related-help-cost-list < 2 ) [ "NA" ] [ variance female-lifetime-whole-related-help-cost-list ] end
+to-report total-population-female-lifetime-whole-related-help-cost report sum female-lifetime-whole-related-help-cost-list end
   
 to-report male-lifetime-half-related-help-cost-list report [ half.related.help.cost ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
 to-report male-lifetime-half-related-help-cost-maximum report ifelse-value ( length male-lifetime-half-related-help-cost-list < 1 ) [ "NA" ] [ max male-lifetime-half-related-help-cost-list ] end
 to-report male-lifetime-half-related-help-cost-minimum report ifelse-value ( length male-lifetime-half-related-help-cost-list < 1 ) [ "NA" ] [ min male-lifetime-half-related-help-cost-list ] end
 to-report male-lifetime-half-related-help-cost-mean report ifelse-value ( length male-lifetime-half-related-help-cost-list < 1 ) [ "NA" ] [ mean male-lifetime-half-related-help-cost-list ] end
 to-report male-lifetime-half-related-help-cost-variance report ifelse-value ( length male-lifetime-half-related-help-cost-list < 2 ) [ "NA" ] [ variance male-lifetime-half-related-help-cost-list ] end
+to-report total-population-male-lifetime-half-related-help-cost report sum male-lifetime-half-related-help-cost-list end
   
 to-report female-lifetime-half-related-help-cost-list report [ half.related.help.cost ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
 to-report female-lifetime-half-related-help-cost-maximum report ifelse-value ( length female-lifetime-half-related-help-cost-list < 1 ) [ "NA" ] [ max female-lifetime-half-related-help-cost-list ] end
 to-report female-lifetime-half-related-help-cost-minimum report ifelse-value ( length female-lifetime-half-related-help-cost-list < 1 ) [ "NA" ] [ min female-lifetime-half-related-help-cost-list ] end
 to-report female-lifetime-half-related-help-cost-mean report ifelse-value ( length female-lifetime-half-related-help-cost-list < 1 ) [ "NA" ] [ mean female-lifetime-half-related-help-cost-list ] end
 to-report female-lifetime-half-related-help-cost-variance report ifelse-value ( length female-lifetime-half-related-help-cost-list < 2 ) [ "NA" ] [ variance female-lifetime-half-related-help-cost-list ] end
+to-report total-population-female-lifetime-half-related-help-cost report sum female-lifetime-half-related-help-cost-list end
   
 to-report male-lifetime-fourth-related-help-cost-list report [ fourth.related.help.cost ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
 to-report male-lifetime-fourth-related-help-cost-maximum report ifelse-value ( length male-lifetime-fourth-related-help-cost-list < 1 ) [ "NA" ] [ max male-lifetime-fourth-related-help-cost-list ] end
 to-report male-lifetime-fourth-related-help-cost-minimum report ifelse-value ( length male-lifetime-fourth-related-help-cost-list < 1 ) [ "NA" ] [ min male-lifetime-fourth-related-help-cost-list ] end
 to-report male-lifetime-fourth-related-help-cost-mean report ifelse-value ( length male-lifetime-fourth-related-help-cost-list < 1 ) [ "NA" ] [ mean male-lifetime-fourth-related-help-cost-list ] end
 to-report male-lifetime-fourth-related-help-cost-variance report ifelse-value ( length male-lifetime-fourth-related-help-cost-list < 2 ) [ "NA" ] [ variance male-lifetime-fourth-related-help-cost-list ] end
+to-report total-population-male-lifetime-fourth-related-help-cost report sum male-lifetime-fourth-related-help-cost-list end
   
 to-report female-lifetime-fourth-related-help-cost-list report [ fourth.related.help.cost ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
 to-report female-lifetime-fourth-related-help-cost-maximum report ifelse-value ( length female-lifetime-fourth-related-help-cost-list < 1 ) [ "NA" ] [ max female-lifetime-fourth-related-help-cost-list ] end
 to-report female-lifetime-fourth-related-help-cost-minimum report ifelse-value ( length female-lifetime-fourth-related-help-cost-list < 1 ) [ "NA" ] [ min female-lifetime-fourth-related-help-cost-list ] end
 to-report female-lifetime-fourth-related-help-cost-mean report ifelse-value ( length female-lifetime-fourth-related-help-cost-list < 1 ) [ "NA" ] [ mean female-lifetime-fourth-related-help-cost-list ] end
 to-report female-lifetime-fourth-related-help-cost-variance report ifelse-value ( length female-lifetime-fourth-related-help-cost-list < 2 ) [ "NA" ] [ variance female-lifetime-fourth-related-help-cost-list ] end
+to-report total-population-female-lifetime-fourth-related-help-cost report sum female-lifetime-fourth-related-help-cost-list end
   
 to-report male-lifetime-eighth-related-help-cost-list report [ eighth.related.help.cost ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
 to-report male-lifetime-eighth-related-help-cost-maximum report ifelse-value ( length male-lifetime-eighth-related-help-cost-list < 1 ) [ "NA" ] [ max male-lifetime-eighth-related-help-cost-list ] end
 to-report male-lifetime-eighth-related-help-cost-minimum report ifelse-value ( length male-lifetime-eighth-related-help-cost-list < 1 ) [ "NA" ] [ min male-lifetime-eighth-related-help-cost-list ] end
 to-report male-lifetime-eighth-related-help-cost-mean report ifelse-value ( length male-lifetime-eighth-related-help-cost-list < 1 ) [ "NA" ] [ mean male-lifetime-eighth-related-help-cost-list ] end
 to-report male-lifetime-eighth-related-help-cost-variance report ifelse-value ( length male-lifetime-eighth-related-help-cost-list < 2 ) [ "NA" ] [ variance male-lifetime-eighth-related-help-cost-list ] end
+to-report total-population-male-lifetime-eighth-related-help-cost report sum male-lifetime-eighth-related-help-cost-list end
   
 to-report female-lifetime-eighth-related-help-cost-list report [ eighth.related.help.cost ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
 to-report female-lifetime-eighth-related-help-cost-maximum report ifelse-value ( length female-lifetime-eighth-related-help-cost-list < 1 ) [ "NA" ] [ max female-lifetime-eighth-related-help-cost-list ] end
 to-report female-lifetime-eighth-related-help-cost-minimum report ifelse-value ( length female-lifetime-eighth-related-help-cost-list < 1 ) [ "NA" ] [ min female-lifetime-eighth-related-help-cost-list ] end
 to-report female-lifetime-eighth-related-help-cost-mean report ifelse-value ( length female-lifetime-eighth-related-help-cost-list < 1 ) [ "NA" ] [ mean female-lifetime-eighth-related-help-cost-list ] end
 to-report female-lifetime-eighth-related-help-cost-variance report ifelse-value ( length female-lifetime-eighth-related-help-cost-list < 2 ) [ "NA" ] [ variance female-lifetime-eighth-related-help-cost-list ] end
+to-report total-population-female-lifetime-eighth-related-help-cost report sum female-lifetime-eighth-related-help-cost-list end
   
 to-report male-lifetime-not-related-help-cost-list report [ not.related.help.cost ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
 to-report male-lifetime-not-related-help-cost-maximum report ifelse-value ( length male-lifetime-not-related-help-cost-list < 1 ) [ "NA" ] [ max male-lifetime-not-related-help-cost-list ] end
 to-report male-lifetime-not-related-help-cost-minimum report ifelse-value ( length male-lifetime-not-related-help-cost-list < 1 ) [ "NA" ] [ min male-lifetime-not-related-help-cost-list ] end
 to-report male-lifetime-not-related-help-cost-mean report ifelse-value ( length male-lifetime-not-related-help-cost-list < 1 ) [ "NA" ] [ mean male-lifetime-not-related-help-cost-list ] end
 to-report male-lifetime-not-related-help-cost-variance report ifelse-value ( length male-lifetime-not-related-help-cost-list < 2 ) [ "NA" ] [ variance male-lifetime-not-related-help-cost-list ] end
+to-report total-population-male-lifetime-not-related-help-cost report sum male-lifetime-not-related-help-cost-list end
   
 to-report female-lifetime-not-related-help-cost-list report [ not.related.help.cost ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
 to-report female-lifetime-not-related-help-cost-maximum report ifelse-value ( length female-lifetime-not-related-help-cost-list < 1 ) [ "NA" ] [ max female-lifetime-not-related-help-cost-list ] end
 to-report female-lifetime-not-related-help-cost-minimum report ifelse-value ( length female-lifetime-not-related-help-cost-list < 1 ) [ "NA" ] [ min female-lifetime-not-related-help-cost-list ] end
 to-report female-lifetime-not-related-help-cost-mean report ifelse-value ( length female-lifetime-not-related-help-cost-list < 1 ) [ "NA" ] [ mean female-lifetime-not-related-help-cost-list ] end
 to-report female-lifetime-not-related-help-cost-variance report ifelse-value ( length female-lifetime-not-related-help-cost-list < 2 ) [ "NA" ] [ variance female-lifetime-not-related-help-cost-list ] end
+to-report total-population-female-lifetime-not-related-help-cost report sum female-lifetime-not-related-help-cost-list end
   
 to-report male-lifetime-whole-related-attack-cost-list report [ whole.related.attack.cost ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
 to-report male-lifetime-whole-related-attack-cost-maximum report ifelse-value ( length male-lifetime-whole-related-attack-cost-list < 1 ) [ "NA" ] [ max male-lifetime-whole-related-attack-cost-list ] end
 to-report male-lifetime-whole-related-attack-cost-minimum report ifelse-value ( length male-lifetime-whole-related-attack-cost-list < 1 ) [ "NA" ] [ min male-lifetime-whole-related-attack-cost-list ] end
 to-report male-lifetime-whole-related-attack-cost-mean report ifelse-value ( length male-lifetime-whole-related-attack-cost-list < 1 ) [ "NA" ] [ mean male-lifetime-whole-related-attack-cost-list ] end
 to-report male-lifetime-whole-related-attack-cost-variance report ifelse-value ( length male-lifetime-whole-related-attack-cost-list < 2 ) [ "NA" ] [ variance male-lifetime-whole-related-attack-cost-list ] end
+to-report total-population-male-lifetime-whole-related-attack-cost report sum male-lifetime-whole-related-attack-cost-list end
   
 to-report female-lifetime-whole-related-attack-cost-list report [ whole.related.attack.cost ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
 to-report female-lifetime-whole-related-attack-cost-maximum report ifelse-value ( length female-lifetime-whole-related-attack-cost-list < 1 ) [ "NA" ] [ max female-lifetime-whole-related-attack-cost-list ] end
 to-report female-lifetime-whole-related-attack-cost-minimum report ifelse-value ( length female-lifetime-whole-related-attack-cost-list < 1 ) [ "NA" ] [ min female-lifetime-whole-related-attack-cost-list ] end
 to-report female-lifetime-whole-related-attack-cost-mean report ifelse-value ( length female-lifetime-whole-related-attack-cost-list < 1 ) [ "NA" ] [ mean female-lifetime-whole-related-attack-cost-list ] end
 to-report female-lifetime-whole-related-attack-cost-variance report ifelse-value ( length female-lifetime-whole-related-attack-cost-list < 2 ) [ "NA" ] [ variance female-lifetime-whole-related-attack-cost-list ] end
+to-report total-population-female-lifetime-whole-related-attack-cost report sum female-lifetime-whole-related-attack-cost-list end
   
 to-report male-lifetime-half-related-attack-cost-list report [ half.related.attack.cost ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
 to-report male-lifetime-half-related-attack-cost-maximum report ifelse-value ( length male-lifetime-half-related-attack-cost-list < 1 ) [ "NA" ] [ max male-lifetime-half-related-attack-cost-list ] end
 to-report male-lifetime-half-related-attack-cost-minimum report ifelse-value ( length male-lifetime-half-related-attack-cost-list < 1 ) [ "NA" ] [ min male-lifetime-half-related-attack-cost-list ] end
 to-report male-lifetime-half-related-attack-cost-mean report ifelse-value ( length male-lifetime-half-related-attack-cost-list < 1 ) [ "NA" ] [ mean male-lifetime-half-related-attack-cost-list ] end
 to-report male-lifetime-half-related-attack-cost-variance report ifelse-value ( length male-lifetime-half-related-attack-cost-list < 2 ) [ "NA" ] [ variance male-lifetime-half-related-attack-cost-list ] end
+to-report total-population-male-lifetime-half-related-attack-cost report sum male-lifetime-half-related-attack-cost-list end
   
 to-report female-lifetime-half-related-attack-cost-list report [ half.related.attack.cost ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
 to-report female-lifetime-half-related-attack-cost-maximum report ifelse-value ( length female-lifetime-half-related-attack-cost-list < 1 ) [ "NA" ] [ max female-lifetime-half-related-attack-cost-list ] end
 to-report female-lifetime-half-related-attack-cost-minimum report ifelse-value ( length female-lifetime-half-related-attack-cost-list < 1 ) [ "NA" ] [ min female-lifetime-half-related-attack-cost-list ] end
 to-report female-lifetime-half-related-attack-cost-mean report ifelse-value ( length female-lifetime-half-related-attack-cost-list < 1 ) [ "NA" ] [ mean female-lifetime-half-related-attack-cost-list ] end
 to-report female-lifetime-half-related-attack-cost-variance report ifelse-value ( length female-lifetime-half-related-attack-cost-list < 2 ) [ "NA" ] [ variance female-lifetime-half-related-attack-cost-list ] end
+to-report total-population-female-lifetime-half-related-attack-cost report sum female-lifetime-half-related-attack-cost-list end
   
 to-report male-lifetime-fourth-related-attack-cost-list report [ fourth.related.attack.cost ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
 to-report male-lifetime-fourth-related-attack-cost-maximum report ifelse-value ( length male-lifetime-fourth-related-attack-cost-list < 1 ) [ "NA" ] [ max male-lifetime-fourth-related-attack-cost-list ] end
 to-report male-lifetime-fourth-related-attack-cost-minimum report ifelse-value ( length male-lifetime-fourth-related-attack-cost-list < 1 ) [ "NA" ] [ min male-lifetime-fourth-related-attack-cost-list ] end
 to-report male-lifetime-fourth-related-attack-cost-mean report ifelse-value ( length male-lifetime-fourth-related-attack-cost-list < 1 ) [ "NA" ] [ mean male-lifetime-fourth-related-attack-cost-list ] end
 to-report male-lifetime-fourth-related-attack-cost-variance report ifelse-value ( length male-lifetime-fourth-related-attack-cost-list < 2 ) [ "NA" ] [ variance male-lifetime-fourth-related-attack-cost-list ] end
+to-report total-population-male-lifetime-fourth-related-attack-cost report sum male-lifetime-fourth-related-attack-cost-list end
   
 to-report female-lifetime-fourth-related-attack-cost-list report [ fourth.related.attack.cost ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
 to-report female-lifetime-fourth-related-attack-cost-maximum report ifelse-value ( length female-lifetime-fourth-related-attack-cost-list < 1 ) [ "NA" ] [ max female-lifetime-fourth-related-attack-cost-list ] end
 to-report female-lifetime-fourth-related-attack-cost-minimum report ifelse-value ( length female-lifetime-fourth-related-attack-cost-list < 1 ) [ "NA" ] [ min female-lifetime-fourth-related-attack-cost-list ] end
 to-report female-lifetime-fourth-related-attack-cost-mean report ifelse-value ( length female-lifetime-fourth-related-attack-cost-list < 1 ) [ "NA" ] [ mean female-lifetime-fourth-related-attack-cost-list ] end
 to-report female-lifetime-fourth-related-attack-cost-variance report ifelse-value ( length female-lifetime-fourth-related-attack-cost-list < 2 ) [ "NA" ] [ variance female-lifetime-fourth-related-attack-cost-list ] end
+to-report total-population-female-lifetime-fourth-related-attack-cost report sum female-lifetime-fourth-related-attack-cost-list end
   
 to-report male-lifetime-eighth-related-attack-cost-list report [ eighth.related.attack.cost ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
 to-report male-lifetime-eighth-related-attack-cost-maximum report ifelse-value ( length male-lifetime-eighth-related-attack-cost-list < 1 ) [ "NA" ] [ max male-lifetime-eighth-related-attack-cost-list ] end
 to-report male-lifetime-eighth-related-attack-cost-minimum report ifelse-value ( length male-lifetime-eighth-related-attack-cost-list < 1 ) [ "NA" ] [ min male-lifetime-eighth-related-attack-cost-list ] end
 to-report male-lifetime-eighth-related-attack-cost-mean report ifelse-value ( length male-lifetime-eighth-related-attack-cost-list < 1 ) [ "NA" ] [ mean male-lifetime-eighth-related-attack-cost-list ] end
 to-report male-lifetime-eighth-related-attack-cost-variance report ifelse-value ( length male-lifetime-eighth-related-attack-cost-list < 2 ) [ "NA" ] [ variance male-lifetime-eighth-related-attack-cost-list ] end
+to-report total-population-male-lifetime-eighth-related-attack-cost report sum male-lifetime-eighth-related-attack-cost-list end
   
 to-report female-lifetime-eighth-related-attack-cost-list report [ eighth.related.attack.cost ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
 to-report female-lifetime-eighth-related-attack-cost-maximum report ifelse-value ( length female-lifetime-eighth-related-attack-cost-list < 1 ) [ "NA" ] [ max female-lifetime-eighth-related-attack-cost-list ] end
 to-report female-lifetime-eighth-related-attack-cost-minimum report ifelse-value ( length female-lifetime-eighth-related-attack-cost-list < 1 ) [ "NA" ] [ min female-lifetime-eighth-related-attack-cost-list ] end
 to-report female-lifetime-eighth-related-attack-cost-mean report ifelse-value ( length female-lifetime-eighth-related-attack-cost-list < 1 ) [ "NA" ] [ mean female-lifetime-eighth-related-attack-cost-list ] end
 to-report female-lifetime-eighth-related-attack-cost-variance report ifelse-value ( length female-lifetime-eighth-related-attack-cost-list < 2 ) [ "NA" ] [ variance female-lifetime-eighth-related-attack-cost-list ] end
+to-report total-population-female-lifetime-eighth-related-attack-cost report sum female-lifetime-eighth-related-attack-cost-list end
   
 to-report male-lifetime-not-related-attack-cost-list report [ not.related.attack.cost ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
 to-report male-lifetime-not-related-attack-cost-maximum report ifelse-value ( length male-lifetime-not-related-attack-cost-list < 1 ) [ "NA" ] [ max male-lifetime-not-related-attack-cost-list ] end
 to-report male-lifetime-not-related-attack-cost-minimum report ifelse-value ( length male-lifetime-not-related-attack-cost-list < 1 ) [ "NA" ] [ min male-lifetime-not-related-attack-cost-list ] end
 to-report male-lifetime-not-related-attack-cost-mean report ifelse-value ( length male-lifetime-not-related-attack-cost-list < 1 ) [ "NA" ] [ mean male-lifetime-not-related-attack-cost-list ] end
 to-report male-lifetime-not-related-attack-cost-variance report ifelse-value ( length male-lifetime-not-related-attack-cost-list < 2 ) [ "NA" ] [ variance male-lifetime-not-related-attack-cost-list ] end
-  
+to-report total-population-male-lifetime-not-related-attack-cost report sum male-lifetime-not-related-attack-cost-list end
+        
 to-report female-lifetime-not-related-attack-cost-list report [ not.related.attack.cost ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
 to-report female-lifetime-not-related-attack-cost-maximum report ifelse-value ( length female-lifetime-not-related-attack-cost-list < 1 ) [ "NA" ] [ max female-lifetime-not-related-attack-cost-list ] end
 to-report female-lifetime-not-related-attack-cost-minimum report ifelse-value ( length female-lifetime-not-related-attack-cost-list < 1 ) [ "NA" ] [ min female-lifetime-not-related-attack-cost-list ] end
 to-report female-lifetime-not-related-attack-cost-mean report ifelse-value ( length female-lifetime-not-related-attack-cost-list < 1 ) [ "NA" ] [ mean female-lifetime-not-related-attack-cost-list ] end
 to-report female-lifetime-not-related-attack-cost-variance report ifelse-value ( length female-lifetime-not-related-attack-cost-list < 2 ) [ "NA" ] [ variance female-lifetime-not-related-attack-cost-list ] end
-  
-to-report male-total-aid-count-list report [ length aid.history ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
-to-report male-total-aid-count-maximum report ifelse-value ( length male-total-aid-count-list < 1 ) [ "NA" ] [ max male-total-aid-count-list ] end
-to-report male-total-aid-count-minimum report ifelse-value ( length male-total-aid-count-list < 1 ) [ "NA" ] [ min male-total-aid-count-list ] end
-to-report male-total-aid-count-mean report ifelse-value ( length male-total-aid-count-list < 1 ) [ "NA" ] [ mean male-total-aid-count-list ] end
-to-report male-total-aid-count-variance report ifelse-value ( length male-total-aid-count-list < 2 ) [ "NA" ] [ variance male-total-aid-count-list ] end
-  
-to-report female-total-aid-count-list report [ length aid.history ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
-to-report female-total-aid-count-maximum report ifelse-value ( length female-total-aid-count-list < 1 ) [ "NA" ] [ max female-total-aid-count-list ] end
-to-report female-total-aid-count-minimum report ifelse-value ( length female-total-aid-count-list < 1 ) [ "NA" ] [ min female-total-aid-count-list ] end
-to-report female-total-aid-count-mean report ifelse-value ( length female-total-aid-count-list < 1 ) [ "NA" ] [ mean female-total-aid-count-list ] end
-to-report female-total-aid-count-variance report ifelse-value ( length female-total-aid-count-list < 2 ) [ "NA" ] [ variance female-total-aid-count-list ] end
-  
-to-report male-total-harm-count-list report [ length harm.history ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ]  end
-to-report male-total-harm-count-maximum report ifelse-value ( length male-total-harm-count-list < 1 ) [ "NA" ] [ max male-total-harm-count-list ] end
-to-report male-total-harm-count-minimum report ifelse-value ( length male-total-harm-count-list < 1 ) [ "NA" ] [ min male-total-harm-count-list ] end
-to-report male-total-harm-count-mean report ifelse-value ( length male-total-harm-count-list < 1 ) [ "NA" ] [ mean male-total-harm-count-list ] end
-to-report male-total-harm-count-variance report ifelse-value ( length male-total-harm-count-list < 2 ) [ "NA" ] [ variance male-total-harm-count-list ] end
-  
-to-report female-total-harm-count-list report [ length harm.history ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
-to-report female-total-harm-count-maximum report ifelse-value ( length female-total-harm-count-list < 1 ) [ "NA" ] [ max female-total-harm-count-list ] end
-to-report female-total-harm-count-minimum report ifelse-value ( length female-total-harm-count-list < 1 ) [ "NA" ] [ min female-total-harm-count-list ] end
-to-report female-total-harm-count-mean report ifelse-value ( length female-total-harm-count-list < 1 ) [ "NA" ] [ mean female-total-harm-count-list ] end
-to-report female-total-harm-count-variance report ifelse-value ( length female-total-harm-count-list < 2 ) [ "NA" ] [ variance female-total-harm-count-list ] end
+to-report total-population-female-lifetime-not-related-attack-cost report sum female-lifetime-not-related-attack-cost-list end
+        
+to-report male-total-help-from-count-list report [ length help.from.history ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
+to-report male-total-help-from-count-maximum report ifelse-value ( length male-total-help-from-count-list < 1 ) [ "NA" ] [ max male-total-help-from-count-list ] end
+to-report male-total-help-from-count-minimum report ifelse-value ( length male-total-help-from-count-list < 1 ) [ "NA" ] [ min male-total-help-from-count-list ] end
+to-report male-total-help-from-count-mean report ifelse-value ( length male-total-help-from-count-list < 1 ) [ "NA" ] [ mean male-total-help-from-count-list ] end
+to-report male-total-help-from-count-variance report ifelse-value ( length male-total-help-from-count-list < 2 ) [ "NA" ] [ variance male-total-help-from-count-list ] end
+to-report total-population-male-total-help-from-count report sum male-total-help-from-count-list end
+        
+to-report female-total-help-from-count-list report [ length help.from.history ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
+to-report female-total-help-from-count-maximum report ifelse-value ( length female-total-help-from-count-list < 1 ) [ "NA" ] [ max female-total-help-from-count-list ] end
+to-report female-total-help-from-count-minimum report ifelse-value ( length female-total-help-from-count-list < 1 ) [ "NA" ] [ min female-total-help-from-count-list ] end
+to-report female-total-help-from-count-mean report ifelse-value ( length female-total-help-from-count-list < 1 ) [ "NA" ] [ mean female-total-help-from-count-list ] end
+to-report female-total-help-from-count-variance report ifelse-value ( length female-total-help-from-count-list < 2 ) [ "NA" ] [ variance female-total-help-from-count-list ] end
+to-report total-population-female-total-help-from-count report sum female-total-help-from-count-list end
+        
+to-report male-total-attack-from-count-list report [ length attack.from.history ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ]  end
+to-report male-total-attack-from-count-maximum report ifelse-value ( length male-total-attack-from-count-list < 1 ) [ "NA" ] [ max male-total-attack-from-count-list ] end
+to-report male-total-attack-from-count-minimum report ifelse-value ( length male-total-attack-from-count-list < 1 ) [ "NA" ] [ min male-total-attack-from-count-list ] end
+to-report male-total-attack-from-count-mean report ifelse-value ( length male-total-attack-from-count-list < 1 ) [ "NA" ] [ mean male-total-attack-from-count-list ] end
+to-report male-total-attack-from-count-variance report ifelse-value ( length male-total-attack-from-count-list < 2 ) [ "NA" ] [ variance male-total-attack-from-count-list ] end
+to-report total-population-male-total-attack-from-count report sum male-total-attack-from-count-list end
+        
+to-report female-total-attack-from-count-list report [ length attack.from.history ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
+to-report female-total-attack-from-count-maximum report ifelse-value ( length female-total-attack-from-count-list < 1 ) [ "NA" ] [ max female-total-attack-from-count-list ] end
+to-report female-total-attack-from-count-minimum report ifelse-value ( length female-total-attack-from-count-list < 1 ) [ "NA" ] [ min female-total-attack-from-count-list ] end
+to-report female-total-attack-from-count-mean report ifelse-value ( length female-total-attack-from-count-list < 1 ) [ "NA" ] [ mean female-total-attack-from-count-list ] end
+to-report female-total-attack-from-count-variance report ifelse-value ( length female-total-attack-from-count-list < 2 ) [ "NA" ] [ variance female-total-attack-from-count-list ] end
+to-report total-population-female-total-attack-from-count report sum female-total-attack-from-count-list end
   
 to-report male-total-matings-list report [ length copulations.history ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
 to-report male-total-matings-maximum report ifelse-value ( length male-total-matings-list < 1 ) [ "NA" ] [ max male-total-matings-list ] end
 to-report male-total-matings-minimum report ifelse-value ( length male-total-matings-list < 1 ) [ "NA" ] [ min male-total-matings-list ] end
 to-report male-total-matings-mean report ifelse-value ( length male-total-matings-list < 1 ) [ "NA" ] [ mean male-total-matings-list ] end
 to-report male-total-matings-variance report ifelse-value ( length male-total-matings-list < 2 ) [ "NA" ] [ variance male-total-matings-list ] end
+to-report total-population-male-total-matings report sum male-total-matings-list end
   
 to-report female-total-matings-list report [ length copulations.history ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
 to-report female-total-matings-maximum report ifelse-value ( length female-total-matings-list < 1 ) [ "NA" ] [ max female-total-matings-list ] end
 to-report female-total-matings-minimum report ifelse-value ( length female-total-matings-list < 1 ) [ "NA" ] [ min female-total-matings-list ] end
 to-report female-total-matings-mean report ifelse-value ( length female-total-matings-list < 1 ) [ "NA" ] [ mean female-total-matings-list ] end
 to-report female-total-matings-variance report ifelse-value ( length female-total-matings-list < 2 ) [ "NA" ] [ variance female-total-matings-list ] end
+to-report total-population-female-total-matings report sum female-total-matings-list end
   
 to-report male-unique-female-matings-list report [ length remove-duplicates copulations.history ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
 to-report male-unique-female-matings-maximum report ifelse-value ( length male-unique-female-matings-list < 1 ) [ "NA" ] [ max male-unique-female-matings-list ] end
 to-report male-unique-female-matings-minimum report ifelse-value ( length male-unique-female-matings-list < 1 ) [ "NA" ] [ min male-unique-female-matings-list ] end
 to-report male-unique-female-matings-mean report ifelse-value ( length male-unique-female-matings-list < 1 ) [ "NA" ] [ mean male-unique-female-matings-list ] end
 to-report male-unique-female-matings-variance report ifelse-value ( length male-unique-female-matings-list < 2 ) [ "NA" ] [ variance male-unique-female-matings-list ] end
+to-report total-population-male-unique-female-matings report length remove-duplicates reduce sentence [ copulations.history ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end 
   
 to-report female-unique-male-matings-list report [ length remove-duplicates copulations.history ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
 to-report female-unique-male-matings-maximum report ifelse-value ( length female-unique-male-matings-list < 1 ) [ "NA" ] [ max female-unique-male-matings-list ] end
 to-report female-unique-male-matings-minimum report ifelse-value ( length female-unique-male-matings-list < 1 ) [ "NA" ] [ min female-unique-male-matings-list ] end
 to-report female-unique-male-matings-mean report ifelse-value ( length female-unique-male-matings-list < 1 ) [ "NA" ] [ mean female-unique-male-matings-list ] end
 to-report female-unique-male-matings-variance report ifelse-value ( length female-unique-male-matings-list < 2 ) [ "NA" ] [ variance female-unique-male-matings-list ] end
+to-report total-population-female-unique-male-matings report length remove-duplicates reduce sentence [ copulations.history ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
   
 to-report male-total-group-transfers-list report [ length group.transfers.history ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
 to-report male-total-group-transfers-maximum report ifelse-value ( length male-total-group-transfers-list < 1 ) [ "NA" ] [ max male-total-group-transfers-list ] end
 to-report male-total-group-transfers-minimum report ifelse-value ( length male-total-group-transfers-list < 1 ) [ "NA" ] [ min male-total-group-transfers-list ] end
 to-report male-total-group-transfers-mean report ifelse-value ( length male-total-group-transfers-list < 1 ) [ "NA" ] [ mean male-total-group-transfers-list ] end
 to-report male-total-group-transfers-variance report ifelse-value ( length male-total-group-transfers-list < 2 ) [ "NA" ] [ variance male-total-group-transfers-list ] end
+to-report total-population-male-total-group-transfers report sum male-total-group-transfers-list end
   
 to-report female-total-group-transfers-list report [ length group.transfers.history ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
 to-report female-total-group-transfers-maximum report ifelse-value ( length female-total-group-transfers-list < 1 ) [ "NA" ] [ max female-total-group-transfers-list ] end
 to-report female-total-group-transfers-minimum report ifelse-value ( length female-total-group-transfers-list < 1 ) [ "NA" ] [ min female-total-group-transfers-list ] end
 to-report female-total-group-transfers-mean report ifelse-value ( length female-total-group-transfers-list < 1 ) [ "NA" ] [ mean female-total-group-transfers-list ] end
 to-report female-total-group-transfers-variance report ifelse-value ( length female-total-group-transfers-list < 2 ) [ "NA" ] [ variance female-total-group-transfers-list ] end
+to-report total-population-female-total-group-transfers report sum female-total-group-transfers-list end
   
-to-report male-infantice-count-list report [ length infanticide.history ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
-to-report male-infantice-count-maximum report ifelse-value ( length male-infantice-count-list < 1 ) [ "NA" ] [ max male-infantice-count-list ] end
-to-report male-infantice-count-minimum report ifelse-value ( length male-infantice-count-list < 1 ) [ "NA" ] [ min male-infantice-count-list ] end
-to-report male-infantice-count-mean report ifelse-value ( length male-infantice-count-list < 1 ) [ "NA" ] [ mean male-infantice-count-list ] end
-to-report male-infantice-count-variance report ifelse-value ( length male-infantice-count-list < 2 ) [ "NA" ] [ variance male-infantice-count-list ] end
-  
-to-report female-infantice-count-list report [ length infanticide.history ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
-to-report female-infantice-count-maximum report ifelse-value ( length female-infantice-count-list < 1 ) [ "NA" ] [ max female-infantice-count-list ] end
-to-report female-infantice-count-minimum report ifelse-value ( length female-infantice-count-list < 1 ) [ "NA" ] [ min female-infantice-count-list ] end
-to-report female-infantice-count-mean report ifelse-value ( length female-infantice-count-list < 1 ) [ "NA" ] [ mean female-infantice-count-list ] end
-to-report female-infantice-count-variance report ifelse-value ( length female-infantice-count-list < 2 ) [ "NA" ] [ variance female-infantice-count-list ] end
+to-report male-infanticide-count-list report [ length filter [ i -> any? anima1s with [ not is.alive and my.identity = i ] ] remove-duplicates infanticide.history ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
+to-report male-infanticide-count-maximum report ifelse-value ( length male-infanticide-count-list < 1 ) [ "NA" ] [ max male-infanticide-count-list ] end
+to-report male-infanticide-count-minimum report ifelse-value ( length male-infanticide-count-list < 1 ) [ "NA" ] [ min male-infanticide-count-list ] end
+to-report male-infanticide-count-mean report ifelse-value ( length male-infanticide-count-list < 1 ) [ "NA" ] [ mean male-infanticide-count-list ] end
+to-report male-infanticide-count-variance report ifelse-value ( length male-infanticide-count-list < 2 ) [ "NA" ] [ variance male-infanticide-count-list ] end
+to-report total-population-male-infanticide-count report length filter [ i -> any? anima1s with [ not is.alive and my.identity = i ] ] remove-duplicates reduce sentence [ infanticide.history ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
+        
+to-report female-infanticide-count-list report [ length filter [ i -> any? anima1s with [ not is.alive and my.identity = i ] ] remove-duplicates infanticide.history ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
+to-report female-infanticide-count-maximum report ifelse-value ( length female-infanticide-count-list < 1 ) [ "NA" ] [ max female-infanticide-count-list ] end
+to-report female-infanticide-count-minimum report ifelse-value ( length female-infanticide-count-list < 1 ) [ "NA" ] [ min female-infanticide-count-list ] end
+to-report female-infanticide-count-mean report ifelse-value ( length female-infanticide-count-list < 1 ) [ "NA" ] [ mean female-infanticide-count-list ] end
+to-report female-infanticide-count-variance report ifelse-value ( length female-infanticide-count-list < 2 ) [ "NA" ] [ variance female-infanticide-count-list ] end
+to-report total-population-female-infanticide-count report length filter [ i -> any? anima1s with [ not is.alive and my.identity = i ] ] remove-duplicates reduce sentence [ infanticide.history ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
 
 

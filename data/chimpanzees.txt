@@ -1,208 +1,218 @@
 
-[1] e e survival-chance 6E-3
-[0] e e1 survival-chance -6E-3
-[1] g e body-size 1E-3
-[1] i e body-size 1E-3
-[1] jf e body-size 1E-4
-[1] jm e body-size 1E-4
-[1] e e body-shade 5E-5        
-[1] i e visual-range 2E-3
-[1] i e visual-angle 2E-3
-[1] i e day-perception 2E-3
-[0] i e night-perception 0
-[1] jf e conception-chance 1E-3
-[1] jm e conception-chance 1E-3
-[1] g e bite-capacity 1E-3
-[0] jf⋅ß e red-signal 1E-3    ;_chimpanzee_female_juvenile_swelling
-[1] c ß red-signal 1E-3
-[1] l β red-signal -1E-3
-[1] p β red-signal -1E-3
-[1] j e mutation-rate 0
-[1] j e sex-ratio 0
-[1] j e litter-size 0
-[1] gf e check-infancy 5E-4
-[1] gm e check-infancy 5E-4
-[1] if e check-juvenility 3E-4
-[1] im e check-juvenility 3E-4
-[1] jf e check-adulthood 1E-4
-[1] jm e check-adulthood 1E-4
-[1] p e check-birth 5E-4
-[1] l e check-weaning 3E-4
-[1] jf e go-forward 5E-3
-[1] jm e go-forward 5E-3
-[1] af e go-forward 5E-3
-[1] am e go-forward 5E-3
-[0] e *e rest -1E-9
-[0] e -e rest 1E-9           
-[1] e oavn move-toward 1E-4          
-[1] am βqnv move-toward 1E-4     
-[1] c amqnv move-toward 1E-4     
-[1] e ouv move-toward -1E-4           
-[0] am ouvr move-toward 1E-2       ;_chimp_males_confront_smaller_strangers
-[0] am oamnv move-toward 1E-4     ;_chimp_males_are_gregarious
-[0] af oanv move-toward -1E-4     ;_chimp_females_are_not_gregarious
-[0] e du move-toward -1E-3       ;_chimp_territorial_behavior
-[0] am du move-toward 1E-4          ;_chimp_male_territorial_behavior
-[0] jf⋅β du move-toward 1E-3     ;_chimp_juvenile_female_dispersal_behavior
-[1] j d53 move-toward 1E-3
-[1] j d54 move-toward 1E-4
-[1] j d55 move-toward 1E-5
-[1] j d56 move-toward 1E-6
-[1] j d57 move-toward 1E-7
-[1] j d58 move-toward 1E-8
-[1] a d53 move-toward 1E-3
-[1] a d54 move-toward 1E-4
-[1] a d55 move-toward 1E-5
-[1] a d56 move-toward 1E-6
-[1] a d57 move-toward 1E-7
-[1] a d58 move-toward 1E-8   
-[1] j e set-heading-random 1E-7
-[1] a e set-heading-random 1E-7
-[1] p gvy supply-to 1E-9
-[1] l ivy supply-to 1E-9
-[1] g pv¥ demand-from 1E-9
-[1] i lv¥ demand-from 1E-9
-[1] j d eat 1E-9
-[1] a d eat 1E-9         
-[0] fβ⋅ amqu join 1E-4           ;_chimp_female_transfer
-[0] jf∴ eß leave 1E-2            ;_chimp_female_dispersal
-[1] cf jy put-down 1E-9
-[1] af ik help 0           
-[1] af iq help 0             
-[1] af jk help 0              
-[1] af jq help 0
-[1] af oamk help 0
-[1] af oamq help 0
-[1] af oafk help 0
-[1] af oafq help 0
-[1] am ik help 0
-[1] am iq help 0
-[1] am jk help 0
-[1] am jq help 0
-[1] am oamk help 0
-[1] am oamq help 0
-[1] am oafk help 0
-[1] am oafq help 0
-[1] af ik attack 0
-[1] af iq attack 0
-[1] af jk attack 0
-[1] af jq attack 0
-[1] af oamk attack 0
-[1] af oamq attack 0
-[1] af oafk attack 0
-[1] af oafq attack 0
-[1] am ik attack 0
-[1] am iq attack 1E-3          ;_chimp_male_attack
-[1] am jk attack 0
-[1] am jq attack 1E-3          ;_chimp_male_attack
-[1] am oamk attack 0      
-[1] am oamq attack 1E-3        ;_chimp_male_attack 
-[1] am oafk attack 0
-[1] am oafq attack 1E-3        ;_chimp_male_attack
-[0] am βfv attack -1E-3        ;_chimp_male_do_not_attack_swollen_females
-[1] am βqnv mate-with 1E-5
-[1] c amqnv mate-with 1E-5   
+::::::::::: STA2US CODE :::::::::::
 
-[1] e e survival-chance 6E-3
-[0] e e1 survival-chance -6E-3
-[1] g e body-size 1E-3
-[1] i e body-size 1E-3
-[1] jf e body-size 1E-4
-[1] jm e body-size 1E-4
-[1] e e body-shade 5E-5        
-[1] i e visual-range 2E-3
-[1] i e visual-angle 2E-3
-[1] i e day-perception 2E-3
-[0] i e night-perception 0
-[1] jf e conception-chance 1E-3
-[1] jm e conception-chance 1E-3
-[1] g e bite-capacity 1E-3
-[0] jf⋅ß e red-signal 1E-3    ;_chimpanzee_female_juvenile_swelling
-[1] c ß red-signal 1E-3
-[1] l β red-signal -1E-3
-[1] p β red-signal -1E-3
-[1] j e mutation-rate 0
-[1] j e sex-ratio 0
-[1] j e litter-size 0
-[1] gf e check-infancy 5E-4
-[1] gm e check-infancy 5E-4
-[1] if e check-juvenility 3E-4
-[1] im e check-juvenility 3E-4
-[1] jf e check-adulthood 1E-4
-[1] jm e check-adulthood 1E-4
-[1] p e check-birth 5E-4
-[1] l e check-weaning 3E-4
-[1] jf e go-forward 5E-3
-[1] jm e go-forward 5E-3
-[1] af e go-forward 5E-3
-[1] am e go-forward 5E-3
-[0] e *e rest -1E-9
-[0] e -e rest 1E-9           
-[1] e oavn move-toward 1E-4          
-[1] am βqnv move-toward 1E-4     
-[1] c amqnv move-toward 1E-4     
-[1] e ouv move-toward -1E-4           
-[0] am ouvr move-toward 1E-2       ;_chimp_males_confront_smaller_strangers
-[0] am oamnv move-toward 1E-4     ;_chimp_males_are_gregarious
-[0] af oanv move-toward -1E-4     ;_chimp_females_are_not_gregarious
-[0] e du move-toward -1E-3       ;_chimp_territorial_behavior
-[0] am du move-toward 1E-4          ;_chimp_male_territorial_behavior
-[0] jf⋅β du move-toward 1E-3     ;_chimp_juvenile_female_dispersal_behavior
-[1] j d53 move-toward 1E-3
-[1] j d54 move-toward 1E-4
-[1] j d55 move-toward 1E-5
-[1] j d56 move-toward 1E-6
-[1] j d57 move-toward 1E-7
-[1] j d58 move-toward 1E-8
-[1] a d53 move-toward 1E-3
-[1] a d54 move-toward 1E-4
-[1] a d55 move-toward 1E-5
-[1] a d56 move-toward 1E-6
-[1] a d57 move-toward 1E-7
-[1] a d58 move-toward 1E-8   
-[1] j e set-heading-random 1E-7
-[1] a e set-heading-random 1E-7
-[1] p gvy supply-to 1E-9
-[1] l ivy supply-to 1E-9
-[1] g pv¥ demand-from 1E-9
-[1] i lv¥ demand-from 1E-9
-[1] j d eat 1E-9
-[1] a d eat 1E-9         
-[0] fβ⋅ amqu join 1E-4           ;_chimp_female_transfer
-[0] jf∴ eß leave 1E-2            ;_chimp_female_dispersal
-[1] cf jy put-down 1E-9
-[1] af ik help 0           
-[1] af iq help 0             
-[1] af jk help 0              
-[1] af jq help 0
-[1] af oamk help 0
-[1] af oamq help 0
-[1] af oafk help 0
-[1] af oafq help 0
-[1] am ik help 0
-[1] am iq help 0
-[1] am jk help 0
-[1] am jq help 0
-[1] am oamk help 0
-[1] am oamq help 0
-[1] am oafk help 0
-[1] am oafq help 0
-[1] af ik attack 0
-[1] af iq attack 0
-[1] af jk attack 0
-[1] af jq attack 0
-[1] af oamk attack 0
-[1] af oamq attack 0
-[1] af oafk attack 0
-[1] af oafq attack 0
-[1] am ik attack 0
-[1] am iq attack 1E-3          ;_chimp_male_attack
-[1] am jk attack 0
-[1] am jq attack 1E-3          ;_chimp_male_attack
-[1] am oamk attack 0      
-[1] am oamq attack 1E-3        ;_chimp_male_attack 
-[1] am oafk attack 0
-[1] am oafq attack 1E-3        ;_chimp_male_attack
-[0] am βfv attack -1E-3        ;_chimp_male_do_not_attack_swollen_females
-[1] am βqnv mate-with 1E-5
-[1] c amqnv mate-with 1E-5     
+1| e e survival-chance 5.1E-3
+0| e e1 survival-chance -5.1E-3
+1| g e body-size 1E-3
+1| i e body-size 1E-3
+1| jf e body-size 1E-4
+1| jm e body-size 1E-4
+1| e e body-shade 9E-5        
+1| i e visual-range 2E-3
+1| i e visual-angle 2E-3
+1| i e day-perception 2E-3
+0| i e night-perception 0
+1| jf e conception-chance 1E-3
+1| jm e conception-chance 1E-3
+1| g e bite-capacity 1E-3
+0| jf⋅ß e red-signal 1E-3    ;_chimpanzee_female_juvenile_swelling
+1| c ß red-signal 1E-3
+1| l β red-signal -1E-3
+1| p β red-signal -1E-3
+1| j e mutation-rate 0
+1| j e sex-ratio 0
+1| j e litter-size 0
+1| gf e check-infancy 5E-4
+1| gm e check-infancy 5E-4
+1| if e check-juvenility 3E-4
+1| im e check-juvenility 3E-4
+1| jf e check-adulthood 1E-4
+1| jm e check-adulthood 1E-4
+1| p e check-birth 5E-4
+1| l e check-weaning 3E-4
+1| jf e go-forward 5E-3
+1| jm e go-forward 5E-3
+1| af e go-forward 5E-3
+1| am e go-forward 5E-3
+0| e *e rest -1E-9
+0| e -e rest 1E-9           
+1| e oavn move-toward 1E-4          
+1| am βqnv move-toward 1E-4     
+1| c amqnv move-toward 1E-4     
+1| e ouv move-toward -1E-4      
+0| a oah move-toward -1E-3          ;_new_for_all_pops
+0| am ouvr move-toward 1E-2        ;_chimp_males_confront_smaller_strangers
+0| am oamnv move-toward 1E-4       ;_chimp_males_are_gregarious
+0| af oanv move-toward -1E-4       ;_chimp_females_are_not_gregarious
+0| e du move-toward -1E-3          ;_chimp_territorial_behavior
+0| am du move-toward 1E-5          ;_chimp_male_territorial_behavior
+0| jf⋅β du move-toward 1E-3        ;_chimp_juvenile_female_dispersal_behavior
+1| j d53 move-toward 1E-3
+1| j d54 move-toward 1E-4
+1| j d55 move-toward 1E-5
+1| j d56 move-toward 1E-6
+1| j d57 move-toward 1E-7
+1| j d58 move-toward 1E-8
+1| a d53 move-toward 1E-3
+1| a d54 move-toward 1E-4
+1| a d55 move-toward 1E-5
+1| a d56 move-toward 1E-6
+1| a d57 move-toward 1E-7
+1| a d58 move-toward 1E-8   
+1| j e set-heading-random 1E-7
+1| a e set-heading-random 1E-7
+1| p gvy supply-to 1E-9
+1| l ivy supply-to 1E-9
+1| g pv¥ demand-from 1E-9
+1| i lv¥ demand-from 1E-9
+1| j d eat 1E-9
+1| a d eat 1E-9         
+0| fβ⋅ amqu join 1E-4           ;_chimp_female_transfer
+0| jf∴ß e leave 1E-2            ;_chimp_female_dispersal
+1| cf jy put-down 1E-9
+1| af ik help 0           
+1| af iq help 0             
+1| af jk help 0              
+1| af jq help 0
+1| af oamk help 0
+1| af oamq help 0
+1| af oafk help 0
+1| af oafq help 0
+1| am ik help 0
+1| am iq help 0
+1| am jk help 0
+1| am jq help 0
+1| am oamk help 0
+1| am oamq help 0
+1| am oafk help 0
+1| am oafq help 0
+1| af ik attack 0
+1| af iq attack 0
+1| af jk attack 0
+1| af jq attack 0
+1| af oamk attack 0
+1| af oamq attack 0
+1| af oafk attack 0
+1| af oafq attack 0
+1| am ik attack 0
+1| am iq attack 1E-3          ;_chimp_male_attack
+1| am jk attack 0
+1| am jq attack 1E-3          ;_chimp_male_attack
+1| am oamk attack 0      
+1| am oamq attack 1E-3        ;_chimp_male_attack 
+1| am oafk attack 0
+1| am oafq attack 1E-3        ;_chimp_male_attack
+0| am βfv attack -1E-3        ;_chimp_male_do_not_attack_swollen_females
+1| am βqnv mate-with 1E-5
+1| c amqnv mate-with 1E-5   
+5| e zd do-nothing 1E-9
+5| e zd do-nothing 1E-9
+5| e zd do-nothing 1E-9
+
+1| e e survival-chance 5E-3
+0| e e1 survival-chance -5E-3
+1| g e body-size 1E-3
+1| i e body-size 1E-3
+1| jf e body-size 1E-4
+1| jm e body-size 1E-4
+1| e e body-shade 9E-5        
+1| i e visual-range 2E-3
+1| i e visual-angle 2E-3
+1| i e day-perception 2E-3
+0| i e night-perception 0
+1| jf e conception-chance 1E-3
+1| jm e conception-chance 1E-3
+1| g e bite-capacity 1E-3
+0| jf⋅ß e red-signal 1E-3    ;_chimpanzee_female_juvenile_swelling
+1| c ß red-signal 1E-3
+1| l β red-signal -1E-3
+1| p β red-signal -1E-3
+1| j e mutation-rate 0
+1| j e sex-ratio 0
+1| j e litter-size 0
+1| gf e check-infancy 5E-4
+1| gm e check-infancy 5E-4
+1| if e check-juvenility 3E-4
+1| im e check-juvenility 3E-4
+1| jf e check-adulthood 1E-4
+1| jm e check-adulthood 1E-4
+1| p e check-birth 5E-4
+1| l e check-weaning 3E-4
+1| jf e go-forward 5E-3
+1| jm e go-forward 5E-3
+1| af e go-forward 5E-3
+1| am e go-forward 5E-3
+0| e *e rest -1E-9
+0| e -e rest 1E-9           
+1| e oavn move-toward 1E-4          
+1| am βqnv move-toward 1E-4     
+1| c amqnv move-toward 1E-4     
+1| e ouv move-toward -1E-4        
+0| a oah move-toward -1E-3    
+0| am ouvr move-toward 1E-2        ;_chimp_males_confront_smaller_strangers
+0| am oamnv move-toward 1E-4       ;_chimp_males_are_gregarious
+0| af oanv move-toward -1E-4       ;_chimp_females_are_not_gregarious
+0| e du move-toward -1E-3          ;_chimp_territorial_behavior
+0| am du move-toward 1E-5          ;_chimp_male_territorial_behavior
+0| jf⋅β du move-toward 1E-3        ;_chimp_juvenile_female_dispersal_behavior
+1| j d53 move-toward 1E-3
+1| j d54 move-toward 1E-4
+1| j d55 move-toward 1E-5
+1| j d56 move-toward 1E-6
+1| j d57 move-toward 1E-7
+1| j d58 move-toward 1E-8
+1| a d53 move-toward 1E-3
+1| a d54 move-toward 1E-4
+1| a d55 move-toward 1E-5
+1| a d56 move-toward 1E-6
+1| a d57 move-toward 1E-7
+1| a d58 move-toward 1E-8   
+1| j e set-heading-random 1E-7
+1| a e set-heading-random 1E-7
+1| p gvy supply-to 1E-9
+1| l ivy supply-to 1E-9
+1| g pv¥ demand-from 1E-9
+1| i lv¥ demand-from 1E-9
+1| j d eat 1E-9
+1| a d eat 1E-9         
+0| fβ⋅ amqvu join 1E-4           ;_chimp_female_transfer
+0| jf∴ß e leave 1E-2            ;_chimp_female_dispersal
+1| cf jy put-down 1E-9
+1| af ik help 0           
+1| af iq help 0             
+1| af jk help 0              
+1| af jq help 0
+1| af oamk help 0
+1| af oamq help 0
+1| af oafk help 0
+1| af oafq help 0
+1| am ik help 0
+1| am iq help 0
+1| am jk help 0
+1| am jq help 0
+1| am oamk help 0
+1| am oamq help 0
+1| am oafk help 0
+1| am oafq help 0
+1| af ik attack 0
+1| af iq attack 0
+1| af jk attack 0
+1| af jq attack 0
+1| af oamk attack 0
+1| af oamq attack 0
+1| af oafk attack 0
+1| af oafq attack 0
+1| am ik attack 0
+1| am iq attack 1E-3          ;_chimp_male_attack
+1| am jk attack 0
+1| am jq attack 1E-3          ;_chimp_male_attack
+1| am oamk attack 0      
+1| am oamq attack 1E-3        ;_chimp_male_attack 
+1| am oafk attack 0
+1| am oafq attack 1E-3        ;_chimp_male_attack
+0| am βfv attack -1E-3        ;_chimp_male_do_not_attack_swollen_females
+1| am βqnv mate-with 1E-5
+1| c amqnv mate-with 1E-5   
+5| e zd do-nothing 1E-9
+5| e zd do-nothing 1E-9
+5| e zd do-nothing 1E-9

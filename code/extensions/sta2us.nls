@@ -57,8 +57,8 @@
 ; XXXX-XX-XX    <    is within near range
 ; XXXX-XX-XX    |    is neither too near or far
 ; XXXX-XX-XX    >    is close to edge of 
-; XXXX-XX-XX    '    is alone
-; XXXX-XX-XX    "    is not alone
+; XXXX-XX-XX    ⋅    is alone
+; XXXX-XX-XX    ∴    is not alone
 ;         
 ; 2019-08-26   --> survival-chance
 ; 2019-08-26   --> body-size
@@ -372,6 +372,7 @@ to-report sta7us-get-action [ action-code ]
     ( action-code = "RCT" or action-code = "recruit" ) [ "recruit" ]
     ( action-code = "KCK" or action-code = "kick-out" or action-code = "expel" ) [ "expel" ]
     ( action-code = "MAT" or action-code = "mate-with") [ "mate-with" ]
+    ( action-code = "do-nothing") [ "do-nothing" ]
     [ action-code ])
   
 end
@@ -390,7 +391,7 @@ to-report status-of [ target ]
     let target-life-history first [life.history] of target
     let target-fertility first [fertility.status] of target
     let target-size ifelse-value ( [size] of target < size ) [ "r" ] [ "b" ]
-    let target-health ifelse-value ( [survival.chance] of target > survival.chance ) [ "h" ] [ "x" ]
+    let target-health ( ifelse-value ( [survival.chance] of target > survival.chance + 0.001 ) [ "h" ] ( [survival.chance] of target + 0.001 < survival.chance) [ "x" ] [ "" ] )
     let target-kin ifelse-value ( relatedness-with target > 0.2 ) [ "k" ] [ "q" ]
     let target-group ifelse-value ( [group.identity] of target = group.identity ) [ "n" ] [ "u" ] 
     let target-carry ifelse-value ( member? target carried.items ) [ "y" ] [ ifelse-value ( member? self [carried.items] of target ) [ "¥" ] [ "t" ] ]
@@ -462,7 +463,7 @@ to-report action-code-list
     "move-toward" "move-away-from" "supply-to" "demand-from" "eat"
     "join" "leave" "recruit" "kick-out"
     "pick-up" "put-down" "cling-to" "squirm-from"
-    "help" "hurt" "mate-with" ]
+    "help" "hurt" "mate-with" "do-nothing" ]
 end
 
 to-report sta2us-codon-exists [ codon ]

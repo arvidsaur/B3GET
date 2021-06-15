@@ -263,10 +263,8 @@ to import-population
             ( breed = anima1s and header = "foraging.gains" ) [ set foraging.gains value ]
             ( breed = anima1s and header = "total.energy.gains" ) [ set total.energy.gains value ]
             ( breed = anima1s and header = "total.energy.cost" ) [ set total.energy.cost value ]
-            ( breed = anima1s and header = "receiving.history" ) [ set receiving.history value ]
-            ( breed = anima1s and header = "carried.history" ) [ set carried.history value ]
-            ( breed = anima1s and header = "aid.history" ) [ set aid.history value ]
-            ( breed = anima1s and header = "harm.history" ) [ set harm.history value ]
+            ( breed = anima1s and header = "help.from.history" ) [ set help.from.history value ]
+            ( breed = anima1s and header = "attack.from.history" ) [ set attack.from.history value ]
             ( breed = anima1s and header = "copulations.history" ) [ set copulations.history value ]
             ( breed = anima1s and header = "conceptions.history" ) [ set conceptions.history value ]
             ( breed = anima1s and header = "group.transfers.history" ) [ set group.transfers.history value ]
@@ -304,10 +302,8 @@ to import-population
     ask anima1s [
       
       ; initialize lists
-      set receiving.history []
-      set carried.history []
-      set aid.history []
-      set harm.history []
+      set help.from.history []
+      set attack.from.history []
       set group.transfers.history []
       set copulations.history []
       set conceptions.history []
@@ -330,6 +326,8 @@ to import-population
       if ( is.resting = 0 ) [ set is.resting false ]
       if ( fully.decayed = 0 ) [ set fully.decayed false ]
       if ( hidden.chance = 0 ) [ set hidden.chance 0 ]
+      if ( mother.initiated.birth = 0 ) [ set mother.initiated.birth false ]
+      if ( mother.initiated.weaning = 0 ) [ set mother.initiated.weaning false ]
       
       set shape get-shape ; since this is automatically generated each timestep, it does not matter what is in csv file, more compatible this way
       update-appearance ; One the agent is updated with its attributes, update its appearance to match
@@ -345,6 +343,8 @@ end
 to set-home-range
   ask patches in-radius 10
   [ 
+    set pgroups.here []
+    repeat 100 [ set pgroups.here lput [group.identity] of myself pgroups.here ]
     set pgroup.identity [group.identity] of myself 
     set pcolor pgroup.identity + 2 
   ]
@@ -553,7 +553,7 @@ end
 to import-genotype
   output-header (word " IMPORT GENOTYPE : " genotype )
   
-  let first-codon-list [ "[0]" "[1]" "[2]" "[3]" "[4]" "[5]" ]
+  let first-codon-list [ "0|" "1|" "2|" "3|" "4|" "5|" ]
   
   let file-to-open ( word path-to-experiment genotype ".txt" ) ; first try accessing file in designated file path
   if not file-exists? file-to-open [ set file-to-open ( word "../data/" genotype ".txt" ) ] ; then try the data folder
@@ -635,15 +635,13 @@ end
 ;----------------------------------------------------------------------------------------------
 
 to save-genotype
+  let combined-chromosomes (sentence chromosome.I [[]] chromosome.II )
   output-header (word " SAVE GENOTYPE : organism " my.identity  )
   if ( genotype = "" ) [ if ( subject != nobody ) [ set genotype (word [my.identity] of subject ) ]]
-  ( csv:to-file ( word path-to-experiment genotype ".txt" ) (sentence chromosome.I [[]] chromosome.II ) " " )
+  ( csv:to-file ( word path-to-experiment genotype ".txt" ) combined-chromosomes " " )
   update-metafile "genotype" genotype (word "GENOTYPE " genotype " SAVED")
   output-print " Genotype successfully saved."
 end
-
-
-
 
 to-report generate-genotype-id
   report ( word "g" generate-timestamp )
@@ -652,5 +650,4 @@ end
 to-report generate-population-id
   report ( word "p" generate-timestamp )
 end
-
 

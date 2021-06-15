@@ -30,41 +30,46 @@
 
 to artificial-selection ;  memory caps?
   
-  if ( any? anima1s ) [
+  carefully [
     
-    ; MUTATE GENOTYPES
-    if ( ticks = 0 ) [ ask anima1s [ mutate-chromosomes 0.05 ]] ; increases the genetic variation of the initial population
-    
-    ; SET GENOTYPE TO PROPER STANDARDIZED NAME
-    if ( genotype = "" ) [
-      set genotype generate-genotype-id
+    if ( any? anima1s ) [
+      
+      ; MUTATE GENOTYPES
+      if ( ticks = 0 ) [ ask anima1s [ mutate-chromosomes 0.05 ]] ; increases the genetic variation of the initial population
+      
+      ; SET GENOTYPE TO PROPER STANDARDIZED NAME
+      if ( genotype = "" ) [
+        set genotype generate-genotype-id
+      ]
+      
+      let number-list [ "1" "2" "3" "4" "5" "6" "7" "8" "9" "0" ]
+      if ( not member? "-" genotype or not member? last genotype number-list ) [
+        set genotype ( word genotype "-0" )
+        ask one-of anima1s [ save-genotype ]]
+      
+      impose-selection
+      
+      ; RESET SIMULATION
+      if ( restart-simulation? ) [ ; if criteria met for restarting simulation
+        
+        simulation-summary
+        
+        let selected-anima1 max-one-of anima1s with [ life.history = "adult" ] [ generation.number ]
+        if ( [generation.number] of selected-anima1 > genotype-number ) [
+          set genotype (word (genotype-name) "-" ( genotype-number + 1 ) ) ; set new genotype name up one more number increment
+          ask selected-anima1 [ save-genotype ]]
+        
+        let old-population-name population
+        set population next-population-file-name
+        save-population
+        set population old-population-name
+        
+        setup
+      ]
     ]
     
-    let number-list [ "1" "2" "3" "4" "5" "6" "7" "8" "9" "0" ]
-    if ( not member? "-" genotype or not member? last genotype number-list ) [
-      set genotype ( word genotype "-0" )
-      ask one-of anima1s [ save-genotype ]]
-    
-    impose-selection
-    
-    ; RESET SIMULATION
-    if ( restart-simulation? ) [ ; if criteria met for restarting simulation
-      
-      simulation-summary
-      
-      let selected-anima1 max-one-of anima1s with [ life.history = "adult" ] [ generation.number ]
-      if ( [generation.number] of selected-anima1 > genotype-number ) [
-        set genotype (word (genotype-name) "-" ( genotype-number + 1 ) ) ; set new genotype name up one more number increment
-        ask selected-anima1 [ save-genotype ]]
-      
-      let old-population-name population
-      set population next-population-file-name
-      save-population
-      set population old-population-name
-      
-      setup
-    ]
-  ]
+  ] [ print ( word "ARTIFICIAL SELECTION ERROR: " error-message ) ]    ; If error occurs, print out error message.
+  
 end
 
 to-report dash-position 

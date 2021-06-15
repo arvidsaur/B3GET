@@ -353,6 +353,7 @@ end
 ;end
 
 to import-world-command
+  ;set-current-directory path-to-experiment  - only uncomment if you have figured out how to get back to original directory at the end of this subroutine
   let file-name user-file
   if ( is-string? file-name and file-exists? file-name ) [ 
     print file-name
@@ -391,6 +392,12 @@ end
 to dynamic-verification
   let user-choice substring useful-commands 5 length useful-commands
   
+  profiler:start
+  profiler:reset
+
+  
+  go
+  
   ( ifelse
     
     ( user-choice = "true" ) [
@@ -403,7 +410,82 @@ to dynamic-verification
     
     [ output-header " CODE VERIFICATION :  ALL  "
       output-all-verification ])
+  
+  ;profiler:stop
+  
 end
+
+;---------------------------------------------------------------------------------------------------------------------------------
+; GUI OUPUT FUNCTIONS 
+;---------------------------------------------------------------------------------------------------------------------------------
+
+;to-report go-runtime
+;  profiler:reset
+;  profiler:start
+;  repeat 1 [ go ]
+;  report profiler:inclusive-time "go"
+;end
+
+to output-all-verification
+  clear-output
+  let new-tape generate-verification-tape
+  let length-of-tape length first new-tape
+  let i 0
+  
+  while [ i < length-of-tape ]
+  [
+    (ifelse 
+      ( i < 4 ) [output-print (word " "  item i item 0 new-tape " " item i item 3 new-tape ) if ( i = 3 ) [ output-print ( "     " ) ] ]
+      [ output-print (word " " (i - 3) ". " item i item 3 new-tape "  " item i item 2 new-tape "  " item i item 1 new-tape "  :  " item i item 0 new-tape )])
+    set i i + 1
+  ]  
+end
+
+to output-true-verification
+  clear-output
+  let new-tape generate-verification-tape
+  let length-of-tape length first new-tape
+  let i 0
+  let j 0
+  while [ i < length-of-tape ]
+  [
+    (ifelse 
+      ( i < 4 ) [output-print (word " "  item i item 0 new-tape " " item i item 3 new-tape ) if ( i = 3 ) [ output-print ( "     " ) ] ]
+      [ if (item i item 3 new-tape = true ) [ set j j + 1 output-print (word " " j ". " item i item 3 new-tape " " item i item 2 new-tape " " item i item 1 new-tape " : " item i item 0 new-tape ) ]])
+    set i i + 1
+  ]
+end
+
+to output-false-verification
+  clear-output
+  let new-tape generate-verification-tape
+  let length-of-tape length first new-tape
+  let i 0
+  let j 0
+  while [ i < length-of-tape ]
+  [
+    (ifelse 
+      ( i < 4 ) [output-print (word " " item i item 0 new-tape " " item i item 3 new-tape ) if ( i = 3 ) [ output-print ( "     " ) ] ]
+      [ if (item i item 3 new-tape = false) [ set j j + 1 output-print (word " " j ". " item i item 3 new-tape " " item i item 2 new-tape " " item i item 1 new-tape " : " item i item 0 new-tape ) ]])
+    set i i + 1
+  ]
+end
+
+to output-verification [ input ]
+  clear-output
+  let new-tape generate-verification-tape
+  let length-of-tape length first new-tape
+  let i 0
+  
+  while [ i < length-of-tape ]
+  [
+    (ifelse 
+      ( i < 4 ) [output-print (word " "  item i item 0 new-tape " " item i item 3 new-tape ) if ( i = 3 ) [ output-print ( "     " ) ] ]
+      [ output-print (word " " (i - 3) ". " item i item 3 new-tape "  " item i item 2 new-tape "  " item i item 1 new-tape "  :  " item i item 0 new-tape )])
+    set i i + 1
+  ]  
+end
+
 
 ;-----------------------------------------------------------------------------       
 ; RUNTIME CHECK
@@ -717,10 +799,8 @@ to-report get-result-from-selected-display
     ( useful-commands = "-- foraging-gains" ) [ foraging.gains ]
     ( useful-commands = "-- total-energy-gains" ) [ total.energy.gains ]
     ( useful-commands = "-- total-energy-cost" ) [ total.energy.cost ]
-    ( useful-commands = "-- receiving-history" ) [ length receiving.history ]
-    ( useful-commands = "-- carried-history" ) [ length carried.history ]
-    ( useful-commands = "-- aid-history" ) [ length aid.history ]
-    ( useful-commands = "-- harm-history" ) [ length harm.history ]
+    ( useful-commands = "-- help-history" ) [ length help.from.history ]
+    ( useful-commands = "-- attack-history" ) [ length attack.from.history ]
     
     [ 0 ])
 end
@@ -1019,8 +1099,8 @@ end
 ;;    ( input = "total-energy-cost" ) [ total.energy.cost ]
 ;;    ( input = "receiving.history" ) [ receiving.history ]
 ;;    ( input = "carried.history" ) [ length carried.history ]
-;;    ( input = "aid-history" ) [ length aid.history ]
-;;    ( input = "harm-history" ) [ length harm.history ]
+;;    ( input = "aid-history" ) [ length help.from.history ]
+;;    ( input = "harm-history" ) [ length attack.from.history ]
 ;;      
 ;;    [])
 ;;  ]
@@ -1214,13 +1294,13 @@ end
 ;;  
 ;;  output-print ( word " Number of helpful behaviors: "
 ;;    ifelse-value ( anima1-to-inspect != nobody ) 
-;;    [ [ length aid.history ] of subject ] 
-;;    [ ( word sum [ length aid.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length aid.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
+;;    [ [ length help.from.history ] of subject ] 
+;;    [ ( word sum [ length help.from.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length help.from.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
 ;;  
 ;;  output-print ( word " Number of aggressive behaviors: "
 ;;    ifelse-value ( anima1-to-inspect != nobody ) 
-;;    [ [ length harm.history ] of subject ] 
-;;    [ ( word sum [ length harm.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length harm.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
+;;    [ [ length attack.from.history ] of subject ] 
+;;    [ ( word sum [ length attack.from.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length attack.from.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
 ;;  
 ;;  output-print ( word " Number of infanticides: "
 ;;    ifelse-value ( anima1-to-inspect != nobody ) 
