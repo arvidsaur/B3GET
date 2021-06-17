@@ -398,7 +398,7 @@ to-report status-of [ target ]
     let target-signal (word ifelse-value [yellow.signal] of target [ "α" ][ "å" ] ifelse-value [red.signal] of target [ "β" ][ "ß" ] ifelse-value [blue.signal] of target [ "ɣ" ][ "œ" ] )
     let target-rest ifelse-value ( [is.resting] of target = true ) [ "s" ] [ "." ]
     let target-color (word "" round [color] of target "" ifelse-value ( shade-of? color [color] of target) [ "#" ] [ "" ])
-    ;let target-proximity (ifelse-value ( distance-to-target < max-proximity target ) [ "<" ] ( distance-to-target > 0.5 * maximum-visual-range * visual.range ) [ ">" ] [ "|" ] )
+    let target-proximity (ifelse-value ( distance-to-target < 0.5 * size ) [ "<" ] ( distance-to-target > 0.5 * maximum-visual-range * visual.range ) [ ">" ] [ "|" ] )
     let target-alone ifelse-value ( count anima1s with [ group.identity = [group.identity] of target ] > 1 ) [ "∴" ] [ "⋅" ]
     set status-report (word status-report 
       target-kind 
@@ -415,7 +415,7 @@ to-report status-of [ target ]
       target-signal
       target-rest 
       target-color 
-      ;target-proximity 
+      target-proximity 
       target-alone
   ) ]
     
@@ -449,7 +449,7 @@ to-report status-code-list
     "å" "β" "ß" "ɣ" "œ" "*" "-" 
     "#" "$" "~" "1" "2" "3" "4" 
     "5" "6" "7" "8" "9" "0" "." 
-    "∴" "⋅"]
+    "∴" "⋅" "<" ">" "|" ]
 end
 
 to-report action-code-list

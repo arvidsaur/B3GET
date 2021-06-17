@@ -459,7 +459,7 @@ to save-population
     )
     
     ask anima1s with [ is.alive ] [ 
-      if ( is-anima1? self ) [ set my.mother ifelse-value ( my.mother != nobody ) [ [my.identity] of my.mother ] [ nobody ] ]
+      ;if ( is-anima1? self ) [ set my.mother ifelse-value ( my.mother != nobody ) [ [my.identity] of my.mother ] [ nobody ] ]
       
       let data-list []
       
@@ -517,8 +517,8 @@ to save-population
           ( text = "y.magnitude" ) [ y.magnitude ]
           ( text = "chromosome.I" ) [ csv:to-string chromosome.I ]
           ( text = "chromosome.II" ) [ csv:to-string chromosome.II ]
-          ( text = "my.mother" ) [ my.mother ]
-          ( text = "home-range?" ) [ sort patches with [ pgroup.identity = [group.identity] of myself ] ])
+          ( text = "my.mother" ) [ ifelse-value ( my.mother != nobody ) [ [my.identity] of my.mother ] [ nobody ] ]
+          ( text = "home-range?" ) [ "" ])
         
         set data-list lput value data-list ]
       

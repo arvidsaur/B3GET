@@ -206,12 +206,10 @@ globals [
   start-date-and-time              ;
   verification-results             ;
 
-  record-tick-interval
+  timestep-interval
   plant-abundance-record           ;
   plant-patchiness-record          ;
   population-size-record           ;
-  recent-decisions-made            ;
-  recent-actions-completed         ;
 
   solar-status                     ;
   current-season                   ;
@@ -244,18 +242,16 @@ globals [
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to setup-parameters
-  set model-version "1.2.0-Beta2"                               ;
+  set model-version "1.2.0-Beta2"                              ;
   set deterioration-rate -0.01                                 ;
   set maximum-visual-range 5                                   ;
   set base-litter-size 10                                      ;
   set model-structure [ "baseline" ]                           ;
   set verification-results []                                  ;
-  set record-tick-interval 100                                 ;
+  set timestep-interval 100                                 ;
   set plant-abundance-record []                                ;
   set plant-patchiness-record []                               ;
   set population-size-record []                                ;
-  set recent-decisions-made []                                 ;
-  set recent-actions-completed []                              ;
   set start-date-and-time date-and-time                        ;
   set selected-display "groups"                                ;
   reset-timer                                                  ;
@@ -274,12 +270,14 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to setup-patches
+  let initial-group-list []
+  repeat 100 [ set initial-group-list lput 0 initial-group-list ]
   ask patches [
     set pterminal.energy random-float plant-quality
     set penergy.supply pterminal.energy
     set pmy.identity random 9999999
     set pgroups.here [ ]
-    repeat 100 [ set pgroups.here lput 0 pgroups.here ]
+    set pgroups.here initial-group-list
     update-patch-color ]
 end
 
@@ -386,15 +384,15 @@ to go
 
   global-update                                                ; Update the current state of the
   plants-update                                                ; plants and animals in the
-  animals-update                                               ; world.
+  animals-update                                               ; simulated world.
 
-  ask anima1s with [ is.alive ] [ consider-environment ]       ; Living animals view their environment and
-  ask anima1s with [ is.alive ] [ make-decisions ]             ; make decisions according to their genotype and
+  ask anima1s with [ is.alive ] [ consider-environment ]       ; Allow living animals to view their environment,
+  ask anima1s with [ is.alive ] [ make-decisions ]             ; make decisions according to their genotype, and
   ask anima1s with [ is.alive ] [ do-actions ]                 ; perform those actions if they have enough energy.
 
   if selection-on? [ artificial-selection ]                    ; Impose artificial selection on animals.
   if output-results? [ output-results ]                        ; Generate data from current simulation state.
-  print-out-simulation-status                                  ; Print out simulation status.
+  display-simulation-status                                    ; Display simulation status.
 
   tick                                                         ; Move forward one simulated hour.
 
@@ -402,28 +400,59 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; PRINT OUT THE CURRENT SIMULATION STATUS FOR USER
+; DISPLAY THE CURRENT SIMULATION STATUS FOR USER
 ;
-; Prints out current status of the simulation every 100 timesteps.
+; This subroutine periodically displays the current status of the simulation. Typically it is called at
+; least once per timestep, and it watches for transitions to the next period, the length of which is
+; defined in an external variable.
 ;
-; ENTRY: Simulation must be currently running.
+; ENTRY:  The simulation is currently running with living individuals present.
 ;
-; EXIT: B3GET prints out simulation information.
+;         'timestep-interval' is set to the number of ticks between displays. Typically this is
+;            set to 100.
+;
+;         'ticks' is the number of current time step. On the first call, its value is 0.
+;
+; EXIT:   The simulation status is displayed. In particular, the number of simulated years thus far, the
+;           number of units of plant energy, the number of animals living, and the number of generations
+;           that have transpired are displayed.
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
-to print-out-simulation-status
-  if ( ticks > 0 and
-    ceiling (ticks / record-tick-interval) = (ticks / record-tick-interval) ) [
+to display-simulation-status
+  if ( ticks-on-interval? timestep-interval ) [             ; Determine if periodic condition is met.
 
-    let print-text ( word
-      "Simulation " simulation-id
-      " is now at " precision (ticks / plant-annual-cycle) 3 " years, "
-      precision sum [penergy.supply] of patches 3 " plant units, "
-      ifelse-value ( count anima1s with  [is.alive]  > 0 ) [ precision mean [generation.number] of anima1s with [ is.alive ] 3 ] [ 0 ] " generations, and contains "
-      count anima1s with [ is.alive ] " living organisms.")
-    print print-text
+    print ( word                                               ; Diplay the following information:
+      "Simulation " simulation-id                              ; Current simulation identification.
+      " is now at "
+      precision (ticks / plant-annual-cycle) 3                 ; The number of simulated years thus far.
+      " years, "
+      precision sum [penergy.supply] of patches 3              ; The number of units of plant energy.
+      " plant units, "
+      precision mean ( sentence
+        [generation.number] of anima1s with [ is.alive ]       ; The number of generations that have transpired.
+        0 ) 3
+      " generations, and contains "
+      count anima1s with [ is.alive ] " living organisms." )   ; The number of living individuals.
+
   ]
+end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; DETERMINE IF THE CURRENT TIMESTEP LANDS ON A GIVEN INTERVAL
+;
+; This subroutine is used to determine when periodic events should occur. Specifically, it calculates
+; if the current timestep (ticks) is a multiple of a given interval value.
+;
+; ENTRY:  period | The number of ticks between intervals.
+;
+; EXIT:   This subroutine returns true if the current timestep is on the interval and false otherwise.
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to-report ticks-on-interval? [ period ]
+  report remainder ticks period = 0  ; ceiling ( ticks / period ) = ( ticks / period )
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -449,31 +478,42 @@ to global-update
 
   carefully [
 
-    set recent-decisions-made filter                ;Update code to add current timestep and remove old timestep
-    [ vector ->
-      item 0 vector > ( ticks - 1 ) ]
-    recent-decisions-made
+    set solar-status ifelse-value                               ; Identify whether it is day or night
+    ( ( cos (( 360 / plant-daily-cycle ) * ticks)) > 0 )        ; based on the current timestep and
+    [ "DAY" ]                                                   ; user setting for day length.
+    [ "NIGHT" ]
 
-    set recent-actions-completed filter [ vector -> item 0 vector > ( ticks - 1 ) ] recent-actions-completed
+    set current-season ( cos (( 360 / plant-annual-cycle ) * ticks )) ; Calculate the current season
+                                                                ; which oscillates sinusoidally with time.
 
+    if ( ticks-on-interval? timestep-interval ) [            ; Periodically record data on the following:
 
-    if ( ceiling (ticks / record-tick-interval) = (ticks / record-tick-interval) ) [ ; must include first tick
-      set plant-abundance-record lput sum [penergy.supply] of patches plant-abundance-record
-      set plant-patchiness-record lput plant-patchiness plant-patchiness-record
-      set population-size-record lput count anima1s with [ is.alive ] population-size-record
+      set plant-abundance-record lput                           ;
+      sum [penergy.supply] of patches
+      plant-abundance-record
+
+      set plant-patchiness-record lput
+      plant-patchiness
+      plant-patchiness-record
+
+      set population-size-record lput
+      count anima1s with [ is.alive ]
+      population-size-record
     ]
-
-    set solar-status get-solar-status
-    set current-season ( cos (( 360 / plant-annual-cycle ) * ticks ))
 
   ] [ print ( word "GLOBAL UPDATE ERROR: " error-message ) ]    ; If error occurs, print out error message.
 
 end
 
-to-report get-solar-status
-  report ifelse-value ( ( cos (( 360 / plant-daily-cycle ) * ticks)) > 0 )
-  [ "DAY" ] [ "NIGHT" ]
-end
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; CALCULATE A NEW VALUE ....
+;
+; ENTRY:
+;
+; EXIT:
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report get-updated-value [ current-value update-value ]
   let report-value ifelse-value ( current-value < 0.00001 ) [ 0.00001 ] [ ifelse-value ( current-value > 0.99999 ) [ 0.99999 ] [ current-value ] ]
@@ -764,6 +804,18 @@ to set-to-dead
   set actions.completed []
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; U
+;
+; The
+;
+; ENTRY:
+;
+; EXIT:
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to remove-from-environment
   if ( ticks.at.death = 0 ) [ set ticks.at.death ticks ]
   ask anima1s with [ member? myself carried.items ] [ set carried.items remove myself remove-duplicates carried.items ] ; remove me from other agent's carried.items
@@ -773,6 +825,18 @@ to remove-from-environment
   set label " "
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; U
+;
+; The
+;
+; ENTRY:
+;
+; EXIT:
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to update-appearance
   set size body.size
   set label ifelse-value ( is.alive ) [ " " ] [ "x" ]
@@ -780,9 +844,25 @@ to update-appearance
   set shape get-shape
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; U
+;
+; The
+;
+; ENTRY:
+;
+; EXIT:
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to-report get-shape
-  let base_shape ifelse-value ( biological.sex = "male" ) [ "triangle" ] [ "circle" ]
-  let eye_size ( ifelse-value ( visual.range < ( 1 / 3 ) ) [ "1" ] ( visual.range < ( 2 / 3 ) ) [ "2" ] [ "3" ] )
+  let base_shape ifelse-value
+  ( biological.sex = "male" ) [ "triangle" ] [ "circle" ]
+  let eye_size ( ifelse-value
+    ( visual.range < ( 1 / 3 ) )
+    [ "1" ]
+    ( visual.range < ( 2 / 3 ) ) [ "2" ] [ "3" ] )
   let eye_spacing ( ifelse-value ( visual.angle < ( 1 / 3 ) ) [ "1" ] ( visual.angle < ( 2 / 3 ) ) [ "2" ] [ "3" ] )
   let current-perception ifelse-value ( solar-status = "DAY" ) [ day.perception ] [ night.perception ]
   let eye_acuity ( ifelse-value ( is.resting or not is.alive ) [ "1" ] ( current-perception > 0.5 ) [ "3" ] ( current-perception > 0 ) [ "2" ] [ "1" ])
@@ -792,13 +872,30 @@ to-report get-shape
   report ( word base_shape eye_size eye_spacing eye_acuity a_on b_on c_on )
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; UPDATE CALLER'S ENERGY SUPPLY ACCORDING TO INPUT VALUE
+;
+; This subroutine regulates the input and output flow of the caller's energy as they live their lives. The
+; input value can be positive, which means that the caller has gained energy, such as through eating or
+; nursing. An input value that is negative occurs when the caller has lost energy, such as through performing
+; behaviors. This inflow and outflow of energy is recorded for each individual's net cost and gain of energy.
+;
+; ENTRY:  update | The positive or negative input value.
+;
+; EXIT:  The caller's energy supply is increased or decreased by a given ammount.
+;        This net gain or loss is recorded.
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to update-energy [ update ]
-  set energy.supply energy.supply + update
-  ifelse ( update > 0 )
-  [ set total.energy.gains total.energy.gains + update ]
-  [ set total.energy.cost total.energy.cost + abs update ]
+  set energy.supply energy.supply + update                      ; Update caller's energy with input value,
+  ifelse ( update > 0 )                                         ; which can be positive or negative.
+  [ set total.energy.gains total.energy.gains + update ]        ; Record positive values as energy gains.
+  [ set total.energy.cost total.energy.cost + abs update ]      ; Record negative values as energy costs.
 end
 
+; ========================================================================================================= ;
 ; ========================================================================================================= ;
 ;
 ;                             oo
@@ -817,6 +914,7 @@ end
 ;
 ; consider-environment > make-decisions > check-energy > do-actions
 ;
+; ========================================================================================================= ;
 ; ========================================================================================================= ;
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -933,12 +1031,7 @@ to make-decisions
       [ gat3s-get-decisions my.environment ]                     ; get decisions based on a gat3s genotype.
       [ sta7us-get-decisions my.environment ] )                  ; If not specified, assume current genotype reader is sta2us.
 
-    reduce-to-unique-vectors                                     ; Reduce to unique set of decision vectors
-
-    foreach decision.vectors [ d ->                              ; Record these decisions into global pool
-      set recent-decisions-made lput                             ; for user tracking purposes.
-      ( sentence ticks but-last d )
-      recent-decisions-made ]
+    ;reduce-to-unique-vectors                                     ; Reduce to unique set of decision vectors
 
   ] [ print ( word "MAKE DECISIONS ERROR - " my.identity " : " error-message ) ]    ; If error occurs, print out error message.
 
@@ -960,67 +1053,67 @@ end
 
 to reduce-to-unique-vectors
 
-  let initial-decisions decision.vectors                       ; Initially, there is a full list of decisions
-  let reduced-decisions []                                     ; and an empty list.
+  let initial-decisions decision.vectors                         ; Initially, there is a full list of decisions
+  let reduced-decisions []                                       ; and an empty list.
 
-  foreach initial-decisions [ original-vector ->               ; Looping through the full list of decisions,
-    let original-ego item 0 original-vector                    ; identify the caller,
-    let original-target item 1 original-vector                 ; identity the target,
-    let original-action item 2 original-vector                 ; identity the action,
-    let original-weight item 3 original-vector                 ; identify the cost.
+  foreach initial-decisions [ original-vector ->                 ; Looping through the full list of decisions,
+    let original-ego item 0 original-vector                      ; identify the caller,
+    let original-target item 1 original-vector                   ; identity the target,
+    let original-action item 2 original-vector                   ; identity the action,
+    let original-weight item 3 original-vector                   ; identify the cost.
 
-    let vector-doesnt-exist true                               ;
+    let vector-doesnt-exist true                                 ;
 
-    let index 0                                                ;
-    foreach reduced-decisions [ reduced-vector ->              ;
-      let reduced-ego item 0 reduced-vector                    ;
-      let reduced-target item 1 reduced-vector                 ;
-      let reduced-action item 2 reduced-vector                 ;
-      let reduced-weight item 3 reduced-vector                 ;
+    let index 0                                                  ;
+    foreach reduced-decisions [ reduced-vector ->                ;
+      let reduced-ego item 0 reduced-vector                      ;
+      let reduced-target item 1 reduced-vector                   ;
+      let reduced-action item 2 reduced-vector                   ;
+      let reduced-weight item 3 reduced-vector                   ;
 
-      if ( reduced-ego = original-ego )                        ;
-      and ( reduced-target = original-target )                 ;
-      and ( reduced-action = original-action ) [               ;
+      if ( reduced-ego = original-ego )                          ;
+      and ( reduced-target = original-target )                   ;
+      and ( reduced-action = original-action ) [                 ;
 
-        set vector-doesnt-exist false                          ;
+        set vector-doesnt-exist false                            ;
 
-        set reduced-weight ifelse-value                        ;
-        ( is-number? reduced-weight )                          ;
-        [ reduced-weight ]                                     ;
-        [ 0 ]                                                  ;
+        set reduced-weight ifelse-value                          ;
+        ( is-number? reduced-weight )                            ;
+        [ reduced-weight ]                                       ;
+        [ 0 ]                                                    ;
 
-        set original-weight ifelse-value                       ;
-        ( is-number? original-weight )                         ;
-        [ original-weight ]                                    ;
-        [ 0 ]                                                  ;
+        set original-weight ifelse-value                         ;
+        ( is-number? original-weight )                           ;
+        [ original-weight ]                                      ;
+        [ 0 ]                                                    ;
 
-        let new-vector ( list                                  ;
-          self                                                 ;
-          reduced-target                                       ;
-          reduced-action                                       ;
-          ( reduced-weight + original-weight )                 ;
-          false )                                              ;
+        let new-vector ( list                                    ;
+          self                                                   ;
+          reduced-target                                         ;
+          reduced-action                                         ;
+          ( reduced-weight + original-weight )                   ;
+          false )                                                ;
 
-        set reduced-decisions                                  ;
-        remove-item index reduced-decisions                    ;
+        set reduced-decisions                                    ;
+        remove-item index reduced-decisions                      ;
 
-        set reduced-decisions                                  ;
-        lput new-vector reduced-decisions ]                    ;
+        set reduced-decisions                                    ;
+        lput new-vector reduced-decisions ]                      ;
 
-      set index index + 1                                      ;
+      set index index + 1                                        ;
     ]
 
-    if vector-doesnt-exist [                                   ;
-      set reduced-decisions lput                               ;
-      ( list                                                   ;
-        self                                                   ;
-        original-target                                        ;
-        original-action                                        ;
-        original-weight                                        ;
-        false )                                                ;
-      reduced-decisions ]                                      ;
+    if vector-doesnt-exist [                                     ;
+      set reduced-decisions lput                                 ;
+      ( list                                                     ;
+        self                                                     ;
+        original-target                                          ;
+        original-action                                          ;
+        original-weight                                          ;
+        false )                                                  ;
+      reduced-decisions ]                                        ;
   ]
-  set decision.vectors reduced-decisions                       ;
+  set decision.vectors reduced-decisions                         ;
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -1154,7 +1247,7 @@ to-report check-distance [ target ]
 
   report ( ifelse-value
     ( member? "aspatial" model-structure )                     ; If current simulation is "aspatial" then
-    [ true ]                                                   ; distance to target is within bounds.
+    [ true ]                                                   ; distance to target is always within bounds.
 
     ( target = nobody )                                        ; If there is no target then distance
     [ false ]                                                  ; to target is not within bounds.
@@ -1277,10 +1370,6 @@ to complete-action [ target action cost ]
   set actions.completed                                        ; Record this action item
   lput completed-action                                        ; in caller's list of recently completed
   actions.completed                                            ; actions.
-
-  set recent-actions-completed                                 ; Also record this action item
-  lput ( sentence ticks completed-action )                     ; globally.
-  recent-actions-completed
 end
 
 ; ========================================================================================================= ;
@@ -1792,7 +1881,9 @@ end
 ;
 ; This routine
 ;
-; ENTRY:
+; ENTRY: 'target' defines the individual that the caller is interacting with.
+;
+;        'cost' defines the amount of energy that the caller paid for this interaction.
 ;
 ; EXIT:
 ;
@@ -1810,7 +1901,7 @@ to join [ target cost ]
       [ get-action-cost-of myself "recruit" ] of myself         ; about caller joining the group.
     ]
     let probability ( my-cost + target-cost )
-    / ( abs my-cost + abs target-cost )                         ; The probability of caller joining group depends on
+    / ( abs my-cost + abs target-cost + 0.0000000001 )          ; The probability of caller joining group depends on
     if ( random-float 1.0 <= probability )                      ; the relative costs paid by caller and group members.
     [ join-group ([group.identity] of target) ]                 ; If the probability is high enough, caller joins group.
   ]
@@ -1822,7 +1913,9 @@ end
 ;
 ; This routine only works if target and caller are part of the same group.
 ;
-; ENTRY:
+; ENTRY: 'target' defines the individual that the caller is interacting with.
+;
+;        'cost' defines the amount of energy that the caller paid for this interaction.
 ;
 ; EXIT:
 ;
@@ -1840,8 +1933,9 @@ to leave [ target cost ]
       [ get-action-cost-of myself "expel" ] of myself           ; about caller leaving the group.
     ]
     let probability ( my-cost + target-cost )
-    / ( abs my-cost + abs target-cost )                         ; The probability of caller joining group depends on
-    if ( random-float 1.0 <= probability )                      ; the relative costs paid by caller and group members.
+    / ( abs my-cost + abs target-cost + 0.0000000001 )          ; The probability of caller joining group depends on
+    if ( random-float 1.0 <= probability                        ; the relative costs paid by caller and group members.
+      or ( probability = 0 and cost = 0 ))
     [ leave-group ]                                             ; If the probability is high enough, caller leaves group.
   ]
 end
@@ -1852,7 +1946,9 @@ end
 ;
 ; This routine
 ;
-; ENTRY:
+; ENTRY: 'target' defines the individual that the caller is interacting with.
+;
+;        'cost' defines the amount of energy that the caller paid for this interaction.
 ;
 ; EXIT:
 ;
@@ -1871,7 +1967,7 @@ to recruit [ target cost ]
       get-action-cost-of target "join"
     ]
     let probability ( our-cost + target-cost )
-    / ( abs our-cost + abs target-cost )                          ; The probability of caller joining group depends on
+    / ( abs our-cost + abs target-cost + 0.0000000001 )           ; The probability of caller joining group depends on
     if ( random-float 1.0 <= probability )                        ; the relative costs paid by target and group members.
     [ ask target [ join-group [group.identity] of myself ]]       ; If the probability is high enough, target joins group.
   ]
@@ -1879,11 +1975,13 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; CALLER APPLIES TO EXPEL THE TARGET TO ITS CURRENT GROUP
+; CALLER APPLIES TO EXPEL THE TARGET FROM ITS CURRENT GROUP
 ;
-; This routine
+; This routine...strangers cannot do this to non-group members to get them to leave their group (Change)
 ;
-; ENTRY:
+; ENTRY: 'target' defines the individual that the caller is interacting with.
+;
+;        'cost' defines the amount of energy that the caller paid for this interaction.
 ;
 ; EXIT:
 ;
@@ -1902,7 +2000,7 @@ to expel [ target cost ]
       get-action-cost-of target "leave"
     ]
     let probability ( our-cost + target-cost )
-    / ( abs our-cost + abs target-cost )                          ; The probability of caller joining group depends on
+    / ( abs our-cost + abs target-cost + 0.0000000001 )           ; The probability of caller joining group depends on
     if ( random-float 1.0 <= probability )                        ; the relative costs paid by target and group members.
     [ ask target [ leave-group ]]                                 ; If the probability is high enough, target leaves group.
   ]
@@ -1925,13 +2023,24 @@ end
 
 to join-group [ group-id ]
   complete-action self "join-group" 0                          ; Record that this action is completed.
-  if ( group.identity != group-id ) [                          ; If the caller is not already parf of group,
-    set group.identity group-id                                ; establish the input value as the current group.
-    set label "="                                              ; Visually indicate that caller has joined a group.
-    set group.transfers.history                                ; Caller keeps a record of transferring to this group.
-    lput group.identity group.transfers.history
-    complete-action self "joined-group" 0
+  ifelse ( group.identity != group-id ) [                      ; If the caller is not already parf of group:
+
+    leave self 0                                               ; Determine if the caller leaves its current group.
+    if ( is-solitary? ) [                                      ; If the caller has left its group:
+
+      set group.identity group-id                              ; Establish the input value as the current group.
+      set label "="                                            ; Visually indicate that caller has joined a group.
+      set group.transfers.history                              ; Caller keeps a record of transferring to this group.
+      lput group.identity group.transfers.history
+      complete-action self "joined-group" 0  ]                 ; Record that the individual has now joined the group.
+
+  ][
+    complete-action self "already-in-group" 0                  ; Record if individual is already in this group.
   ]
+end
+
+to-report is-solitary?
+  report count anima1s with [ group.identity = [group.identity] of myself ] = 1
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -1957,45 +2066,118 @@ to leave-group
   complete-action self "left-group" 0
 end
 
-
-
-
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; CALLER ATTEMPTS TO PICK UP THE TARGET
+;
+; This subroutine
+;
+; ENTRY: 'target' defines the individual that the caller is interacting with.
+;
+;        'cost' defines the amount of energy that the caller paid for this interaction.
+;
+; EXIT:
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to pick-up [ target cost ]
   complete-action target "pick-up" cost
   if ( is-anima1? target ) [
     if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "pick-up"
-      let probability ( cost - abs target-cost ) / cost
-      if ( random-float 1.0 <= probability ) [ carry target ]]]
+    [ let target-cost get-action-cost-of target "cling-to"
+      let probability ( cost + target-cost )
+      / ( abs cost + abs target-cost + 0.0000000001 )             ; The probability of caller
+      if ( random-float 1.0 <= probability )
+      [ carry target ]]]
 end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; CALLER ATTEMPTS TO PUT DOWN TARGET
+;
+; This subroutine
+;
+; ENTRY: 'target' defines the individual that the caller is interacting with.
+;
+;        'cost' defines the amount of energy that the caller paid for this interaction.
+;
+; EXIT:
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to put-down [ target cost ]
   complete-action target "put-down" cost
   if ( is-anima1? target ) [
     if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "put-down"
-      let probability ( cost - abs target-cost ) / cost
-      if ( random-float 1.0 <= probability ) [ drop target ]]]
+    [ let target-cost get-action-cost-of target "squirm-from"
+      let probability ( cost + target-cost )
+      / ( abs cost + abs target-cost + 0.0000000001 )             ; The probability of caller
+      if ( random-float 1.0 <= probability )
+      [ drop target ]]]
 end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; CALLER ATTEMPTS TO CLING TO TARGET
+;
+; This subroutine
+;
+; ENTRY: 'target' defines the individual that the caller is interacting with.
+;
+;        'cost' defines the amount of energy that the caller paid for this interaction.
+;
+; EXIT:
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to cling-to [ target cost ]
   complete-action target "cling-to" cost
   if ( is-anima1? target ) [
     if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "cling-to"
-      let probability ( cost - abs target-cost ) / cost
-      if ( random-float 1.0 <= probability ) [ ask target [ carry myself ] ]]]
+    [ let target-cost get-action-cost-of target "pick-up"
+      let probability ( cost + target-cost )
+      / ( abs cost + abs target-cost + 0.0000000001 )             ; The probability of caller
+      if ( random-float 1.0 <= probability )
+      [ ask target [ carry myself ] ]]]
 end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; CALLER ATTEMPTS TO SQUIRM FROM TARGET
+;
+; This subroutine
+;
+; ENTRY: 'target' defines the individual that the caller is interacting with.
+;
+;        'cost' defines the amount of energy that the caller paid for this interaction.
+;
+; EXIT:
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to squirm-from [ target cost ]
   complete-action target "squirm-from" cost
   if ( is-anima1? target ) [
     if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "squirm-from"
-      let probability ( cost - abs target-cost ) / cost
-      if ( random-float 1.0 <= probability ) [ ask target [ drop myself ] ]]]
+    [ let target-cost get-action-cost-of target "put-down"
+      let probability ( cost + target-cost )
+      / ( abs cost + abs target-cost + 0.0000000001 )             ; The probability of caller
+      if ( random-float 1.0 <= probability )
+      [ ask target [ drop myself ] ]]]
 end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; CALLER ATTEMPTS TO CARRY TARGET
+;
+; This subroutine
+;
+; ENTRY: 'target' defines the individual that the caller is interacting with.
+;
+;
+; EXIT:
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to carry [ target ]
   complete-action target "carry" 0
@@ -2008,6 +2190,19 @@ to carry [ target ]
   ]
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; CALLER ATTEMPTS TO DROP TARGET
+;
+; This subroutine
+;
+; ENTRY: 'target' defines the individual that the caller is interacting with.
+;
+;
+; EXIT:
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to drop [ target ]
   complete-action target "drop" 0
   if ( member? target carried.items ) [
@@ -2016,6 +2211,20 @@ to drop [ target ]
     complete-action target "drop-complete" 0
   ]
 end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; CALLER ATTEMPTS TO HELP TARGET
+;
+; This subroutine
+;
+; ENTRY: 'target' defines the individual that the caller is interacting with.
+;
+;        'cost' defines the amount of energy that the caller paid for this interaction.
+;
+; EXIT:
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to help [ target cost ]
   complete-action target "help" cost
@@ -2028,56 +2237,122 @@ to help [ target cost ]
       if ( random-float 1.0 <= ( cost-probability * size-probability ) ) [ aid target net-cost ]]]
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; CALLER AIDS THE TARGET
+;
+; This subroutine
+;
+; ENTRY: 'target' defines the individual that the caller is interacting with.
+;
+;        'cost' defines the amount of energy that the caller paid for this interaction.
+;
+; EXIT:
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to aid [ target cost ]
   complete-action target "aid" 0
-  if ( is-anima1? target and [ is.alive ] of target = true ) [
-    complete-action target "aid-complete" 0
-    ask target [
-      survival-chance cost
-      set help.from.history lput [my.identity] of myself help.from.history
-    ]
 
-    set label "+"
-    ; recording kin selection
-    let relatedness-with-target relatedness-with target
-    if ( relatedness-with-target > 0.90 ) [ set whole.related.help.cost whole.related.help.cost + cost ]
-    if ( relatedness-with-target <= 0.90 and relatedness-with-target > 0.40 ) [ set half.related.help.cost half.related.help.cost + cost ]
-    if ( relatedness-with-target <= 0.40 and relatedness-with-target > 0.15 ) [ set fourth.related.help.cost fourth.related.help.cost + cost ]
-    if ( relatedness-with-target <= 0.15 and relatedness-with-target > 0.05 ) [ set eighth.related.help.cost eighth.related.help.cost + cost ]
-    if ( relatedness-with-target <= 0.05 ) [ set not.related.help.cost not.related.help.cost + cost ]
-  ]
+  ask target [
+    survival-chance cost
+
+    set help.from.history lput
+    [my.identity] of myself
+    help.from.history ]
+
+  set label "+"
+
+  let relatedness-with-target relatedness-with target
+  if ( relatedness-with-target > 0.90 )
+  [ set whole.related.help.cost whole.related.help.cost + cost ]
+  if ( relatedness-with-target <= 0.90 and
+    relatedness-with-target > 0.40 )
+  [ set half.related.help.cost half.related.help.cost + cost ]
+  if ( relatedness-with-target <= 0.40 and
+    relatedness-with-target > 0.15 )
+  [ set fourth.related.help.cost fourth.related.help.cost + cost ]
+  if ( relatedness-with-target <= 0.15 and
+    relatedness-with-target > 0.05 )
+  [ set eighth.related.help.cost eighth.related.help.cost + cost ]
+  if ( relatedness-with-target <= 0.05 )
+  [ set not.related.help.cost not.related.help.cost + cost ]
+
+  complete-action target "aid-complete" 0
 end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; CALLER ATTEMPTS TO ATTACK THE TARGET
+;
+; This subroutine
+;
+; ENTRY: 'target' defines the individual that the caller is interacting with.
+;
+;        'cost' defines the amount of energy that the caller paid for this interaction.
+;
+; EXIT:
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to attack [ target cost ]
   complete-action target "attack" cost
   if ( is-anima1? target and [ is.alive ] of target = true ) [
     if ( cost > 0 )
     [ let target-cost get-action-cost-of target "attack"
-      let cost-probability ( cost + target-cost ) / cost
+      let cost-probability ( cost + target-cost ) / ( abs cost + abs target-cost )
       let size-probability ( size / ( size + [size] of target ) )
       let net-cost cost + target-cost
       if ( random-float 1.0 <= ( cost-probability * size-probability ) ) [ harm target net-cost ]]]
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; CALLER HARMS THE TARGET
+;
+; This subroutine
+;
+; ENTRY: 'target' defines the individual that the caller is interacting with.
+;
+;        'cost' defines the amount of energy that the caller paid for this interaction.
+;
+; EXIT:
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to harm [ target cost ]
   complete-action target "harm" 0
   if ( is-anima1? target and [ is.alive ] of target = true ) [
-    complete-action target "harm-complete" 0
+
     ask target [
       survival-chance ( - cost )
-      set attack.from.history lput [my.identity] of myself attack.from.history
-    ]
+      set attack.from.history lput
+      [my.identity] of myself
+      attack.from.history ]
 
     set label "-"
-    ; recording kin selection
-    let relatedness-with-target relatedness-with target
-    if ( relatedness-with-target > 0.90 ) [ set whole.related.attack.cost whole.related.attack.cost + cost ]
-    if ( relatedness-with-target <= 0.90 and relatedness-with-target > 0.40 ) [ set half.related.attack.cost half.related.attack.cost + cost ]
-    if ( relatedness-with-target <= 0.40 and relatedness-with-target > 0.15 ) [ set fourth.related.attack.cost fourth.related.attack.cost + cost ]
-    if ( relatedness-with-target <= 0.15 and relatedness-with-target > 0.05 ) [ set eighth.related.attack.cost eighth.related.attack.cost + cost ]
-    if ( relatedness-with-target <= 0.05 ) [ set not.related.attack.cost not.related.attack.cost + cost ]
-    ; infanticide
-    if ( [ life.history ] of target = "infant" and target != self ) [ set infanticide.history lput [my.identity] of target infanticide.history ]
+
+    let relatedness-with-target relatedness-with target               ; recording kin selection
+    if ( relatedness-with-target > 0.90 )
+    [ set whole.related.attack.cost whole.related.attack.cost + cost ]
+    if ( relatedness-with-target <= 0.90 and
+      relatedness-with-target > 0.40 )
+    [ set half.related.attack.cost half.related.attack.cost + cost ]
+    if ( relatedness-with-target <= 0.40 and
+      relatedness-with-target > 0.15 )
+    [ set fourth.related.attack.cost fourth.related.attack.cost + cost ]
+    if ( relatedness-with-target <= 0.15 and
+      relatedness-with-target > 0.05 )
+    [ set eighth.related.attack.cost eighth.related.attack.cost + cost ]
+    if ( relatedness-with-target <= 0.05 )
+    [ set not.related.attack.cost not.related.attack.cost + cost ]
+
+    if ( [ life.history ] of target = "infant" and                     ; infanticide
+      target != self and
+      not member? target infanticide.history )
+    [ set infanticide.history lput [my.identity] of target infanticide.history ]
+
+    complete-action target "harm-complete" 0
   ]
 end
 
@@ -2143,9 +2418,15 @@ end
 ; caller and target must not be of the same biological sex and they must both be adults. The female in
 ; this interaction must also be currently cycling (rather than pregnant or lactating).
 ;
-; ENTRY:
+; ENTRY: 'target' defines the individual that the caller is interacting with.
 ;
-; EXIT:
+;        'cost' defines the amount of energy that the caller paid for this interaction.
+;
+;        conception.chance | is defined in the anima1 state variables above.
+;
+; EXIT:  If mating occurs, there is a chance that caller and target will conceive.
+;
+;        copulations.history | A record of all mating partners and frequency of matings.
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
@@ -2167,9 +2448,10 @@ to mate-with [ target cost ]
     and conception.chance > 0                                  ;
     and [conception.chance] of target > 0 ) [                  ; If all of these criteria are met...
 
+    let my-cost [ get-action-cost-of myself "mate-with" ] of target
     let target-cost get-action-cost-of target "mate-with"      ; Calculate the probability of copulation,
-    let net-cost ( cost + target-cost )                        ; which could be 100% if both parties cooperate
-    let copulation-prob net-cost / cost                        ; or a smaller probability if either party resists.
+    let net-cost ( my-cost + target-cost )                        ; which could be 100% if both parties cooperate
+    let copulation-prob net-cost / my-cost                        ; or a smaller probability if either party resists.
     if ( random-float 1.0 <= copulation-prob ) [               ; If passes this probability check...
 
       set label "!"                                            ; Signal that a successful copulation event occurred.
@@ -2204,7 +2486,8 @@ end
 ;
 ; This subroutine can only be performed by a female caller.
 ;
-; ENTRY:
+; ENTRY: 'target' defines the individual that the caller is interacting with.
+;
 ;
 ; EXIT:
 ;
@@ -2405,38 +2688,38 @@ end
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
-to set-phenotype-to-ideal-form ; all anima1s or living animals?
+to set-phenotype-to-ideal-form
   ask my.mother [
     let new-energy-supply ( energy.supply / 2 )
     set energy.supply new-energy-supply
     ask myself [ set energy.supply new-energy-supply ]]
   set hidden? false
   set is.resting false
-  set body.size mean [body.size] of anima1s
-  set body.shade mean [body.shade] of anima1s
-  set bite.capacity mean [bite.capacity] of anima1s
-  set mutation.chance mean [mutation.chance] of anima1s
-  set sex.ratio mean [sex.ratio] of anima1s
-  set litter.size mean [litter.size] of anima1s
-  set conception.chance mean [conception.chance] of anima1s
-  set hidden.chance mean [hidden.chance] of anima1s
-  set birthing.chance mean [birthing.chance] of anima1s
-  set weaning.chance mean [weaning.chance] of anima1s
-  set infancy.chance mean [infancy.chance] of anima1s
-  set juvenility.chance mean [juvenility.chance] of anima1s
-  set adulthood.chance mean [adulthood.chance] of anima1s
-  set survival.chance mean [survival.chance] of anima1s
-  set yellow.chance mean [yellow.chance] of anima1s
-  set red.chance mean [red.chance] of anima1s
-  set blue.chance mean [blue.chance] of anima1s
-  set yellow.signal one-of modes [yellow.signal] of anima1s
-  set red.signal one-of modes [red.signal] of anima1s
-  set blue.signal one-of modes [blue.signal] of anima1s
-  set visual.angle mean [ visual.angle ] of anima1s
-  set visual.range mean [ visual.range ] of anima1s
-  set day.perception mean [ day.perception ] of anima1s
-  set night.perception mean [ night.perception ] of anima1s
-  update-to-adult
+  set body.size mean [body.size] of anima1s with [ is.alive ]
+  set body.shade mean [body.shade] of anima1s with [ is.alive ]
+  set bite.capacity mean [bite.capacity] of anima1s with [ is.alive ]
+  set mutation.chance mean [mutation.chance] of anima1s with [ is.alive ]
+  set sex.ratio mean [sex.ratio] of anima1s with [ is.alive ]
+  set litter.size mean [litter.size] of anima1s with [ is.alive ]
+  set conception.chance mean [conception.chance] of anima1s with [ is.alive ]
+  set hidden.chance mean [hidden.chance] of anima1s with [ is.alive ]
+  set birthing.chance mean [birthing.chance] of anima1s with [ is.alive ]
+  set weaning.chance mean [weaning.chance] of anima1s with [ is.alive ]
+  set infancy.chance mean [infancy.chance] of anima1s with [ is.alive ]
+  set juvenility.chance mean [juvenility.chance] of anima1s with [ is.alive ]
+  set adulthood.chance mean [adulthood.chance] of anima1s with [ is.alive ]
+  set survival.chance mean [survival.chance] of anima1s with [ is.alive ]
+  set yellow.chance mean [yellow.chance] of anima1s with [ is.alive ]
+  set red.chance mean [red.chance] of anima1s with [ is.alive ]
+  set blue.chance mean [blue.chance] of anima1s with [ is.alive ]
+  set yellow.signal one-of modes [yellow.signal] of anima1s with [ is.alive ]
+  set red.signal one-of modes [red.signal] of anima1s with [ is.alive ]
+  set blue.signal one-of modes [blue.signal] of anima1s with [ is.alive ]
+  set visual.angle mean [ visual.angle ] of anima1s with [ is.alive ]
+  set visual.range mean [ visual.range ] of anima1s with [ is.alive ]
+  set day.perception mean [ day.perception ] of anima1s with [ is.alive ]
+  set night.perception mean [ night.perception ] of anima1s with [ is.alive ]
+  update-to-adult                                               ; Update caller to adult status.
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -2891,7 +3174,7 @@ plant-seasonality
 plant-seasonality
 0
 1
-0.5
+1.0
 .05
 1
 NIL
@@ -2933,7 +3216,7 @@ MONITOR
 825
 142
 time
-get-solar-status
+solar-status
 17
 1
 11
@@ -2944,7 +3227,7 @@ INPUTBOX
 995
 191
 population
-Geladas-2
+four-groups-plus-males
 1
 0
 String
@@ -3019,7 +3302,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "meta-report" "show-territories" "---------------------" " > OPERATIONS   " "---------------------" "parameter-settings" "default-settings" "model-structure" "-- aspatial" "-- free-lunch" "-- ideal-form" "-- no-evolution" "-- no-plants" "-- reaper" "-- signal-fertility" "-- stork" "-- uninvadable" "clear-population" "new-population" "reset-plants" "save-world" "import-world" "save-simulation" "output-results" "---------------------" " > VERIFICATION " "---------------------" "dynamic-check" "-- true" "-- false" "runtime-check" "visual-check" "-- attack-pattern" "-- dine-and-dash" "-- life-history-channel" "-- musical-pairs" "-- night-and-day" "-- popularity-context" "-- speed-mating" "-- square-dance" "-- supply-and-demand" "---------------------" " > DISPLAY RESULTS   " "---------------------" "age" "generations" "life-history" "genotype" "phenotype" "-- survival-chance" "-- body-size" "-- body-shade" "-- fertility-status" "-- hidden-chance" "-- bite-capacity" "-- mutation-chance" "-- sex-ratio" "-- litter-size" "-- conception-chance" "-- visual-angle" "-- visual-range" "-- day-perception" "-- night-perception" "-- yellow-chance" "-- red-chance" "-- blue-chance" "-- birthing-chance" "-- weaning-chance" "-- infancy-chance" "-- juvenility-chance" "-- adulthood-chance" "carried-items" "energy-supply" "behaviors" "-- environment" "-- decisions" "-- actions" "-- birthing" "-- weaning" "-- matings" "-- mating-partners" "-- conceptions" "-- infanticide" "-- group-transfers" "-- travel-distance" "-- foraging-gains" "-- total-energy-gains" "-- total-energy-cost" "-- receiving-history" "-- carried-history" "-- aid-history" "-- harm-history"
-2
+75
 
 BUTTON
 1063
@@ -3098,7 +3381,7 @@ plant-quality
 plant-quality
 .1
 100
-20.0
+10.0
 .1
 1
 NIL
@@ -3259,7 +3542,7 @@ simulation-summary-ticks
 simulation-summary-ticks
 0
 10000
-10000.0
+0.0
 500
 1
 NIL
@@ -3274,7 +3557,7 @@ verification-rate
 verification-rate
 0
 1
-0.005
+0.0
 0.001
 1
 NIL
@@ -3287,7 +3570,7 @@ SWITCH
 270
 record-individuals-on
 record-individuals-on
-0
+1
 1
 -1000
 
@@ -3300,7 +3583,7 @@ simulation-scan-ticks
 simulation-scan-ticks
 0
 10000
-250.0
+0.0
 250
 1
 NIL
@@ -3315,7 +3598,7 @@ group-scan-ticks
 group-scan-ticks
 0
 10000
-1000.0
+0.0
 500
 1
 NIL
@@ -3345,7 +3628,7 @@ view-scan-ticks
 view-scan-ticks
 0
 10000
-1000.0
+10000.0
 500
 1
 NIL
@@ -3360,7 +3643,7 @@ genotype-scan-ticks
 genotype-scan-ticks
 0
 10000
-1000.0
+0.0
 500
 1
 NIL
@@ -3375,16 +3658,16 @@ focal-follow-rate
 focal-follow-rate
 0
 1
-1.0
+0.0
 0.0001
 1
 NIL
 HORIZONTAL
 
 OUTPUT
-1129
+1132
 10
-1695
+1698
 587
 12
 

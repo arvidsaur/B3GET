@@ -350,7 +350,7 @@ to record-actions ; agent subroutine
   
   file-open file-path
   
-  let action-list filter [ a -> item 0 a = ticks and ( item 1 a = self or item 2 a = self ) ] recent-actions-completed
+  let action-list filter [ a -> item 0 a = ticks and ( item 1 a = self or item 2 a = self ) ] [] ; FIX recent-actions-completed
   
   foreach action-list [ action ->
     
@@ -2357,7 +2357,7 @@ to-report lifetime-plant-abundance report mean sublist plant-abundance-record ( 
 to-report lifetime-plant-patchiness report mean sublist plant-patchiness-record  ( length plant-patchiness-record  - how-many-records ) ( length plant-patchiness-record  ) end
 to-report lifetime-population-size report mean sublist population-size-record ( length population-size-record - how-many-records ) ( length population-size-record ) end
   
-to-report how-many-records report ceiling (( ticks.at.death - ticks.at.conception ) / record-tick-interval ) end
+to-report how-many-records report ceiling (( ticks.at.death - ticks.at.conception ) / timestep-interval ) end
   
 ;--------------------------------------------------------------------------------------------------------------------
 ; OBSERVER FUNCTIONS

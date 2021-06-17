@@ -5984,7 +5984,7 @@ anima1s,9999999,0,95,270,81,82, ,9.9,circle332,FALSE,0.9,1,up,female,adult,cycli
 ""[1]"",am,βqnv,mate-with,1.0E-5
 ""[1]"",c,amqnv,mate-with,1.0E-5
 ""[1]"",e,oafnv,match-heading,5.0E-4",nobody
-anima1s,9999999,0,105,45,80,40, ,9.9,circle332,FALSE,0.9,1,up,female,adult,cycling,105,TRUE,FALSE,FALSE,TRUE,FALSE,0.999990194,0.9,0.7,1000,LLLLLLLLLL,OLKBWXUPBS,[],0.4,0.05,0.5,0,0.999,0.8,1,0.5,0,0,0.999,0,0,0,0,0,0,0,0,"""[1]"",e,e,survival-chance,0.006
+anima1s,9999999,0,105,45,80,40, ,9.9,circle332,FALSE,0.9,1,up,female,adult,cycling,245,TRUE,FALSE,FALSE,TRUE,FALSE,0.999990194,0.9,0.7,1000,LLLLLLLLLL,OLKBWXUPBS,[],0.4,0.05,0.5,0,0.999,0.8,1,0.5,0,0,0.999,0,0,0,0,0,0,0,0,"""[1]"",e,e,survival-chance,0.006
 ""[1]"",g,e,body-size,5.0E-5
 ""[1]"",i,e,body-size,0.001
 ""[1]"",jf,e,body-size,5.0E-4
@@ -6117,7 +6117,7 @@ anima1s,9999999,0,105,45,80,40, ,9.9,circle332,FALSE,0.9,1,up,female,adult,cycli
 ""[1]"",am,βqnv,mate-with,1.0E-5
 ""[1]"",c,amqnv,mate-with,1.0E-5
 ""[1]"",e,oafnv,match-heading,5.0E-4",nobody
-anima1s,9999999,0,105,45,78,40, ,9.9,circle332,FALSE,0.9,1,up,female,adult,cycling,105,TRUE,FALSE,FALSE,TRUE,FALSE,0.999990194,0.9,0.7,1000,LLLLLLLLLL,ZDWUNSTQQK,[],0.4,0.05,0.5,0,0.999,0.8,1,0.5,0,0,0.999,0,0,0,0,0,0,0,0,"""[1]"",e,e,survival-chance,0.006
+anima1s,9999999,0,105,45,78,40, ,9.9,circle332,FALSE,0.9,1,up,female,adult,cycling,245,TRUE,FALSE,FALSE,TRUE,FALSE,0.999990194,0.9,0.7,1000,LLLLLLLLLL,ZDWUNSTQQK,[],0.4,0.05,0.5,0,0.999,0.8,1,0.5,0,0,0.999,0,0,0,0,0,0,0,0,"""[1]"",e,e,survival-chance,0.006
 ""[1]"",g,e,body-size,5.0E-5
 ""[1]"",i,e,body-size,0.001
 ""[1]"",jf,e,body-size,5.0E-4
@@ -6250,7 +6250,7 @@ anima1s,9999999,0,105,45,78,40, ,9.9,circle332,FALSE,0.9,1,up,female,adult,cycli
 ""[1]"",am,βqnv,mate-with,1.0E-5
 ""[1]"",c,amqnv,mate-with,1.0E-5
 ""[1]"",e,oafnv,match-heading,5.0E-4",nobody
-anima1s,9999999,0,105,0,80,38, ,9.9,circle332,FALSE,0.9,1,up,female,adult,cycling,105,TRUE,FALSE,FALSE,TRUE,FALSE,0.999990194,0.9,0.7,1000,LLLLLLLLLL,KEJMLPRPPP,[],0.4,0.05,0.5,0,0.999,0.8,1,0.5,0,0,0.999,0,0,0,0,0,0,0,0,"""[1]"",e,e,survival-chance,0.006
+anima1s,9999999,0,105,0,80,38, ,9.9,circle332,FALSE,0.9,1,up,female,adult,cycling,245,TRUE,FALSE,FALSE,TRUE,FALSE,0.999990194,0.9,0.7,1000,LLLLLLLLLL,KEJMLPRPPP,[],0.4,0.05,0.5,0,0.999,0.8,1,0.5,0,0,0.999,0,0,0,0,0,0,0,0,"""[1]"",e,e,survival-chance,0.006
 ""[1]"",g,e,body-size,5.0E-5
 ""[1]"",i,e,body-size,0.001
 ""[1]"",jf,e,body-size,5.0E-4
@@ -6383,7 +6383,7 @@ anima1s,9999999,0,105,0,80,38, ,9.9,circle332,FALSE,0.9,1,up,female,adult,cyclin
 ""[1]"",am,βqnv,mate-with,1.0E-5
 ""[1]"",c,amqnv,mate-with,1.0E-5
 ""[1]"",e,oafnv,match-heading,5.0E-4",nobody
-anima1s,9999999,0,105,0,79,39, ,9.9,circle332,FALSE,0.9,1,up,female,adult,cycling,105,TRUE,FALSE,FALSE,TRUE,FALSE,0.999990194,0.9,0.7,1000,LLLLLLLLLL,RWQMKEVYIH,[],0.4,0.05,0.5,0,0.999,0.8,1,0.5,0,0,0.999,0,0,0,0,0,0,0,0,"""[1]"",e,e,survival-chance,0.006
+anima1s,9999999,0,105,0,79,39, ,9.9,circle332,FALSE,0.9,1,up,female,adult,cycling,245,TRUE,FALSE,FALSE,TRUE,FALSE,0.999990194,0.9,0.7,1000,LLLLLLLLLL,RWQMKEVYIH,[],0.4,0.05,0.5,0,0.999,0.8,1,0.5,0,0,0.999,0,0,0,0,0,0,0,0,"""[1]"",e,e,survival-chance,0.006
 ""[1]"",g,e,body-size,5.0E-5
 ""[1]"",i,e,body-size,0.001
 ""[1]"",jf,e,body-size,5.0E-4
@@ -6516,7 +6516,7 @@ anima1s,9999999,0,105,0,79,39, ,9.9,circle332,FALSE,0.9,1,up,female,adult,cyclin
 ""[1]"",am,βqnv,mate-with,1.0E-5
 ""[1]"",c,amqnv,mate-with,1.0E-5
 ""[1]"",e,oafnv,match-heading,5.0E-4",nobody
-anima1s,9999999,0,105,0,80,39, ,9.9,circle332,FALSE,0.9,1,up,female,adult,cycling,105,TRUE,FALSE,FALSE,TRUE,FALSE,0.999990194,0.9,0.7,1000,LLLLLLLLLL,TUNRYHASMV,[],0.4,0.05,0.5,0,0.999,0.8,1,0.5,0,0,0.999,0,0,0,0,0,0,0,0,"""[1]"",e,e,survival-chance,0.006
+anima1s,9999999,0,105,0,80,39, ,9.9,circle332,FALSE,0.9,1,up,female,adult,cycling,245,TRUE,FALSE,FALSE,TRUE,FALSE,0.999990194,0.9,0.7,1000,LLLLLLLLLL,TUNRYHASMV,[],0.4,0.05,0.5,0,0.999,0.8,1,0.5,0,0,0.999,0,0,0,0,0,0,0,0,"""[1]"",e,e,survival-chance,0.006
 ""[1]"",g,e,body-size,5.0E-5
 ""[1]"",i,e,body-size,0.001
 ""[1]"",jf,e,body-size,5.0E-4
@@ -11836,7 +11836,7 @@ anima1s,9999999,0,95,128,80,81, ,9.9,triangle332,FALSE,0.9,1,up,male,adult, ,95,
 ""[1]"",am,βqnv,mate-with,1.0E-5
 ""[1]"",c,amqnv,mate-with,1.0E-5
 ""[1]"",e,oafnv,match-heading,5.0E-4",nobody
-anima1s,9999999,0,105,112,80,41, ,9.9,triangle332,FALSE,0.9,1,up,male,adult, ,105,TRUE,FALSE,FALSE,FALSE,FALSE,0.999990194,0.9,0.7,1000,KJZKSEWDNI,ZGKVGRJJWW,[],0.4,0.05,0.5,0,0.999,0.8,1,0.5,0,0,0,0,0,0,0,0,0,0,0,"""[1]"",e,e,survival-chance,0.006
+anima1s,9999999,0,105,112,80,41, ,9.9,triangle332,FALSE,0.9,1,up,male,adult, ,245,TRUE,FALSE,FALSE,FALSE,FALSE,0.999990194,0.9,0.7,1000,KJZKSEWDNI,ZGKVGRJJWW,[],0.4,0.05,0.5,0,0.999,0.8,1,0.5,0,0,0,0,0,0,0,0,0,0,0,"""[1]"",e,e,survival-chance,0.006
 ""[1]"",g,e,body-size,5.0E-5
 ""[1]"",i,e,body-size,0.001
 ""[1]"",jf,e,body-size,5.0E-4

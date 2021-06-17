@@ -106,8 +106,8 @@ to command
     ( useful-commands = "-- square-dance" ) [ visual-verification ]
     
     ( useful-commands = "-- environment" ) [ environment-check ]
-    ( useful-commands = "-- decisions" ) [ output-decisions display-results ] ;
-    ( useful-commands = "-- actions" ) [ output-actions  display-results ] ; 
+    ( useful-commands = "-- decisions" ) [ output-decisions ] ;
+    ( useful-commands = "-- actions" ) [ output-actions ] ; 
     ( useful-commands = "genotype" ) [ output-genotype  ]
     
     
@@ -171,22 +171,6 @@ to command
 
 
 
-end
-
-to environment-check
-  ifelse ( subject != nobody ) [
-    
-    ask subject [
-    foreach my.environment [ envir -> 
-      output-print envir
-    ]]
-    
-  ][
-    
-    
-    
-    
-  ]
 end
 
 to output-territories
@@ -530,26 +514,29 @@ to visual-verification
 end
 
 ;-----------------------------------------------------------------------------       
-; VIEW ACTIONS
-;-----------------------------------------------------------------------------   
+; VIEW ENVIRONMENT
+;-----------------------------------------------------------------------------  
 
-to output-actions
+
+to environment-check
   let anima1-to-inspect one-of anima1s with [ self = subject ]
-  output-header (word " ACTIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [my.identity ] of anima1-to-inspect ) ] )
-  clear-output
-  ifelse ( anima1-to-inspect != nobody ) 
-  
-  [ ask anima1-to-inspect [
-    foreach actions.completed [ action -> output-print action ]]]
-  
-  [ 
-    foreach recent-actions-completed [ action -> output-print-action action ]
+  output-header ( word " ENVIRONMENT : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [my.identity ] of anima1-to-inspect ) ] )
+  ifelse ( subject != nobody ) [
+    output-print ( word "  NetLogo ID    B3GET ID    status     " )
+    output-print " ------------------------------------"
+    ask subject [
+      foreach my.environment [ envir -> 
+        let indiv-name but-first but-last (word envir )
+        let their-id ifelse-value ( is-patch? envir ) [ pmy.identity ] [ my.identity ]
+        output-print ( word "  " indiv-name "    " their-id "    " status-of envir )
+    ]]
+    
+  ][
+    
+    
+    
+    
   ]
-  
-end
-
-to output-print-action [ action ]
-  output-print ( word " At " item 0 action " timesteps " item 1 action " performed " item 3 action " on " item 2 action " for " item 4 action " energy." )
 end
 
 ;-----------------------------------------------------------------------------       
@@ -559,24 +546,59 @@ end
 to output-decisions
   let anima1-to-inspect one-of anima1s with [ self = subject ]
   output-header (word " DECISIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [my.identity ] of anima1-to-inspect ) ] )
-  clear-output
-  ifelse ( anima1-to-inspect != nobody ) 
   
-  [ ask anima1-to-inspect [
-    foreach decision.vectors [ decision ->
-      output-print ( word " " decision )]]]
+  ifelse ( anima1-to-inspect != nobody ) [ 
+    output-print ( word "  caller      target      action       cost     " )
+    output-print " ------------------------------------------"
+    
+    ask anima1-to-inspect [
+      foreach decision.vectors [ decision ->
+        let caller-name but-first but-last (word item 0 decision )
+        let target-name but-first but-last (word item 1 decision )
+        let action-name item 2 decision
+        let cost-name precision item 3 decision 10
+        output-print ( word " " caller-name "   " target-name "   " action-name "   " cost-name  )]]
+    
+    
+  ]
   
   [ 
-    foreach recent-decisions-made [ d -> 
-      output-print (word "  " d ) ]
+;    foreach recent-decisions-made [ d -> 
+;      output-print (word "  " d ) ]
   ]
 end
 
+
 ;-----------------------------------------------------------------------------       
-; VIEW ENVIRONMENT
-;-----------------------------------------------------------------------------  
+; VIEW ACTIONS
+;-----------------------------------------------------------------------------   
 
+to output-actions
+  let anima1-to-inspect one-of anima1s with [ self = subject ]
+  output-header (word " ACTIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [my.identity ] of anima1-to-inspect ) ] )
+  
+  ifelse ( anima1-to-inspect != nobody ) [ 
+    
+    output-print ( word "  caller      target      action       cost     " )
+    output-print " ------------------------------------------"
+    
+    ask anima1-to-inspect [
+      foreach actions.completed [ action -> 
+        let caller-name but-first but-last (word item 0 action )
+        let target-name but-first but-last (word item 1 action )
+        let action-name item 2 action
+        let cost-name precision item 3 action 10
+        output-print ( word " " caller-name "   " target-name "   " action-name "   " cost-name  )]]
+    
+  ][ 
+    ;foreach recent-actions-completed [ action -> output-print-action action ]
+  ]
+  
+end
 
+to output-print-action [ action ]
+  output-print ( word " At " item 0 action " timesteps " item 1 action " performed " item 3 action " on " item 2 action " for " item 4 action " energy." )
+end
 
 
 

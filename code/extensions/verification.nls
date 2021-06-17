@@ -243,11 +243,11 @@ to-report generate-verification-tape
   set function lput "make-decisions" function
   set boolean lput ( not any? anima1z with [ life.history = "female" and any? my-targets with [ life.history = "gestatee" and my.mother != myself ]] ) boolean
   
-  set header lput "All decision.vectors are unique in their combination of non-numeric values?" header
-  set verification lput "100" verification 
-  set function lput "make-decisions" function
-  let decisions-list map [ i -> but-first but-last i ] recent-decisions-made
-  set boolean lput ( length remove-duplicates decisions-list = length remove-duplicates decisions-list ) boolean
+;  set header lput "All decision.vectors are unique in their combination of non-numeric values?" header
+;  set verification lput "100" verification 
+;  set function lput "make-decisions" function
+;  let decisions-list map [ i -> but-first but-last i ] recent-decisions-made
+;  set boolean lput ( length remove-duplicates decisions-list = length remove-duplicates decisions-list ) boolean
 
   ; --------------------------------------------------------------------------------------------------------------------
   ; DO-ACTIONS
@@ -263,10 +263,10 @@ to-report generate-verification-tape
   set function lput "do-actions" function
   set boolean lput ( not any? anima1z with [ length actions.completed > 0 and energy.supply = 0 ] ) boolean ; might return false if agent just completed an action that took their energy down to 0
   
-  set header lput "There are no actions that can be completed with 0 cost?" header
-  set verification lput "100" verification 
-  set function lput "do-actions" function
-  set boolean lput ( length ( filter [ i -> i = 0 ] map [ j -> last j ] recent-actions-completed ) > 0 ) boolean 
+;  set header lput "There are no actions that can be completed with 0 cost?" header
+;  set verification lput "100" verification 
+;  set function lput "do-actions" function
+;  set boolean lput ( length ( filter [ i -> i = 0 ] map [ j -> last j ] recent-actions-completed ) > 0 ) boolean 
 
   set header lput "Dead individuals have not completed any actions?" header
   set verification lput "100" verification 
