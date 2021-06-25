@@ -162,6 +162,9 @@ anima1s-own [
   foraging.gains                   ;
   total.energy.gains               ;
   total.energy.cost                ;
+  foraging.gains.this.timestep     ;
+  energy.gains.this.timestep       ;
+  energy.cost.this.timestep        ;
   help.from.history                ;
   attack.from.history              ;
   copulations.history              ;
@@ -210,6 +213,8 @@ globals [
   plant-abundance-record           ;
   plant-patchiness-record          ;
   population-size-record           ;
+  actions-completed-this-timsetep  ;
+  decisions-made-this-timsetep     ;
 
   solar-status                     ;
   current-season                   ;
@@ -252,6 +257,7 @@ to setup-parameters
   set plant-abundance-record []                                ;
   set plant-patchiness-record []                               ;
   set population-size-record []                                ;
+  set actions-completed-this-timsetep []
   set start-date-and-time date-and-time                        ;
   set selected-display "groups"                                ;
   reset-timer                                                  ;
@@ -501,6 +507,9 @@ to global-update
       population-size-record
     ]
 
+    set actions-completed-this-timsetep []
+    set decisions-made-this-timsetep []
+
   ] [ print ( word "GLOBAL UPDATE ERROR: " error-message ) ]    ; If error occurs, print out error message.
 
 end
@@ -713,6 +722,11 @@ to animals-update
 
     ; UPDATE AGENTS
     ask anima1s with [ not fully.decayed ] [
+
+      set foraging.gains.this.timestep 0
+      set energy.gains.this.timestep 0
+      set energy.cost.this.timestep 0
+
       set my.environment [] set decision.vectors [] set actions.completed []                         ; Clear memory from the previous timestep.
       set age.in.ticks age.in.ticks + 1                                                              ; Advance the individual's age by one timestep.
       deteriorate                                                                                    ; Advance the individual's decay for this time step.
@@ -733,6 +747,8 @@ to animals-update
         set pgroups.here lput [group.identity] of myself pgroups.here
         set pgroup.identity one-of modes pgroups.here
       ]
+
+      set cause.of.death ""
 
     ]
 
@@ -891,8 +907,10 @@ end
 to update-energy [ update ]
   set energy.supply energy.supply + update                      ; Update caller's energy with input value,
   ifelse ( update > 0 )                                         ; which can be positive or negative.
-  [ set total.energy.gains total.energy.gains + update ]        ; Record positive values as energy gains.
-  [ set total.energy.cost total.energy.cost + abs update ]      ; Record negative values as energy costs.
+  [ set total.energy.gains total.energy.gains + update
+    set energy.gains.this.timestep energy.gains.this.timestep + update ] ; Record positive values as energy gains.
+  [ set total.energy.cost total.energy.cost + abs update
+    set energy.cost.this.timestep energy.cost.this.timestep + abs update ] ; Record negative values as energy costs.
 end
 
 ; ========================================================================================================= ;
@@ -1031,89 +1049,11 @@ to make-decisions
       [ gat3s-get-decisions my.environment ]                     ; get decisions based on a gat3s genotype.
       [ sta7us-get-decisions my.environment ] )                  ; If not specified, assume current genotype reader is sta2us.
 
-    ;reduce-to-unique-vectors                                     ; Reduce to unique set of decision vectors
+    foreach decision.vectors [ d ->
+      set decisions-made-this-timsetep lput d decisions-made-this-timsetep ]
 
   ] [ print ( word "MAKE DECISIONS ERROR - " my.identity " : " error-message ) ]    ; If error occurs, print out error message.
 
-end
-
-; --------------------------------------------------------------------------------------------------------- ;
-;
-; HELPER SUBROUTINE TO REDUCE LIST OF DECISIONS TO UNIQUE COMBINATIONS OF TARGET AND ACTION
-;
-; This subroutine reduces the current list of decision vectors into a list of unique vectors such that
-; there is only one vector for each combination of target and action. During this reduction processes, the
-; decision vector weights are added together resulting in a decision vector with the net weight.
-;
-; ENTRY: Initial list of decision vectors before reduction process.
-;
-; EXIT:  Final list of decision vectors after the reduction process.
-;
-; --------------------------------------------------------------------------------------------------------- ;
-
-to reduce-to-unique-vectors
-
-  let initial-decisions decision.vectors                         ; Initially, there is a full list of decisions
-  let reduced-decisions []                                       ; and an empty list.
-
-  foreach initial-decisions [ original-vector ->                 ; Looping through the full list of decisions,
-    let original-ego item 0 original-vector                      ; identify the caller,
-    let original-target item 1 original-vector                   ; identity the target,
-    let original-action item 2 original-vector                   ; identity the action,
-    let original-weight item 3 original-vector                   ; identify the cost.
-
-    let vector-doesnt-exist true                                 ;
-
-    let index 0                                                  ;
-    foreach reduced-decisions [ reduced-vector ->                ;
-      let reduced-ego item 0 reduced-vector                      ;
-      let reduced-target item 1 reduced-vector                   ;
-      let reduced-action item 2 reduced-vector                   ;
-      let reduced-weight item 3 reduced-vector                   ;
-
-      if ( reduced-ego = original-ego )                          ;
-      and ( reduced-target = original-target )                   ;
-      and ( reduced-action = original-action ) [                 ;
-
-        set vector-doesnt-exist false                            ;
-
-        set reduced-weight ifelse-value                          ;
-        ( is-number? reduced-weight )                            ;
-        [ reduced-weight ]                                       ;
-        [ 0 ]                                                    ;
-
-        set original-weight ifelse-value                         ;
-        ( is-number? original-weight )                           ;
-        [ original-weight ]                                      ;
-        [ 0 ]                                                    ;
-
-        let new-vector ( list                                    ;
-          self                                                   ;
-          reduced-target                                         ;
-          reduced-action                                         ;
-          ( reduced-weight + original-weight )                   ;
-          false )                                                ;
-
-        set reduced-decisions                                    ;
-        remove-item index reduced-decisions                      ;
-
-        set reduced-decisions                                    ;
-        lput new-vector reduced-decisions ]                      ;
-
-      set index index + 1                                        ;
-    ]
-
-    if vector-doesnt-exist [                                     ;
-      set reduced-decisions lput                                 ;
-      ( list                                                     ;
-        self                                                     ;
-        original-target                                          ;
-        original-action                                          ;
-        original-weight                                          ;
-        false )                                                  ;
-      reduced-decisions ]                                        ;
-  ]
-  set decision.vectors reduced-decisions                         ;
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -1140,11 +1080,14 @@ end
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
+
 to do-actions
 
   carefully [
 
-    foreach decision.vectors [ vector ->                         ; For each decision vector
+    let i 0
+    while [ i < length decision.vectors ] [
+      let vector item i decision.vectors                         ; For each decision vector
       let done item 4 vector                                     ; first determine if this decision has already
                                                                  ; been acted upon.
 
@@ -1168,7 +1111,6 @@ to do-actions
           action = "go-forward" [ go-forward cost ]
           action = "set-heading" [ set-heading cost ]
           action = "set-heading-random" [ set-heading-random cost ]
-          action = "match-heading" [ match-heading target cost ]
           action = "eat" [ if ( check-distance target ) [ eat target cost ] ]
           action = "join" [ join target cost ]
           action = "leave" [ leave target cost ]
@@ -1211,7 +1153,8 @@ to do-actions
           action = "demand-from" [ if ( check-distance target ) [ demand-from target cost ]]
           [])
       ]
-    ]
+
+      set i i + 1 ]
 
   ] [ print ( word "DO ACTIONS ERROR - " my.identity " : " error-message ) ]      ; If error occurs, print out error message.
 
@@ -1277,23 +1220,24 @@ end
 
 to-report check-energy [ vector ]
   let cost item 3 vector                                       ; Identify the cost of the decision.
+  let abs-cost abs cost
   let passes-energy-check ifelse-value                         ; Confirm if caller's energy is sufficient for cost.
   ( member? "free-lunch" model-structure )                     ; If B3GET is set to "free lunch"
   [ true ]                                                     ; then any amount of energy is sufficient.
-  [ energy.supply > abs cost and abs cost > 0 ]                ; Otherwise, the energy is sufficient if
+  [ energy.supply > abs-cost and abs-cost > 0 ]                ; Otherwise, the energy is sufficient if
                                                                ; it is greater than the cost, and the cost
                                                                ; is greater than 0.
 
   if ( passes-energy-check ) [                                 ; If the energy is sufficient,
-    update-energy ( - abs cost )                               ; reduce the caller's energy supply by the cost.
+    update-energy ( - abs-cost )                               ; reduce the caller's energy supply by the cost.
 
     let new-vector lput true but-last vector                   ; Update this decision in the caller's
     let vector-index position vector decision.vectors          ; decision.vectors to be marked as
     if ( is-number? vector-index ) [                           ; having been acted upon.
-      set decision.vectors                                     ; This ensures that the same decision
-      remove-item vector-index decision.vectors                ; will not be acted upon twice.
-      set decision.vectors
-      lput new-vector decision.vectors ]]
+
+      set decision.vectors replace-item                        ; This ensures that the same decision
+      vector-index decision.vectors new-vector                 ; will not be acted upon twice.
+  ]]
 
   report passes-energy-check                                   ; Report whether the energy check passed,
                                                                ; therby allowing the decision to be acted upon.
@@ -1370,6 +1314,10 @@ to complete-action [ target action cost ]
   set actions.completed                                        ; Record this action item
   lput completed-action                                        ; in caller's list of recently completed
   actions.completed                                            ; actions.
+
+  set actions-completed-this-timsetep                          ; Globally record this action item.
+  lput completed-action
+  actions-completed-this-timsetep
 end
 
 ; ========================================================================================================= ;
@@ -1526,47 +1474,6 @@ to move-toward [ target cost ]
     ; set heading based on magnitudes
     set heading ifelse-value ( x.magnitude = 0 and y.magnitude = 0 ) [ heading ] [ ( atan x.magnitude y.magnitude ) ]
   ]
-end
-
-to match-heading [ target cost ]
-  complete-action target "match-heading" cost
-;  ;print heading
-;  ;print [heading] of target
-  ;  let total-cost 10 * cost / ( abs deterioration-rate ) ; scaled with deterioration rate
-  ;  let heading-difference subtract-headings heading [heading] of target
-  ;  ;print heading-difference
-  ;  let cost-of-heading abs heading-difference / 360
-  ;  ;print cost-of-heading
-  ;
-  ;  ifelse ( total-cost >= cost-of-heading ) [
-  ;    set heading [heading] of target
-  ;  ][
-  ;    set heading heading + 360 * total-cost * -1 * ( heading-difference / abs heading-difference )
-  ;  ]
-  ;print heading
-  ;print ""
-
-
-  if (target != nobody ) [
-
-    ; deteremine x and y coordinate difference to target
-    let ycor-difference [ y.magnitude ] of target
-    let xcor-difference [ x.magnitude ] of target
-
-    if ( not ( ycor-difference = 0 and xcor-difference = 0 ) ) [ ; If the target isn't in the exact same location as self
-
-      ; calculate angle to target
-      let angle atan xcor-difference ycor-difference
-      if ( cost < 0 ) [ set angle angle - 180 ]
-
-      ; set magnitudes based on cost
-      set x.magnitude x.magnitude + (abs cost * sin angle)
-      set y.magnitude y.magnitude + (abs cost * cos angle) ]
-
-    ; set heading based on magnitudes
-    set heading ifelse-value ( x.magnitude = 0 and y.magnitude = 0 ) [ heading ] [ ( atan x.magnitude y.magnitude ) ]
-  ]
-
 end
 
 to turn-right [ cost ]
@@ -1862,7 +1769,9 @@ to receive-from [ target cost ]
       ifelse ( is-patch? target )
       [ ask target [ set penergy.supply penergy.supply - energy-received ]]
       [ ask target [ update-energy ( - energy-received ) ]]
-      if ( life.history = "juvenile" or life.history = "adult" ) [ set foraging.gains foraging.gains + energy-received ] ; only juveniles and adults can eat plants
+      if ( life.history = "juvenile" or life.history = "adult" and is-patch? target ) [
+        set foraging.gains.this.timestep foraging.gains.this.timestep + energy-received
+        set foraging.gains foraging.gains + energy-received ] ; only juveniles and adults can eat plants
   ]]
 end
 
@@ -1891,7 +1800,8 @@ end
 
 to join [ target cost ]
   complete-action target "join" cost                            ; Record that this action has been completed.
-  if ( is-anima1? target and [ is.alive ] of target = true ) [  ; Check that the target is able to interact.
+  if ( is-anima1? target and [ is.alive ] of target = true
+    and [ group.identity ] of target != group.identity ) [      ; Check that the target is able to interact.
     let my-cost 0                                               ; Establish placeholder values to track caller
     let target-cost 0                                           ; and target decisions about caller joining the group.
     ask anima1s with                                            ; Identify all individuals
@@ -1923,7 +1833,8 @@ end
 
 to leave [ target cost ]
   complete-action target "leave" cost                           ; Record that this action has been completed.
-  if ( is-anima1? target and [ is.alive ] of target = true ) [  ; Check that the target is able to interact.
+  if ( is-anima1? target and [ is.alive ] of target = true
+    and [ group.identity ] of target = group.identity ) [       ; Check that the target is able to interact.
     let my-cost 0                                               ; Establish placeholder values to track caller
     let target-cost 0                                           ; and target decisions about caller leaving the group.
     ask anima1s with                                            ; Identify all individuals
@@ -1956,7 +1867,8 @@ end
 
 to recruit [ target cost ]
   complete-action target "recruit" cost                           ; Record that this action has been completed.
-  if ( is-anima1? target and [ is.alive ] of target = true ) [    ; Check that the target is able to interact.
+  if ( is-anima1? target and [ is.alive ] of target = true
+    and [ group.identity ] of target != group.identity ) [        ; Check that the target is able to interact.
     let our-cost 0                                                ; Establish placeholder values to track group members
     let target-cost 0                                             ; and target decisions about recruiting the target.
     ask anima1s with                                              ; Identify all individuals
@@ -1989,7 +1901,8 @@ end
 
 to expel [ target cost ]
   complete-action target "expel" cost                             ; Record that this action has been completed.
-  if ( is-anima1? target and [ is.alive ] of target = true ) [    ; Check that the target is able to interact.
+  if ( is-anima1? target and [ is.alive ] of target = true
+    and [ group.identity ] of target = group.identity ) [         ; Check that the target is able to interact.
     let our-cost 0                                                ; Establish placeholder values to track group members
     let target-cost 0                                             ; and target decisions about expelling the target.
     ask anima1s with                                              ; Identify all individuals
@@ -2026,13 +1939,15 @@ to join-group [ group-id ]
   ifelse ( group.identity != group-id ) [                      ; If the caller is not already parf of group:
 
     leave self 0                                               ; Determine if the caller leaves its current group.
-    if ( is-solitary? ) [                                      ; If the caller has left its group:
+    ifelse ( is-solitary? ) [                                      ; If the caller has left its group:
 
       set group.identity group-id                              ; Establish the input value as the current group.
       set label "="                                            ; Visually indicate that caller has joined a group.
       set group.transfers.history                              ; Caller keeps a record of transferring to this group.
       lput group.identity group.transfers.history
       complete-action self "joined-group" 0  ]                 ; Record that the individual has now joined the group.
+
+    [ complete-action self "remained-in-previous-group" 0 ]    ; Record that the individual remained in previous group.
 
   ][
     complete-action self "already-in-group" 0                  ; Record if individual is already in this group.
@@ -2081,14 +1996,14 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to pick-up [ target cost ]
-  complete-action target "pick-up" cost
-  if ( is-anima1? target ) [
-    if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "cling-to"
-      let probability ( cost + target-cost )
-      / ( abs cost + abs target-cost + 0.0000000001 )             ; The probability of caller
-      if ( random-float 1.0 <= probability )
-      [ carry target ]]]
+  complete-action target "pick-up" cost                        ; Record that this action has been completed.
+  if ( is-anima1? target ) [                                   ; Check that the target is able to interact.
+    let caller-cost [ get-action-cost-of myself "pick-up" ] of target
+    let target-cost get-action-cost-of target "cling-to"
+    let probability ( caller-cost + target-cost )              ; The probability of caller carrying target depends on
+    / ( abs caller-cost + abs target-cost + 0.0000000001 )     ; the relative costs paid by caller and target.
+    if ( random-float 1.0 <= probability )                     ; If the probability is high enough, caller picks up target.
+    [ carry target ]]
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -2106,14 +2021,15 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to put-down [ target cost ]
-  complete-action target "put-down" cost
-  if ( is-anima1? target ) [
-    if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "squirm-from"
-      let probability ( cost + target-cost )
-      / ( abs cost + abs target-cost + 0.0000000001 )             ; The probability of caller
-      if ( random-float 1.0 <= probability )
-      [ drop target ]]]
+  complete-action target "put-down" cost                       ; Record that this action has been completed.
+  if ( is-anima1? target ) [                                   ; Check that the target is able to interact.
+    let caller-cost [ get-action-cost-of myself "put-down" ] of target
+    let target-cost get-action-cost-of target "squirm-from"
+    let probability ( caller-cost + target-cost )              ; The probability of caller dropping target depends on
+    / ( abs caller-cost + abs target-cost + 0.0000000001 )     ; the relative costs paid by caller and target.
+    if ( random-float 1.0 <= probability                       ; If the probability is high enough, caller puts down target.
+      or ( probability = 0 and cost = 0 ))
+    [ drop target ]]
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -2131,14 +2047,14 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to cling-to [ target cost ]
-  complete-action target "cling-to" cost
-  if ( is-anima1? target ) [
-    if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "pick-up"
-      let probability ( cost + target-cost )
-      / ( abs cost + abs target-cost + 0.0000000001 )             ; The probability of caller
-      if ( random-float 1.0 <= probability )
-      [ ask target [ carry myself ] ]]]
+  complete-action target "cling-to" cost                       ; Record that this action has been completed.
+  if ( is-anima1? target ) [                                   ; Check that the target is able to interact.
+    let caller-cost [ get-action-cost-of myself "cling-to" ] of target
+    let target-cost get-action-cost-of target "pick-up"
+    let probability ( caller-cost + target-cost )              ; The probability of caller clinging to target depends on
+    / ( abs caller-cost + abs target-cost + 0.0000000001 )     ; the relative costs paid by caller and target.
+    if ( random-float 1.0 <= probability )                     ; If the probability is high enough, target carries caller.
+    [ ask target [ carry myself ] ]]
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -2156,14 +2072,14 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to squirm-from [ target cost ]
-  complete-action target "squirm-from" cost
-  if ( is-anima1? target ) [
-    if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "put-down"
-      let probability ( cost + target-cost )
-      / ( abs cost + abs target-cost + 0.0000000001 )             ; The probability of caller
-      if ( random-float 1.0 <= probability )
-      [ ask target [ drop myself ] ]]]
+  complete-action target "squirm-from" cost                    ; Record that this action has been completed.
+  if ( is-anima1? target ) [                                   ; Check that the target is able to interact.
+    let caller-cost [ get-action-cost-of myself "squirm-from" ] of target
+    let target-cost get-action-cost-of target "put-down"
+    let probability ( caller-cost + target-cost )              ; The probability of caller squirming from to target depends on
+    / ( abs caller-cost + abs target-cost + 0.0000000001 )     ; the relative costs paid by caller and target.
+    if ( random-float 1.0 <= probability )                     ; If the probability is high enough, target drops caller.
+    [ ask target [ drop myself ] ]]
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -2180,15 +2096,27 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to carry [ target ]
-  complete-action target "carry" 0
-  if ( not member? target [carried.items] of anima1s ) [
-    ask anima1s with [ member? target carried.items ] [ set carried.items remove-item ( position target remove-duplicates carried.items ) remove-duplicates carried.items ]
-    set carried.items lput target carried.items
-    ask target [ move-to myself ]
-    set label "^"
-    complete-action target "carry-complete" 0
+  complete-action target "carry" 0                             ; Record that this action has been completed.
+  if ( not member? target [carried.items] of anima1s ) [       ; Check that the target is able to interact.
+
+    ask anima1s with [ member? target carried.items ] [        ; Prompt any individual currently carrying the
+      put-down target 0 ]                                      ; target to put down the target.
+
+    ifelse ( [ is-not-carried? ] of target ) [                 ; If the target is not being carried
+      set carried.items lput target carried.items              ; caller's carried items updates to include target.
+      ask target [ move-to myself ]                            ; The target's location is updated to match the caller.
+      set label "^"                                            ; Visually indicate that caller has picked up target.
+      complete-action target "carry-complete" 0  ]             ; Record that the individual has now joined the group.
+
+    [ complete-action target "still-carried-by-another" 0 ]    ; Record that the individual remained in previous group.
   ]
 end
+
+to-report is-not-carried? report not any? anima1s with [ member? myself carried.items ] end
+
+        ;      set carried.items remove-item
+      ;      ( position target remove-duplicates carried.items )
+      ;      remove-duplicates carried.items
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
@@ -2204,11 +2132,12 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to drop [ target ]
-  complete-action target "drop" 0
-  if ( member? target carried.items ) [
-    set carried.items remove target remove-duplicates carried.items
-    set label "*"
-    complete-action target "drop-complete" 0
+  complete-action target "drop" 0                              ; Record that this action has been completed.
+  if ( member? target carried.items ) [                        ; Check that the target is able to interact.
+    set carried.items remove target                            ; Target is removed from current inventory of caller.
+    remove-duplicates carried.items
+    set label "*"                                              ; Visually indicate that the caller has dropped target.
+    complete-action target "drop-complete" 0                   ; Record that the target has been dropped by target.
   ]
 end
 
@@ -2326,6 +2255,7 @@ to harm [ target cost ]
 
     ask target [
       survival-chance ( - cost )
+      set cause.of.death ( word "Attacked by " [my.identity] of myself )
       set attack.from.history lput
       [my.identity] of myself
       attack.from.history ]
@@ -2349,7 +2279,7 @@ to harm [ target cost ]
 
     if ( [ life.history ] of target = "infant" and                     ; infanticide
       target != self and
-      not member? target infanticide.history )
+      not member? [my.identity] of target infanticide.history )
     [ set infanticide.history lput [my.identity] of target infanticide.history ]
 
     complete-action target "harm-complete" 0
@@ -2623,6 +2553,9 @@ to initialize-from-parents [ m f ]
   set foraging.gains 0
   set total.energy.gains 0
   set total.energy.cost 0
+  set foraging.gains.this.timestep 0
+  set energy.gains.this.timestep 0
+  set energy.cost.this.timestep 0
   set help.from.history []
   set attack.from.history []
   set copulations.history []
@@ -2999,11 +2932,11 @@ end
 GRAPHICS-WINDOW
 7
 86
-838
-918
+837
+917
 -1
 -1
-8.23
+8.22
 1
 10
 1
@@ -3017,8 +2950,8 @@ GRAPHICS-WINDOW
 99
 0
 99
-0
-0
+1
+1
 1
 timesteps
 30.0
@@ -3063,7 +2996,7 @@ INPUTBOX
 354
 79
 path-to-experiment
-../results/thesis-geladas-test/
+../data/visual-verification/
 1
 0
 String
@@ -3174,7 +3107,7 @@ plant-seasonality
 plant-seasonality
 0
 1
-1.0
+0.5
 .05
 1
 NIL
@@ -3204,7 +3137,7 @@ plant-daily-cycle
 plant-daily-cycle
 1
 100
-11.0
+10.0
 1
 1
 ticks
@@ -3227,7 +3160,7 @@ INPUTBOX
 995
 191
 population
-four-groups-plus-males
+square-dance
 1
 0
 String
@@ -3238,7 +3171,7 @@ INPUTBOX
 995
 265
 genotype
-geladas
+square-dance
 1
 0
 String
@@ -3302,7 +3235,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "meta-report" "show-territories" "---------------------" " > OPERATIONS   " "---------------------" "parameter-settings" "default-settings" "model-structure" "-- aspatial" "-- free-lunch" "-- ideal-form" "-- no-evolution" "-- no-plants" "-- reaper" "-- signal-fertility" "-- stork" "-- uninvadable" "clear-population" "new-population" "reset-plants" "save-world" "import-world" "save-simulation" "output-results" "---------------------" " > VERIFICATION " "---------------------" "dynamic-check" "-- true" "-- false" "runtime-check" "visual-check" "-- attack-pattern" "-- dine-and-dash" "-- life-history-channel" "-- musical-pairs" "-- night-and-day" "-- popularity-context" "-- speed-mating" "-- square-dance" "-- supply-and-demand" "---------------------" " > DISPLAY RESULTS   " "---------------------" "age" "generations" "life-history" "genotype" "phenotype" "-- survival-chance" "-- body-size" "-- body-shade" "-- fertility-status" "-- hidden-chance" "-- bite-capacity" "-- mutation-chance" "-- sex-ratio" "-- litter-size" "-- conception-chance" "-- visual-angle" "-- visual-range" "-- day-perception" "-- night-perception" "-- yellow-chance" "-- red-chance" "-- blue-chance" "-- birthing-chance" "-- weaning-chance" "-- infancy-chance" "-- juvenility-chance" "-- adulthood-chance" "carried-items" "energy-supply" "behaviors" "-- environment" "-- decisions" "-- actions" "-- birthing" "-- weaning" "-- matings" "-- mating-partners" "-- conceptions" "-- infanticide" "-- group-transfers" "-- travel-distance" "-- foraging-gains" "-- total-energy-gains" "-- total-energy-cost" "-- receiving-history" "-- carried-history" "-- aid-history" "-- harm-history"
-75
+13
 
 BUTTON
 1063
@@ -3542,7 +3475,7 @@ simulation-summary-ticks
 simulation-summary-ticks
 0
 10000
-0.0
+10000.0
 500
 1
 NIL
@@ -3557,7 +3490,7 @@ verification-rate
 verification-rate
 0
 1
-0.0
+0.033
 0.001
 1
 NIL
@@ -3570,7 +3503,7 @@ SWITCH
 270
 record-individuals-on
 record-individuals-on
-1
+0
 1
 -1000
 
@@ -3583,7 +3516,7 @@ simulation-scan-ticks
 simulation-scan-ticks
 0
 10000
-0.0
+250.0
 250
 1
 NIL
@@ -3598,7 +3531,7 @@ group-scan-ticks
 group-scan-ticks
 0
 10000
-0.0
+1000.0
 500
 1
 NIL
@@ -3628,7 +3561,7 @@ view-scan-ticks
 view-scan-ticks
 0
 10000
-10000.0
+1000.0
 500
 1
 NIL
@@ -3643,7 +3576,7 @@ genotype-scan-ticks
 genotype-scan-ticks
 0
 10000
-0.0
+1000.0
 500
 1
 NIL
@@ -3658,16 +3591,16 @@ focal-follow-rate
 focal-follow-rate
 0
 1
-0.0
+0.1
 0.0001
 1
 NIL
 HORIZONTAL
 
 OUTPUT
-1132
+1133
 10
-1698
+1699
 587
 12
 
@@ -9465,7 +9398,7 @@ simulation-summary</final>
       <value value="50000"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="genotype-scan-ticks">
-      <value value="100000"/>
+      <value value="10000"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="focal-follow-rate">
       <value value="1.0E-4"/>

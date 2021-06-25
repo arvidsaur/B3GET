@@ -295,8 +295,11 @@ to import-population
     ; update mother identity
     ask anima1s [
       if ( my.mother = 0 or my.mother = "nobody" ) [ set my.mother nobody ]
-      if ( member? my.mother table:keys table-of-ids ) [ 
-        set my.mother one-of anima1s with [ table:get table-of-ids [my.mother] of myself = my.identity  ] ]]
+      ifelse ( member? my.mother table:keys table-of-ids ) [ 
+        set my.mother one-of anima1s with [ table:get table-of-ids [my.mother] of myself = my.identity  ] ]
+      [ set my.mother nobody ]
+    
+    ]
     
     ; general initialization of variables
     ask anima1s [
@@ -346,7 +349,7 @@ to set-home-range
     set pgroups.here []
     repeat 100 [ set pgroups.here lput [group.identity] of myself pgroups.here ]
     set pgroup.identity [group.identity] of myself 
-    set pcolor pgroup.identity + 2 
+    set pcolor pgroup.identity + 3 
   ]
 end
 
@@ -374,7 +377,7 @@ end
 ;
 ;--------------------------------------------------------------------------------------------------------------------
 
-to save-population
+to save-population ; create popup window if can't find file location (maybe folder missing or something)
   output-header (word " SAVE POPULATION : " population )
   
   let filename (word path-to-experiment population ".csv")

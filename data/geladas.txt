@@ -3,14 +3,14 @@
 
 1| e e survival-chance 5.1E-3
 0| e e0 survival-chance -5.1E-3
-1| g e body-size 1E-3
+1| g e body-size 2E-3
 1| i e body-size 1E-3
 1| jf e body-size 1E-4
 1| jm e body-size 1E-4
 1| e e body-shade 9E-5        
-1| i e visual-range 2E-3
-1| i e visual-angle 2E-3
-1| i e day-perception 2E-3
+1| i e visual-range 3E-3
+1| i e visual-angle 3E-3
+1| i e day-perception 3E-3
 0| i e night-perception 0
 1| jf e conception-chance 1E-3
 1| jm e conception-chance 1E-3
@@ -38,11 +38,11 @@
 1| am βqnv move-toward 1E-3
 1| c amqnv move-toward 1E-3
 0| a oahv move-toward -1E-2      
-0| e oavn< move-toward -1E-3      geladas_avoid_getting_too_close_to_others
-0| e oavn> move-toward 1E-2      geladas_stay_in_proximity_with_their_unit
+0| e ovn< move-toward -1E-3      geladas_avoid_getting_too_close_to_others
+0| e ovn> move-toward 1E-1      geladas_stay_in_proximity_with_their_unit
 0| f oafkv move-toward 1E-4      gelada_females_associate_with_female_kin
 0| am afv move-toward 1E-2       gelada_males_associate_with_adult_females
-0| am⋅ oamnv⋅ move-toward 1E-4    gelada_bachelor_males_associate_with_each_other
+0| m⋅ omv⋅ move-toward 1E-3    gelada_bachelor_males_associate_with_each_other
 0| am∴ oamuv⋅ move-toward 1E-1    gelada_leader_males_engage_encroaching_bachelor_males
 1| j d53 move-toward 1E-3
 1| j d54 move-toward 1E-4
@@ -64,11 +64,10 @@
 1| i lv¥ demand-from 1E-9
 1| j d eat 1E-9
 1| a d eat 1E-9         
-0| am⋅ fqu< join 1E-3          gelada_solitary_males_join_nonkin_females
+0| am⋅ fquv< join 1E-3          gelada_solitary_males_join_nonkin_females
 0| jm∴ e leave 1E-9            gelada_males_leave_as_juveniles
-0| am∴ afnh leave 1E-9         gelada_adult_males_leave_when_injured
-0| af oafvnq leave 1E-9        gelada_females_fission_because_nonkin
-1| am∴ oamu recruit -1E-1       gelada_males_prevent_others_from_joining
+0| am∴ afnhv leave 1E-9         gelada_adult_males_leave_when_injured
+1| am∴ ⋅oamvu recruit -1E-1       gelada_males_prevent_others_from_joining
 1| af jy put-down 1E-9
 1| af ik help 0           
 1| af iq help 0             
@@ -110,14 +109,14 @@
 
 1| e e survival-chance 5.1E-3
 0| e e0 survival-chance -5.1E-3
-1| g e body-size 1E-3
+1| g e body-size 2E-3
 1| i e body-size 1E-3
 1| jf e body-size 1E-4
 1| jm e body-size 1E-4
 1| e e body-shade 9E-5        
-1| i e visual-range 2E-3
-1| i e visual-angle 2E-3
-1| i e day-perception 2E-3
+1| i e visual-range 3E-3
+1| i e visual-angle 3E-3
+1| i e day-perception 3E-3
 0| i e night-perception 0
 1| jf e conception-chance 1E-3
 1| jm e conception-chance 1E-3
@@ -144,12 +143,12 @@
 0| e -e rest 1E-9         
 1| am βqnv move-toward 1E-3
 1| c amqnv move-toward 1E-3
-0| a oahv move-toward -1E-2     
-0| e oavn< move-toward -1E-3      geladas_avoid_getting_too_close_to_others
-0| e oavn> move-toward 1E-2      geladas_stay_in_proximity_with_their_unit
+0| a oahv move-toward -1E-2      
+0| e ovn< move-toward -1E-3      geladas_avoid_getting_too_close_to_others
+0| e ovn> move-toward 1E-1      geladas_stay_in_proximity_with_their_unit
 0| f oafkv move-toward 1E-4      gelada_females_associate_with_female_kin
 0| am afv move-toward 1E-2       gelada_males_associate_with_adult_females
-0| am⋅ oamnv⋅ move-toward 1E-4    gelada_bachelor_males_associate_with_each_other
+0| m⋅ omv⋅ move-toward 1E-3    gelada_bachelor_males_associate_with_each_other
 0| am∴ oamuv⋅ move-toward 1E-1    gelada_leader_males_engage_encroaching_bachelor_males
 1| j d53 move-toward 1E-3
 1| j d54 move-toward 1E-4
@@ -171,11 +170,10 @@
 1| i lv¥ demand-from 1E-9
 1| j d eat 1E-9
 1| a d eat 1E-9         
-0| am⋅ fqu< join 1E-3          gelada_solitary_males_join_nonkin_females
+0| am⋅ fquv< join 1E-3          gelada_solitary_males_join_nonkin_females
 0| jm∴ e leave 1E-9            gelada_males_leave_as_juveniles
-0| am∴ afnh leave 1E-9         gelada_adult_males_leave_when_injured
-0| af oafvnq leave 1E-9        gelada_females_fission_because_nonkin
-1| am∴ oamu recruit -1E-1       gelada_males_prevent_others_from_joining
+0| am∴ afnhv leave 1E-9         gelada_adult_males_leave_when_injured
+1| am∴ ⋅oamvu recruit -1E-1       gelada_males_prevent_others_from_joining
 1| af jy put-down 1E-9
 1| af ik help 0           
 1| af iq help 0             

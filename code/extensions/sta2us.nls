@@ -386,7 +386,7 @@ to-report status-of [ target ]
   if (is-anima1? target) [ ; ANIMALS
     let target-kind "z"
     let target-self ifelse-value ( target = self ) [ "e" ] [ "o" ]
-    let target-alive ifelse-value ( is.alive ) [ "v" ] [ "w" ]
+    let target-alive ifelse-value ( [is.alive] of target ) [ "v" ] [ "w" ]
     let target-sex first [biological.sex] of target
     let target-life-history first [life.history] of target
     let target-fertility first [fertility.status] of target
@@ -398,7 +398,7 @@ to-report status-of [ target ]
     let target-signal (word ifelse-value [yellow.signal] of target [ "α" ][ "å" ] ifelse-value [red.signal] of target [ "β" ][ "ß" ] ifelse-value [blue.signal] of target [ "ɣ" ][ "œ" ] )
     let target-rest ifelse-value ( [is.resting] of target = true ) [ "s" ] [ "." ]
     let target-color (word "" round [color] of target "" ifelse-value ( shade-of? color [color] of target) [ "#" ] [ "" ])
-    let target-proximity (ifelse-value ( distance-to-target < 0.5 * size ) [ "<" ] ( distance-to-target > 0.5 * maximum-visual-range * visual.range ) [ ">" ] [ "|" ] )
+    let target-proximity (ifelse-value ( distance-to-target < 0.5 * size ) [ "<" ] ( distance-to-target > 0.66 * maximum-visual-range * visual.range ) [ ">" ] [ "|" ] )
     let target-alone ifelse-value ( count anima1s with [ group.identity = [group.identity] of target ] > 1 ) [ "∴" ] [ "⋅" ]
     set status-report (word status-report 
       target-kind 
@@ -457,7 +457,7 @@ to-report action-code-list
     "survival-chance" "body-size" "body-shade" 
     "day-perception" "night-perception" "visual-angle" "visual-range" 
     "conception-chance" "bite-capacity" "mutation-chance" "sex-ratio" "litter-size" 
-    "turn-right" "turn-left" "go-forward" "set-heading" "hide" "rest" "set-heading-random" "match-heading"
+    "turn-right" "turn-left" "go-forward" "set-heading" "hide" "rest" "set-heading-random"
     "yellow-signal" "red-signal" "blue-signal" 
     "check-infancy" "check-birth" "check-juvenility" "check-weaning" "check-adulthood" 
     "move-toward" "move-away-from" "supply-to" "demand-from" "eat"

@@ -181,17 +181,24 @@ to scan-genotype ; agent subroutine, sta2us only
           map but-last [chromosome.I] of min-one-of anima1s [ generation.number ] ))]
     
     file-open file-path
-
+    
     let combined-list []
+    let mutated-alleles []
     
     let i 0
-    let chrome-length max [ length chromosome.I ] of anima1s
+    let chrome-length max ( sentence [ length chromosome.I ] of anima1s [ length chromosome.II ] of anima1s )
     while [ i < chrome-length ] [
+      
       let list-i [ last item i chromosome.I ] of anima1s with [ is.alive and length chromosome.I > i and is-number? last item i chromosome.I ]
       let list-ii [ last item i chromosome.II ] of anima1s with [ is.alive and length chromosome.II > i and is-number? last item i chromosome.II ]
       let item-I ifelse-value ( length list-i < 1 ) [ 0 ] [ mean list-i ]
       let item-II ifelse-value ( length list-ii < 1 ) [ 0 ] [ mean list-ii ]
       set combined-list lput ( item-I + item-II ) combined-list
+      
+      let mutants-i [ item i chromosome.I ] of anima1s with [ is.alive and length chromosome.I > i and first item i chromosome.I = "5|" ]
+      let mutants-ii [ item i chromosome.II ] of anima1s with [ is.alive and length chromosome.II > i and first item i chromosome.II = "5|"]
+      set mutated-alleles remove-duplicates (sentence mutated-alleles mutants-i mutants-ii )
+      
       set i i + 1 ]
     
     file-print csv:to-string ( list 
@@ -220,7 +227,8 @@ to scan-genotype ; agent subroutine, sta2us only
         maximum-visual-range
         base-litter-size
         ticks
-        combined-list ))
+        combined-list 
+        mutated-alleles ))
     
     file-close 
     
@@ -323,12 +331,16 @@ to record-actions ; agent subroutine
       "foraging.gains"  
       "total.energy.gains"
       "total.energy.cost"
+      "foraging.gains.this.timestep"
+      "energy.gains.this.timestep"
+      "energy.cost.this.timestep"
       "help-from-count"
       "attack-from-count"
       "copulations-count"
       "unique-mates-count"
       "conceptions-count"
       "group-transfers-count"
+      "unique-group-transfers-count"
       "infanticide-count"
       "whole.related.help.cost"
       "half.related.help.cost"
@@ -350,13 +362,13 @@ to record-actions ; agent subroutine
   
   file-open file-path
   
-  let action-list filter [ a -> item 0 a = ticks and ( item 1 a = self or item 2 a = self ) ] [] ; FIX recent-actions-completed
+  let action-list filter [ a -> item 0 a = self or item 1 a = self ] actions-completed-this-timsetep
   
   foreach action-list [ action ->
     
-    if ( is-anima1? item 1 action ) [
+    if ( is-anima1? item 0 action ) [
       
-      ask ( item 1 action ) [
+      ask ( item 0 action ) [
         
         file-print csv:to-string ( list ( list
           
@@ -437,12 +449,16 @@ to record-actions ; agent subroutine
           foraging.gains
           total.energy.gains
           total.energy.cost
+          foraging.gains.this.timestep
+          energy.gains.this.timestep
+          energy.cost.this.timestep
           help-from-count
           attack-from-count
           copulations-count
           unique-mates-count
           conceptions-count
           group-transfers-count
+          unique-group-transfers-count
           infanticide-count
           whole.related.help.cost
           half.related.help.cost
@@ -455,10 +471,10 @@ to record-actions ; agent subroutine
           eighth.related.attack.cost
           not.related.attack.cost
           
+          ifelse-value ( is-anima1? item 0 action ) [ [my.identity] of item 0 action ] [ item 0 action ]
           ifelse-value ( is-anima1? item 1 action ) [ [my.identity] of item 1 action ] [ item 1 action ]
-          ifelse-value ( is-anima1? item 2 action ) [ [my.identity] of item 2 action ] [ item 2 action ]
+          item 2 action
           item 3 action
-          item 4 action
           
   ))]]]
   
@@ -561,12 +577,16 @@ to scan-agent
       "foraging.gains"  
       "total.energy.gains"
       "total.energy.cost"
+      "foraging.gains.this.timestep"
+      "energy.gains.this.timestep"
+      "energy.cost.this.timestep"
       "help-from-count"
       "attack-from-count"
       "copulations-count"
       "unique-mates-count"
       "conceptions-count"
       "group-transfers-count"
+      "unique-group-transfers-count"
       "infanticide-count"
       "whole.related.help.cost"
       "half.related.help.cost"
@@ -662,12 +682,16 @@ to scan-agent
     foraging.gains
     total.energy.gains
     total.energy.cost
+    foraging.gains.this.timestep
+    energy.gains.this.timestep
+    energy.cost.this.timestep
     help-from-count
     attack-from-count
     copulations-count
     unique-mates-count
     conceptions-count
     group-transfers-count
+    unique-group-transfers-count
     infanticide-count
     whole.related.help.cost
     half.related.help.cost
@@ -776,12 +800,16 @@ to individual-summary
       "foraging.gains"  
       "total.energy.gains"
       "total.energy.cost"
+      "foraging.gains.this.timestep"
+      "energy.gains.this.timestep"
+      "energy.cost.this.timestep"
       "help-from-count"
       "attack-from-count"
       "copulations-count"
       "unique-mates-count"
       "conceptions-count"
       "group-transfers-count"
+      "unique-group-transfers-count"
       "infanticide-count"
       "whole.related.help.cost"
       "half.related.help.cost"
@@ -914,12 +942,16 @@ to individual-summary
     foraging.gains
     total.energy.gains
     total.energy.cost
+    foraging.gains.this.timestep
+    energy.gains.this.timestep
+    energy.cost.this.timestep
     help-from-count
     attack-from-count
     copulations-count
     unique-mates-count
     conceptions-count
     group-transfers-count
+    unique-group-transfers-count
     infanticide-count
     whole.related.help.cost
     half.related.help.cost
@@ -991,6 +1023,10 @@ end
 ;  |___/                         |_|                                                     
 ; --------------------------------------------------------------------------------------------------------- ;
 
+to scan-all-groups
+  foreach remove-duplicates [ group.identity ] of anima1s with [ is.alive ] [ g -> scan-group g ]
+end
+
 to scan-group [ group-id ]
   
   let file-path ( word path-to-experiment "group-scans-" population ".csv" )
@@ -1036,11 +1072,15 @@ to scan-group [ group-id ]
       "current-group-members"
       "current-territory-energy"
       
-      "distance-to-centroid-minimum"
-      "distance-to-centroid-maximum"
-      "distance-to-centroid-mean"
-      "distance-to-centroid-median"
-      "distance-to-centroid-variance"
+      "members-within-territory"
+      "members-outside-territory"
+      "percent-members-within-territory"
+      
+      "distance-to-group-members-minimum"
+      "distance-to-group-members-maximum"
+      "distance-to-group-members-mean"
+      "distance-to-group-members-median"
+      "distance-to-group-members-variance"
       
       "adult-male-count"
       "adult-cycling-count"
@@ -1102,19 +1142,57 @@ to scan-group [ group-id ]
       "per-capita-infant-female-energy"
       "per-capita-gestatee-male-energy"
       "per-capita-gestatee-female-energy" 
+            
+      "timestep-foraging-gained"
+      "timestep-foraging-gained-adult-male"
+      "timestep-foraging-gained-adult-cycling"
+      "timestep-foraging-gained-adult-pregnant"
+      "timestep-foraging-gained-adult-lactating"
+      "timestep-foraging-gained-juvenile-male"
+      "timestep-foraging-gained-juvenile-female"
+      "timestep-foraging-gained-infant-male"
+      "timestep-foraging-gained-infant-female"
+      "timestep-foraging-gained-gestatee-male"
+      "timestep-foraging-gained-gestatee-female" 
+      
+      "timestep-energy-gained"
+      "timestep-energy-gained-adult-male"
+      "timestep-energy-gained-adult-cycling"
+      "timestep-energy-gained-adult-pregnant"
+      "timestep-energy-gained-adult-lactating"
+      "timestep-energy-gained-juvenile-male"
+      "timestep-energy-gained-juvenile-female"
+      "timestep-energy-gained-infant-male"
+      "timestep-energy-gained-infant-female"
+      "timestep-energy-gained-gestatee-male"
+      "timestep-energy-gained-gestatee-female" 
+      
+      "timestep-energy-cost"
+      "timestep-energy-cost-adult-male"
+      "timestep-energy-cost-adult-cycling"
+      "timestep-energy-cost-adult-pregnant"
+      "timestep-energy-cost-adult-lactating"
+      "timestep-energy-cost-juvenile-male"
+      "timestep-energy-cost-juvenile-female"
+      "timestep-energy-cost-infant-male"
+      "timestep-energy-cost-infant-female"
+      "timestep-energy-cost-gestatee-male"
+      "timestep-energy-cost-gestatee-female" 
       
   )) ]
   
   file-open file-path
+
+  let distance-list []        
+  ask anima1s with [ is.alive and group.identity = group-id ] [
+   ask other anima1s with [ is.alive and group.identity = group-id ] [
+      set distance-list lput distance myself distance-list ]]
   
-  let x-centroid mean [xcor] of living-agents with [ group.identity = group-id ]
-  let y-centroid mean [ycor] of living-agents with [ group.identity = group-id ]
-  let distance-list [ distancexy x-centroid y-centroid ] of living-agents with [ group.identity = group-id ]
-  let distance-to-centroid-minimum ifelse-value ( length distance-list < 1 ) [ "NA" ] [ min distance-list ]
-  let distance-to-centroid-maximum ifelse-value ( length distance-list < 1 ) [ "NA" ] [ max distance-list ] 
-  let distance-to-centroid-mean ifelse-value ( length distance-list < 1 ) [ "NA" ] [ mean distance-list ]
-  let distance-to-centroid-median ifelse-value ( length distance-list < 1 ) [ "NA" ] [ median distance-list ]
-  let distance-to-centroid-variance ifelse-value ( length distance-list < 2 ) [ "NA" ] [ variance distance-list ] 
+  let distance-to-group-members-minimum ifelse-value ( length distance-list < 1 ) [ "NA" ] [ min distance-list ]
+  let distance-to-group-members-maximum ifelse-value ( length distance-list < 1 ) [ "NA" ] [ max distance-list ] 
+  let distance-to-group-members-mean ifelse-value ( length distance-list < 1 ) [ "NA" ] [ mean distance-list ]
+  let distance-to-group-members-median ifelse-value ( length distance-list < 1 ) [ "NA" ] [ median distance-list ]
+  let distance-to-group-members-variance ifelse-value ( length distance-list < 2 ) [ "NA" ] [ variance distance-list ] 
  
   let current-group-size count living-agents with [ group.identity = group-id ]
   let adult-male-count count living-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ]
@@ -1155,6 +1233,42 @@ to scan-group [ group-id ]
   let gestatee-male-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "male" ]
   let gestatee-female-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "female" ]
   
+  let timestep-foraging-gained sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id ]
+  let timestep-foraging-gained-adult-male sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ]
+  let timestep-foraging-gained-adult-cycling sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "cycling" ]
+  let timestep-foraging-gained-adult-pregnant sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "pregnant" ]
+  let timestep-foraging-gained-adult-lactating sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "lactating" ]
+  let timestep-foraging-gained-juvenile-male sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "male" ]
+  let timestep-foraging-gained-juvenile-female sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "female" ]
+  let timestep-foraging-gained-infant-male sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "male" ]
+  let timestep-foraging-gained-infant-female sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "female" ]
+  let timestep-foraging-gained-gestatee-male sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "male" ]
+  let timestep-foraging-gained-gestatee-female sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "female" ]
+  
+  let timestep-energy-gained sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id ]
+  let timestep-energy-gained-adult-male sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ]
+  let timestep-energy-gained-adult-cycling sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "cycling" ]
+  let timestep-energy-gained-adult-pregnant sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "pregnant" ]
+  let timestep-energy-gained-adult-lactating sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "lactating" ]
+  let timestep-energy-gained-juvenile-male sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "male" ]
+  let timestep-energy-gained-juvenile-female sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "female" ]
+  let timestep-energy-gained-infant-male sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "male" ]
+  let timestep-energy-gained-infant-female sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "female" ]
+  let timestep-energy-gained-gestatee-male sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "male" ]
+  let timestep-energy-gained-gestatee-female sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "female" ] 
+  
+  let timestep-energy-cost sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id ] 
+  let timestep-energy-cost-adult-male sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ] 
+  let timestep-energy-cost-adult-cycling sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "cycling" ]
+  let timestep-energy-cost-adult-pregnant sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "pregnant" ] 
+  let timestep-energy-cost-adult-lactating sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "lactating" ] 
+  let timestep-energy-cost-juvenile-male sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "male" ]
+  let timestep-energy-cost-juvenile-female sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "female" ] 
+  let timestep-energy-cost-infant-male sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "male" ] 
+  let timestep-energy-cost-infant-female sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "female" ] 
+  let timestep-energy-cost-gestatee-male sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "male" ] 
+  let timestep-energy-cost-gestatee-female sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "female" ]  
+  
   file-print csv:to-string ( list ( list
     
     date-and-time
@@ -1193,11 +1307,15 @@ to scan-group [ group-id ]
     ([my.identity] of living-agents with [ group.identity = group-id ])
     (sum [penergy.supply] of patches with [ pgroup.identity = group-id ])
     
-    distance-to-centroid-minimum
-    distance-to-centroid-maximum
-    distance-to-centroid-mean
-    distance-to-centroid-median
-    distance-to-centroid-variance
+    count living-agents with [ group.identity = group-id and pgroup.identity = group-id ]
+    count living-agents with [ group.identity = group-id and pgroup.identity != group-id ]
+    (count living-agents with [ group.identity = group-id and pgroup.identity = group-id ] / ( count living-agents with [ group.identity = group-id and pgroup.identity = group-id ] + count living-agents with [ group.identity = group-id and pgroup.identity != group-id ] ))
+    
+    distance-to-group-members-minimum
+    distance-to-group-members-maximum
+    distance-to-group-members-mean
+    distance-to-group-members-median
+    distance-to-group-members-variance
 
     adult-male-count
     adult-cycling-count
@@ -1255,10 +1373,45 @@ to scan-group [ group-id ]
     ifelse-value ( adult-lactating-count > 0 ) [ (adult-lactating-energy / adult-lactating-count) ] [ "NA" ]
     ifelse-value ( juvenile-male-count > 0 ) [ (juvenile-male-energy / juvenile-male-count) ] [ "NA" ]
     ifelse-value ( juvenile-female-count > 0 ) [ (juvenile-female-energy / juvenile-female-count) ] [ "NA" ]
-    ifelse-value ( infant-male-count > 0 ) [ (infant-male-energy / infant-male-count) ] [ "NA" ]
-    ifelse-value ( infant-female-count > 0 ) [ (infant-female-energy / infant-female-count) ] [ "NA" ]
+    ifelse-value ( infant-male-count > 0 ) [ (infant-male-energy / infant-male-count) ] [ "NA" ]    ifelse-value ( infant-female-count > 0 ) [ (infant-female-energy / infant-female-count) ] [ "NA" ]
     ifelse-value ( gestatee-male-count > 0 ) [ (gestatee-male-energy / gestatee-male-count) ] [ "NA" ]
     ifelse-value ( gestatee-female-count > 0 ) [ (gestatee-female-energy / gestatee-female-count) ] [ "NA" ]
+        
+    timestep-foraging-gained
+    timestep-foraging-gained-adult-male
+    timestep-foraging-gained-adult-cycling
+    timestep-foraging-gained-adult-pregnant
+    timestep-foraging-gained-adult-lactating
+    timestep-foraging-gained-juvenile-male
+    timestep-foraging-gained-juvenile-female
+    timestep-foraging-gained-infant-male
+    timestep-foraging-gained-infant-female
+    timestep-foraging-gained-gestatee-male
+    timestep-foraging-gained-gestatee-female 
+    
+    timestep-energy-gained
+    timestep-energy-gained-adult-male
+    timestep-energy-gained-adult-cycling
+    timestep-energy-gained-adult-pregnant
+    timestep-energy-gained-adult-lactating
+    timestep-energy-gained-juvenile-male
+    timestep-energy-gained-juvenile-female
+    timestep-energy-gained-infant-male
+    timestep-energy-gained-infant-female
+    timestep-energy-gained-gestatee-male
+    timestep-energy-gained-gestatee-female 
+    
+    timestep-energy-cost
+    timestep-energy-cost-adult-male
+    timestep-energy-cost-adult-cycling
+    timestep-energy-cost-adult-pregnant
+    timestep-energy-cost-adult-lactating
+    timestep-energy-cost-juvenile-male
+    timestep-energy-cost-juvenile-female
+    timestep-energy-cost-infant-male
+    timestep-energy-cost-infant-female
+    timestep-energy-cost-gestatee-male
+    timestep-energy-cost-gestatee-female 
     
   ))
   
@@ -1319,6 +1472,7 @@ to scan-simulation
       "generation-number-min"
       "generation-number-mean"
       "generation-number-median"
+      
       "number-of-groups"
       "number-of-males"
       "number-of-females" 
@@ -1332,6 +1486,42 @@ to scan-simulation
       "number-of-fully-alive-agents"
       "number-of-decaying-agents"
       "number-of-fully-decayed-agents"
+      
+      "total-timestep-foraging-gained"
+      "total-timestep-foraging-gained-adult-male"
+      "total-timestep-foraging-gained-adult-cycling"
+      "total-timestep-foraging-gained-adult-pregnant"
+      "total-timestep-foraging-gained-adult-lactating"
+      "total-timestep-foraging-gained-juvenile-male"
+      "total-timestep-foraging-gained-juvenile-female"
+      "total-timestep-foraging-gained-infant-male"
+      "total-timestep-foraging-gained-infant-female"
+      "total-timestep-foraging-gained-gestatee-male"
+      "total-timestep-foraging-gained-gestatee-female" 
+      
+      "total-timestep-energy-gained"
+      "total-timestep-energy-gained-adult-male"
+      "total-timestep-energy-gained-adult-cycling"
+      "total-timestep-energy-gained-adult-pregnant"
+      "total-timestep-energy-gained-adult-lactating"
+      "total-timestep-energy-gained-juvenile-male"
+      "total-timestep-energy-gained-juvenile-female"
+      "total-timestep-energy-gained-infant-male"
+      "total-timestep-energy-gained-infant-female"
+      "total-timestep-energy-gained-gestatee-male"
+      "total-timestep-energy-gained-gestatee-female" 
+      
+      "total-timestep-energy-cost"
+      "total-timestep-energy-cost-adult-male"
+      "total-timestep-energy-cost-adult-cycling"
+      "total-timestep-energy-cost-adult-pregnant"
+      "total-timestep-energy-cost-adult-lactating"
+      "total-timestep-energy-cost-juvenile-male"
+      "total-timestep-energy-cost-juvenile-female"
+      "total-timestep-energy-cost-infant-male"
+      "total-timestep-energy-cost-infant-female"
+      "total-timestep-energy-cost-gestatee-male"
+      "total-timestep-energy-cost-gestatee-female" 
 
   )) ]
   
@@ -1388,6 +1578,42 @@ to scan-simulation
     number-of-fully-alive-agents
     number-of-decaying-agents
     number-of-fully-decayed-agents
+    
+    sum [foraging.gains.this.timestep] of living-agents
+    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "adult" and biological.sex = "male" ]
+    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "cycling" ]
+    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "pregnant" ]
+    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "lactating" ]
+    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "juvenile" and biological.sex = "male" ]
+    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "juvenile" and biological.sex = "female" ]
+    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "infant" and biological.sex = "male" ]
+    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "infant" and biological.sex = "female" ]
+    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "gestatee" and biological.sex = "male" ]
+    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "gestatee" and biological.sex = "female" ]
+    
+    sum [energy.gains.this.timestep] of living-agents 
+    sum [energy.gains.this.timestep] of living-agents with [ life.history = "adult" and biological.sex = "male" ]
+    sum [energy.gains.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "cycling" ]
+    sum [energy.gains.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "pregnant" ]
+    sum [energy.gains.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "lactating" ]
+    sum [energy.gains.this.timestep] of living-agents with [ life.history = "juvenile" and biological.sex = "male" ]
+    sum [energy.gains.this.timestep] of living-agents with [ life.history = "juvenile" and biological.sex = "female" ]
+    sum [energy.gains.this.timestep] of living-agents with [ life.history = "infant" and biological.sex = "male" ]
+    sum [energy.gains.this.timestep] of living-agents with [ life.history = "infant" and biological.sex = "female" ]
+    sum [energy.gains.this.timestep] of living-agents with [ life.history = "gestatee" and biological.sex = "male" ]
+    sum [energy.gains.this.timestep] of living-agents with [ life.history = "gestatee" and biological.sex = "female" ] 
+    
+    sum [energy.cost.this.timestep] of living-agents  
+    sum [energy.cost.this.timestep] of living-agents with [ life.history = "adult" and biological.sex = "male" ] 
+    sum [energy.cost.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "cycling" ]
+    sum [energy.cost.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "pregnant" ] 
+    sum [energy.cost.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "lactating" ] 
+    sum [energy.cost.this.timestep] of living-agents with [ life.history = "juvenile" and biological.sex = "male" ]
+    sum [energy.cost.this.timestep] of living-agents with [ life.history = "juvenile" and biological.sex = "female" ] 
+    sum [energy.cost.this.timestep] of living-agents with [ life.history = "infant" and biological.sex = "male" ] 
+    sum [energy.cost.this.timestep] of living-agents with [ life.history = "infant" and biological.sex = "female" ] 
+    sum [energy.cost.this.timestep] of living-agents with [ life.history = "gestatee" and biological.sex = "male" ] 
+    sum [energy.cost.this.timestep] of living-agents with [ life.history = "gestatee" and biological.sex = "female" ]  
     
   ))
   
@@ -1460,11 +1686,11 @@ to simulation-summary ; observer subroutine
       "adult-group-size-median" 
       "adult-group-size-variance" 
       
-      "groups-distance-to-centroid-minimum"
-      "groups-distance-to-centroid-maximum"
-      "groups-distance-to-centroid-mean"
-      "groups-distance-to-centroid-median"
-      "groups-distance-to-centroid-variance"
+      "groups-distance-to-group-members-minimum"
+      "groups-distance-to-group-members-maximum"
+      "groups-distance-to-group-members-mean"
+      "groups-distance-to-group-members-median"
+      "groups-distance-to-group-members-variance"
       
       "adult-males-who-disperse-count"
       "adult-males-who-not-disperse-count" 
@@ -1481,6 +1707,10 @@ to simulation-summary ; observer subroutine
       "adult-females-single-mate-count" 
       "adult-females-no-mates-count" 
       "adult-females-percent-multiple-mates"
+      
+      "individuals-within-territory"
+      "individuals-outside-territory"
+      "precent-individuals-within-territory"
       
       ; emergent properties of plants
       "plant-abundance-maximum" 
@@ -1855,6 +2085,16 @@ to simulation-summary ; observer subroutine
       "female-total-group-transfers-mean"
       "female-total-group-transfers-variance"      
       "total-population-female-total-group-transfers"
+      "male-unique-group-transfers-maximum"
+      "male-unique-group-transfers-minimum"
+      "male-unique-group-transfers-mean"
+      "male-unique-group-transfers-variance"       
+      "total-population-male-unique-group-transfers"
+      "female-unique-group-transfers-maximum"
+      "female-unique-group-transfers-minimum"
+      "female-unique-group-transfers-mean"
+      "female-unique-group-transfers-variance"      
+      "total-population-female-unique-group-transfers"
       "male-infanticide-count-maximum"
       "male-infanticide-count-minimum"
       "male-infanticide-count-mean"
@@ -1918,11 +2158,11 @@ to simulation-summary ; observer subroutine
     adult-group-size-median 
     adult-group-size-variance 
     
-    groups-distance-to-centroid-minimum
-    groups-distance-to-centroid-maximum
-    groups-distance-to-centroid-mean
-    groups-distance-to-centroid-median
-    groups-distance-to-centroid-variance
+    groups-distance-to-group-members-minimum
+    groups-distance-to-group-members-maximum
+    groups-distance-to-group-members-mean
+    groups-distance-to-group-members-median
+    groups-distance-to-group-members-variance
     
     adult-males-who-disperse-count
     adult-males-who-not-disperse-count 
@@ -1939,6 +2179,10 @@ to simulation-summary ; observer subroutine
     adult-females-single-mate-count
     adult-females-no-mates-count
     adult-females-percent-multiple-mates
+    
+    individuals-within-territory
+    individuals-outside-territory
+    precent-individuals-within-territory
     
     ; emergent properties of plants
     plant-abundance-maximum 
@@ -2313,6 +2557,16 @@ to simulation-summary ; observer subroutine
     female-total-group-transfers-mean
     female-total-group-transfers-variance       
     total-population-female-total-group-transfers
+    male-unique-group-transfers-maximum
+    male-unique-group-transfers-minimum
+    male-unique-group-transfers-mean
+    male-unique-group-transfers-variance       
+    total-population-male-unique-group-transfers
+    female-unique-group-transfers-maximum
+    female-unique-group-transfers-minimum
+    female-unique-group-transfers-mean
+    female-unique-group-transfers-variance      
+    total-population-female-unique-group-transfers
     male-infanticide-count-maximum
     male-infanticide-count-minimum
     male-infanticide-count-mean
@@ -2341,6 +2595,7 @@ to-report copulations-count report length copulations.history end
 to-report unique-mates-count report length remove-duplicates copulations.history end
 to-report conceptions-count report length conceptions.history end
 to-report group-transfers-count report length group.transfers.history end
+to-report unique-group-transfers-count report length remove-duplicates group.transfers.history end
 
 to-report infanticide-count 
   let current-infanticide-history filter [ i -> any? anima1s with [ not is.alive and my.identity = i ] ] remove-duplicates infanticide.history   ; must remove individual infants who are still alive at the time of this individual's death ; only count ids from dead anima1s
@@ -2353,7 +2608,7 @@ to-report juvenile-duration report ifelse-value ( ticks.at.sexual.maturity = 0 o
 to-report lifespan report ( ticks.at.death - ticks.at.conception ) end
 
   ; defensive programming needed here
-to-report lifetime-plant-abundance report mean sublist plant-abundance-record ( length plant-abundance-record - how-many-records ) ( length plant-abundance-record )  end
+to-report lifetime-plant-abundance report mean sublist plant-abundance-record ( length plant-abundance-record - how-many-records ) ( length plant-abundance-record )  end ; must account for list emptiness
 to-report lifetime-plant-patchiness report mean sublist plant-patchiness-record  ( length plant-patchiness-record  - how-many-records ) ( length plant-patchiness-record  ) end
 to-report lifetime-population-size report mean sublist population-size-record ( length population-size-record - how-many-records ) ( length population-size-record ) end
   
@@ -2431,12 +2686,19 @@ to-report total-group-size-mean report ifelse-value ( length group-sizes < 1 ) [
 to-report total-group-size-median report ifelse-value ( length group-sizes < 1 ) [ "NA" ] [ median group-sizes ] end
 to-report total-group-size-variance report ifelse-value ( length group-sizes < 2 ) [ "NA" ] [ variance group-sizes ]  end
   
-to-report group-distance-list report [ distancexy (mean [xcor] of living-agents with [ group.identity = [group.identity] of myself ]) (mean [ycor] of living-agents with [ group.identity = [group.identity] of myself ]) ] of living-agents end
-to-report groups-distance-to-centroid-minimum report ifelse-value ( length group-distance-list < 1 ) [ "NA" ] [ min group-distance-list ] end
-to-report groups-distance-to-centroid-maximum report ifelse-value ( length group-distance-list < 1 ) [ "NA" ] [ max group-distance-list ] end 
-to-report groups-distance-to-centroid-mean report ifelse-value ( length group-distance-list < 1 ) [ "NA" ] [ mean group-distance-list ] end
-to-report groups-distance-to-centroid-median report ifelse-value ( length group-distance-list < 1 ) [ "NA" ] [ median group-distance-list ] end
-to-report groups-distance-to-centroid-variance report ifelse-value ( length group-distance-list < 2 ) [ "NA" ] [ variance group-distance-list ] end
+to-report group-distance-list 
+  let distance-list []        
+  ask anima1s with [ is.alive ] [
+    ask other anima1s with [ is.alive and group.identity = [group.identity] of myself ] [
+      set distance-list lput distance myself distance-list ]]
+  report distance-list
+end
+  
+to-report groups-distance-to-group-members-minimum report ifelse-value ( length group-distance-list < 1 ) [ "NA" ] [ min group-distance-list ] end
+to-report groups-distance-to-group-members-maximum report ifelse-value ( length group-distance-list < 1 ) [ "NA" ] [ max group-distance-list ] end 
+to-report groups-distance-to-group-members-mean report ifelse-value ( length group-distance-list < 1 ) [ "NA" ] [ mean group-distance-list ] end
+to-report groups-distance-to-group-members-median report ifelse-value ( length group-distance-list < 1 ) [ "NA" ] [ median group-distance-list ] end
+to-report groups-distance-to-group-members-variance report ifelse-value ( length group-distance-list < 2 ) [ "NA" ] [ variance group-distance-list ] end
   
 to-report adult-group-sizes report filter [ j -> j > 1 ] map [ i -> count living-agents with [ group.identity = i and life.history = "adult" ]] remove-duplicates [group.identity] of living-agents end
 to-report adult-group-size-minimum report ifelse-value ( length adult-group-sizes < 1 ) [ "NA" ] [ min adult-group-sizes ] end
@@ -2460,6 +2722,10 @@ to-report adult-females-multiple-mates-count report count decayed-agents with [ 
 to-report adult-females-single-mate-count report count decayed-agents with [ biological.sex = "female" and life.history = "adult" and length remove-duplicates copulations.history = 1 ] end
 to-report adult-females-no-mates-count report count decayed-agents with [ biological.sex = "female" and life.history = "adult" and length remove-duplicates copulations.history = 0 ] end
 to-report adult-females-percent-multiple-mates report ( adult-females-multiple-mates-count / ( adult-females-multiple-mates-count + adult-females-single-mate-count + adult-females-no-mates-count + 0.0000000001 ) ) end
+  
+to-report individuals-within-territory report count living-agents with [ group.identity = pgroup.identity ] end
+to-report individuals-outside-territory report count living-agents with [ group.identity != pgroup.identity ] end
+to-report precent-individuals-within-territory report individuals-within-territory / ( individuals-within-territory + individuals-outside-territory + 0.0000000001 ) end
 
 ; emergent plant properties
 to-report plant-abundance-maximum report ifelse-value ( length plant-abundance-record > 0 ) [ max plant-abundance-record ] [ "NA" ] end
@@ -2968,14 +3234,26 @@ to-report male-total-group-transfers-maximum report ifelse-value ( length male-t
 to-report male-total-group-transfers-minimum report ifelse-value ( length male-total-group-transfers-list < 1 ) [ "NA" ] [ min male-total-group-transfers-list ] end
 to-report male-total-group-transfers-mean report ifelse-value ( length male-total-group-transfers-list < 1 ) [ "NA" ] [ mean male-total-group-transfers-list ] end
 to-report male-total-group-transfers-variance report ifelse-value ( length male-total-group-transfers-list < 2 ) [ "NA" ] [ variance male-total-group-transfers-list ] end
-to-report total-population-male-total-group-transfers report sum male-total-group-transfers-list end
+to-report total-population-male-total-group-transfers report length male-total-group-transfers-list end
   
 to-report female-total-group-transfers-list report [ length group.transfers.history ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
 to-report female-total-group-transfers-maximum report ifelse-value ( length female-total-group-transfers-list < 1 ) [ "NA" ] [ max female-total-group-transfers-list ] end
 to-report female-total-group-transfers-minimum report ifelse-value ( length female-total-group-transfers-list < 1 ) [ "NA" ] [ min female-total-group-transfers-list ] end
 to-report female-total-group-transfers-mean report ifelse-value ( length female-total-group-transfers-list < 1 ) [ "NA" ] [ mean female-total-group-transfers-list ] end
 to-report female-total-group-transfers-variance report ifelse-value ( length female-total-group-transfers-list < 2 ) [ "NA" ] [ variance female-total-group-transfers-list ] end
-to-report total-population-female-total-group-transfers report sum female-total-group-transfers-list end
+to-report total-population-female-total-group-transfers report length female-total-group-transfers-list end
+  
+to-report male-unique-group-transfers-maximum report ifelse-value ( length remove-duplicates male-total-group-transfers-list < 1 ) [ "NA" ] [ max remove-duplicates male-total-group-transfers-list ] end
+to-report male-unique-group-transfers-minimum report ifelse-value ( length remove-duplicates male-total-group-transfers-list < 1 ) [ "NA" ] [ min remove-duplicates male-total-group-transfers-list ] end
+to-report male-unique-group-transfers-mean report ifelse-value ( length remove-duplicates male-total-group-transfers-list < 1 ) [ "NA" ] [ mean remove-duplicates male-total-group-transfers-list ] end
+to-report male-unique-group-transfers-variance report ifelse-value ( length remove-duplicates male-total-group-transfers-list < 2 ) [ "NA" ] [ variance remove-duplicates male-total-group-transfers-list ] end       
+to-report total-population-male-unique-group-transfers report length remove-duplicates male-total-group-transfers-list end
+  
+to-report female-unique-group-transfers-maximum report ifelse-value ( length remove-duplicates female-total-group-transfers-list < 1 ) [ "NA" ] [ max remove-duplicates female-total-group-transfers-list ] end
+to-report female-unique-group-transfers-minimum report ifelse-value ( length remove-duplicates female-total-group-transfers-list < 1 ) [ "NA" ] [ min remove-duplicates female-total-group-transfers-list ] end
+to-report female-unique-group-transfers-mean report ifelse-value ( length remove-duplicates female-total-group-transfers-list < 1 ) [ "NA" ] [ mean remove-duplicates female-total-group-transfers-list ] end
+to-report female-unique-group-transfers-variance report ifelse-value ( length remove-duplicates female-total-group-transfers-list < 2 ) [ "NA" ] [ variance remove-duplicates female-total-group-transfers-list ] end      
+to-report total-population-female-unique-group-transfers report length remove-duplicates female-total-group-transfers-list end
   
 to-report male-infanticide-count-list report [ length filter [ i -> any? anima1s with [ not is.alive and my.identity = i ] ] remove-duplicates infanticide.history ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
 to-report male-infanticide-count-maximum report ifelse-value ( length male-infanticide-count-list < 1 ) [ "NA" ] [ max male-infanticide-count-list ] end

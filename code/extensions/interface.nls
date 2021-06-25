@@ -174,7 +174,7 @@ to command
 end
 
 to output-territories
-  ask patches [ if ( pgroup.identity != 0 ) [ set pcolor pgroup.identity + 2 ]]
+  ask patches [ if ( pgroup.identity != 0 ) [ set pcolor pgroup.identity + 3 ]]
   
   foreach remove-duplicates [ group.identity ] of anima1s [ grp ->
     print ( word grp " " count patches with [ pgroup.identity = grp ] ) 
@@ -546,11 +546,11 @@ end
 to output-decisions
   let anima1-to-inspect one-of anima1s with [ self = subject ]
   output-header (word " DECISIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [my.identity ] of anima1-to-inspect ) ] )
+  output-print ( word "  caller      target      action       cost     " )
+  output-print " ------------------------------------------"
   
   ifelse ( anima1-to-inspect != nobody ) [ 
-    output-print ( word "  caller      target      action       cost     " )
-    output-print " ------------------------------------------"
-    
+  
     ask anima1-to-inspect [
       foreach decision.vectors [ decision ->
         let caller-name but-first but-last (word item 0 decision )
@@ -560,12 +560,13 @@ to output-decisions
         output-print ( word " " caller-name "   " target-name "   " action-name "   " cost-name  )]]
     
     
-  ]
-  
-  [ 
-;    foreach recent-decisions-made [ d -> 
-;      output-print (word "  " d ) ]
-  ]
+  ][ 
+    foreach decisions-made-this-timsetep [ decision -> 
+        let caller-name but-first but-last (word item 0 decision )
+        let target-name but-first but-last (word item 1 decision )
+        let action-name item 2 decision
+        let cost-name precision item 3 decision 10
+        output-print ( word " " caller-name "   " target-name "   " action-name "   " cost-name  )]]
 end
 
 
@@ -576,11 +577,10 @@ end
 to output-actions
   let anima1-to-inspect one-of anima1s with [ self = subject ]
   output-header (word " ACTIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [my.identity ] of anima1-to-inspect ) ] )
+  output-print ( word "  caller      action      target       cost     " )
+  output-print " ------------------------------------------"
   
   ifelse ( anima1-to-inspect != nobody ) [ 
-    
-    output-print ( word "  caller      target      action       cost     " )
-    output-print " ------------------------------------------"
     
     ask anima1-to-inspect [
       foreach actions.completed [ action -> 
@@ -591,9 +591,29 @@ to output-actions
         output-print ( word " " caller-name "   " target-name "   " action-name "   " cost-name  )]]
     
   ][ 
-    ;foreach recent-actions-completed [ action -> output-print-action action ]
+    foreach actions-completed-this-timsetep [ action -> 
+      let caller-name but-first but-last (word item 0 action )
+      let target-name but-first but-last (word item 1 action )
+      let action-name item 2 action
+      let cost-name precision item 3 action 10
+      output-print ( word " " caller-name "   " action-name "   " target-name "   " cost-name  )]
+    ;output-print get-spaced-words ( list caller-name action-name target-name cost-name ) 20 ]
   ]
   
+end
+
+to-report get-spaced-words [ word-list spacing ]
+  let string-to-report ""
+  foreach word-list [ w ->
+    if ( is-string? w ) [
+      let w-length length w
+      let space-left spacing - w-length + 1
+      let spaces ""
+      repeat space-left [ set spaces (word spaces " ") ] 
+      set string-to-report ( word string-to-report w spaces ) 
+    ]  
+  ]
+  report string-to-report
 end
 
 to output-print-action [ action ]

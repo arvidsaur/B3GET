@@ -14,7 +14,127 @@
 ;
 ;----------------------------------------------------------------------------------------------
 
+    ;reduce-to-unique-vectors                                     ; Reduce to unique set of decision vectors
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; HELPER SUBROUTINE TO REDUCE LIST OF DECISIONS TO UNIQUE COMBINATIONS OF TARGET AND ACTION
+;
+; This subroutine reduces the current list of decision vectors into a list of unique vectors such that
+; there is only one vector for each combination of target and action. During this reduction processes, the
+; decision vector weights are added together resulting in a decision vector with the net weight.
+;
+; ENTRY: Initial list of decision vectors before reduction process.
+;
+; EXIT:  Final list of decision vectors after the reduction process.
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to reduce-to-unique-vectors
+
+  let initial-decisions decision.vectors                         ; Initially, there is a full list of decisions
+  let reduced-decisions []                                       ; and an empty list.
+
+  foreach initial-decisions [ original-vector ->                 ; Looping through the full list of decisions,
+    let original-ego item 0 original-vector                      ; identify the caller,
+    let original-target item 1 original-vector                   ; identity the target,
+    let original-action item 2 original-vector                   ; identity the action,
+    let original-weight item 3 original-vector                   ; identify the cost.
+
+    let vector-doesnt-exist true                                 ;
+
+    let index 0                                                  ;
+    foreach reduced-decisions [ reduced-vector ->                ;
+      let reduced-ego item 0 reduced-vector                      ;
+      let reduced-target item 1 reduced-vector                   ;
+      let reduced-action item 2 reduced-vector                   ;
+      let reduced-weight item 3 reduced-vector                   ;
+
+      if ( reduced-ego = original-ego )                          ;
+      and ( reduced-target = original-target )                   ;
+      and ( reduced-action = original-action ) [                 ;
+
+        set vector-doesnt-exist false                            ;
+
+        set reduced-weight ifelse-value                          ;
+        ( is-number? reduced-weight )                            ;
+        [ reduced-weight ]                                       ;
+        [ 0 ]                                                    ;
+
+        set original-weight ifelse-value                         ;
+        ( is-number? original-weight )                           ;
+        [ original-weight ]                                      ;
+        [ 0 ]                                                    ;
+
+        let new-vector ( list                                    ;
+          self                                                   ;
+          reduced-target                                         ;
+          reduced-action                                         ;
+          ( reduced-weight + original-weight )                   ;
+          false )                                                ;
+
+        set reduced-decisions                                    ;
+        remove-item index reduced-decisions                      ;
+
+        set reduced-decisions                                    ;
+        lput new-vector reduced-decisions ]                      ;
+
+      set index index + 1                                        ;
+    ]
+
+    if vector-doesnt-exist [                                     ;
+      set reduced-decisions lput                                 ;
+      ( list                                                     ;
+        self                                                     ;
+        original-target                                          ;
+        original-action                                          ;
+        original-weight                                          ;
+        false )                                                  ;
+      reduced-decisions ]                                        ;
+  ]
+  set decision.vectors reduced-decisions                         ;
+end
+
+to match-heading [ target cost ]
+  complete-action target "match-heading" cost
+;  ;print heading
+;  ;print [heading] of target
+  ;  let total-cost 10 * cost / ( abs deterioration-rate ) ; scaled with deterioration rate
+  ;  let heading-difference subtract-headings heading [heading] of target
+  ;  ;print heading-difference
+  ;  let cost-of-heading abs heading-difference / 360
+  ;  ;print cost-of-heading
+  ;
+  ;  ifelse ( total-cost >= cost-of-heading ) [
+  ;    set heading [heading] of target
+  ;  ][
+  ;    set heading heading + 360 * total-cost * -1 * ( heading-difference / abs heading-difference )
+  ;  ]
+  ;print heading
+  ;print ""
+
+
+  if (target != nobody ) [
+
+    ; deteremine x and y coordinate difference to target
+    let ycor-difference [ y.magnitude ] of target
+    let xcor-difference [ x.magnitude ] of target
+
+    if ( not ( ycor-difference = 0 and xcor-difference = 0 ) ) [ ; If the target isn't in the exact same location as self
+
+      ; calculate angle to target
+      let angle atan xcor-difference ycor-difference
+      if ( cost < 0 ) [ set angle angle - 180 ]
+
+      ; set magnitudes based on cost
+      set x.magnitude x.magnitude + (abs cost * sin angle)
+      set y.magnitude y.magnitude + (abs cost * cos angle) ]
+
+    ; set heading based on magnitudes
+    set heading ifelse-value ( x.magnitude = 0 and y.magnitude = 0 ) [ heading ] [ ( atan x.magnitude y.magnitude ) ]
+  ]
+
+end
 
 
   
