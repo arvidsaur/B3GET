@@ -800,6 +800,9 @@ to individual-summary
       "foraging.gains"  
       "total.energy.gains"
       "total.energy.cost"
+      "lifetime-foraging-gains-per-timestep"
+      "lifetime-energy-gains-per-timestep"
+      "lifetime-energy-cost-per-timestep"
       "foraging.gains.this.timestep"
       "energy.gains.this.timestep"
       "energy.cost.this.timestep"
@@ -862,9 +865,9 @@ to individual-summary
       "mother.initiated.birth"
       "mother.initiated.weaning"
       
-      "lifetime-plant-abundance"
-      "lifetime-plant-patchiness"
-      "lifetime-population-size"
+      "lifetime-mean-plant-abundance"
+      "lifetime-mean-plant-patchiness"
+      "lifetime-mean-population-size"
 
   )) ]
   
@@ -942,6 +945,9 @@ to individual-summary
     foraging.gains
     total.energy.gains
     total.energy.cost
+    ( foraging.gains / lifespan )
+    ( total.energy.gains / lifespan )
+    ( total.energy.cost / lifespan )
     foraging.gains.this.timestep
     energy.gains.this.timestep
     energy.cost.this.timestep
@@ -1083,6 +1089,7 @@ to scan-group [ group-id ]
       "distance-to-group-members-variance"
       
       "adult-male-count"
+      "adult-female-count"
       "adult-cycling-count"
       "adult-pregnant-count"
       "adult-lactating-count"
@@ -1106,18 +1113,19 @@ to scan-group [ group-id ]
       "gestatee-male-death-count"
       "gestatee-female-death-count"
       
-      "per-capita-birth" 
-      "per-capita-death"
-      "per-capita-adult-male-death"
-      "per-capita-adult-cycling-death"
-      "per-capita-adult-pregnant-death"
-      "per-capita-adult-lactating-death"
-      "per-capita-juvenile-male-death"
-      "per-capita-juvenile-female-death"
-      "per-capita-infant-male-death"
-      "per-capita-infant-female-death"
-      "per-capita-gestatee-male-death"
-      "per-capita-gestatee-female-death"
+      "births-per-female" 
+      "per-capita-births"
+      "per-capita-deaths"
+      "per-capita-adult-male-deaths"
+      "per-capita-adult-cycling-deaths"
+      "per-capita-adult-pregnant-deaths"
+      "per-capita-adult-lactating-deaths"
+      "per-capita-juvenile-male-deaths"
+      "per-capita-juvenile-female-deaths"
+      "per-capita-infant-male-deaths"
+      "per-capita-infant-female-deaths"
+      "per-capita-gestatee-male-deaths"
+      "per-capita-gestatee-female-deaths"
       
       "total-energy"
       "adult-male-energy"
@@ -1318,6 +1326,7 @@ to scan-group [ group-id ]
     distance-to-group-members-variance
 
     adult-male-count
+    (adult-cycling-count + adult-pregnant-count + adult-lactating-count)
     adult-cycling-count
     adult-pregnant-count
     adult-lactating-count
@@ -1341,6 +1350,7 @@ to scan-group [ group-id ]
     gestatee-male-death-count
     gestatee-female-death-count
     
+    ifelse-value ( current-group-size > 0 ) [ ( total-birth-count / (adult-cycling-count + adult-pregnant-count + adult-lactating-count)) ] [ "NA" ]
     ifelse-value ( current-group-size > 0 ) [ ( total-birth-count / current-group-size) ] [ "NA" ]
     ifelse-value ( current-group-size > 0 ) [ ( total-death-count / current-group-size) ] [ "NA" ]
     ifelse-value ( adult-male-count > 0 ) [ (adult-male-death-count / adult-male-count) ] [ "NA" ]
@@ -1669,6 +1679,20 @@ to simulation-summary ; observer subroutine
       "population-went-extinct"
       "ticks-at-extinction"
       
+      "number-of-groups"
+      "number-of-males"
+      "number-of-females" 
+      "number-of-adults" 
+      "number-of-cycling-females" 
+      "number-of-pregnant-females" 
+      "number-of-lactating-females"
+      "number-of-juveniles" 
+      "number-of-infants"
+      "number-of-gestatees" 
+      "number-of-fully-alive-agents"
+      "number-of-decaying-agents"
+      "number-of-fully-decayed-agents"
+      
       ; model validation and verification
       "verification-true-count"
       "verification-false-count"
@@ -1691,6 +1715,12 @@ to simulation-summary ; observer subroutine
       "groups-distance-to-group-members-mean"
       "groups-distance-to-group-members-median"
       "groups-distance-to-group-members-variance"
+      
+      "groups-distance-to-nongroup-members-minimum"
+      "groups-distance-to-nongroup-members-maximum"
+      "groups-distance-to-nongroup-members-mean"
+      "groups-distance-to-nongroup-members-median"
+      "groups-distance-to-nongroup-members-variance"
       
       "adult-males-who-disperse-count"
       "adult-males-who-not-disperse-count" 
@@ -2141,6 +2171,20 @@ to simulation-summary ; observer subroutine
     population-went-extinct
     ticks-at-extinction
     
+    number-of-groups
+    number-of-males
+    number-of-females
+    number-of-adults
+    number-of-cycling-females
+    number-of-pregnant-females
+    number-of-lactating-females
+    number-of-juveniles
+    number-of-infants
+    number-of-gestatees
+    number-of-fully-alive-agents
+    number-of-decaying-agents
+    number-of-fully-decayed-agents
+    
     ; model validation and verification
     verification-true-count
     verification-false-count
@@ -2163,6 +2207,12 @@ to simulation-summary ; observer subroutine
     groups-distance-to-group-members-mean
     groups-distance-to-group-members-median
     groups-distance-to-group-members-variance
+    
+    groups-distance-to-nongroup-members-minimum
+    groups-distance-to-nongroup-members-maximum
+    groups-distance-to-nongroup-members-mean
+    groups-distance-to-nongroup-members-median
+    groups-distance-to-nongroup-members-variance
     
     adult-males-who-disperse-count
     adult-males-who-not-disperse-count 
@@ -2693,12 +2743,26 @@ to-report group-distance-list
       set distance-list lput distance myself distance-list ]]
   report distance-list
 end
-  
+
 to-report groups-distance-to-group-members-minimum report ifelse-value ( length group-distance-list < 1 ) [ "NA" ] [ min group-distance-list ] end
 to-report groups-distance-to-group-members-maximum report ifelse-value ( length group-distance-list < 1 ) [ "NA" ] [ max group-distance-list ] end 
 to-report groups-distance-to-group-members-mean report ifelse-value ( length group-distance-list < 1 ) [ "NA" ] [ mean group-distance-list ] end
 to-report groups-distance-to-group-members-median report ifelse-value ( length group-distance-list < 1 ) [ "NA" ] [ median group-distance-list ] end
 to-report groups-distance-to-group-members-variance report ifelse-value ( length group-distance-list < 2 ) [ "NA" ] [ variance group-distance-list ] end
+  
+to-report nongroup-distance-list 
+  let distance-list []        
+  ask anima1s with [ is.alive ] [
+    ask other anima1s with [ is.alive and group.identity != [group.identity] of myself ] [
+      set distance-list lput distance myself distance-list ]]
+  report distance-list
+end
+
+to-report groups-distance-to-nongroup-members-minimum report ifelse-value ( length nongroup-distance-list < 1 ) [ "NA" ] [ min nongroup-distance-list ] end
+to-report groups-distance-to-nongroup-members-maximum report ifelse-value ( length nongroup-distance-list < 1 ) [ "NA" ] [ max nongroup-distance-list ] end 
+to-report groups-distance-to-nongroup-members-mean report ifelse-value ( length nongroup-distance-list < 1 ) [ "NA" ] [ mean nongroup-distance-list ] end
+to-report groups-distance-to-nongroup-members-median report ifelse-value ( length nongroup-distance-list < 1 ) [ "NA" ] [ median nongroup-distance-list ] end
+to-report groups-distance-to-nongroup-members-variance report ifelse-value ( length nongroup-distance-list < 2 ) [ "NA" ] [ variance nongroup-distance-list ] end
   
 to-report adult-group-sizes report filter [ j -> j > 1 ] map [ i -> count living-agents with [ group.identity = i and life.history = "adult" ]] remove-duplicates [group.identity] of living-agents end
 to-report adult-group-size-minimum report ifelse-value ( length adult-group-sizes < 1 ) [ "NA" ] [ min adult-group-sizes ] end

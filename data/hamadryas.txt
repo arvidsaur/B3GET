@@ -97,9 +97,9 @@
 1| am oafq attack 0       
 1| am βqnv mate-with 1E-5
 1| c amqnv mate-with 1E-5   
-5| e zd do-nothing 1E-9
-5| e zd do-nothing 1E-9
-5| e zd do-nothing 1E-9
+5| e zd do-nothing 0
+5| e zd do-nothing 0
+5| e zd do-nothing 0
 
 1| e e survival-chance 5.1E-3
 0| e e0 survival-chance -5.1E-3
@@ -197,6 +197,6 @@
 1| am oafq attack 0       
 1| am βqnv mate-with 1E-5
 1| c amqnv mate-with 1E-5   
-5| e zd do-nothing 1E-9
-5| e zd do-nothing 1E-9
-5| e zd do-nothing 1E-9
+5| e zd do-nothing 0
+5| e zd do-nothing 0
+5| e zd do-nothing 0

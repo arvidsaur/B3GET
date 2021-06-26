@@ -3,11 +3,11 @@
 
 1| e e survival-chance 5.1E-3
 0| e e1 survival-chance -5.1E-3
-1| g e body-size 1E-3
+1| g e body-size 2E-3
 1| i e body-size 1E-3
 1| jf e body-size 1E-4
 1| jm e body-size 1E-4
-1| e e body-shade 9E-5        
+0| e e body-shade 9E-5        
 1| i e visual-range 2E-3
 1| i e visual-angle 2E-3
 1| i e day-perception 2E-3
@@ -109,13 +109,13 @@
 5| e zd do-nothing 1E-9
 5| e zd do-nothing 1E-9
 
-1| e e survival-chance 5E-3
-0| e e1 survival-chance -5E-3
-1| g e body-size 1E-3
+1| e e survival-chance 5.1E-3
+0| e e1 survival-chance -5.1E-3
+1| g e body-size 2E-3
 1| i e body-size 1E-3
 1| jf e body-size 1E-4
 1| jm e body-size 1E-4
-1| e e body-shade 9E-5        
+0| e e body-shade 9E-5        
 1| i e visual-range 2E-3
 1| i e visual-angle 2E-3
 1| i e day-perception 2E-3
@@ -147,8 +147,8 @@
 1| e oavn move-toward 1E-4          
 1| am βqnv move-toward 1E-4     
 1| c amqnv move-toward 1E-4     
-1| e ouv move-toward -1E-4        
-0| a oah move-toward -1E-3    
+1| e ouv move-toward -1E-4      
+0| a oah move-toward -1E-3          ;_new_for_all_pops
 0| am ouvr move-toward 1E-2        ;_chimp_males_confront_smaller_strangers
 0| am oamnv move-toward 1E-4       ;_chimp_males_are_gregarious
 0| af oanv move-toward -1E-4       ;_chimp_females_are_not_gregarious
@@ -175,7 +175,7 @@
 1| i lv¥ demand-from 1E-9
 1| j d eat 1E-9
 1| a d eat 1E-9         
-0| fβ⋅ amqvu join 1E-4           ;_chimp_female_transfer
+0| fβ⋅ amqu join 1E-4           ;_chimp_female_transfer
 0| jf∴ß e leave 1E-2            ;_chimp_female_dispersal
 1| cf jy put-down 1E-9
 1| af ik help 0           

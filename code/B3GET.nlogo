@@ -236,6 +236,51 @@ globals [
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
+; SETUP THE ENVIRONMENT OF A NEW SIMULATION
+;
+; This is the main entry of the program and must be called before any other subroutine can proceed. This
+; subroutine can also be called when a simulation is currently running, which will delete the current simulation
+; and set up a new simulation. When this occurs, if at least 50,000 timesteps have transpired, the current
+; state of the simulation is saved before it is deleted. Once the simulation environment is deleted, a new
+; simulation is given a randomly generated unique identity. This subroutine calls additional subroutines
+; to set initial parameters, initialize plants, and import a starting population and possibly genotype.
+; Once these processes are complete, the new simulation state is displayed.
+;
+; ENTRY: This subroutine is the main entry.
+;
+; EXIT: setup-parameters
+;
+;       setup-patches
+;
+;       import-population
+;
+;       import-genotype
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to setup
+  if ( simulation-id != 0 and                                  ; If a simulation is currently running
+    behaviorspace-run-number = 0 and                           ; and at least 50000 timesteps have transpired
+    ticks > 50000 and                                          ; and user is currently recording data then
+    output-results? = true ) [ record-world ]                  ; completely record the current simulation state.
+
+  clear-all                                                    ; Delete all current settings in the simulation.
+  reset-ticks                                                  ; Reset the timesteps to zero.
+  set simulation-id generate-simulation-id                     ; Generate a new simulation identification.
+  if ( path-to-experiment = "" )                               ; By default, the path-to-experiment is
+  [ set path-to-experiment "../results/" ]                     ; set to point to the results folder.
+  setup-parameters                                             ; Setup the global parameter settings.
+  setup-patches                                                ; Initialize the plants for a new simulation.
+  import-population                                            ; Create an initial population of indiviudals
+  import-genotype                                              ; and their genotypes from user files.
+  output-print (word                                           ; Once setup is complete, display the current
+    " Simulation " simulation-id " "                           ; state of the new simulation.
+    behaviorspace-run-number " end setup at "
+    date-and-time )
+end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; SETUP GLOBAL PARAMETERS AT THE START OF A NEW SIMULATION
 ;
 ;
@@ -253,11 +298,11 @@ to setup-parameters
   set base-litter-size 10                                      ;
   set model-structure [ "baseline" ]                           ;
   set verification-results []                                  ;
-  set timestep-interval 100                                 ;
+  set timestep-interval 100                                    ;
   set plant-abundance-record []                                ;
   set plant-patchiness-record []                               ;
   set population-size-record []                                ;
-  set actions-completed-this-timsetep []
+  set actions-completed-this-timsetep []                       ;
   set start-date-and-time date-and-time                        ;
   set selected-display "groups"                                ;
   reset-timer                                                  ;
@@ -267,51 +312,47 @@ end
 ;
 ; SETUP PLANTS AT THE START OF A NEW SIMULATION
 ;
+; The plant environment must be set up at the start of each simulation. During this process, the NetLogo
+; patches, or cells, include a few starting conditions. First, they are given a random amount of potential
+; energy between 0 and the 'plant-quality' global variable, and have this much starting energy. They are
+; given a random id number so that other individuals can uniquely identity them. They are also given initial
+; records for the group whose territory is the patch, which is initially set to no group. And finally, the
+; color of the patch is updated to reflect its current energy contents, with darker colors of green
+; representing more energy contained within that plant.
 ;
+; ENTRY: plant-quality
 ;
-; ENTRY:
-;
-; EXIT:
+; EXIT:  plants are updated with starting conditions for a simulation environment
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to setup-patches
-  let initial-group-list []
-  repeat 100 [ set initial-group-list lput 0 initial-group-list ]
-  ask patches [
-    set pterminal.energy random-float plant-quality
-    set penergy.supply pterminal.energy
-    set pmy.identity random 9999999
-    set pgroups.here [ ]
-    set pgroups.here initial-group-list
-    update-patch-color ]
+  let initial-group-list []                                    ; Set up a generic list that contains one
+  repeat 100 [                                                 ; hundered zeros.
+    set initial-group-list lput 0 initial-group-list ]
+  ask patches [                                                ; Update the settings for each patch.
+    set pterminal.energy random-float plant-quality            ; Give each plant a random starting maximum
+    set penergy.supply pterminal.energy                        ; energy capacity and set the energy to this amount.
+    set pmy.identity random 9999999                            ; Plants get a randomly generated id number.
+    set pgroups.here initial-group-list                        ; The record of groups to occupy space, initially
+                                                               ; includes no groups.
+    update-patch-color ]                                       ; Update plant color to match its amount of energy.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
-;
-;
-;
-;
-; ENTRY:
-;
-; EXIT:
-;
-; --------------------------------------------------------------------------------------------------------- ;
+to-report generate-simulation-id report ( word "s" generate-timestamp ) end
 
-to setup ; [ new-simulation-id ]
-         ; save world file of old simulation before starting new simulation under following conditions
-         ;if ( simulation-id != 0 and behaviorspace-run-number = 0 and output-results? = true ) [ record-world ]
+to-report generate-timestamp
+  let string-to-report ""
+  let time-difference time:difference-between (time:create "1970-01-01 00:00:00.0") (time:create "") "seconds"
+  set time-difference time-difference + random 1000 - random 1000
+  let hex-list [ "0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z" ]
 
-  clear-all
-  reset-ticks
-  set simulation-id generate-simulation-id
-  setup-parameters
-  setup-patches
-  if ( path-to-experiment = "" ) [ set path-to-experiment "../results/" ]
-  import-population ; test
-  import-genotype
-  output-print (word " Simulation " simulation-id " " behaviorspace-run-number " end setup at "  date-and-time )
+  while [ time-difference > 0 ] [
+    let unix-remainder floor remainder time-difference 36
+    set string-to-report ( word item unix-remainder hex-list string-to-report )
+    set time-difference floor ( time-difference / 36 ) ]
+
+  report string-to-report
 end
 
 ; ========================================================================================================= ;
@@ -329,7 +370,7 @@ end
 ;
 ; MAIN SUBROUTINE CALLED ONCE EACH TIMESTEP
 ;
-; This is the main repetitive entry for the program. Time in this program is measured in
+; This is the main repetitive entry for the program when a simulation is running. Time in this program is measured in
 ; abstract years and divided into abstract days, then further divided into
 ; abstract hours. For decimal simplicity, there are 100 days per year and 10
 ; hours per day. These divisions are arbitrary and can be modified as
@@ -371,8 +412,6 @@ end
 ;          vectors created by all agents.
 ;        'recent-actions-completed' contains the recent history of actions
 ;          completed by all agents.
-;        'how-many-ticks?' contains the number ticks to be tracked variables
-;          carrying recent history.
 ;
 ; EXIT:
 ;        'recent-decisions-made' and 'recent-actions-completed' are updated
@@ -426,7 +465,7 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to display-simulation-status
-  if ( ticks-on-interval? timestep-interval ) [             ; Determine if periodic condition is met.
+  if ( ticks-on-interval? timestep-interval ) [                ; Determine if periodic condition is met.
 
     print ( word                                               ; Diplay the following information:
       "Simulation " simulation-id                              ; Current simulation identification.
@@ -458,7 +497,7 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to-report ticks-on-interval? [ period ]
-  report remainder ticks period = 0  ; ceiling ( ticks / period ) = ( ticks / period )
+  report remainder ticks period = 0
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -474,9 +513,19 @@ end
 ;
 ; PERFORM ALL GLOBAL UPDATES TO THE CURRENT SIMULATION
 ;
-; ENTRY:
 ;
-; EXIT:
+;
+;
+;
+; ENTRY: current timesteps
+;
+;        plant-daily-cycle
+;
+;        plant-annual-cycle is defined above.
+;
+;
+; EXIT: The variables solar-status and current-season, and tracking variables plant-abundance-record
+;       plant-patchiness-record and population-size record
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
@@ -484,33 +533,33 @@ to global-update
 
   carefully [
 
-    set solar-status ifelse-value                               ; Identify whether it is day or night
-    ( ( cos (( 360 / plant-daily-cycle ) * ticks)) > 0 )        ; based on the current timestep and
-    [ "DAY" ]                                                   ; user setting for day length.
+    set solar-status ifelse-value                              ; Identify whether it is day or night
+    ( ( cos (( 360 / plant-daily-cycle ) * ticks)) > 0 )       ; based on the current timestep and
+    [ "DAY" ]                                                  ; user setting for day length.
     [ "NIGHT" ]
 
-    set current-season ( cos (( 360 / plant-annual-cycle ) * ticks )) ; Calculate the current season
-                                                                ; which oscillates sinusoidally with time.
+    set current-season                                         ; Calculate the current season
+    ( cos (( 360 / plant-annual-cycle ) * ticks ))             ; which oscillates sinusoidally with time.
 
-    if ( ticks-on-interval? timestep-interval ) [            ; Periodically record data on the following:
+    if ( ticks-on-interval? timestep-interval ) [
 
-      set plant-abundance-record lput                           ;
-      sum [penergy.supply] of patches
+      set plant-abundance-record lput                          ; Periodically record the total amount
+      sum [penergy.supply] of patches                          ; of energy available in all plants.
       plant-abundance-record
 
-      set plant-patchiness-record lput
-      plant-patchiness
+      set plant-patchiness-record lput                         ; Periodically record the current level
+      plant-patchiness                                         ; of patchiness in plant distribution.
       plant-patchiness-record
 
-      set population-size-record lput
-      count anima1s with [ is.alive ]
+      set population-size-record lput                          ; Periodically record the current number
+      count anima1s with [ is.alive ]                          ; of living individuals.
       population-size-record
     ]
 
-    set actions-completed-this-timsetep []
-    set decisions-made-this-timsetep []
+    set actions-completed-this-timsetep []                     ; Reset the variables for decisions and
+    set decisions-made-this-timsetep []                        ; actions from the previous timestep.
 
-  ] [ print ( word "GLOBAL UPDATE ERROR: " error-message ) ]    ; If error occurs, print out error message.
+  ] [ print ( word "GLOBAL UPDATE ERROR: " error-message ) ]   ; If error occurs, print out error message.
 
 end
 
@@ -525,27 +574,15 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to-report get-updated-value [ current-value update-value ]
-  let report-value ifelse-value ( current-value < 0.00001 ) [ 0.00001 ] [ ifelse-value ( current-value > 0.99999 ) [ 0.99999 ] [ current-value ] ]
-  ifelse update-value < 0
-  [ set report-value ( report-value ^ (1 + abs update-value) ) ]
-  [ set report-value ( report-value ^ (1 / ( 1 + update-value) )) ]
+  let report-value ifelse-value ( current-value < 0.00001 )           ;
+  [ 0.00001 ]                                                         ;
+  [ ifelse-value ( current-value > 0.99999 )                          ;
+    [ 0.99999 ]                                                       ;
+    [ current-value ] ]                                               ;
+  ifelse update-value < 0                                             ;
+  [ set report-value ( report-value ^ (1 + abs update-value) ) ]      ;
+  [ set report-value ( report-value ^ (1 / ( 1 + update-value) )) ]   ;
   report report-value
-end
-
-to-report generate-simulation-id report ( word "s" generate-timestamp ) end
-
-to-report generate-timestamp
-  let string-to-report ""
-  let time-difference time:difference-between (time:create "1970-01-01 00:00:00.0") (time:create "") "seconds"
-  set time-difference time-difference + random 1000 - random 1000
-  let hex-list [ "0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z" ]
-
-  while [ time-difference > 0 ] [
-    let unix-remainder floor remainder time-difference 36
-    set string-to-report ( word item unix-remainder hex-list string-to-report )
-    set time-difference floor ( time-difference / 36 ) ]
-
-  report string-to-report
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -572,15 +609,13 @@ to plants-update
 
   carefully [
 
-    ifelse ( member? "no-plants" model-structure )   ; If the model-structure setting contains "no-plants"
-    [
-      ask patches with [ pcolor != brown + 1 ]       ; Then for patches that are not currently brown
-      [ set pcolor brown + 1 ]                       ; Set their color to brown
-    ][
-      update-patches                                 ; Otherwise update plant growth in all patches
-    ]
+    ifelse ( member? "no-plants" model-structure )             ; If the model-structure setting contains "no-plants"
+    [ ask patches with [ pcolor != brown + 1 ]                 ; then for patches that are not currently brown
+      [ set pcolor brown + 1 ]]                                ; set their color to brown.
 
-  ] [ print ( word "PLANTS UPDATE ERROR: " error-message ) ]    ; If error occurs, print out error message.
+    [ update-patches ]                                         ; Otherwise update plant growth in all patches
+
+  ] [ print ( word "PLANTS UPDATE ERROR: " error-message ) ]   ; If error occurs, print out error message.
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -616,17 +651,21 @@ end
 
 to update-patches
 
-  ifelse ( solar-status = "DAY" ) [
-    let season current-season
-    let density ( sum [penergy.supply] of patches ) / ( count patches * plant-quality )
-    ask patches [
-      update-terminal-energy season density
-      set penergy.supply penergy.supply + plant-quality / plant-annual-cycle
-      if penergy.supply > pterminal.energy [ set penergy.supply pterminal.energy ]
-      update-patch-color ]
-  ][
-    ask patches [ update-patch-color ]
-  ]
+  if ( solar-status = "DAY" ) [                                ;
+    let season current-season                                  ;
+    let density ( sum [penergy.supply] of patches )            ;
+    / ( count patches * plant-quality )                        ;
+
+    ask patches [                                              ;
+      update-terminal-energy season density                    ;
+
+      set penergy.supply penergy.supply                        ;
+      + plant-quality / plant-annual-cycle                     ;
+
+      if penergy.supply > pterminal.energy                     ;
+      [ set penergy.supply pterminal.energy ]]]                ;
+
+  ask patches [ update-patch-color ]                           ; Both day and night update the visuals of plants.
 
 end
 
@@ -650,17 +689,40 @@ end
 
 to update-terminal-energy [ plant-season plant-density ]
 
-  let seasonal-factor ( ( plant-seasonality * plant-season + 1 ) / 2 )
-  let optimal-neighbor-energy ( plant-minimum-neighbors + plant-maximum-neighbors ) / 2
-  let neighbor-energy-sd ( optimal-neighbor-energy - plant-minimum-neighbors )
-  let neighbor-energy ( mean (list (sum [penergy.supply] of neighbors) (sum [pterminal.energy] of neighbors) ) / plant-quality ) ; fix language in ch 2?
+  let seasonal-factor (                                        ;
+    ( plant-seasonality * plant-season + 1 ) / 2 )             ;
 
-  let probability-up ifelse-value ( neighbor-energy-sd = 0 ) [ 0 ] [ ( 1 * e ^ ( - (( neighbor-energy - optimal-neighbor-energy ) ^ 2 ) / ( 2 * ( neighbor-energy-sd ^ 2 ) )) ) ]
-  let y ( ( plant-daily-cycle * plant-quality ) / plant-annual-cycle ) * ( plant-density * ( 2 * probability-up - 1 ) + seasonal-factor - plant-density )
+  let optimal-neighbor-energy (                                ;
+    plant-minimum-neighbors + plant-maximum-neighbors ) / 2    ;
 
-  set pterminal.energy ( pterminal.energy + random-float y )
-  if pterminal.energy >= plant-quality [ set pterminal.energy plant-quality ]
-  if pterminal.energy <= 0.000 [ set pterminal.energy 0.000 ]
+  let neighbor-energy-sd (                                     ;
+    optimal-neighbor-energy                                    ;
+    - plant-minimum-neighbors )                                ;
+
+  let neighbor-energy (                                        ;
+    mean ( list                                                ;
+      (sum [penergy.supply] of neighbors)                      ;
+      (sum [pterminal.energy] of neighbors) )                  ;
+    / plant-quality )                                          ;
+
+  let probability-up ifelse-value                              ;
+  ( neighbor-energy-sd = 0 ) [ 0 ] [                           ;
+    ( 1 * e ^ (                                                ;
+      - (( neighbor-energy - optimal-neighbor-energy ) ^ 2 )   ;
+      / ( 2 * ( neighbor-energy-sd ^ 2 ) )) ) ]                ;
+
+  let y (                                                      ;
+    ( plant-daily-cycle * plant-quality )                      ;
+    / plant-annual-cycle ) * (                                 ;
+    plant-density *                                            ;
+    ( 2 * probability-up - 1 ) +                               ;
+    seasonal-factor -                                          ;
+    plant-density )                                            ;
+
+  set pterminal.energy ( pterminal.energy + random-float y )   ;
+  if pterminal.energy >= plant-quality                         ;
+  [ set pterminal.energy plant-quality ]                       ;
+  if pterminal.energy <= 0.000 [ set pterminal.energy 0.000 ]  ;
 
 end
 
@@ -690,6 +752,8 @@ end
 ;
 ; PERFORM ALL GLOBAL UPDATES FOR ANIMA1S
 ;
+; This organization ensures that 100 individuals stay alive at all times.... essentially ; random mating
+;
 ; ENTRY:
 ;
 ; EXIT:
@@ -700,57 +764,62 @@ to animals-update
 
   carefully [
 
-    ifelse ( member? "reaper" model-structure ) [
-      if (( count anima1s with [ is.alive ] - 100 ) > 0 ) [ ask n-of ( count anima1s with [ is.alive ] - 100 ) anima1s [ set-to-dead ]]
-      ask anima1s with [ not fully.decayed and is.alive = false ] [ check-mortality ]
-    ]
-    [ ask anima1s with [ not fully.decayed ] [ check-mortality ] ]
+    ifelse ( member? "reaper" model-structure ) [                   ;
+      if ( count anima1s with [ is.alive ] > 100 ) [                ;
+        ask n-of ( count anima1s with [ is.alive ] - 100 ) anima1s  ;
+        [ set-to-dead ]]                                            ;
+      ask anima1s with [ not fully.decayed and is.alive = false ]   ;
+      [ check-mortality ] ]                                         ;
+
+    [ ask anima1s with [ not fully.decayed ]                        ;
+      [ check-mortality ] ]                                         ;
 
 
-    ; this organization ensures that 100 individuals stay alive at all times
+    if ( member? "stork" model-structure ) [                        ; UPDATE AGENTS : reproduction ( when model-structure = "stork" )
+      if (count anima1s with [ is.alive ] < 100 ) [                 ;
+        repeat ( 100 - count anima1s with [ is.alive ]) [           ;
+          if ( ( count anima1s with [                               ;
+            biological.sex = "male" and                             ;
+            life.history = "adult" and                              ;
+            is.alive ] > 0 )                                        ; if there is at least one adult male
+            and ( count anima1s with [                              ;
+              biological.sex = "female" and                         ;
+              life.history = "adult" and                            ;
+              fertility.status = "cycling" and                      ;
+              is.alive ] > 0 ) )                                    ; and one adult cycling female left in the simulation,
+          [ ask one-of anima1s with [                               ;
+            biological.sex = "female" and                           ;
+            life.history = "adult" and                              ;
+            fertility.status = "cycling" and                        ;
+            is.alive ]                                              ; randomly select one adult male and one cycling female,
+            [ conceive-with ( one-of anima1s with [                 ;
+              biological.sex = "male" and                           ;
+              life.history = "adult" and                            ;
+              is.alive ] ) ]]]]]                                    ; and the female spontaneously conceives a new offspring from their alleles
 
-    if ( member? "stork" model-structure ) [
-
-      ; UPDATE AGENTS : reproduction ( when model-structure = "stork" )
-      if (count anima1s with [ is.alive ] < 100 ) ; random mating
-      [ repeat ( 100 - count anima1s with [ is.alive ]) [
-        if ( ( count anima1s with [ biological.sex = "male" and life.history = "adult" and is.alive ] > 0 )                                        ; if there is at least one adult male
-          and ( count anima1s with [ biological.sex = "female" and life.history = "adult" and fertility.status = "cycling" and is.alive ] > 0 ) )  ; and one adult cycling female left in the simulation,
-        [ ask one-of anima1s with [ biological.sex = "female" and life.history = "adult" and fertility.status = "cycling" and is.alive ]           ; randomly select one adult male and one cycling female,
-          [ conceive-with ( one-of anima1s with [ biological.sex = "male" and life.history = "adult" and is.alive ] ) ]]]]                  ; and the female spontaneously conceives a new offspring from their alleles
-    ]
-
-    ; UPDATE AGENTS
     ask anima1s with [ not fully.decayed ] [
 
-      set foraging.gains.this.timestep 0
-      set energy.gains.this.timestep 0
-      set energy.cost.this.timestep 0
+      set foraging.gains.this.timestep 0                            ;
+      set energy.gains.this.timestep 0                              ;
+      set energy.cost.this.timestep 0                               ;
+      set my.environment []                                         ;
+      set decision.vectors []                                       ;
+      set actions.completed []                                      ; Clear memory from the previous timestep.
+      set age.in.ticks age.in.ticks + 1                             ; Advance the individual's age by one timestep.
 
-      set my.environment [] set decision.vectors [] set actions.completed []                         ; Clear memory from the previous timestep.
-      set age.in.ticks age.in.ticks + 1                                                              ; Advance the individual's age by one timestep.
-      deteriorate                                                                                    ; Advance the individual's decay for this time step.
-                                                                                                     ; NEXT: DO THE RIGHT THING FOR SUBROUTINE "deteriorate" <------------------------------------
-      update-appearance                                                                              ; Update the visual appearance to match.
+      deteriorate                                                   ; Advance the individual's decay for this time step.
+      update-appearance                                             ; Update the visual appearance to match.
 
-      if ( not empty? carried.items ) [             ; If the carrier has move, bring all the carried items along.
-        foreach carried.items [ itm ->
-          ask itm [ move-to myself ]
-        ]
-      ]
+      if ( not empty? carried.items ) [                             ; If the carrier has moved, bring all the
+        foreach carried.items [ itm ->                              ; carried items along.
+          ask itm [ move-to myself ]]]
 
-      ;    if ( [pgroup.identity] of patch-here != group.identity and count anima1s with [ group.identity = [group.identity] of myself ] > 1 ) [ ; is this code costly?
-      ;      ask patch-here [ set pgroup.identity [group.identity] of myself ]] ; update territories of groups
-
-      ask patch-here [
+      ask patch-here [                                              ; Record individual's
         set pgroups.here but-first pgroups.here
         set pgroups.here lput [group.identity] of myself pgroups.here
-        set pgroup.identity one-of modes pgroups.here
-      ]
+        set pgroup.identity one-of modes pgroups.here ]
 
-      set cause.of.death ""
-
-    ]
+      set cause.of.death ""  ]                                      ;
 
   ] [ print ( word "INDVIDUALS UPDATE ERROR: " error-message ) ]    ; If error occurs, print out error message.
 
@@ -801,7 +870,7 @@ end
 ; UPDATE CALLER TO BE DEAD
 ;
 ; The caller's status is updated to dead, which triggers some tracking records and visual changes. The
-; caller's state is perminantly set todead.
+; caller's state is perminantly set to dead.
 ;
 ; ENTRY:
 ;
@@ -810,21 +879,24 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to set-to-dead
-  set is.alive false
-  set ticks.at.death ticks
-  set death.group.identity group.identity
-  set death.group.size (count anima1s with [ is.alive and group.identity = [group.identity] of myself ])
-  set label "x"
-  set my.environment []
-  set decision.vectors []
-  set actions.completed []
+  set is.alive false                                           ;
+  set ticks.at.death ticks                                     ;
+  set death.group.identity group.identity                      ;
+  set death.group.size ( count anima1s with [                  ;
+    is.alive and                                               ;
+    group.identity = [group.identity] of myself ] )            ;
+  set label "x"                                                ;
+  set my.environment []                                        ;
+  set decision.vectors []                                      ;
+  set actions.completed []                                     ;
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; U
+; UPDATE CALLER TO BE DEAD AND FULLY DECAYED
 ;
-; The
+; An individual who dies is still available in the environment for living individuals to interact with. For
+; exmaple, a living individual may want to eat a dead individual.
 ;
 ; ENTRY:
 ;
@@ -833,12 +905,15 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to remove-from-environment
-  if ( ticks.at.death = 0 ) [ set ticks.at.death ticks ]
-  ask anima1s with [ member? myself carried.items ] [ set carried.items remove myself remove-duplicates carried.items ] ; remove me from other agent's carried.items
-  set carried.items [] ; remove others from my carried items
-  set hidden? true
-  set fully.decayed true
-  set label " "
+  if ( ticks.at.death = 0 ) [ set ticks.at.death ticks ]       ;
+  ask anima1s with [ member? myself carried.items ]            ;
+  [ set carried.items                                          ;
+    remove myself remove-duplicates                            ;
+    carried.items ]                                            ;  remove me from other agent's carried.items
+  set carried.items []                                         ; remove others from my carried items
+  set hidden? true                                             ;
+  set fully.decayed true                                       ;
+  set label " "                                                ;
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -854,10 +929,12 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to update-appearance
-  set size body.size
-  set label ifelse-value ( is.alive ) [ " " ] [ "x" ]
-  set color round ( wrap-color group.identity + 5 - ( 10 ^ body.shade ))
-  set shape get-shape
+  set size body.size                                           ;
+  set label ifelse-value                                       ;
+  ( is.alive ) [ " " ] [ "x" ]                                 ;
+  set color round (                                            ;
+    wrap-color group.identity + 5 - ( 10 ^ body.shade ))       ;
+  set shape get-shape                                          ;
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -873,19 +950,28 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to-report get-shape
-  let base_shape ifelse-value
-  ( biological.sex = "male" ) [ "triangle" ] [ "circle" ]
-  let eye_size ( ifelse-value
-    ( visual.range < ( 1 / 3 ) )
-    [ "1" ]
-    ( visual.range < ( 2 / 3 ) ) [ "2" ] [ "3" ] )
-  let eye_spacing ( ifelse-value ( visual.angle < ( 1 / 3 ) ) [ "1" ] ( visual.angle < ( 2 / 3 ) ) [ "2" ] [ "3" ] )
-  let current-perception ifelse-value ( solar-status = "DAY" ) [ day.perception ] [ night.perception ]
-  let eye_acuity ( ifelse-value ( is.resting or not is.alive ) [ "1" ] ( current-perception > 0.5 ) [ "3" ] ( current-perception > 0 ) [ "2" ] [ "1" ])
-  let a_on ifelse-value yellow.signal [ "a" ] [ "" ]
-  let b_on ifelse-value red.signal [ "b" ] [ "" ]
-  let c_on ifelse-value blue.signal [ "c" ] [ "" ]
-  report ( word base_shape eye_size eye_spacing eye_acuity a_on b_on c_on )
+  let base_shape ifelse-value                                  ;
+  ( biological.sex = "male" ) [ "triangle" ] [ "circle" ]      ;
+  let eye_size ( ifelse-value                                  ;
+    ( visual.range < ( 1 / 3 ) ) [ "1" ]                       ;
+    ( visual.range < ( 2 / 3 ) ) [ "2" ] [ "3" ] )             ;
+  let eye_spacing ( ifelse-value                               ;
+    ( visual.angle < ( 1 / 3 ) ) [ "1" ]                       ;
+    ( visual.angle < ( 2 / 3 ) ) [ "2" ] [ "3" ] )             ;
+  let current-perception ifelse-value                          ;
+  ( solar-status = "DAY" )                                     ;
+  [ day.perception ]                                           ;
+  [ night.perception ]                                         ;
+  let eye_acuity ( ifelse-value                                ;
+    ( is.resting or not is.alive ) [ "1" ]                     ;
+    ( current-perception > 0.5 ) [ "3" ]                       ;
+    ( current-perception > 0 ) [ "2" ] [ "1" ] )               ;
+  let a_on ifelse-value yellow.signal [ "a" ] [ "" ]           ;
+  let b_on ifelse-value red.signal [ "b" ] [ "" ]              ;
+  let c_on ifelse-value blue.signal [ "c" ] [ "" ]             ;
+
+  report ( word base_shape eye_size eye_spacing                ;
+    eye_acuity a_on b_on c_on )                                ;
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -905,12 +991,14 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to update-energy [ update ]
-  set energy.supply energy.supply + update                      ; Update caller's energy with input value,
-  ifelse ( update > 0 )                                         ; which can be positive or negative.
-  [ set total.energy.gains total.energy.gains + update
-    set energy.gains.this.timestep energy.gains.this.timestep + update ] ; Record positive values as energy gains.
-  [ set total.energy.cost total.energy.cost + abs update
-    set energy.cost.this.timestep energy.cost.this.timestep + abs update ] ; Record negative values as energy costs.
+  set energy.supply energy.supply + update                     ; Update caller's energy with input value,
+  ifelse ( update > 0 )                                        ; which can be positive or negative.
+  [ set total.energy.gains total.energy.gains + update         ;
+    set energy.gains.this.timestep                             ;
+    energy.gains.this.timestep + update ]                      ; Record positive values as energy gains.
+  [ set total.energy.cost total.energy.cost + abs update       ;
+    set energy.cost.this.timestep                              ;
+    energy.cost.this.timestep + abs update ]                   ; Record negative values as energy costs.
 end
 
 ; ========================================================================================================= ;
@@ -1947,7 +2035,7 @@ to join-group [ group-id ]
       lput group.identity group.transfers.history
       complete-action self "joined-group" 0  ]                 ; Record that the individual has now joined the group.
 
-    [ complete-action self "remained-in-previous-group" 0 ]    ; Record that the individual remained in previous group.
+    [ complete-action self "still-in-previous-group" 0 ]    ; Record that the individual remained in previous group.
 
   ][
     complete-action self "already-in-group" 0                  ; Record if individual is already in this group.
@@ -2114,10 +2202,6 @@ end
 
 to-report is-not-carried? report not any? anima1s with [ member? myself carried.items ] end
 
-        ;      set carried.items remove-item
-      ;      ( position target remove-duplicates carried.items )
-      ;      remove-duplicates carried.items
-
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
 ; CALLER ATTEMPTS TO DROP TARGET
@@ -2126,8 +2210,7 @@ to-report is-not-carried? report not any? anima1s with [ member? myself carried.
 ;
 ; ENTRY: 'target' defines the individual that the caller is interacting with.
 ;
-;
-; EXIT:
+; EXIT: Target is not or no longer in the carried.items inventory of caller.
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
@@ -2157,13 +2240,14 @@ end
 
 to help [ target cost ]
   complete-action target "help" cost
-  if ( is-anima1? target and [ is.alive ] of target = true ) [
+  if ( is-anima1? target ) [
     if ( cost > 0 )
     [ let target-cost get-action-cost-of target "help"
       let cost-probability ( cost + target-cost ) / cost
       let size-probability ( size / ( size + [size] of target ) )
       let net-cost cost + target-cost
-      if ( random-float 1.0 <= ( cost-probability * size-probability ) ) [ aid target net-cost ]]]
+      if ( random-float 1.0 <= ( cost-probability * size-probability ) )
+      [ aid target net-cost ]]]
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -2226,13 +2310,17 @@ end
 
 to attack [ target cost ]
   complete-action target "attack" cost
-  if ( is-anima1? target and [ is.alive ] of target = true ) [
-    if ( cost > 0 )
-    [ let target-cost get-action-cost-of target "attack"
-      let cost-probability ( cost + target-cost ) / ( abs cost + abs target-cost )
-      let size-probability ( size / ( size + [size] of target ) )
-      let net-cost cost + target-cost
-      if ( random-float 1.0 <= ( cost-probability * size-probability ) ) [ harm target net-cost ]]]
+  if ( is-anima1? target ) [
+    let caller-cost [ get-action-cost-of myself "attack" ] of target
+    let target-cost get-action-cost-of target "attack"
+    let cost-probability ( cost + target-cost ) /
+    ( abs cost + abs target-cost )
+    let size-probability ( size /
+      ( size + [size] of target ) )
+    let net-cost cost + target-cost
+    if ( random-float 1.0 <=
+      ( cost-probability * size-probability ) )
+    [ harm target net-cost ]]
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -2996,7 +3084,7 @@ INPUTBOX
 354
 79
 path-to-experiment
-../data/visual-verification/
+../results/thesis-hamadryas-test/
 1
 0
 String
@@ -3160,7 +3248,7 @@ INPUTBOX
 995
 191
 population
-square-dance
+four-groups-central
 1
 0
 String
@@ -3171,7 +3259,7 @@ INPUTBOX
 995
 265
 genotype
-square-dance
+hamadryas
 1
 0
 String
@@ -3235,7 +3323,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "meta-report" "show-territories" "---------------------" " > OPERATIONS   " "---------------------" "parameter-settings" "default-settings" "model-structure" "-- aspatial" "-- free-lunch" "-- ideal-form" "-- no-evolution" "-- no-plants" "-- reaper" "-- signal-fertility" "-- stork" "-- uninvadable" "clear-population" "new-population" "reset-plants" "save-world" "import-world" "save-simulation" "output-results" "---------------------" " > VERIFICATION " "---------------------" "dynamic-check" "-- true" "-- false" "runtime-check" "visual-check" "-- attack-pattern" "-- dine-and-dash" "-- life-history-channel" "-- musical-pairs" "-- night-and-day" "-- popularity-context" "-- speed-mating" "-- square-dance" "-- supply-and-demand" "---------------------" " > DISPLAY RESULTS   " "---------------------" "age" "generations" "life-history" "genotype" "phenotype" "-- survival-chance" "-- body-size" "-- body-shade" "-- fertility-status" "-- hidden-chance" "-- bite-capacity" "-- mutation-chance" "-- sex-ratio" "-- litter-size" "-- conception-chance" "-- visual-angle" "-- visual-range" "-- day-perception" "-- night-perception" "-- yellow-chance" "-- red-chance" "-- blue-chance" "-- birthing-chance" "-- weaning-chance" "-- infancy-chance" "-- juvenility-chance" "-- adulthood-chance" "carried-items" "energy-supply" "behaviors" "-- environment" "-- decisions" "-- actions" "-- birthing" "-- weaning" "-- matings" "-- mating-partners" "-- conceptions" "-- infanticide" "-- group-transfers" "-- travel-distance" "-- foraging-gains" "-- total-energy-gains" "-- total-energy-cost" "-- receiving-history" "-- carried-history" "-- aid-history" "-- harm-history"
-13
+77
 
 BUTTON
 1063
