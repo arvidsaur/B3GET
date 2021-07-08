@@ -1,12 +1,12 @@
 ; ========================================================================================================= ;
 ; 
 ;                                                                                    
-; .d888888  888888ba   .d888888  dP        dP    dP .d88888b  dP .d88888b  
-;d8'    88  88    `8b d8'    88  88        Y8.  .8P 88.    "' 88 88.    "' 
-;88aaaaa88a 88     88 88aaaaa88a 88         Y8aa8P  `Y88888b. 88 `Y88888b. 
-;88     88  88     88 88     88  88           88          `8b 88       `8b 
-;88     88  88     88 88     88  88           88    d8'   .8P 88 d8'   .8P 
-;88     88  dP     dP 88     88  88888888P    dP     Y88888P  dP  Y88888P  
+;   .d888888  888888ba   .d888888  dP        dP    dP .d88888b  dP .d88888b  
+;  d8'    88  88    `8b d8'    88  88        Y8.  .8P 88.    "' 88 88.    "' 
+;  88aaaaa88a 88     88 88aaaaa88a 88         Y8aa8P  `Y88888b. 88 `Y88888b. 
+;  88     88  88     88 88     88  88           88          `8b 88       `8b 
+;  88     88  88     88 88     88  88           88    d8'   .8P 88 d8'   .8P 
+;  88     88  dP     dP 88     88  88888888P    dP     Y88888P  dP  Y88888P  
 ;                                                                          
 ;            
 ; © 2021 K N Crouse  
@@ -108,6 +108,11 @@ to thesis-setup
     behaviorspace-run-number " end setup at "
     date-and-time )
   
+end
+
+to thesis-final
+  simulation-summary
+  if ( record-individuals ) [ ask anima1s with [ is.alive ] [ individual-summary ]]
 end
 
 ;reduce-to-unique-vectors                                     ; Reduce to unique set of decision vectors
