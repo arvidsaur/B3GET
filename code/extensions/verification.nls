@@ -1,21 +1,23 @@
-;-------------------------------------------------------------------------------------------------
-; 
-;                             oo .8888b oo                     dP   oo                   
-;                                88   "                        88                        
-;  dP   .dP .d8888b. 88d888b. dP 88aaa  dP .d8888b. .d8888b. d8888P dP .d8888b. 88d888b. 
-;  88   d8' 88ooood8 88'  `88 88 88     88 88'  `"" 88'  `88   88   88 88'  `88 88'  `88 
-;  88 .88'  88.  ... 88       88 88     88 88.  ... 88.  .88   88   88 88.  .88 88    88 
-;  8888P'   `88888P' dP       dP dP     dP `88888P' `88888P8   dP   dP `88888P' dP    dP 
-; 
-; © 2021 K N Crouse  
-;-------------------------------------------------------------------------------------------------
+; ========================================================================================================= ;
+;                                                                 
+;  dP     dP  88888888b  888888ba  dP  88888888b dP  a88888b.  .d888888  d888888P dP  .88888.  888888ba  
+;  88     88  88         88    `8b 88  88        88 d8'   `88 d8'    88     88    88 d8'   `8b 88    `8b 
+;  88    .8P a88aaaa    a88aaaa8P' 88 a88aaaa    88 88        88aaaaa88a    88    88 88     88 88     88 
+;  88    d8'  88         88   `8b. 88  88        88 88        88     88     88    88 88     88 88     88 
+;  88  .d8P   88         88     88 88  88        88 Y8.   .88 88     88     88    88 Y8.   .8P 88     88 
+;  888888'    88888888P  dP     dP dP  dP        dP  Y88888P' 88     88     dP    dP  `8888P'  dP     dP 
+;                                                                                                      
 ;
 ; This extension contains all functions related to verifying B3GET's code during simulations.   
 ;
-;-------------------------------------------------------------------------------------------------
+; ========================================================================================================= ;
 
-;--------------------------------------------------------------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; 
+;
+; This subroutine...
+;
 ; GENERATE TAPE WITH VERIFICATION DATA
 ;
 ; Generates a "tape" of all verification measurements. This subroutine requires profiler to be running or it may; not return accurate results.
@@ -30,8 +32,12 @@
 ; date-and-time  model-version  simulation-id  ticks   true / false    true / false    true / false    true / false    ....
 ; date-and-time  model-version  simulation-id  ticks   true / false    true / false    true / false    true / false    ....
 ;
-;---------------------------------------------------------------------------------------------------------------------------------
-
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report generate-verification-tape
 
@@ -155,9 +161,9 @@ to-report generate-verification-tape
   set function lput "get-shape" function
   set boolean lput ( not any? anima1z with [ age.in.ticks > 0 and biological.sex = "male" and not member? "triangle" shape ] ) boolean   
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; CONSIDER-ENVIRONMENT
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Individual calls to consider-environment same number as living individuals?" header
   set verification lput "100" verification 
@@ -214,9 +220,9 @@ to-report generate-verification-tape
   set function lput "consider-environment" function
   set boolean lput ( not any? anima1s with [ fully.decayed and member? self [my.environment] of anima1z ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; MAKE-DECISIONS
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Every individuals who is alive has decision.vectors?" header
   set verification lput "95" verification ; there could be bad (but legitimate) mutations that cause this to not be true for some
@@ -249,9 +255,9 @@ to-report generate-verification-tape
 ;  let decisions-list map [ i -> but-first but-last i ] recent-decisions-made
 ;  set boolean lput ( length remove-duplicates decisions-list = length remove-duplicates decisions-list ) boolean
 
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; DO-ACTIONS
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to do-actions same as number of living individuals?" header 
   set verification lput "100" verification 
@@ -278,9 +284,9 @@ to-report generate-verification-tape
   set function lput "do-actions" function
   set boolean lput ( not any? anima1z with [ generation.number > 0 and ( precision total.energy.gains 5 < precision total.energy.cost 5 )] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; SUVIVAL-CHANCE
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to survival-chance less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -302,9 +308,9 @@ to-report generate-verification-tape
   set function lput "survival-chance" function
   set boolean lput ( not any? anima1s with [ survival.chance < 0.95 and is.alive = true ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; BODY-SIZE
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to body-size less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -336,9 +342,9 @@ to-report generate-verification-tape
   set function lput "body-size" function
   set boolean lput ( ( ifelse-value ( any? anima1z with [ life.history = "adult" ] ) [ mean [body.size] of anima1z with [ life.history = "adult" ]][1]) >= ( ifelse-value ( any? anima1z with [ life.history = "juvenile" ] ) [mean [body.size] of anima1z with [ life.history = "juvenile"]] [0] )) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; BODY-SHADE
-  ; -------------------------------------------------------------------------------------------------------------------- 
+  ; --------------------------------------------------------------------------------------------------------- 
   
   set header lput "Calls to body-shade less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -355,9 +361,9 @@ to-report generate-verification-tape
   set function lput "body-shade" function
   set boolean lput ( not any? anima1z with [ body.shade < 0 or body.shade > 1 ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; VISUAL-RANGE
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to visual-range less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -379,9 +385,9 @@ to-report generate-verification-tape
   set function lput "visual-range" function
   set boolean lput ( ( ifelse-value ( any? anima1z with [ life.history = "adult" ]) [mean [visual.range] of anima1z with [ life.history = "adult" ]][0]) >= ( ifelse-value ( any? anima1z with [ life.history = "juvenile" or life.history = "infant" or life.history = "gestatee" ] ) [mean [visual.range] of anima1z with [ life.history = "juvenile" or life.history = "infant" or life.history = "gestatee"]] [0] )) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; VISUAL-ANGLE
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to visual-angle less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -403,9 +409,9 @@ to-report generate-verification-tape
   set function lput "visual-angle" function
   set boolean lput ( ( ifelse-value ( any? anima1z with [ life.history = "adult" ]) [mean [visual.angle] of anima1z with [ life.history = "adult" ]][0]) >= ( ifelse-value ( any? anima1z with [ life.history = "juvenile" or life.history = "infant" or life.history = "gestatee" ] ) [mean [visual.angle] of anima1z with [ life.history = "juvenile" or life.history = "infant" or life.history = "gestatee"]] [0] )) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; DAY-PERCEPTION
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to day-perception less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -427,9 +433,9 @@ to-report generate-verification-tape
   set function lput "day-perception" function
   set boolean lput ( ( ifelse-value ( any? anima1z with [ life.history = "adult" ]) [mean [day.perception] of anima1z with [ life.history = "adult" ]][0]) >= ( ifelse-value ( any? anima1z with [ life.history = "juvenile" or life.history = "infant" or life.history = "gestatee" ] ) [mean [day.perception] of anima1z with [ life.history = "juvenile" or life.history = "infant" or life.history = "gestatee"]] [0] )) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; NIGHT-PERCEPTION
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to night-perception less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -451,9 +457,9 @@ to-report generate-verification-tape
   set function lput "night-perception" function
   set boolean lput ( ( ifelse-value ( any? anima1z with [ life.history = "adult" ]) [mean [night.perception] of anima1z with [ life.history = "adult" ]][0]) >= ( ifelse-value ( any? anima1z with [ life.history = "juvenile" or life.history = "infant" or life.history = "gestatee" ] ) [mean [night.perception] of anima1z with [ life.history = "juvenile" or life.history = "infant" or life.history = "gestatee"]] [0] )) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; CONCEPTION-CHANCE
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to conception-chance less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -480,9 +486,9 @@ to-report generate-verification-tape
   set function lput "conception-chance" function
   set boolean lput ( not any? anima1z with [ count my-offspring > 0 and conception.chance = 0 ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; BITE-CAPACITY
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to bite-capacity less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -504,9 +510,9 @@ to-report generate-verification-tape
   set function lput "bite-capacity" function
   set boolean lput ( not any? anima1z with [ ( life.history = "juvenile" or life.history = "adult" ) and bite.capacity = 0 ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; MUTATION-CHANCE
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to mutation-chance less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -523,9 +529,9 @@ to-report generate-verification-tape
   set function lput "mutation-chance" function
   set boolean lput ( not any? anima1z with [ mutation.chance < 0 or mutation.chance > 1 ] ) boolean
 
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; SEX-RATIO
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to sex-ratio less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -552,9 +558,9 @@ to-report generate-verification-tape
   set function lput "sex-ratio" function
   set boolean lput ( any? anima1z with [ biological.sex = "male" ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; LITTER-SIZE
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to litter-size less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -571,9 +577,9 @@ to-report generate-verification-tape
   set function lput "litter-size" function
   set boolean lput ( not any? anima1z with [ litter.size < 0 or litter.size > 1 ] ) boolean    
 
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; MOVE-TOWARD
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to move-toward less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -585,9 +591,9 @@ to-report generate-verification-tape
   set function lput "move-toward" function
   set boolean lput ( profiler:calls "move-toward" = action-count-for "move-toward" ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; TURN-RIGHT
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to turn-right less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -599,9 +605,9 @@ to-report generate-verification-tape
   set function lput "turn-right" function
   set boolean lput ( profiler:calls "turn-right" = action-count-for "turn-right" ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; GO-FORWARD
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to go-forward less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -631,9 +637,9 @@ to-report generate-verification-tape
   set function lput "go-forward" function
   set boolean lput ( not any? anima1z with [ distance.traveled = 0 and my-actions-include "went-forward" ] ) boolean 
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; HIDE
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to hide less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -650,9 +656,9 @@ to-report generate-verification-tape
   set function lput "hide" function
   set boolean lput ( not any? anima1z with [ life.history != "gestatee" and hidden? and member? self ( reduce sentence [my.environment] of other anima1z ) ] ) boolean 
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; REST
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to rest less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -676,9 +682,9 @@ to-report generate-verification-tape
       or last-actions-include "pick-up" or last-actions-include "put-down" or last-actions-include "cling-to" 
       or last-actions-include "squirm-from" or last-actions-include "help" or last-actions-include "hurt" or last-actions-include "mate-with" ) ] ) boolean 
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; SIGNALING
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to yellow-signal less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -725,9 +731,9 @@ to-report generate-verification-tape
   set function lput "blue-signal" function
   set boolean lput ( not any? anima1z with [ blue.chance < 0 or blue.chance > 1 ] ) boolean
 
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; CHECK-INFANCY
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to check-infancy less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -764,9 +770,9 @@ to-report generate-verification-tape
   set function lput "check-infancy" function
   set boolean lput ( not any? anima1z with [ life.history = "adult" and my-actions-include "check-infancy" ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; CHECK-BIRTH
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to check-birth less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -808,9 +814,9 @@ to-report generate-verification-tape
   set function lput "check-birth" function
   set boolean lput ( not any? anima1z with [ life.history = "adult" and biological.sex = "male" and my-actions-include "check-birth" ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; GIVE-BIRTH
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to give-birth are equal to calls to update-to-infant?" header
   set verification lput "100" verification 
@@ -822,9 +828,9 @@ to-report generate-verification-tape
   set function lput "check-birth" function
   set boolean lput ( not any? anima1z with [ my-actions-include "give-birth" and biological.sex != "female" and life.history != "adult" ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; UPDATE-TO-INFANT
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "There is at least one infant?" header 
   set verification lput "75" verification 
@@ -841,9 +847,9 @@ to-report generate-verification-tape
   set function lput "update-to-infant" function
   set boolean lput ( not any? anima1z with [ label = "i" and ( ticks.at.birth - ticks.at.conception != age.in.ticks ) ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; CHECK-JUVENILITY
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to check-juvenility less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -875,9 +881,9 @@ to-report generate-verification-tape
   set function lput "check-juvenility" function
   set boolean lput ( not any? anima1z with [ life.history = "adult" and my-actions-include "check-juvenility" ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; CHECK-WEANING
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to check-weaning less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -945,18 +951,18 @@ to-report generate-verification-tape
   set function lput "check-weaning" function
   set boolean lput ( not any? anima1z with [ life.history = "adult" and biological.sex = "male" and my-actions-include "check-weaning" ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; WEAN-OFFSPRING
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to wean-offspring are equal to call to update-to-juvenile?" header
   set verification lput "100" verification 
   set function lput "wean-offspring" function
   set boolean lput ( profiler:calls "wean-offspring" = profiler:calls "update-to-juvenile" ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; UPDATE-TO-JUVENILE
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "There is at least one juvenile?" header 
   set verification lput "75" verification 
@@ -973,9 +979,9 @@ to-report generate-verification-tape
   set function lput "update-to-juvenile" function
   set boolean lput ( not any? anima1z with [ label = "j" and ( ticks.at.weaning - ticks.at.conception != age.in.ticks ) ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; CHECK-ADULTHODD
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to check-adulthood less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -1002,9 +1008,9 @@ to-report generate-verification-tape
   set function lput "check-adulthood" function
   set boolean lput ( not any? anima1z with [ life.history = "adult" and my-actions-include "check-adulthood" ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; UPDATE-TO-ADULT
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "There is at least one adult?" header 
   set verification lput "75" verification 
@@ -1057,9 +1063,9 @@ to-report generate-verification-tape
       or adult.day.perception > 0 or adult.night.perception > 0 
       or adult.yellow.chance > 0 or adult.red.chance > 0 or adult.blue.chance > 0 )]) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; SUPPLY-TO
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to supply-to less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -1091,9 +1097,9 @@ to-report generate-verification-tape
   set function lput "supply-to" function
   set boolean lput ( not any? anima1z with [ life.history = "adult" and biological.sex = "male" and my-actions-include "supply-to" ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; DEMAND-FROM 
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to demand-from less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -1120,9 +1126,9 @@ to-report generate-verification-tape
   set function lput "demand-from" function
   set boolean lput ( not any? anima1z with [ life.history = "adult" and my-actions-include "demand-from" ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; EAT
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to eat less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -1153,18 +1159,18 @@ to-report generate-verification-tape
   let adult-foraging-gains ( ifelse-value ( any? anima1z with [ life.history = "adult" ] ) [ mean [foraging.gains] of anima1z with [ life.history = "adult" ] ] [0] )
   set boolean lput ( gestatee-foraging-gains <= infant-foraging-gains and infant-foraging-gains <= juvenile-foraging-gains and juvenile-foraging-gains <= adult-foraging-gains  ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; RECEIVE-FROM
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to receive-from equal to number of action vectors?" header 
   set verification lput "100" verification
   set function lput "receive-from" function
   set boolean lput ( profiler:calls "receive-from" = action-count-for "receive-from" ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; JOIN
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to join less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -1176,9 +1182,9 @@ to-report generate-verification-tape
   set function lput "join" function
   set boolean lput ( profiler:calls "join" = action-count-for "join" ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; LEAVE 
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to leave less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -1190,9 +1196,9 @@ to-report generate-verification-tape
   set function lput "leave" function
   set boolean lput ( profiler:calls "leave" = action-count-for "leave" ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; RECRUIT 
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to recruit less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -1204,9 +1210,9 @@ to-report generate-verification-tape
   set function lput "recruit" function
   set boolean lput ( profiler:calls "recruit" = action-count-for "recruit" ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; EXPEL
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to expel less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -1218,9 +1224,9 @@ to-report generate-verification-tape
   set function lput "expel" function
   set boolean lput ( profiler:calls "expel" = action-count-for "expel" ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; JOIN-GROUP 
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to join-group less than or equal to number of actions?" header 
   set verification lput "100" verification
@@ -1232,9 +1238,9 @@ to-report generate-verification-tape
   set function lput "join-group" function
   set boolean lput ( not any? anima1z with [ life.history = "gestatee" and my-actions-include "join-group" ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; LEAVE-GROUP
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to leave-group less than or equal to number of actions?" header 
   set verification lput "100" verification
@@ -1246,9 +1252,9 @@ to-report generate-verification-tape
   set function lput "leave-group" function
   set boolean lput ( not any? anima1z with [ life.history = "gestatee" and my-actions-include "leave-group" ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; PICK-UP 
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to pick-up less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -1265,9 +1271,9 @@ to-report generate-verification-tape
   set function lput "pick-up" function
   set boolean lput ( not any? anima1z with [ life.history = "gestatee" and my-actions-include "pick-up" ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; PUT-DOWN 
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to put-down less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -1284,9 +1290,9 @@ to-report generate-verification-tape
   set function lput "put-down" function
   set boolean lput ( not any? anima1z with [ life.history = "gestatee" and my-actions-include "put-down" ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; CLING-TO
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to cling-to less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -1303,9 +1309,9 @@ to-report generate-verification-tape
   set function lput "cling-to" function
   set boolean lput ( not any? anima1z with [ life.history = "gestatee" and my-actions-include "cling-to" ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; SQUIRM-FROM
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to squirm-from less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -1322,9 +1328,9 @@ to-report generate-verification-tape
   set function lput "squirm-from" function
   set boolean lput ( not any? anima1z with [ life.history = "gestatee" and my-actions-include "squirm-from" ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; CARRY
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to carry equal to number of actions?" header 
   set verification lput "100" verification
@@ -1356,18 +1362,18 @@ to-report generate-verification-tape
   set function lput "carry" function
   set boolean lput ( not any? anima1z with [ count anima1z with [ member? myself carried.items ] > 1 ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; DROP
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Adults are not still being carried?" header 
   set verification lput "95" verification 
   set function lput "drop" function
   set boolean lput ( not any? anima1z with [ life.history = "adult" and my.mother != nobody and member? self [carried.items] of my.mother ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; ATTACK
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to attack less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -1384,9 +1390,9 @@ to-report generate-verification-tape
   set function lput "attack" function
   set boolean lput ( not any? anima1z with [ life.history = "gestatee" and my-actions-include "attack" ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; HARM
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to attack greater than or equal to calls to harm?" header 
   set verification lput "100" verification
@@ -1398,9 +1404,9 @@ to-report generate-verification-tape
   set function lput "harm" function
   set boolean lput ( action-count-for "attack" >= action-count-for "harm" ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; HELP
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to help less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -1417,9 +1423,9 @@ to-report generate-verification-tape
   set function lput "help" function
   set boolean lput ( not any? anima1z with [ life.history = "gestatee" and my-actions-include "help" ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; AID
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to help greater than or equal to calls to aid?" header 
   set verification lput "100" verification
@@ -1431,9 +1437,9 @@ to-report generate-verification-tape
   set function lput "aid" function
   set boolean lput ( action-count-for "help" >= action-count-for "aid" ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; MATE-WITH
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to mate-with less than or equal to number of decisions?" header 
   set verification lput "100" verification 
@@ -1450,9 +1456,9 @@ to-report generate-verification-tape
   set function lput "mate-with" function
   set boolean lput ( ifelse-value ( any? anima1z with [ life.history = "gestatee" and age.in.ticks = 0 ] ) [ profiler:calls "mate-with" > 0 ] [ true ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; CONCEIVE-WITH
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
 
   set header lput "Calls to conceive-with less than or equal to calls to mate-with?" header 
   set verification lput "runtime-boundaries" verification
@@ -1509,9 +1515,9 @@ to-report generate-verification-tape
   set function lput "conceive-with" function
   set boolean lput ( not any? anima1z with [ life.history = "juvenile" and my-actions-include "conceive-with" ] ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; INITIALIZE-FROM-PARENTS
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
 
   set header lput "Calls to initialize-from-parents less than or equal to number of conceive-with actions?" header 
   set verification lput "100" verification
@@ -1579,9 +1585,9 @@ to-report generate-verification-tape
   set function lput "initialize-from-parents" function
   set boolean lput ( not any? anima1z with [ not is-number? group.identity or group.identity = 0 ] ) boolean 
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; SETUP-CHROMOSOMES-FROM
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
 
   set header lput "Calls to setup-chromosomes-from less than or equal to number of conceive-with actions?" header 
   set verification lput "100" verification
@@ -1600,9 +1606,9 @@ to-report generate-verification-tape
 ;  let mean-grandmother-relatedness mean [ relatedness-with [my.mother] of my.mother ] of anima1z with [ ([my.mother] of my.mother) != nobody ]
 ;  set boolean lput ( mean-grandmother-relatedness > 0.15 and mean-grandmother-relatedness < 0.35 ) boolean
   
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   ; MUTATE-CHROMOSOMES
-  ; --------------------------------------------------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------------------------------------
   
   set header lput "Calls to mutate-chromosome equal to double the number of calls to setup chromosome?" header 
   set verification lput "100" verification
@@ -1616,21 +1622,81 @@ to-report generate-verification-tape
 
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to-report my-actions-include [ input ]
   report length filter [ vector -> item 0 vector = self and item 2 vector = input ] (reduce sentence [actions.completed] of anima1z) > 0 
 end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report last-actions-include [ input ]
   report length filter [ vector -> item 2 vector = input ] actions.completed > 0 
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to-report decision-count-for [ input ]
   report length filter [ vector -> item 2 vector = input ] (reduce sentence [decision.vectors] of anima1z)
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to-report action-count-for [ input ]
   report length filter [ vector -> item 2 vector = input ] (reduce sentence [actions.completed] of anima1z)
 end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report my-targets
   let my-targets-list remove-duplicates map [ i -> item 1 i ] decision.vectors
@@ -1638,4 +1704,21 @@ to-report my-targets
   report targets
 end
 
-to-report anima1z report anima1s with [ is.alive ] end
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to-report anima1z 
+  report anima1s with [ is.alive ]
+end
+
+
+

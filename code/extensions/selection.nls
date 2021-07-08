@@ -1,24 +1,22 @@
- ;-------------------------------------------------------------------------------------------------                                                                                                                                                   
+; ========================================================================================================= ;
 ;
-;                    dP                     dP   oo                   
-;                    88                     88                        
-;  .d8888b. .d8888b. 88 .d8888b. .d8888b. d8888P dP .d8888b. 88d888b. 
-;  Y8ooooo. 88ooood8 88 88ooood8 88'  `""   88   88 88'  `88 88'  `88 
-;        88 88.  ... 88 88.  ... 88.  ...   88   88 88.  .88 88    88 
-;  `88888P' `88888P' dP `88888P' `88888P'   dP   dP `88888P' dP    dP 
-;
-; © 2020 K N Crouse     
-;-------------------------------------------------------------------------------------------------
-; 
+;  .d88888b   88888888b dP         88888888b  a88888b. d888888P dP  .88888.  888888ba  
+;  88.    "'  88        88         88        d8'   `88    88    88 d8'   `8b 88    `8b 
+;  `Y88888b. a88aaaa    88        a88aaaa    88           88    88 88     88 88     88 
+;        `8b  88        88         88        88           88    88 88     88 88     88 
+;  d8'   .8P  88        88         88        Y8.   .88    88    88 Y8.   .8P 88     88 
+;   Y88888P   88888888P 88888888P  88888888P  Y88888P'    dP    dP  `8888P'  dP     dP 
+;                                                                                    
 ; This extension contains all functions that allow users to apply artificial selection
 ; on organismal populations. Selection can be turned ON or OFF with the SELECTION-ON? 
 ; switch on the user interface. When ON is selected, the ARTIFICIAL-SELECTION function is 
 ; applied once every timestep and artificially selects for a population that can better
 ; persist in its environment.
 ;
-;-------------------------------------------------------------------------------------------------
+; ========================================================================================================= ;
 
-;-------------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; ARTIFICIAL-SELECTION
 ;
 ; Operation that allows an override of B3GET to artificially select for populations that are
@@ -26,7 +24,12 @@
 ; 
 ; The genotype files incrememntally show the selection process. The population files record each population
 ; before the reset occurs, whether successful or not
-;-------------------------------------------------------------------------------------------------
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to artificial-selection ;  memory caps?
   
@@ -72,17 +75,65 @@ to artificial-selection ;  memory caps?
   
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to-report dash-position 
   report ( position "-" genotype ) 
 end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report genotype-number
   report read-from-string substring genotype ( dash-position + 1 ) ( length genotype )
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to-report genotype-name
   report substring genotype 0 ( dash-position )
 end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to impose-selection
   
@@ -98,6 +149,18 @@ to impose-selection
   
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to-report restart-simulation?
   let criteria-met false
   
@@ -110,6 +173,18 @@ to-report restart-simulation?
 
   report criteria-met
 end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report next-population-file-name
   let the-alphabet [ "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z" ]

@@ -1,14 +1,12 @@
-;----------------------------------------------------------------------------------------------
-;
-;        dP            dP            
-;        88            88            
-;  .d888b88 .d8888b. d8888P .d8888b. 
-;  88'  `88 88'  `88   88   88'  `88 
-;  88.  .88 88.  .88   88   88.  .88 
-;  `88888P8 `88888P8   dP   `88888P8 
-;
-; © 2021 K N Crouse  
-;
+; ========================================================================================================= ;
+;               
+;  888888ba   .d888888  d888888P  .d888888  
+;  88    `8b d8'    88     88    d8'    88  
+;  88     88 88aaaaa88a    88    88aaaaa88a 
+;  88     88 88     88     88    88     88  
+;  88    .8P 88     88     88    88     88  
+;  8888888P  88     88     dP    88     88  
+;                                   
 ; This extension handles the creation and use of data files, which are stored in the data 
 ; folder. There is a single metafile, which contains timestamped information on interface 
 ; button clicks to keep a record of user activities. Population csv files contain complete 
@@ -17,9 +15,11 @@
 ; a new simulation. Likewise, the user can save and import genotype txt files, which contain
 ; complete information on the genotype of an individual.
 ;
-;----------------------------------------------------------------------------------------------
+; © 2021 K N Crouse  
+;
+; ========================================================================================================= ;
 
-;----------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 ;
 ; CREATE OR UPDATE METAFILE WHEN USER INTERACTS WITH B3GET
 ;
@@ -38,7 +38,8 @@
 ;
 ; EXIT:  The metafile is updated with information on this interaction.
 ; 
-;----------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
+
 
 to update-metafile [ type-of-interaction name-of-file metafile-notes ]
                                                             
@@ -116,7 +117,20 @@ to update-metafile [ type-of-interaction name-of-file metafile-notes ]
   
 end
 
-;----------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;      
+;
+;                                      dP            dP   oo                            
+;                                      88            88                                 
+;  88d888b. .d8888b. 88d888b. dP    dP 88 .d8888b. d8888P dP .d8888b. 88d888b. .d8888b. 
+;  88'  `88 88'  `88 88'  `88 88    88 88 88'  `88   88   88 88'  `88 88'  `88 Y8ooooo. 
+;  88.  .88 88.  .88 88.  .88 88.  .88 88 88.  .88   88   88 88.  .88 88    88       88 
+;  88Y888P' `88888P' 88Y888P' `88888P' dP `88888P8   dP   dP `88888P' dP    dP `88888P' 
+;  88                88                                                                 
+;  dP                dP                                                                
+;  
+; --------------------------------------------------------------------------------------------------------- ;
+
+; --------------------------------------------------------------------------------------------------------- ;
 ;
 ; CREATE A SET OF AGENTS FROM INFORMATION STORED IN A POPULATION FILE
 ; 
@@ -130,7 +144,7 @@ end
 ;
 ; EXIT: SET OF AGENTS WHOSE COMPOSITION AND ATTRBUUTES MATCH THOSE IN THE population file
 ;
-;----------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 
 to import-population
   
@@ -315,6 +329,7 @@ to import-population
       set my.environment []
       set actions.completed []
       set label-color white
+      set solitary? ifelse-value ( count anima1s with [ group.identity = [group.identity] of myself ] > 1 ) [ false ] [ true ]
       
       ; compatibility with previous versions
       if ( yellow.signal = 0 ) [ set yellow.signal false ]
@@ -343,6 +358,18 @@ to import-population
   
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to set-home-range
   ask patches in-radius 10
   [ 
@@ -353,7 +380,7 @@ to set-home-range
   ]
 end
 
-;--------------------------------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 ;
 ; STORE COMPLETE INFORMATION ABOUT AN AGENT POPULATION INTO A FILE
 ;
@@ -375,7 +402,7 @@ end
 ;  - You CAN save multiple different turtles breeds to the same file
 ;  - can handle booleans, numbers, strings, and lists of turtles, numbers, strings, or booleans, and csv-formatted list
 ;
-;--------------------------------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 
 to save-population ; create popup window if can't find file location (maybe folder missing or something)
   output-header (word " SAVE POPULATION : " population )
@@ -540,7 +567,20 @@ to save-population ; create popup window if can't find file location (maybe fold
  
 end
 
-;----------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
+;
+;                                        dP                                       
+;                                        88                                       
+;  .d8888b. .d8888b. 88d888b. .d8888b. d8888P dP    dP 88d888b. .d8888b. .d8888b. 
+;  88'  `88 88ooood8 88'  `88 88'  `88   88   88    88 88'  `88 88ooood8 Y8ooooo. 
+;  88.  .88 88.  ... 88    88 88.  .88   88   88.  .88 88.  .88 88.  ...       88 
+;  `8888P88 `88888P' dP    dP `88888P'   dP   `8888P88 88Y888P' `88888P' `88888P' 
+;       .88                                        .88 88                         
+;   d8888P                                     d8888P  dP                        
+;  
+; --------------------------------------------------------------------------------------------------------- ;
+
+; --------------------------------------------------------------------------------------------------------- ;
 ;
 ; IMPORT INFORMATION FROM GENOTYPE FILE AND REPLACE AGENT GENOTYPES WITH INFORMATION
 ; 
@@ -551,7 +591,7 @@ end
 ;
 ; EXIT
 ;
-;----------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 
 to import-genotype
   output-header (word " IMPORT GENOTYPE : " genotype )
@@ -624,7 +664,7 @@ to import-genotype
   
 end
 
-;----------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 ;
 ; SAVE GENOTYPE OF SELECTED INDIVIDUAL AND STORE IN EXTERNAL TXT FILE
 ;
@@ -635,7 +675,7 @@ end
 ;
 ; EXIT
 ;
-;----------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 
 to save-genotype
   let combined-chromosomes (sentence chromosome.I [[]] chromosome.II )
@@ -644,13 +684,5 @@ to save-genotype
   ( csv:to-file ( word path-to-experiment genotype ".txt" ) combined-chromosomes " " )
   update-metafile "genotype" genotype (word "GENOTYPE " genotype " SAVED")
   output-print " Genotype successfully saved."
-end
-
-to-report generate-genotype-id
-  report ( word "g" generate-timestamp )
-end
-
-to-report generate-population-id
-  report ( word "p" generate-timestamp )
 end
 

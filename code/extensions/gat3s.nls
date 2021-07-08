@@ -1,16 +1,32 @@
-;----------------------------------------------------------------------------------------------
-;
-;                     dP   d8888b.          
-;                     88       `88          
-; .d8888b. .d8888b. d8888P  aaad8' .d8888b. 
-; 88'  `88 88'  `88   88       `88 Y8ooooo. 
-; 88.  .88 88.  .88   88       .88       88 
-; `8888P88 `88888P8   dP   d88888P `88888P' 
-;      .88                                  
-;  d8888P                                                                             
+; ========================================================================================================= ;
 ; 
-; © 2021 K N Crouse   
-;----------------------------------------------------------------------------------------------
+;   .88888.   88888888b 888888ba   .88888.  d888888P dP    dP  888888ba   88888888b 
+;  d8'   `88  88        88    `8b d8'   `8b    88    Y8.  .8P  88    `8b  88        
+;  88        a88aaaa    88     88 88     88    88     Y8aa8P  a88aaaa8P' a88aaaa    
+;  88   YP88  88        88     88 88     88    88       88     88         88        
+;  Y8.   .88  88        88     88 Y8.   .8P    88       88     88         88        
+;   `88888'   88888888P dP     dP  `8888P'     dP       dP     dP         88888888P 
+;                                                                                  
+;                                                                                 
+;  888888ba   88888888b  .d888888  888888ba   88888888b  888888ba  
+;   88    `8b  88        d8'    88  88    `8b  88         88    `8b 
+;  a88aaaa8P' a88aaaa    88aaaaa88a 88     88 a88aaaa    a88aaaa8P' 
+;   88   `8b.  88        88     88  88     88  88         88   `8b. 
+;   88     88  88        88     88  88    .8P  88         88     88 
+;   dP     dP  88888888P 88     88  8888888P   88888888P  dP     dP                                                                
+;             
+; ========================================================================================================= ;                
+;                                                   
+;                      dP   d8888b.          
+;                      88       `88          
+;  .d8888b. .d8888b. d8888P  aaad8' .d8888b. 
+;  88'  `88 88'  `88   88       `88 Y8ooooo. 
+;  88.  .88 88.  .88   88       .88       88 
+;  `8888P88 `88888P8   dP   d88888P `88888P' 
+;       .88                                  
+;   d8888P              
+;
+; --------------------------------------------------------------------------------------------------------- ;
 ; 
 ; This extension contains all functions that allow anima1s to make decisions from their 
 ; genotypes.
@@ -172,14 +188,21 @@
 ; 
 ;----------------------------------------------------------------------------------------------
 
-
-;----------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; GET-DECISIONS
 ;
 ; Reporter that returns a list of decision vectors generated from genotype.
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
 ;
 ; Caller: anima1
 ; ENVIRONMENT: list of turtles (both plants and anima1s) observed by the caller.
+;
 ;----------------------------------------------------------------------------------------------
 
 to-report gat3s-get-decisions [ environment ]
@@ -189,6 +212,18 @@ end
 ;---------------------------------------------------------------------------------------------- 
 ; INTERATIVE 'HELPER' FUNCTION 
 ;----------------------------------------------------------------------------------------------
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report get-iterative-decisions [ me old-environment old-gates old-boolean old-feed old-targets old-vectors ]
   
@@ -319,6 +354,18 @@ to-report get-iterative-decisions [ me old-environment old-gates old-boolean old
   
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to-report generate-decision-vectors [ old-targets old-vectors ]; Make each combination of vectors and targets to create decision-vector
   let decs []
   foreach old-targets [ new-target ->
@@ -328,6 +375,18 @@ to-report generate-decision-vectors [ old-targets old-vectors ]; Make each combi
       set decs lput (list self new-target new-action new-weight ) decs]]
   report decs  
 end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report break-apart-allele [ allele ] ; SLOW
   let gtlist [ 
@@ -357,6 +416,18 @@ to-report break-apart-allele [ allele ] ; SLOW
   ]]]
   report (list section-of-code remaining-allele)
 end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report g8tes-get-action [ action-code ]
   
@@ -413,6 +484,18 @@ to-report g8tes-get-action [ action-code ]
   
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to-report read-section [ section target ] ; make it so can only pass sections of 3, then don't need to calculate length as much
                                           ;  let operator ifelse-value ( length section = 3 ) [ item 1 section ] [ "" ]
                                           ;
@@ -436,6 +519,18 @@ to-report read-section [ section target ] ; make it so can only pass sections of
     ( operator = "SDO" ) [ shade-of? left-value right-value ]
     [ false ])
 end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report read-code [ code target ]
   report (ifelse-value
@@ -542,17 +637,51 @@ end
 ; Returns a randomly selected codon to occasionally introduce novel mutations into a population.
 ;
 ; CALLER: anima1
-;----------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report g8tes-get-mutation [ original-codon type-of-mutation ]
   report one-of (sentence gate-codons action-codons operation-codons reporter-codons )
 end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report gate-codons
   report [ 
     "ANY" "UUU" "NNN" "ONE" "MEE" 
     "ALL" "THN" "TNT" ] ; "AND" "ORR" "NOT" 
 end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report action-codons
   report [ 
@@ -569,9 +698,33 @@ to-report action-codons
   ]
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to-report operation-codons 
   report [ "EQL" "NQL" "GRT" "LST" "SDO" ]
 end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report reporter-codons
   report [
@@ -599,6 +752,19 @@ to-report reporter-codons
   ]
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to-report gat3s-codon-exists [ codon ]
   report member? codon (sentence gate-codons action-codons operation-codons reporter-codons )
 end
+

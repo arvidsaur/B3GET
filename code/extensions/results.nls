@@ -1,14 +1,14 @@
-;----------------------------------------------------------------------------------------------     
+; ========================================================================================================= ;
 ;
-;                                      dP   dP            
-;                                      88   88            
-;  88d888b. .d8888b. .d8888b. dP    dP 88 d8888P .d8888b. 
-;  88'  `88 88ooood8 Y8ooooo. 88    88 88   88   Y8ooooo. 
-;  88       88.  ...       88 88.  .88 88   88         88 
-;  dP       `88888P' `88888P' `88888P' dP   dP   `88888P' 
-; 
-; © 2021 K N Crouse  
-;----------------------------------------------------------------------------------------------                                                      
+;   888888ba   88888888b .d88888b  dP     dP dP        d888888P .d88888b  
+;   88    `8b  88        88.    "' 88     88 88           88    88.    "' 
+;  a88aaaa8P' a88aaaa    `Y88888b. 88     88 88           88    `Y88888b. 
+;   88   `8b.  88              `8b 88     88 88           88          `8b 
+;   88     88  88        d8'   .8P Y8.   .8P 88           88    d8'   .8P 
+;   dP     dP  88888888P  Y88888P  `Y88888P' 88888888P    dP     Y88888P  
+;            
+;
+; ========================================================================================================= ;                                                  
 ; 
 ; This B3GET extension contains all functions related to output results. Data collection 
 ; can be turned ON or OFF with the OUTPUT-RESULTS? switch on the user interface. When ON is selected, 
@@ -18,7 +18,19 @@
 ; extension to run code verification checks. Modify the USER SETTINGS below for specific data
 ; collection preferences.
 ;  
-;----------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to output-results
   
@@ -42,25 +54,26 @@ to output-results
     ;----------------------------------------------------------------------------------------------
     
     if ( simulation-summary-ticks > 0 and ticks = simulation-summary-ticks ) [ simulation-summary ]
-    if ( record-individuals-on ) [ ask anima1s with [ ticks.at.death > 0 and ticks = ( ticks.at.death + 1 ) ] [ individual-summary ] ]
+    if ( record-world-ticks > 0 and ticks = record-world-ticks ) [ record-world ]
+    if ( record-individuals = true ) [ ask anima1s with [ ticks.at.death > 0 and ticks = ( ticks.at.death + 1 ) ] [ individual-summary ] ]
     
     ;----------------------------------------------------------------------------------------------     
     ; SCAN : collect data on the current state of simulations, groups, or individuals
     ;----------------------------------------------------------------------------------------------
     
-    if ( simulation-scan-ticks > 0 and ticks > 0 and ceiling ( ticks / simulation-scan-ticks ) = (ticks / simulation-scan-ticks ) ) [ 
+    if ( simulation-scan-ticks > 0 and ticks > 0 and ticks-on-interval? simulation-scan-ticks ) [ 
       scan-simulation
     ]
     
-    if ( group-scan-ticks > 0 and ticks > 0 and ceiling ( ticks / group-scan-ticks ) = ( ticks / group-scan-ticks ) ) [ 
+    if ( group-scan-ticks > 0 and ticks > 0 and ticks-on-interval? group-scan-ticks ) [ 
       if ( any? anima1s with [ is.alive ] ) [ foreach remove-duplicates [ group.identity ] of anima1s with [ is.alive ] [ g -> scan-group g ]]
     ]
     
-    if ( individual-scan-ticks > 0 and ticks > 0 and ceiling (ticks / individual-scan-ticks ) = (ticks / individual-scan-ticks ) ) [ 
+    if ( individual-scan-ticks > 0 and ticks > 0 and ticks-on-interval? individual-scan-ticks ) [ 
       if ( any? anima1s with [ is.alive ] ) [ ask anima1s with [ is.alive ] [ scan-agent ]]
     ]
     
-    if ( view-scan-ticks > 0 and ceiling ( ticks / view-scan-ticks ) = ( ticks / view-scan-ticks ) ) [
+    if ( view-scan-ticks > 0 and ticks-on-interval? view-scan-ticks ) [
       let saved-subject subject
       reset-perspective
       export-view ( word path-to-experiment "view-" simulation-id "-" ticks ".png")
@@ -69,7 +82,7 @@ to output-results
       if ( saved-subject != nobody ) [ watch saved-subject ]
     ]
     
-    if ( genotype-scan-ticks > 0 and ceiling ( ticks / genotype-scan-ticks ) = ( ticks / genotype-scan-ticks ) and any? anima1s with [ is.alive ] ) [
+    if ( genotype-scan-ticks > 0 and ticks-on-interval? genotype-scan-ticks and any? anima1s with [ is.alive ] ) [
       scan-genotype
     ]
     
@@ -91,29 +104,45 @@ to output-results
   
 end
 
-
 ; --------------------------------------------------------------------------------------------------------- ;
-;                            _       _ 
-; __      __   ___    _ __  | |   __| |
-; \ \ /\ / /  / _ \  | '__| | |  / _` |
-;  \ V  V /  | (_) | | |    | | | (_| |
-;   \_/\_/    \___/  |_|    |_|  \__,_|
-;                                                                                                   
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
 ; --------------------------------------------------------------------------------------------------------- ;
 
-to record-world
-  let file-path ( word path-to-experiment "w" but-first simulation-id "-" ticks ".csv" )
-  export-world file-path
-  update-metafile "world" ( word "w" but-first simulation-id "-" ticks ) ( word "WORLD SAVED" )
+to scan-all-groups
+  foreach remove-duplicates [ group.identity ] of anima1s with [ is.alive ] [ g -> scan-group g ]
 end
-  
-; --------------------------------------------------------------------------------------------------------- ; 
-;                        _    __   _                  _     _                 
-; __   __   ___   _ __  (_)  / _| (_)   ___    __ _  | |_  (_)   ___    _ __  
-; \ \ / /  / _ \ | '__| | | | |_  | |  / __|  / _` | | __| | |  / _ \  | '_ \ 
-;  \ V /  |  __/ | |    | | |  _| | | | (__  | (_| | | |_  | | | (_) | | | | |
-;   \_/    \___| |_|    |_| |_|   |_|  \___|  \__,_|  \__| |_|  \___/  |_| |_|
-;                                                                             
+
+
+; --------------------------------------------------------------------------------------------------------- ;
+;  
+;                             oo .8888b oo                   oo   dP                     
+;                                88   "                           88                     
+;  dP   .dP .d8888b. 88d888b. dP 88aaa  dP .d8888b. .d8888b. dP d8888P .d8888b. 88d888b. 
+;  88   d8' 88ooood8 88'  `88 88 88     88 88'  `"" 88'  `88 88   88   88'  `88 88'  `88 
+;  88 .88'  88.  ... 88       88 88     88 88.  ... 88.  .88 88   88   88.  .88 88    88 
+;  8888P'   `88888P' dP       dP dP     dP `88888P' `88888P8 dP   dP   `88888P' dP    dP 
+;                                                                                      
+;                                                                                     
+; --------------------------------------------------------------------------------------------------------- ;
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to record-verification
@@ -133,594 +162,47 @@ to record-verification
   
 end
 
-
-; --------------------------------------------------------------------------------------------------------- ;                                                                 
-;                                 _                                                         
-;   __ _    ___   _ __     ___   | |_   _   _   _ __     ___     ___    ___    __ _   _ __  
-;  / _` |  / _ \ | '_ \   / _ \  | __| | | | | | '_ \   / _ \   / __|  / __|  / _` | | '_ \ 
-; | (_| | |  __/ | | | | | (_) | | |_  | |_| | | |_) | |  __/   \__ \ | (__  | (_| | | | | |
-;  \__, |  \___| |_| |_|  \___/   \__|  \__, | | .__/   \___|   |___/  \___|  \__,_| |_| |_|
-;  |___/                                |___/  |_|                                                       
-; --------------------------------------------------------------------------------------------------------- ; 
-
-to scan-genotype ; agent subroutine, sta2us only
-  
-  if ( any? anima1s ) [
-    
-    let file-path ( word path-to-experiment "genotypes-" genotype ".csv" )
-    
-    if ( not file-exists? file-path and simulation-id != 0 )
-    
-    [ file-open file-path
-      file-print csv:to-string (list 
-        
-        (sentence
-          "date-and-time"
-          "path-to-experiment"
-          "model-version"
-          "model-structure"
-          "genotype-reader"
-          "simulation-id"
-          "behaviorspace-experiment-name"
-          "population" 
-          "genotype"
-          "plant-annual-cycle" 
-          "plant-daily-cycle" 
-          "plant-seasonality" 
-          "plant-quality"
-          "plant-minimum-neighbors" 
-          "plant-maximum-neighbors" 
-          "world-width" 
-          "world-height"
-          "output-results?" 
-          "selection-on?"
-          "deterioration-rate"
-          "maximum-visual-range"
-          "base-litter-size"
-          "timesteps"
-          map but-last [chromosome.I] of min-one-of anima1s [ generation.number ] ))]
-    
-    file-open file-path
-    
-    let combined-list []
-    let mutated-alleles []
-    
-    let i 0
-    let chrome-length max ( sentence [ length chromosome.I ] of anima1s [ length chromosome.II ] of anima1s )
-    while [ i < chrome-length ] [
-      
-      let list-i [ last item i chromosome.I ] of anima1s with [ is.alive and length chromosome.I > i and is-number? last item i chromosome.I ]
-      let list-ii [ last item i chromosome.II ] of anima1s with [ is.alive and length chromosome.II > i and is-number? last item i chromosome.II ]
-      let item-I ifelse-value ( length list-i < 1 ) [ 0 ] [ mean list-i ]
-      let item-II ifelse-value ( length list-ii < 1 ) [ 0 ] [ mean list-ii ]
-      set combined-list lput ( item-I + item-II ) combined-list
-      
-      let mutants-i [ item i chromosome.I ] of anima1s with [ is.alive and length chromosome.I > i and first item i chromosome.I = "5|" ]
-      let mutants-ii [ item i chromosome.II ] of anima1s with [ is.alive and length chromosome.II > i and first item i chromosome.II = "5|"]
-      set mutated-alleles remove-duplicates (sentence mutated-alleles mutants-i mutants-ii )
-      
-      set i i + 1 ]
-    
-    file-print csv:to-string ( list 
-      
-      (sentence
-        date-and-time
-        path-to-experiment
-        model-version
-        model-structure
-        genotype-reader
-        simulation-id
-        behaviorspace-experiment-name
-        population
-        genotype
-        plant-annual-cycle
-        plant-daily-cycle
-        plant-seasonality
-        plant-quality
-        plant-minimum-neighbors
-        plant-maximum-neighbors
-        world-width
-        world-height
-        output-results?
-        selection-on?
-        deterioration-rate
-        maximum-visual-range
-        base-litter-size
-        ticks
-        combined-list 
-        mutated-alleles ))
-    
-    file-close 
-    
-  ] 
-  
-end
-
-; --------------------------------------------------------------------------------------------------------- ; 
-;                 _     _                       
-;   __ _    ___  | |_  (_)   ___    _ __    ___ 
-;  / _` |  / __| | __| | |  / _ \  | '_ \  / __|
-; | (_| | | (__  | |_  | | | (_) | | | | | \__ \
-;  \__,_|  \___|  \__| |_|  \___/  |_| |_| |___/
-;                                               
+; --------------------------------------------------------------------------------------------------------- ;
+;                                                                    
+;                                                                     
+;  .d8888b. dP    dP 88d8b.d8b. 88d8b.d8b. .d8888b. 88d888b. dP    dP 
+;  Y8ooooo. 88    88 88'`88'`88 88'`88'`88 88'  `88 88'  `88 88    88 
+;        88 88.  .88 88  88  88 88  88  88 88.  .88 88       88.  .88 
+;  `88888P' `88888P' dP  dP  dP dP  dP  dP `88888P8 dP       `8888P88 
+;                                                                 .88 
+;                                                             d8888P 
 ; --------------------------------------------------------------------------------------------------------- ;
 
-to record-actions ; agent subroutine
-  
-  let file-path ( word path-to-experiment "actions-" simulation-id "-" my.identity ".csv" )
-  
-  if ( not file-exists? file-path and simulation-id != 0 )
-  
-  [ file-open file-path
-    file-print csv:to-string (list (list 
-      
-      "date-and-time"
-      "path-to-experiment"
-      "model-version"
-      "model-structure"
-      "genotype-reader"
-      "simulation-id"
-      "behaviorspace-experiment-name"
-      "population" 
-      "genotype"
-      "plant-annual-cycle" 
-      "plant-daily-cycle" 
-      "plant-seasonality" 
-      "plant-quality"
-      "plant-minimum-neighbors" 
-      "plant-maximum-neighbors" 
-      "world-width" 
-      "world-height"
-      "output-results?" 
-      "selection-on?"
-      "deterioration-rate"
-      "maximum-visual-range"
-      "base-litter-size"
-      
-      "timesteps"
-      "solar-status"
-      "current-season"
-      "plant-patchiness"
-      "population-density"
-      "current-plant-abundance"
-      
-      ; subject
-      "color" 
-      "heading" 
-      "xcor" 
-      "ycor" 
-      "my.identity" 
-      "age.in.ticks" 
-      "generation.number"
-      "biological.sex" 
-      "life.history" 
-      "fertility.status" 
-      "group.identity" 
-      "is.alive" 
-      "carried.items"
-      "yellow.signal" 
-      "red.signal" 
-      "blue.signal"
-      "body.size" 
-      "body.shade" 
-      "is.resting"
-      "hidden.chance"
-      "fully.decayed"
-      "survival.chance" 
-      "energy.supply"
-      "bite.capacity" 
-      "mutation.chance"
-      "sex.ratio" 
-      "litter.size" 
-      "conception.chance"
-      "visual.angle" 
-      "visual.range" 
-      "day.perception"
-      "night.perception" 
-      "yellow.chance" 
-      "red.chance" 
-      "blue.chance"
-      "birthing.chance" 
-      "weaning.chance" 
-      "infancy.chance"
-      "juvenility.chance" 
-      "adulthood.chance" 
-      "x.magnitude" 
-      "y.magnitude"
-      "distance.traveled"  
-      "foraging.gains"  
-      "total.energy.gains"
-      "total.energy.cost"
-      "foraging.gains.this.timestep"
-      "energy.gains.this.timestep"
-      "energy.cost.this.timestep"
-      "help-from-count"
-      "attack-from-count"
-      "copulations-count"
-      "unique-mates-count"
-      "conceptions-count"
-      "group-transfers-count"
-      "unique-group-transfers-count"
-      "infanticide-count"
-      "whole.related.help.cost"
-      "half.related.help.cost"
-      "fourth.related.help.cost"
-      "eighth.related.help.cost"
-      "not.related.help.cost"
-      "whole.related.attack.cost"
-      "half.related.attack.cost"
-      "fourth.related.attack.cost"
-      "eighth.related.attack.cost"
-      "not.related.attack.cost"
-      
-      "action-ego"
-      "action-target"
-      "action-name"
-      "action-cost"
-      
-    )) ]
-  
-  file-open file-path
-  
-  let action-list filter [ a -> item 0 a = self or item 1 a = self ] actions-completed-this-timsetep
-  
-  foreach action-list [ action ->
-    
-    if ( is-anima1? item 0 action ) [
-      
-      ask ( item 0 action ) [
-        
-        file-print csv:to-string ( list ( list
-          
-          date-and-time
-          path-to-experiment
-          model-version
-          model-structure
-          genotype-reader
-          simulation-id
-          behaviorspace-experiment-name
-          population
-          genotype
-          plant-annual-cycle
-          plant-daily-cycle
-          plant-seasonality
-          plant-quality
-          plant-minimum-neighbors
-          plant-maximum-neighbors
-          world-width
-          world-height
-          output-results?
-          selection-on?
-          deterioration-rate
-          maximum-visual-range
-          base-litter-size
-          
-          ticks
-          solar-status
-          current-season
-          plant-patchiness
-          population-density
-          current-plant-abundance
-          
-          ; subject
-          color
-          heading 
-          xcor
-          ycor
-          my.identity
-          age.in.ticks 
-          generation.number
-          biological.sex
-          life.history
-          fertility.status 
-          group.identity
-          is.alive
-          carried.items
-          yellow.signal
-          red.signal
-          blue.signal
-          body.size
-          body.shade
-          is.resting
-          hidden.chance
-          fully.decayed
-          survival.chance 
-          energy.supply
-          bite.capacity
-          mutation.chance
-          sex.ratio
-          litter.size
-          conception.chance
-          visual.angle
-          visual.range
-          day.perception
-          night.perception
-          yellow.chance
-          red.chance
-          blue.chance
-          birthing.chance
-          weaning.chance 
-          infancy.chance
-          juvenility.chance
-          adulthood.chance
-          x.magnitude
-          y.magnitude
-          distance.traveled
-          foraging.gains
-          total.energy.gains
-          total.energy.cost
-          foraging.gains.this.timestep
-          energy.gains.this.timestep
-          energy.cost.this.timestep
-          help-from-count
-          attack-from-count
-          copulations-count
-          unique-mates-count
-          conceptions-count
-          group-transfers-count
-          unique-group-transfers-count
-          infanticide-count
-          whole.related.help.cost
-          half.related.help.cost
-          fourth.related.help.cost
-          eighth.related.help.cost
-          not.related.help.cost
-          whole.related.attack.cost
-          half.related.attack.cost
-          fourth.related.attack.cost
-          eighth.related.attack.cost
-          not.related.attack.cost
-          
-          ifelse-value ( is-anima1? item 0 action ) [ [my.identity] of item 0 action ] [ item 0 action ]
-          ifelse-value ( is-anima1? item 1 action ) [ [my.identity] of item 1 action ] [ item 1 action ]
-          item 2 action
-          item 3 action
-          
-  ))]]]
-  
-  file-close 
-  
-end
-
 ; --------------------------------------------------------------------------------------------------------- ;
-;  _               _   _           _       _                   _                                
-; (_)  _ __     __| | (_) __   __ (_)   __| |  _   _    __ _  | |    ___    ___    __ _   _ __  
-; | | | '_ \   / _` | | | \ \ / / | |  / _` | | | | |  / _` | | |   / __|  / __|  / _` | | '_ \ 
-; | | | | | | | (_| | | |  \ V /  | | | (_| | | |_| | | (_| | | |   \__ \ | (__  | (_| | | | | |
-; |_| |_| |_|  \__,_| |_|   \_/   |_|  \__,_|  \__,_|  \__,_| |_|   |___/  \___|  \__,_| |_| |_|
-;                                                                                                                                        
-; --------------------------------------------------------------------------------------------------------- ;
-
-to scan-agent
-  
-  let file-path ( word path-to-experiment "individual-scans.csv" )
-  
-  if ( not file-exists? file-path and simulation-id != 0 )
-  
-  [ file-open file-path
-    file-print csv:to-string (list (list 
-      
-      "date-and-time"
-      "path-to-experiment"
-      "model-version"
-      "model-structure"
-      "genotype-reader"
-      "simulation-id"
-      "behaviorspace-experiment-name"
-      "population" 
-      "genotype"
-      "plant-annual-cycle" 
-      "plant-daily-cycle" 
-      "plant-seasonality" 
-      "plant-quality"
-      "plant-minimum-neighbors" 
-      "plant-maximum-neighbors" 
-      "world-width" 
-      "world-height"
-      "output-results?" 
-      "selection-on?" 
-      "deterioration-rate"
-      "maximum-visual-range"
-      "base-litter-size"
-      
-      "current-timesteps"
-      "current-solar-status"
-      "current-season"
-      "current-plant-patchiness"
-      "current-plant-abundance"
-      "current-population-density"
-      
-      "focal-subject"
-      "color" 
-      "heading" 
-      "xcor" 
-      "ycor" 
-      "my.identity" 
-      "age.in.ticks" 
-      "generation.number"
-      "biological.sex" 
-      "life.history" 
-      "fertility.status" 
-      "group.identity" 
-      "is.alive" 
-      "carried.items"
-      "yellow.signal" 
-      "red.signal" 
-      "blue.signal"
-      "body.size" 
-      "body.shade" 
-      "is.resting"
-      "hidden.chance"
-      "fully.decayed"
-      "survival.chance" 
-      "energy.supply"
-      "bite.capacity" 
-      "mutation.chance"
-      "sex.ratio" 
-      "litter.size" 
-      "conception.chance"
-      "visual.angle" 
-      "visual.range" 
-      "day.perception"
-      "night.perception" 
-      "yellow.chance" 
-      "red.chance" 
-      "blue.chance"
-      "birthing.chance" 
-      "weaning.chance" 
-      "infancy.chance"
-      "juvenility.chance" 
-      "adulthood.chance" 
-      "x.magnitude" 
-      "y.magnitude"
-      "distance.traveled" 
-      "foraging.gains"  
-      "total.energy.gains"
-      "total.energy.cost"
-      "foraging.gains.this.timestep"
-      "energy.gains.this.timestep"
-      "energy.cost.this.timestep"
-      "help-from-count"
-      "attack-from-count"
-      "copulations-count"
-      "unique-mates-count"
-      "conceptions-count"
-      "group-transfers-count"
-      "unique-group-transfers-count"
-      "infanticide-count"
-      "whole.related.help.cost"
-      "half.related.help.cost"
-      "fourth.related.help.cost"
-      "eighth.related.help.cost"
-      "not.related.help.cost"
-      "whole.related.attack.cost"
-      "half.related.attack.cost"
-      "fourth.related.attack.cost"
-      "eighth.related.attack.cost"
-      "not.related.attack.cost"
-      
-  )) ]
-  
-  file-open file-path
-  
-  file-print csv:to-string ( list ( list
-    
-    date-and-time
-    path-to-experiment
-    model-version
-    model-structure
-    genotype-reader
-    simulation-id
-    behaviorspace-experiment-name
-    population
-    genotype
-    plant-annual-cycle
-    plant-daily-cycle
-    plant-seasonality
-    plant-quality
-    plant-minimum-neighbors
-    plant-maximum-neighbors
-    world-width
-    world-height
-    output-results?
-    selection-on?
-    deterioration-rate
-    maximum-visual-range
-    base-litter-size
-
-    ticks
-    solar-status
-    current-season
-    plant-patchiness
-    current-plant-abundance
-    population-density
-   
-    focal-subject
-    color
-    heading 
-    xcor
-    ycor
-    my.identity
-    age.in.ticks 
-    generation.number
-    biological.sex
-    life.history
-    fertility.status 
-    group.identity
-    is.alive
-    carried.items
-    yellow.signal
-    red.signal
-    blue.signal
-    body.size
-    body.shade
-    is.resting
-    hidden.chance
-    fully.decayed
-    survival.chance 
-    energy.supply
-    bite.capacity
-    mutation.chance
-    sex.ratio
-    litter.size
-    conception.chance
-    visual.angle
-    visual.range
-    day.perception
-    night.perception
-    yellow.chance
-    red.chance
-    blue.chance
-    birthing.chance
-    weaning.chance 
-    infancy.chance
-    juvenility.chance
-    adulthood.chance
-    x.magnitude
-    y.magnitude
-    distance.traveled 
-    foraging.gains
-    total.energy.gains
-    total.energy.cost
-    foraging.gains.this.timestep
-    energy.gains.this.timestep
-    energy.cost.this.timestep
-    help-from-count
-    attack-from-count
-    copulations-count
-    unique-mates-count
-    conceptions-count
-    group-transfers-count
-    unique-group-transfers-count
-    infanticide-count
-    whole.related.help.cost
-    half.related.help.cost
-    fourth.related.help.cost
-    eighth.related.help.cost
-    not.related.help.cost
-    whole.related.attack.cost
-    half.related.attack.cost
-    fourth.related.attack.cost
-    eighth.related.attack.cost
-    not.related.attack.cost
-    
-  ))
-  
-  file-close 
-  
-end
-
-  
-; ------------------------------------------------------------------------------------------------------------------------------ ;  
-;  _               _   _           _       _                   _                                                                
-; (_)  _ __     __| | (_) __   __ (_)   __| |  _   _    __ _  | |    ___   _   _   _ __ ___    _ __ ___     __ _   _ __   _   _ 
-; | | | '_ \   / _` | | | \ \ / / | |  / _` | | | | |  / _` | | |   / __| | | | | | '_ ` _ \  | '_ ` _ \   / _` | | '__| | | | |
-; | | | | | | | (_| | | |  \ V /  | | | (_| | | |_| | | (_| | | |   \__ \ | |_| | | | | | | | | | | | | | | (_| | | |    | |_| |
-; |_| |_| |_|  \__,_| |_|   \_/   |_|  \__,_|  \__,_|  \__,_| |_|   |___/  \__,_| |_| |_| |_| |_| |_| |_|  \__,_| |_|     \__, |
-;                                                                                                                         |___/ 
 ;
-; ------------------------------------------------------------------------------------------------------------------------------- ;
-  
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to record-world
+  let file-path ( word path-to-experiment "w" but-first simulation-id "-" ticks ".csv" )
+  export-world file-path
+  update-metafile "world" ( word "w" but-first simulation-id "-" ticks ) ( word "WORLD SAVED" )
+end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to individual-summary
   
   let file-path ( word path-to-experiment "individuals-" population ".csv" )
@@ -945,9 +427,9 @@ to individual-summary
     foraging.gains
     total.energy.gains
     total.energy.cost
-    ( foraging.gains / lifespan )
-    ( total.energy.gains / lifespan )
-    ( total.energy.cost / lifespan )
+    ( foraging.gains / (lifespan + 0.0000000001 ))
+    ( total.energy.gains / (lifespan + 0.0000000001))
+    ( total.energy.cost / (lifespan + 0.0000000001))
     foraging.gains.this.timestep
     energy.gains.this.timestep
     energy.cost.this.timestep
@@ -1020,626 +502,17 @@ to individual-summary
 
 end
 
-; --------------------------------------------------------------------------------------------------------- ;                                                           
-;                                                                      
-;   __ _   _ __    ___    _   _   _ __      ___    ___    __ _   _ __  
-;  / _` | | '__|  / _ \  | | | | | '_ \    / __|  / __|  / _` | | '_ \ 
-; | (_| | | |    | (_) | | |_| | | |_) |   \__ \ | (__  | (_| | | | | |
-;  \__, | |_|     \___/   \__,_| | .__/    |___/  \___|  \__,_| |_| |_|
-;  |___/                         |_|                                                     
 ; --------------------------------------------------------------------------------------------------------- ;
-
-to scan-all-groups
-  foreach remove-duplicates [ group.identity ] of anima1s with [ is.alive ] [ g -> scan-group g ]
-end
-
-to scan-group [ group-id ]
-  
-  let file-path ( word path-to-experiment "group-scans-" population ".csv" )
-  
-  if ( not file-exists? file-path and simulation-id != 0 )
-  
-  [ file-open file-path
-    file-print csv:to-string (list (list 
-      
-      "date-and-time"
-      "path-to-experiment"
-      "model-version"
-      "model-structure"
-      "genotype-reader"
-      "simulation-id"
-      "behaviorspace-experiment-name"
-      "population" 
-      "genotype"
-      "plant-annual-cycle" 
-      "plant-daily-cycle" 
-      "plant-seasonality" 
-      "plant-quality"
-      "plant-minimum-neighbors" 
-      "plant-maximum-neighbors" 
-      "world-width" 
-      "world-height"
-      "output-results?" 
-      "selection-on?" 
-      "deterioration-rate"
-      "maximum-visual-range"
-      "base-litter-size"
-
-      "current-timesteps"
-      "current-solar-status"
-      "current-season"
-      "current-plant-patchiness"
-      "current-plant-abundance"
-      "current-population-density"
-      "current-territory-size"
-      
-      "group-identity"
-      "current-group-size" 
-      "current-group-members"
-      "current-territory-energy"
-      
-      "members-within-territory"
-      "members-outside-territory"
-      "percent-members-within-territory"
-      
-      "distance-to-group-members-minimum"
-      "distance-to-group-members-maximum"
-      "distance-to-group-members-mean"
-      "distance-to-group-members-median"
-      "distance-to-group-members-variance"
-      
-      "adult-male-count"
-      "adult-female-count"
-      "adult-cycling-count"
-      "adult-pregnant-count"
-      "adult-lactating-count"
-      "juvenile-male-count"
-      "juvenile-female-count"
-      "infant-male-count"
-      "infant-female-count"
-      "gestatee-male-count"
-      "gestatee-female-count"
-      
-      "total-birth-count"
-      "total-death-count"
-      "adult-male-death-count"
-      "adult-cycling-death-count"
-      "adult-pregnant-death-count"
-      "adult-lactating-death-count"
-      "juvenile-male-death-count"
-      "juvenile-female-death-count"
-      "infant-male-death-count"
-      "infant-female-death-count"
-      "gestatee-male-death-count"
-      "gestatee-female-death-count"
-      
-      "births-per-female" 
-      "per-capita-births"
-      "per-capita-deaths"
-      "per-capita-adult-male-deaths"
-      "per-capita-adult-cycling-deaths"
-      "per-capita-adult-pregnant-deaths"
-      "per-capita-adult-lactating-deaths"
-      "per-capita-juvenile-male-deaths"
-      "per-capita-juvenile-female-deaths"
-      "per-capita-infant-male-deaths"
-      "per-capita-infant-female-deaths"
-      "per-capita-gestatee-male-deaths"
-      "per-capita-gestatee-female-deaths"
-      
-      "total-energy"
-      "adult-male-energy"
-      "adult-cycling-energy"
-      "adult-pregnant-energy"
-      "adult-lactating-energy"
-      "juvenile-male-energy"
-      "juvenile-female-energy"
-      "infant-male-energy"
-      "infant-female-energy"
-      "gestatee-male-energy"
-      "gestatee-female-energy"
-      
-      "per-capita-energy"
-      "per-capita-adult-male-energy"
-      "per-capita-adult-cycling-energy"
-      "per-capita-adult-pregnant-energy"
-      "per-capita-adult-lactating-energy"
-      "per-capita-juvenile-male-energy"
-      "per-capita-juvenile-female-energy"
-      "per-capita-infant-male-energy"
-      "per-capita-infant-female-energy"
-      "per-capita-gestatee-male-energy"
-      "per-capita-gestatee-female-energy" 
-            
-      "timestep-foraging-gained"
-      "timestep-foraging-gained-adult-male"
-      "timestep-foraging-gained-adult-cycling"
-      "timestep-foraging-gained-adult-pregnant"
-      "timestep-foraging-gained-adult-lactating"
-      "timestep-foraging-gained-juvenile-male"
-      "timestep-foraging-gained-juvenile-female"
-      "timestep-foraging-gained-infant-male"
-      "timestep-foraging-gained-infant-female"
-      "timestep-foraging-gained-gestatee-male"
-      "timestep-foraging-gained-gestatee-female" 
-      
-      "timestep-energy-gained"
-      "timestep-energy-gained-adult-male"
-      "timestep-energy-gained-adult-cycling"
-      "timestep-energy-gained-adult-pregnant"
-      "timestep-energy-gained-adult-lactating"
-      "timestep-energy-gained-juvenile-male"
-      "timestep-energy-gained-juvenile-female"
-      "timestep-energy-gained-infant-male"
-      "timestep-energy-gained-infant-female"
-      "timestep-energy-gained-gestatee-male"
-      "timestep-energy-gained-gestatee-female" 
-      
-      "timestep-energy-cost"
-      "timestep-energy-cost-adult-male"
-      "timestep-energy-cost-adult-cycling"
-      "timestep-energy-cost-adult-pregnant"
-      "timestep-energy-cost-adult-lactating"
-      "timestep-energy-cost-juvenile-male"
-      "timestep-energy-cost-juvenile-female"
-      "timestep-energy-cost-infant-male"
-      "timestep-energy-cost-infant-female"
-      "timestep-energy-cost-gestatee-male"
-      "timestep-energy-cost-gestatee-female" 
-      
-  )) ]
-  
-  file-open file-path
-
-  let distance-list []        
-  ask anima1s with [ is.alive and group.identity = group-id ] [
-   ask other anima1s with [ is.alive and group.identity = group-id ] [
-      set distance-list lput distance myself distance-list ]]
-  
-  let distance-to-group-members-minimum ifelse-value ( length distance-list < 1 ) [ "NA" ] [ min distance-list ]
-  let distance-to-group-members-maximum ifelse-value ( length distance-list < 1 ) [ "NA" ] [ max distance-list ] 
-  let distance-to-group-members-mean ifelse-value ( length distance-list < 1 ) [ "NA" ] [ mean distance-list ]
-  let distance-to-group-members-median ifelse-value ( length distance-list < 1 ) [ "NA" ] [ median distance-list ]
-  let distance-to-group-members-variance ifelse-value ( length distance-list < 2 ) [ "NA" ] [ variance distance-list ] 
- 
-  let current-group-size count living-agents with [ group.identity = group-id ]
-  let adult-male-count count living-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ]
-  let adult-cycling-count count living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "cycling" ]
-  let adult-pregnant-count count living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "pregnant" ]
-  let adult-lactating-count count living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "lactating" ]
-  let juvenile-male-count count living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "male" ]
-  let juvenile-female-count count living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "female" ]
-  let infant-male-count count living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "male" ]
-  let infant-female-count count living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "female" ]
-  let gestatee-male-count count living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "male" ]
-  let gestatee-female-count count living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "female" ]
-  
-  let newly-born-agents anima1s with [ is.alive = true and ticks.at.birth <= ticks and ticks.at.birth > ( ticks - group-scan-ticks ) ]
-  let total-birth-count count newly-born-agents with [ group.identity = group-id ]
-  let dying-agents anima1s with [ is.alive = false and ticks.at.death <= ticks and ticks.at.death > ( ticks - group-scan-ticks ) ]
-  let total-death-count count dying-agents with [ group.identity = group-id ]
-  let adult-male-death-count count dying-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ]
-  let adult-cycling-death-count count dying-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "cycling" ]
-  let adult-pregnant-death-count count dying-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "pregnant" ]
-  let adult-lactating-death-count count dying-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "lactating" ]
-  let juvenile-male-death-count count dying-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "male" ]
-  let juvenile-female-death-count count dying-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "female" ]
-  let infant-male-death-count count dying-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "male" ]
-  let infant-female-death-count count dying-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "female" ]
-  let gestatee-male-death-count count dying-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "male" ]
-  let gestatee-female-death-count count dying-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "female" ]
-  
-  let total-energy sum [energy.supply] of living-agents with [ group.identity = group-id ]
-  let adult-male-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ]
-  let adult-cycling-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "cycling" ]
-  let adult-pregnant-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "pregnant" ]
-  let adult-lactating-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "lactating" ]
-  let juvenile-male-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "male" ]
-  let juvenile-female-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "female" ]
-  let infant-male-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "male" ]
-  let infant-female-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "female" ]
-  let gestatee-male-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "male" ]
-  let gestatee-female-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "female" ]
-  
-  let timestep-foraging-gained sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id ]
-  let timestep-foraging-gained-adult-male sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ]
-  let timestep-foraging-gained-adult-cycling sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "cycling" ]
-  let timestep-foraging-gained-adult-pregnant sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "pregnant" ]
-  let timestep-foraging-gained-adult-lactating sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "lactating" ]
-  let timestep-foraging-gained-juvenile-male sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "male" ]
-  let timestep-foraging-gained-juvenile-female sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "female" ]
-  let timestep-foraging-gained-infant-male sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "male" ]
-  let timestep-foraging-gained-infant-female sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "female" ]
-  let timestep-foraging-gained-gestatee-male sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "male" ]
-  let timestep-foraging-gained-gestatee-female sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "female" ]
-  
-  let timestep-energy-gained sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id ]
-  let timestep-energy-gained-adult-male sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ]
-  let timestep-energy-gained-adult-cycling sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "cycling" ]
-  let timestep-energy-gained-adult-pregnant sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "pregnant" ]
-  let timestep-energy-gained-adult-lactating sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "lactating" ]
-  let timestep-energy-gained-juvenile-male sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "male" ]
-  let timestep-energy-gained-juvenile-female sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "female" ]
-  let timestep-energy-gained-infant-male sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "male" ]
-  let timestep-energy-gained-infant-female sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "female" ]
-  let timestep-energy-gained-gestatee-male sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "male" ]
-  let timestep-energy-gained-gestatee-female sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "female" ] 
-  
-  let timestep-energy-cost sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id ] 
-  let timestep-energy-cost-adult-male sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ] 
-  let timestep-energy-cost-adult-cycling sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "cycling" ]
-  let timestep-energy-cost-adult-pregnant sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "pregnant" ] 
-  let timestep-energy-cost-adult-lactating sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "lactating" ] 
-  let timestep-energy-cost-juvenile-male sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "male" ]
-  let timestep-energy-cost-juvenile-female sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "female" ] 
-  let timestep-energy-cost-infant-male sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "male" ] 
-  let timestep-energy-cost-infant-female sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "female" ] 
-  let timestep-energy-cost-gestatee-male sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "male" ] 
-  let timestep-energy-cost-gestatee-female sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "female" ]  
-  
-  file-print csv:to-string ( list ( list
-    
-    date-and-time
-    path-to-experiment
-    model-version
-    model-structure
-    genotype-reader
-    simulation-id
-    behaviorspace-experiment-name
-    population
-    genotype
-    plant-annual-cycle
-    plant-daily-cycle
-    plant-seasonality
-    plant-quality
-    plant-minimum-neighbors
-    plant-maximum-neighbors
-    world-width
-    world-height
-    output-results?
-    selection-on?
-    deterioration-rate
-    maximum-visual-range
-    base-litter-size
-    
-    ticks
-    solar-status
-    current-season
-    plant-patchiness
-    current-plant-abundance
-    population-density
-    count patches with [ pgroup.identity = group-id ]
-        
-    group-id
-    current-group-size
-    ([my.identity] of living-agents with [ group.identity = group-id ])
-    (sum [penergy.supply] of patches with [ pgroup.identity = group-id ])
-    
-    count living-agents with [ group.identity = group-id and pgroup.identity = group-id ]
-    count living-agents with [ group.identity = group-id and pgroup.identity != group-id ]
-    (count living-agents with [ group.identity = group-id and pgroup.identity = group-id ] / ( count living-agents with [ group.identity = group-id and pgroup.identity = group-id ] + count living-agents with [ group.identity = group-id and pgroup.identity != group-id ] ))
-    
-    distance-to-group-members-minimum
-    distance-to-group-members-maximum
-    distance-to-group-members-mean
-    distance-to-group-members-median
-    distance-to-group-members-variance
-
-    adult-male-count
-    (adult-cycling-count + adult-pregnant-count + adult-lactating-count)
-    adult-cycling-count
-    adult-pregnant-count
-    adult-lactating-count
-    juvenile-male-count
-    juvenile-female-count
-    infant-male-count
-    infant-female-count
-    gestatee-male-count
-    gestatee-female-count
-    
-    total-birth-count
-    total-death-count
-    adult-male-death-count
-    adult-cycling-death-count
-    adult-pregnant-death-count
-    adult-lactating-death-count
-    juvenile-male-death-count
-    juvenile-female-death-count
-    infant-male-death-count
-    infant-female-death-count
-    gestatee-male-death-count
-    gestatee-female-death-count
-    
-    ifelse-value ( current-group-size > 0 ) [ ( total-birth-count / (adult-cycling-count + adult-pregnant-count + adult-lactating-count)) ] [ "NA" ]
-    ifelse-value ( current-group-size > 0 ) [ ( total-birth-count / current-group-size) ] [ "NA" ]
-    ifelse-value ( current-group-size > 0 ) [ ( total-death-count / current-group-size) ] [ "NA" ]
-    ifelse-value ( adult-male-count > 0 ) [ (adult-male-death-count / adult-male-count) ] [ "NA" ]
-    ifelse-value ( adult-cycling-count > 0 ) [ (adult-cycling-death-count / adult-cycling-count) ] [ "NA" ]
-    ifelse-value ( adult-pregnant-count > 0 ) [ (adult-pregnant-death-count / adult-pregnant-count) ] [ "NA" ]
-    ifelse-value ( adult-lactating-count > 0 ) [ (adult-lactating-death-count / adult-lactating-count) ] [ "NA" ]
-    ifelse-value ( juvenile-male-count > 0 ) [ (juvenile-male-death-count / juvenile-male-count) ] [ "NA" ]
-    ifelse-value ( juvenile-female-count > 0 ) [ (juvenile-female-death-count / juvenile-female-count) ] [ "NA" ]
-    ifelse-value ( infant-male-count > 0 ) [ (infant-male-death-count / infant-male-count) ] [ "NA" ]
-    ifelse-value ( infant-female-count > 0 ) [ (infant-female-death-count / infant-female-count) ] [ "NA" ]
-    ifelse-value ( gestatee-male-count > 0 ) [ (gestatee-male-death-count / gestatee-male-count) ] [ "NA" ]
-    ifelse-value ( gestatee-female-count > 0 ) [ (gestatee-female-death-count / gestatee-female-count) ] [ "NA" ]
-    
-    total-energy
-    adult-male-energy
-    adult-cycling-energy
-    adult-pregnant-energy
-    adult-lactating-energy
-    juvenile-male-energy
-    juvenile-female-energy
-    infant-male-energy
-    infant-female-energy
-    gestatee-male-energy
-    gestatee-female-energy
-    
-    ifelse-value ( current-group-size > 0 ) [ (total-energy / current-group-size) ] [ "NA" ]
-    ifelse-value ( adult-male-count > 0 ) [ (adult-male-energy / adult-male-count) ] [ "NA" ]
-    ifelse-value ( adult-cycling-count > 0 ) [ (adult-cycling-energy / adult-cycling-count) ] [ "NA" ]
-    ifelse-value ( adult-pregnant-count > 0 ) [ (adult-pregnant-energy / adult-pregnant-count) ] [ "NA" ]
-    ifelse-value ( adult-lactating-count > 0 ) [ (adult-lactating-energy / adult-lactating-count) ] [ "NA" ]
-    ifelse-value ( juvenile-male-count > 0 ) [ (juvenile-male-energy / juvenile-male-count) ] [ "NA" ]
-    ifelse-value ( juvenile-female-count > 0 ) [ (juvenile-female-energy / juvenile-female-count) ] [ "NA" ]
-    ifelse-value ( infant-male-count > 0 ) [ (infant-male-energy / infant-male-count) ] [ "NA" ]    ifelse-value ( infant-female-count > 0 ) [ (infant-female-energy / infant-female-count) ] [ "NA" ]
-    ifelse-value ( gestatee-male-count > 0 ) [ (gestatee-male-energy / gestatee-male-count) ] [ "NA" ]
-    ifelse-value ( gestatee-female-count > 0 ) [ (gestatee-female-energy / gestatee-female-count) ] [ "NA" ]
-        
-    timestep-foraging-gained
-    timestep-foraging-gained-adult-male
-    timestep-foraging-gained-adult-cycling
-    timestep-foraging-gained-adult-pregnant
-    timestep-foraging-gained-adult-lactating
-    timestep-foraging-gained-juvenile-male
-    timestep-foraging-gained-juvenile-female
-    timestep-foraging-gained-infant-male
-    timestep-foraging-gained-infant-female
-    timestep-foraging-gained-gestatee-male
-    timestep-foraging-gained-gestatee-female 
-    
-    timestep-energy-gained
-    timestep-energy-gained-adult-male
-    timestep-energy-gained-adult-cycling
-    timestep-energy-gained-adult-pregnant
-    timestep-energy-gained-adult-lactating
-    timestep-energy-gained-juvenile-male
-    timestep-energy-gained-juvenile-female
-    timestep-energy-gained-infant-male
-    timestep-energy-gained-infant-female
-    timestep-energy-gained-gestatee-male
-    timestep-energy-gained-gestatee-female 
-    
-    timestep-energy-cost
-    timestep-energy-cost-adult-male
-    timestep-energy-cost-adult-cycling
-    timestep-energy-cost-adult-pregnant
-    timestep-energy-cost-adult-lactating
-    timestep-energy-cost-juvenile-male
-    timestep-energy-cost-juvenile-female
-    timestep-energy-cost-infant-male
-    timestep-energy-cost-infant-female
-    timestep-energy-cost-gestatee-male
-    timestep-energy-cost-gestatee-female 
-    
-  ))
-  
-  file-close
-  
-end
-
-; --------------------------------------------------------------------------------------------------------- ;
-;        _                       _           _     _                                                
-;  ___  (_)  _ __ ___    _   _  | |   __ _  | |_  (_)   ___    _ __      ___    ___    __ _   _ __  
-; / __| | | | '_ ` _ \  | | | | | |  / _` | | __| | |  / _ \  | '_ \    / __|  / __|  / _` | | '_ \ 
-; \__ \ | | | | | | | | | |_| | | | | (_| | | |_  | | | (_) | | | | |   \__ \ | (__  | (_| | | | | |
-; |___/ |_| |_| |_| |_|  \__,_| |_|  \__,_|  \__| |_|  \___/  |_| |_|   |___/  \___|  \__,_| |_| |_|
-;                                                                                                   
-; --------------------------------------------------------------------------------------------------------- ;
-
-to scan-simulation
-  
-  let file-path ( word path-to-experiment simulation-id "-scans.csv" )
-  
-  if ( not file-exists? file-path and simulation-id != 0 )
-  
-  [ file-open file-path
-    file-print csv:to-string (list (list 
-      
-      "date-and-time"
-      "path-to-experiment"
-      "model-version"
-      "model-structure"
-      "genotype-reader"
-      "simulation-id"
-      "behaviorspace-experiment-name"
-      "population" 
-      "genotype"
-      "plant-annual-cycle" 
-      "plant-daily-cycle" 
-      "plant-seasonality" 
-      "plant-quality"
-      "plant-minimum-neighbors" 
-      "plant-maximum-neighbors" 
-      "world-width" 
-      "world-height"
-      "output-results?" 
-      "selection-on?" 
-      "deterioration-rate"
-      "maximum-visual-range"
-      "base-litter-size"
-      
-      "timesteps"
-      "solar-status"
-      "current-season"
-      "population-density"
-      
-      "current-plant-abundance"
-      "current-plant-patchiness"
-      "current-population-size"
-      "generation-number-max"
-      "generation-number-min"
-      "generation-number-mean"
-      "generation-number-median"
-      
-      "number-of-groups"
-      "number-of-males"
-      "number-of-females" 
-      "number-of-adults" 
-      "number-of-cycling-females" 
-      "number-of-pregnant-females" 
-      "number-of-lactating-females"
-      "number-of-juveniles" 
-      "number-of-infants"
-      "number-of-gestatees" 
-      "number-of-fully-alive-agents"
-      "number-of-decaying-agents"
-      "number-of-fully-decayed-agents"
-      
-      "total-timestep-foraging-gained"
-      "total-timestep-foraging-gained-adult-male"
-      "total-timestep-foraging-gained-adult-cycling"
-      "total-timestep-foraging-gained-adult-pregnant"
-      "total-timestep-foraging-gained-adult-lactating"
-      "total-timestep-foraging-gained-juvenile-male"
-      "total-timestep-foraging-gained-juvenile-female"
-      "total-timestep-foraging-gained-infant-male"
-      "total-timestep-foraging-gained-infant-female"
-      "total-timestep-foraging-gained-gestatee-male"
-      "total-timestep-foraging-gained-gestatee-female" 
-      
-      "total-timestep-energy-gained"
-      "total-timestep-energy-gained-adult-male"
-      "total-timestep-energy-gained-adult-cycling"
-      "total-timestep-energy-gained-adult-pregnant"
-      "total-timestep-energy-gained-adult-lactating"
-      "total-timestep-energy-gained-juvenile-male"
-      "total-timestep-energy-gained-juvenile-female"
-      "total-timestep-energy-gained-infant-male"
-      "total-timestep-energy-gained-infant-female"
-      "total-timestep-energy-gained-gestatee-male"
-      "total-timestep-energy-gained-gestatee-female" 
-      
-      "total-timestep-energy-cost"
-      "total-timestep-energy-cost-adult-male"
-      "total-timestep-energy-cost-adult-cycling"
-      "total-timestep-energy-cost-adult-pregnant"
-      "total-timestep-energy-cost-adult-lactating"
-      "total-timestep-energy-cost-juvenile-male"
-      "total-timestep-energy-cost-juvenile-female"
-      "total-timestep-energy-cost-infant-male"
-      "total-timestep-energy-cost-infant-female"
-      "total-timestep-energy-cost-gestatee-male"
-      "total-timestep-energy-cost-gestatee-female" 
-
-  )) ]
-  
-  file-open file-path
-  
-  file-print csv:to-string ( list ( list
-    
-    date-and-time
-    path-to-experiment
-    model-version
-    model-structure
-    genotype-reader
-    simulation-id
-    behaviorspace-experiment-name
-    population
-    genotype
-    plant-annual-cycle
-    plant-daily-cycle
-    plant-seasonality
-    plant-quality
-    plant-minimum-neighbors
-    plant-maximum-neighbors
-    world-width
-    world-height
-    output-results?
-    selection-on?
-    deterioration-rate
-    maximum-visual-range
-    base-litter-size
-    
-    ticks
-    solar-status
-    current-season
-    population-density
-    
-    current-plant-abundance
-    current-plant-patchiness
-    current-population-size
-    generation-number-max
-    generation-number-min
-    generation-number-mean
-    generation-number-median
-    
-    number-of-groups
-    number-of-males
-    number-of-females
-    number-of-adults
-    number-of-cycling-females
-    number-of-pregnant-females
-    number-of-lactating-females
-    number-of-juveniles
-    number-of-infants
-    number-of-gestatees
-    number-of-fully-alive-agents
-    number-of-decaying-agents
-    number-of-fully-decayed-agents
-    
-    sum [foraging.gains.this.timestep] of living-agents
-    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "adult" and biological.sex = "male" ]
-    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "cycling" ]
-    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "pregnant" ]
-    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "lactating" ]
-    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "juvenile" and biological.sex = "male" ]
-    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "juvenile" and biological.sex = "female" ]
-    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "infant" and biological.sex = "male" ]
-    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "infant" and biological.sex = "female" ]
-    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "gestatee" and biological.sex = "male" ]
-    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "gestatee" and biological.sex = "female" ]
-    
-    sum [energy.gains.this.timestep] of living-agents 
-    sum [energy.gains.this.timestep] of living-agents with [ life.history = "adult" and biological.sex = "male" ]
-    sum [energy.gains.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "cycling" ]
-    sum [energy.gains.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "pregnant" ]
-    sum [energy.gains.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "lactating" ]
-    sum [energy.gains.this.timestep] of living-agents with [ life.history = "juvenile" and biological.sex = "male" ]
-    sum [energy.gains.this.timestep] of living-agents with [ life.history = "juvenile" and biological.sex = "female" ]
-    sum [energy.gains.this.timestep] of living-agents with [ life.history = "infant" and biological.sex = "male" ]
-    sum [energy.gains.this.timestep] of living-agents with [ life.history = "infant" and biological.sex = "female" ]
-    sum [energy.gains.this.timestep] of living-agents with [ life.history = "gestatee" and biological.sex = "male" ]
-    sum [energy.gains.this.timestep] of living-agents with [ life.history = "gestatee" and biological.sex = "female" ] 
-    
-    sum [energy.cost.this.timestep] of living-agents  
-    sum [energy.cost.this.timestep] of living-agents with [ life.history = "adult" and biological.sex = "male" ] 
-    sum [energy.cost.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "cycling" ]
-    sum [energy.cost.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "pregnant" ] 
-    sum [energy.cost.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "lactating" ] 
-    sum [energy.cost.this.timestep] of living-agents with [ life.history = "juvenile" and biological.sex = "male" ]
-    sum [energy.cost.this.timestep] of living-agents with [ life.history = "juvenile" and biological.sex = "female" ] 
-    sum [energy.cost.this.timestep] of living-agents with [ life.history = "infant" and biological.sex = "male" ] 
-    sum [energy.cost.this.timestep] of living-agents with [ life.history = "infant" and biological.sex = "female" ] 
-    sum [energy.cost.this.timestep] of living-agents with [ life.history = "gestatee" and biological.sex = "male" ] 
-    sum [energy.cost.this.timestep] of living-agents with [ life.history = "gestatee" and biological.sex = "female" ]  
-    
-  ))
-  
-  file-close
-
-end
-
-; ----------------------------------------------------------------------------------------------------------------------------------- ;
-;        _                       _           _     _                                                                                
-;  ___  (_)  _ __ ___    _   _  | |   __ _  | |_  (_)   ___    _ __      ___   _   _   _ __ ___    _ __ ___     __ _   _ __   _   _ 
-; / __| | | | '_ ` _ \  | | | | | |  / _` | | __| | |  / _ \  | '_ \    / __| | | | | | '_ ` _ \  | '_ ` _ \   / _` | | '__| | | | |
-; \__ \ | | | | | | | | | |_| | | | | (_| | | |_  | | | (_) | | | | |   \__ \ | |_| | | | | | | | | | | | | | | (_| | | |    | |_| |
-; |___/ |_| |_| |_| |_|  \__,_| |_|  \__,_|  \__| |_|  \___/  |_| |_|   |___/  \__,_| |_| |_| |_| |_| |_| |_|  \__,_| |_|     \__, |
-;                                                                                                                             |___/ 
 ;
-; ----------------------------------------------------------------------------------------------------------------------------------- ;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to simulation-summary ; observer subroutine
   
@@ -2634,6 +1507,1238 @@ to simulation-summary ; observer subroutine
 
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;                                               
+;  .d8888b. .d8888b. .d8888b. 88d888b. .d8888b. 
+;  Y8ooooo. 88'  `"" 88'  `88 88'  `88 Y8ooooo. 
+;        88 88.  ... 88.  .88 88    88       88 
+;  `88888P' `88888P' `88888P8 dP    dP `88888P' 
+;                                             
+; --------------------------------------------------------------------------------------------------------- ;
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to scan-genotype ; agent subroutine, sta2us only
+  
+  if ( any? anima1s ) [
+    
+    let file-path ( word path-to-experiment "genotypes-" genotype ".csv" )
+    
+    if ( not file-exists? file-path and simulation-id != 0 )
+    
+    [ file-open file-path
+      file-print csv:to-string (list 
+        
+        (sentence
+          "date-and-time"
+          "path-to-experiment"
+          "model-version"
+          "model-structure"
+          "genotype-reader"
+          "simulation-id"
+          "behaviorspace-experiment-name"
+          "population" 
+          "genotype"
+          "plant-annual-cycle" 
+          "plant-daily-cycle" 
+          "plant-seasonality" 
+          "plant-quality"
+          "plant-minimum-neighbors" 
+          "plant-maximum-neighbors" 
+          "world-width" 
+          "world-height"
+          "output-results?" 
+          "selection-on?"
+          "deterioration-rate"
+          "maximum-visual-range"
+          "base-litter-size"
+          "timesteps"
+          map but-last [chromosome.I] of min-one-of anima1s [ generation.number ] ))]
+    
+    file-open file-path
+    
+    let combined-list []
+    let mutated-alleles []
+    
+    let i 0
+    let chrome-length max ( sentence [ length chromosome.I ] of anima1s [ length chromosome.II ] of anima1s )
+    while [ i < chrome-length ] [
+      
+      let list-i [ last item i chromosome.I ] of anima1s with [ is.alive and length chromosome.I > i and is-number? last item i chromosome.I ]
+      let list-ii [ last item i chromosome.II ] of anima1s with [ is.alive and length chromosome.II > i and is-number? last item i chromosome.II ]
+      let item-I ifelse-value ( length list-i < 1 ) [ 0 ] [ mean list-i ]
+      let item-II ifelse-value ( length list-ii < 1 ) [ 0 ] [ mean list-ii ]
+      set combined-list lput ( item-I + item-II ) combined-list
+      
+      let mutants-i [ item i chromosome.I ] of anima1s with [ is.alive and length chromosome.I > i and first item i chromosome.I = "5|" ]
+      let mutants-ii [ item i chromosome.II ] of anima1s with [ is.alive and length chromosome.II > i and first item i chromosome.II = "5|"]
+      set mutated-alleles remove-duplicates (sentence mutated-alleles mutants-i mutants-ii )
+      
+      set i i + 1 ]
+    
+    file-print csv:to-string ( list 
+      
+      (sentence
+        date-and-time
+        path-to-experiment
+        ( csv:to-string model-version )
+        model-structure
+        genotype-reader
+        simulation-id
+        behaviorspace-experiment-name
+        population
+        genotype
+        plant-annual-cycle
+        plant-daily-cycle
+        plant-seasonality
+        plant-quality
+        plant-minimum-neighbors
+        plant-maximum-neighbors
+        world-width
+        world-height
+        output-results?
+        selection-on?
+        deterioration-rate
+        maximum-visual-range
+        base-litter-size
+        ticks
+        combined-list 
+        mutated-alleles ))
+    
+    file-close 
+    
+  ] 
+  
+end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to scan-agent
+  
+  let file-path ( word path-to-experiment "individual-scans.csv" )
+  
+  if ( not file-exists? file-path and simulation-id != 0 )
+  
+  [ file-open file-path
+    file-print csv:to-string (list (list 
+      
+      "date-and-time"
+      "path-to-experiment"
+      "model-version"
+      "model-structure"
+      "genotype-reader"
+      "simulation-id"
+      "behaviorspace-experiment-name"
+      "population" 
+      "genotype"
+      "plant-annual-cycle" 
+      "plant-daily-cycle" 
+      "plant-seasonality" 
+      "plant-quality"
+      "plant-minimum-neighbors" 
+      "plant-maximum-neighbors" 
+      "world-width" 
+      "world-height"
+      "output-results?" 
+      "selection-on?" 
+      "deterioration-rate"
+      "maximum-visual-range"
+      "base-litter-size"
+      
+      "current-timesteps"
+      "current-solar-status"
+      "current-season"
+      "current-plant-patchiness"
+      "current-plant-abundance"
+      "current-population-density"
+      
+      "focal-subject"
+      "color" 
+      "heading" 
+      "xcor" 
+      "ycor" 
+      "my.identity" 
+      "age.in.ticks" 
+      "generation.number"
+      "biological.sex" 
+      "life.history" 
+      "fertility.status" 
+      "group.identity" 
+      "is.alive" 
+      "carried.items"
+      "yellow.signal" 
+      "red.signal" 
+      "blue.signal"
+      "body.size" 
+      "body.shade" 
+      "is.resting"
+      "hidden.chance"
+      "fully.decayed"
+      "survival.chance" 
+      "energy.supply"
+      "bite.capacity" 
+      "mutation.chance"
+      "sex.ratio" 
+      "litter.size" 
+      "conception.chance"
+      "visual.angle" 
+      "visual.range" 
+      "day.perception"
+      "night.perception" 
+      "yellow.chance" 
+      "red.chance" 
+      "blue.chance"
+      "birthing.chance" 
+      "weaning.chance" 
+      "infancy.chance"
+      "juvenility.chance" 
+      "adulthood.chance" 
+      "x.magnitude" 
+      "y.magnitude"
+      "distance.traveled" 
+      "foraging.gains"  
+      "total.energy.gains"
+      "total.energy.cost"
+      "foraging.gains.this.timestep"
+      "energy.gains.this.timestep"
+      "energy.cost.this.timestep"
+      "help-from-count"
+      "attack-from-count"
+      "copulations-count"
+      "unique-mates-count"
+      "conceptions-count"
+      "group-transfers-count"
+      "unique-group-transfers-count"
+      "infanticide-count"
+      "whole.related.help.cost"
+      "half.related.help.cost"
+      "fourth.related.help.cost"
+      "eighth.related.help.cost"
+      "not.related.help.cost"
+      "whole.related.attack.cost"
+      "half.related.attack.cost"
+      "fourth.related.attack.cost"
+      "eighth.related.attack.cost"
+      "not.related.attack.cost"
+      
+  )) ]
+  
+  file-open file-path
+  
+  file-print csv:to-string ( list ( list
+    
+    date-and-time
+    path-to-experiment
+    model-version
+    model-structure
+    genotype-reader
+    simulation-id
+    behaviorspace-experiment-name
+    population
+    genotype
+    plant-annual-cycle
+    plant-daily-cycle
+    plant-seasonality
+    plant-quality
+    plant-minimum-neighbors
+    plant-maximum-neighbors
+    world-width
+    world-height
+    output-results?
+    selection-on?
+    deterioration-rate
+    maximum-visual-range
+    base-litter-size
+    
+    ticks
+    solar-status
+    current-season
+    plant-patchiness
+    current-plant-abundance
+    population-density
+    
+    focal-subject
+    color
+    heading 
+    xcor
+    ycor
+    my.identity
+    age.in.ticks 
+    generation.number
+    biological.sex
+    life.history
+    fertility.status 
+    group.identity
+    is.alive
+    carried.items
+    yellow.signal
+    red.signal
+    blue.signal
+    body.size
+    body.shade
+    is.resting
+    hidden.chance
+    fully.decayed
+    survival.chance 
+    energy.supply
+    bite.capacity
+    mutation.chance
+    sex.ratio
+    litter.size
+    conception.chance
+    visual.angle
+    visual.range
+    day.perception
+    night.perception
+    yellow.chance
+    red.chance
+    blue.chance
+    birthing.chance
+    weaning.chance 
+    infancy.chance
+    juvenility.chance
+    adulthood.chance
+    x.magnitude
+    y.magnitude
+    distance.traveled 
+    foraging.gains
+    total.energy.gains
+    total.energy.cost
+    foraging.gains.this.timestep
+    energy.gains.this.timestep
+    energy.cost.this.timestep
+    help-from-count
+    attack-from-count
+    copulations-count
+    unique-mates-count
+    conceptions-count
+    group-transfers-count
+    unique-group-transfers-count
+    infanticide-count
+    whole.related.help.cost
+    half.related.help.cost
+    fourth.related.help.cost
+    eighth.related.help.cost
+    not.related.help.cost
+    whole.related.attack.cost
+    half.related.attack.cost
+    fourth.related.attack.cost
+    eighth.related.attack.cost
+    not.related.attack.cost
+    
+  ))
+  
+  file-close 
+  
+end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to scan-group [ group-id ]
+  
+  let file-path ( word path-to-experiment "group-scans-" population ".csv" )
+  
+  if ( not file-exists? file-path and simulation-id != 0 )
+  
+  [ file-open file-path
+    file-print csv:to-string (list (list 
+      
+      "date-and-time"
+      "path-to-experiment"
+      "model-version"
+      "model-structure"
+      "genotype-reader"
+      "simulation-id"
+      "behaviorspace-experiment-name"
+      "population" 
+      "genotype"
+      "plant-annual-cycle" 
+      "plant-daily-cycle" 
+      "plant-seasonality" 
+      "plant-quality"
+      "plant-minimum-neighbors" 
+      "plant-maximum-neighbors" 
+      "world-width" 
+      "world-height"
+      "output-results?" 
+      "selection-on?" 
+      "deterioration-rate"
+      "maximum-visual-range"
+      "base-litter-size"
+
+      "current-timesteps"
+      "current-solar-status"
+      "current-season"
+      "current-plant-patchiness"
+      "current-plant-abundance"
+      "current-population-density"
+      "current-territory-size"
+      
+      "group-identity"
+      "current-group-size" 
+      "current-group-members"
+      "current-territory-energy"
+      
+      "members-within-territory"
+      "members-outside-territory"
+      "percent-members-within-territory"
+      
+      "distance-to-group-members-minimum"
+      "distance-to-group-members-maximum"
+      "distance-to-group-members-mean"
+      "distance-to-group-members-median"
+      "distance-to-group-members-variance"
+      
+      "adult-male-count"
+      "adult-female-count"
+      "adult-cycling-count"
+      "adult-pregnant-count"
+      "adult-lactating-count"
+      "juvenile-male-count"
+      "juvenile-female-count"
+      "infant-male-count"
+      "infant-female-count"
+      "gestatee-male-count"
+      "gestatee-female-count"
+      
+      "total-birth-count"
+      "total-death-count"
+      "adult-male-death-count"
+      "adult-cycling-death-count"
+      "adult-pregnant-death-count"
+      "adult-lactating-death-count"
+      "juvenile-male-death-count"
+      "juvenile-female-death-count"
+      "infant-male-death-count"
+      "infant-female-death-count"
+      "gestatee-male-death-count"
+      "gestatee-female-death-count"
+      
+      "births-per-female" 
+      "per-capita-births"
+      "per-capita-deaths"
+      "per-capita-adult-male-deaths"
+      "per-capita-adult-cycling-deaths"
+      "per-capita-adult-pregnant-deaths"
+      "per-capita-adult-lactating-deaths"
+      "per-capita-juvenile-male-deaths"
+      "per-capita-juvenile-female-deaths"
+      "per-capita-infant-male-deaths"
+      "per-capita-infant-female-deaths"
+      "per-capita-gestatee-male-deaths"
+      "per-capita-gestatee-female-deaths"
+      
+      "total-energy-supply"
+      "adult-male-energy"
+      "adult-cycling-energy"
+      "adult-pregnant-energy"
+      "adult-lactating-energy"
+      "juvenile-male-energy"
+      "juvenile-female-energy"
+      "infant-male-energy"
+      "infant-female-energy"
+      "gestatee-male-energy"
+      "gestatee-female-energy"
+      
+      "per-capita-energy"
+      "per-capita-adult-male-energy"
+      "per-capita-adult-cycling-energy"
+      "per-capita-adult-pregnant-energy"
+      "per-capita-adult-lactating-energy"
+      "per-capita-juvenile-male-energy"
+      "per-capita-juvenile-female-energy"
+      "per-capita-infant-male-energy"
+      "per-capita-infant-female-energy"
+      "per-capita-gestatee-male-energy"
+      "per-capita-gestatee-female-energy" 
+            
+      "timestep-foraging-gained"
+      "timestep-foraging-gained-adult-male"
+      "timestep-foraging-gained-adult-cycling"
+      "timestep-foraging-gained-adult-pregnant"
+      "timestep-foraging-gained-adult-lactating"
+      "timestep-foraging-gained-juvenile-male"
+      "timestep-foraging-gained-juvenile-female"
+      "timestep-foraging-gained-infant-male"
+      "timestep-foraging-gained-infant-female"
+      "timestep-foraging-gained-gestatee-male"
+      "timestep-foraging-gained-gestatee-female" 
+      
+      "timestep-energy-gained"
+      "timestep-energy-gained-adult-male"
+      "timestep-energy-gained-adult-cycling"
+      "timestep-energy-gained-adult-pregnant"
+      "timestep-energy-gained-adult-lactating"
+      "timestep-energy-gained-juvenile-male"
+      "timestep-energy-gained-juvenile-female"
+      "timestep-energy-gained-infant-male"
+      "timestep-energy-gained-infant-female"
+      "timestep-energy-gained-gestatee-male"
+      "timestep-energy-gained-gestatee-female" 
+      
+      "timestep-energy-cost"
+      "timestep-energy-cost-adult-male"
+      "timestep-energy-cost-adult-cycling"
+      "timestep-energy-cost-adult-pregnant"
+      "timestep-energy-cost-adult-lactating"
+      "timestep-energy-cost-juvenile-male"
+      "timestep-energy-cost-juvenile-female"
+      "timestep-energy-cost-infant-male"
+      "timestep-energy-cost-infant-female"
+      "timestep-energy-cost-gestatee-male"
+      "timestep-energy-cost-gestatee-female" 
+      
+  )) ]
+  
+  file-open file-path
+
+  let distance-list []        
+  ask anima1s with [ is.alive and group.identity = group-id ] [
+   ask other anima1s with [ is.alive and group.identity = group-id ] [
+      set distance-list lput distance myself distance-list ]]
+  
+  let distance-to-group-members-minimum ifelse-value ( length distance-list < 1 ) [ "NA" ] [ min distance-list ]
+  let distance-to-group-members-maximum ifelse-value ( length distance-list < 1 ) [ "NA" ] [ max distance-list ] 
+  let distance-to-group-members-mean ifelse-value ( length distance-list < 1 ) [ "NA" ] [ mean distance-list ]
+  let distance-to-group-members-median ifelse-value ( length distance-list < 1 ) [ "NA" ] [ median distance-list ]
+  let distance-to-group-members-variance ifelse-value ( length distance-list < 2 ) [ "NA" ] [ variance distance-list ] 
+ 
+  let current-group-size count living-agents with [ group.identity = group-id ]
+  let adult-male-count count living-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ]
+  let adult-cycling-count count living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "cycling" ]
+  let adult-pregnant-count count living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "pregnant" ]
+  let adult-lactating-count count living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "lactating" ]
+  let juvenile-male-count count living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "male" ]
+  let juvenile-female-count count living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "female" ]
+  let infant-male-count count living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "male" ]
+  let infant-female-count count living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "female" ]
+  let gestatee-male-count count living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "male" ]
+  let gestatee-female-count count living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "female" ]
+  
+  let newly-born-agents anima1s with [ is.alive = true and ticks.at.birth <= ticks and ticks.at.birth > ( ticks - group-scan-ticks ) ]
+  let total-birth-count count newly-born-agents with [ group.identity = group-id ]
+  let dying-agents anima1s with [ is.alive = false and ticks.at.death <= ticks and ticks.at.death > ( ticks - group-scan-ticks ) ]
+  let total-death-count count dying-agents with [ group.identity = group-id ]
+  let adult-male-death-count count dying-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ]
+  let adult-cycling-death-count count dying-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "cycling" ]
+  let adult-pregnant-death-count count dying-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "pregnant" ]
+  let adult-lactating-death-count count dying-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "lactating" ]
+  let juvenile-male-death-count count dying-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "male" ]
+  let juvenile-female-death-count count dying-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "female" ]
+  let infant-male-death-count count dying-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "male" ]
+  let infant-female-death-count count dying-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "female" ]
+  let gestatee-male-death-count count dying-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "male" ]
+  let gestatee-female-death-count count dying-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "female" ]
+  
+  let total-energy sum [energy.supply] of living-agents with [ group.identity = group-id ]
+  let adult-male-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ]
+  let adult-cycling-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "cycling" ]
+  let adult-pregnant-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "pregnant" ]
+  let adult-lactating-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "lactating" ]
+  let juvenile-male-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "male" ]
+  let juvenile-female-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "female" ]
+  let infant-male-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "male" ]
+  let infant-female-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "female" ]
+  let gestatee-male-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "male" ]
+  let gestatee-female-energy sum [energy.supply] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "female" ]
+  
+  let timestep-foraging-gained sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id ]
+  let timestep-foraging-gained-adult-male sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ]
+  let timestep-foraging-gained-adult-cycling sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "cycling" ]
+  let timestep-foraging-gained-adult-pregnant sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "pregnant" ]
+  let timestep-foraging-gained-adult-lactating sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "lactating" ]
+  let timestep-foraging-gained-juvenile-male sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "male" ]
+  let timestep-foraging-gained-juvenile-female sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "female" ]
+  let timestep-foraging-gained-infant-male sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "male" ]
+  let timestep-foraging-gained-infant-female sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "female" ]
+  let timestep-foraging-gained-gestatee-male sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "male" ]
+  let timestep-foraging-gained-gestatee-female sum [foraging.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "female" ]
+  
+  let timestep-energy-gained sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id ]
+  let timestep-energy-gained-adult-male sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ]
+  let timestep-energy-gained-adult-cycling sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "cycling" ]
+  let timestep-energy-gained-adult-pregnant sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "pregnant" ]
+  let timestep-energy-gained-adult-lactating sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "lactating" ]
+  let timestep-energy-gained-juvenile-male sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "male" ]
+  let timestep-energy-gained-juvenile-female sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "female" ]
+  let timestep-energy-gained-infant-male sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "male" ]
+  let timestep-energy-gained-infant-female sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "female" ]
+  let timestep-energy-gained-gestatee-male sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "male" ]
+  let timestep-energy-gained-gestatee-female sum [energy.gains.this.timestep] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "female" ] 
+  
+  let timestep-energy-cost sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id ] 
+  let timestep-energy-cost-adult-male sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ] 
+  let timestep-energy-cost-adult-cycling sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "cycling" ]
+  let timestep-energy-cost-adult-pregnant sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "pregnant" ] 
+  let timestep-energy-cost-adult-lactating sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "lactating" ] 
+  let timestep-energy-cost-juvenile-male sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "male" ]
+  let timestep-energy-cost-juvenile-female sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "juvenile" and biological.sex = "female" ] 
+  let timestep-energy-cost-infant-male sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "male" ] 
+  let timestep-energy-cost-infant-female sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "infant" and biological.sex = "female" ] 
+  let timestep-energy-cost-gestatee-male sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "male" ] 
+  let timestep-energy-cost-gestatee-female sum [energy.cost.this.timestep] of living-agents with [ group.identity = group-id and life.history = "gestatee" and biological.sex = "female" ]  
+  
+  file-print csv:to-string ( list ( list
+    
+    date-and-time
+    path-to-experiment
+    model-version
+    model-structure
+    genotype-reader
+    simulation-id
+    behaviorspace-experiment-name
+    population
+    genotype
+    plant-annual-cycle
+    plant-daily-cycle
+    plant-seasonality
+    plant-quality
+    plant-minimum-neighbors
+    plant-maximum-neighbors
+    world-width
+    world-height
+    output-results?
+    selection-on?
+    deterioration-rate
+    maximum-visual-range
+    base-litter-size
+    
+    ticks
+    solar-status
+    current-season
+    plant-patchiness
+    current-plant-abundance
+    population-density
+    count patches with [ pgroup.identity = group-id ]
+        
+    group-id
+    current-group-size
+    ([my.identity] of living-agents with [ group.identity = group-id ])
+    (sum [penergy.supply] of patches with [ pgroup.identity = group-id ])
+    
+    count living-agents with [ group.identity = group-id and pgroup.identity = group-id ]
+    count living-agents with [ group.identity = group-id and pgroup.identity != group-id ]
+    (count living-agents with [ group.identity = group-id and pgroup.identity = group-id ] / ( count living-agents with [ group.identity = group-id and pgroup.identity = group-id ] + count living-agents with [ group.identity = group-id and pgroup.identity != group-id ] + 0.0000000001 ) )
+    
+    distance-to-group-members-minimum
+    distance-to-group-members-maximum
+    distance-to-group-members-mean
+    distance-to-group-members-median
+    distance-to-group-members-variance
+
+    adult-male-count
+    (adult-cycling-count + adult-pregnant-count + adult-lactating-count)
+    adult-cycling-count
+    adult-pregnant-count
+    adult-lactating-count
+    juvenile-male-count
+    juvenile-female-count
+    infant-male-count
+    infant-female-count
+    gestatee-male-count
+    gestatee-female-count
+    
+    total-birth-count
+    total-death-count
+    adult-male-death-count
+    adult-cycling-death-count
+    adult-pregnant-death-count
+    adult-lactating-death-count
+    juvenile-male-death-count
+    juvenile-female-death-count
+    infant-male-death-count
+    infant-female-death-count
+    gestatee-male-death-count
+    gestatee-female-death-count
+    
+    ifelse-value ( (adult-cycling-count + adult-pregnant-count + adult-lactating-count) > 0 ) [ ( total-birth-count / (adult-cycling-count + adult-pregnant-count + adult-lactating-count)) ] [ "NA" ]
+    ifelse-value ( current-group-size > 0 ) [ ( total-birth-count / current-group-size) ] [ "NA" ]
+    ifelse-value ( current-group-size > 0 ) [ ( total-death-count / current-group-size) ] [ "NA" ]
+    ifelse-value ( adult-male-count > 0 ) [ (adult-male-death-count / adult-male-count) ] [ "NA" ]
+    ifelse-value ( adult-cycling-count > 0 ) [ (adult-cycling-death-count / adult-cycling-count) ] [ "NA" ]
+    ifelse-value ( adult-pregnant-count > 0 ) [ (adult-pregnant-death-count / adult-pregnant-count) ] [ "NA" ]
+    ifelse-value ( adult-lactating-count > 0 ) [ (adult-lactating-death-count / adult-lactating-count) ] [ "NA" ]
+    ifelse-value ( juvenile-male-count > 0 ) [ (juvenile-male-death-count / juvenile-male-count) ] [ "NA" ]
+    ifelse-value ( juvenile-female-count > 0 ) [ (juvenile-female-death-count / juvenile-female-count) ] [ "NA" ]
+    ifelse-value ( infant-male-count > 0 ) [ (infant-male-death-count / infant-male-count) ] [ "NA" ]
+    ifelse-value ( infant-female-count > 0 ) [ (infant-female-death-count / infant-female-count) ] [ "NA" ]
+    ifelse-value ( gestatee-male-count > 0 ) [ (gestatee-male-death-count / gestatee-male-count) ] [ "NA" ]
+    ifelse-value ( gestatee-female-count > 0 ) [ (gestatee-female-death-count / gestatee-female-count) ] [ "NA" ]
+    
+    total-energy
+    adult-male-energy
+    adult-cycling-energy
+    adult-pregnant-energy
+    adult-lactating-energy
+    juvenile-male-energy
+    juvenile-female-energy
+    infant-male-energy
+    infant-female-energy
+    gestatee-male-energy
+    gestatee-female-energy
+    
+    ifelse-value ( current-group-size > 0 ) [ (total-energy / current-group-size) ] [ "NA" ]
+    ifelse-value ( adult-male-count > 0 ) [ (adult-male-energy / adult-male-count) ] [ "NA" ]
+    ifelse-value ( adult-cycling-count > 0 ) [ (adult-cycling-energy / adult-cycling-count) ] [ "NA" ]
+    ifelse-value ( adult-pregnant-count > 0 ) [ (adult-pregnant-energy / adult-pregnant-count) ] [ "NA" ]
+    ifelse-value ( adult-lactating-count > 0 ) [ (adult-lactating-energy / adult-lactating-count) ] [ "NA" ]
+    ifelse-value ( juvenile-male-count > 0 ) [ (juvenile-male-energy / juvenile-male-count) ] [ "NA" ]
+    ifelse-value ( juvenile-female-count > 0 ) [ (juvenile-female-energy / juvenile-female-count) ] [ "NA" ]
+    ifelse-value ( infant-male-count > 0 ) [ (infant-male-energy / infant-male-count) ] [ "NA" ]    
+    ifelse-value ( infant-female-count > 0 ) [ (infant-female-energy / infant-female-count) ] [ "NA" ]
+    ifelse-value ( gestatee-male-count > 0 ) [ (gestatee-male-energy / gestatee-male-count) ] [ "NA" ]
+    ifelse-value ( gestatee-female-count > 0 ) [ (gestatee-female-energy / gestatee-female-count) ] [ "NA" ]
+        
+    timestep-foraging-gained
+    timestep-foraging-gained-adult-male
+    timestep-foraging-gained-adult-cycling
+    timestep-foraging-gained-adult-pregnant
+    timestep-foraging-gained-adult-lactating
+    timestep-foraging-gained-juvenile-male
+    timestep-foraging-gained-juvenile-female
+    timestep-foraging-gained-infant-male
+    timestep-foraging-gained-infant-female
+    timestep-foraging-gained-gestatee-male
+    timestep-foraging-gained-gestatee-female 
+    
+    timestep-energy-gained
+    timestep-energy-gained-adult-male
+    timestep-energy-gained-adult-cycling
+    timestep-energy-gained-adult-pregnant
+    timestep-energy-gained-adult-lactating
+    timestep-energy-gained-juvenile-male
+    timestep-energy-gained-juvenile-female
+    timestep-energy-gained-infant-male
+    timestep-energy-gained-infant-female
+    timestep-energy-gained-gestatee-male
+    timestep-energy-gained-gestatee-female 
+    
+    timestep-energy-cost
+    timestep-energy-cost-adult-male
+    timestep-energy-cost-adult-cycling
+    timestep-energy-cost-adult-pregnant
+    timestep-energy-cost-adult-lactating
+    timestep-energy-cost-juvenile-male
+    timestep-energy-cost-juvenile-female
+    timestep-energy-cost-infant-male
+    timestep-energy-cost-infant-female
+    timestep-energy-cost-gestatee-male
+    timestep-energy-cost-gestatee-female 
+    
+  ))
+  
+  file-close
+  
+end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to scan-simulation
+  
+  let file-path ( word path-to-experiment simulation-id "-scans.csv" )
+  
+  if ( not file-exists? file-path and simulation-id != 0 )
+  
+  [ file-open file-path
+    file-print csv:to-string (list (list 
+      
+      "date-and-time"
+      "path-to-experiment"
+      "model-version"
+      "model-structure"
+      "genotype-reader"
+      "simulation-id"
+      "behaviorspace-experiment-name"
+      "population" 
+      "genotype"
+      "plant-annual-cycle" 
+      "plant-daily-cycle" 
+      "plant-seasonality" 
+      "plant-quality"
+      "plant-minimum-neighbors" 
+      "plant-maximum-neighbors" 
+      "world-width" 
+      "world-height"
+      "output-results?" 
+      "selection-on?" 
+      "deterioration-rate"
+      "maximum-visual-range"
+      "base-litter-size"
+      
+      "timesteps"
+      "solar-status"
+      "current-season"
+      "population-density"
+      
+      "current-plant-abundance"
+      "current-plant-patchiness"
+      "current-population-size"
+      "generation-number-max"
+      "generation-number-min"
+      "generation-number-mean"
+      "generation-number-median"
+      
+      "number-of-groups"
+      "number-of-males"
+      "number-of-females" 
+      "number-of-adults" 
+      "number-of-cycling-females" 
+      "number-of-pregnant-females" 
+      "number-of-lactating-females"
+      "number-of-juveniles" 
+      "number-of-infants"
+      "number-of-gestatees" 
+      "number-of-fully-alive-agents"
+      "number-of-decaying-agents"
+      "number-of-fully-decayed-agents"
+      
+      "total-timestep-foraging-gained"
+      "total-timestep-foraging-gained-adult-male"
+      "total-timestep-foraging-gained-adult-cycling"
+      "total-timestep-foraging-gained-adult-pregnant"
+      "total-timestep-foraging-gained-adult-lactating"
+      "total-timestep-foraging-gained-juvenile-male"
+      "total-timestep-foraging-gained-juvenile-female"
+      "total-timestep-foraging-gained-infant-male"
+      "total-timestep-foraging-gained-infant-female"
+      "total-timestep-foraging-gained-gestatee-male"
+      "total-timestep-foraging-gained-gestatee-female" 
+      
+      "total-timestep-energy-gained"
+      "total-timestep-energy-gained-adult-male"
+      "total-timestep-energy-gained-adult-cycling"
+      "total-timestep-energy-gained-adult-pregnant"
+      "total-timestep-energy-gained-adult-lactating"
+      "total-timestep-energy-gained-juvenile-male"
+      "total-timestep-energy-gained-juvenile-female"
+      "total-timestep-energy-gained-infant-male"
+      "total-timestep-energy-gained-infant-female"
+      "total-timestep-energy-gained-gestatee-male"
+      "total-timestep-energy-gained-gestatee-female" 
+      
+      "total-timestep-energy-cost"
+      "total-timestep-energy-cost-adult-male"
+      "total-timestep-energy-cost-adult-cycling"
+      "total-timestep-energy-cost-adult-pregnant"
+      "total-timestep-energy-cost-adult-lactating"
+      "total-timestep-energy-cost-juvenile-male"
+      "total-timestep-energy-cost-juvenile-female"
+      "total-timestep-energy-cost-infant-male"
+      "total-timestep-energy-cost-infant-female"
+      "total-timestep-energy-cost-gestatee-male"
+      "total-timestep-energy-cost-gestatee-female" 
+
+  )) ]
+  
+  file-open file-path
+  
+  file-print csv:to-string ( list ( list
+    
+    date-and-time
+    path-to-experiment
+    model-version
+    model-structure
+    genotype-reader
+    simulation-id
+    behaviorspace-experiment-name
+    population
+    genotype
+    plant-annual-cycle
+    plant-daily-cycle
+    plant-seasonality
+    plant-quality
+    plant-minimum-neighbors
+    plant-maximum-neighbors
+    world-width
+    world-height
+    output-results?
+    selection-on?
+    deterioration-rate
+    maximum-visual-range
+    base-litter-size
+    
+    ticks
+    solar-status
+    current-season
+    population-density
+    
+    current-plant-abundance
+    current-plant-patchiness
+    current-population-size
+    generation-number-max
+    generation-number-min
+    generation-number-mean
+    generation-number-median
+    
+    number-of-groups
+    number-of-males
+    number-of-females
+    number-of-adults
+    number-of-cycling-females
+    number-of-pregnant-females
+    number-of-lactating-females
+    number-of-juveniles
+    number-of-infants
+    number-of-gestatees
+    number-of-fully-alive-agents
+    number-of-decaying-agents
+    number-of-fully-decayed-agents
+    
+    sum [foraging.gains.this.timestep] of living-agents
+    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "adult" and biological.sex = "male" ]
+    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "cycling" ]
+    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "pregnant" ]
+    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "lactating" ]
+    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "juvenile" and biological.sex = "male" ]
+    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "juvenile" and biological.sex = "female" ]
+    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "infant" and biological.sex = "male" ]
+    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "infant" and biological.sex = "female" ]
+    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "gestatee" and biological.sex = "male" ]
+    sum [foraging.gains.this.timestep] of living-agents with [ life.history = "gestatee" and biological.sex = "female" ]
+    
+    sum [energy.gains.this.timestep] of living-agents 
+    sum [energy.gains.this.timestep] of living-agents with [ life.history = "adult" and biological.sex = "male" ]
+    sum [energy.gains.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "cycling" ]
+    sum [energy.gains.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "pregnant" ]
+    sum [energy.gains.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "lactating" ]
+    sum [energy.gains.this.timestep] of living-agents with [ life.history = "juvenile" and biological.sex = "male" ]
+    sum [energy.gains.this.timestep] of living-agents with [ life.history = "juvenile" and biological.sex = "female" ]
+    sum [energy.gains.this.timestep] of living-agents with [ life.history = "infant" and biological.sex = "male" ]
+    sum [energy.gains.this.timestep] of living-agents with [ life.history = "infant" and biological.sex = "female" ]
+    sum [energy.gains.this.timestep] of living-agents with [ life.history = "gestatee" and biological.sex = "male" ]
+    sum [energy.gains.this.timestep] of living-agents with [ life.history = "gestatee" and biological.sex = "female" ] 
+    
+    sum [energy.cost.this.timestep] of living-agents  
+    sum [energy.cost.this.timestep] of living-agents with [ life.history = "adult" and biological.sex = "male" ] 
+    sum [energy.cost.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "cycling" ]
+    sum [energy.cost.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "pregnant" ] 
+    sum [energy.cost.this.timestep] of living-agents with [ life.history = "adult" and fertility.status = "lactating" ] 
+    sum [energy.cost.this.timestep] of living-agents with [ life.history = "juvenile" and biological.sex = "male" ]
+    sum [energy.cost.this.timestep] of living-agents with [ life.history = "juvenile" and biological.sex = "female" ] 
+    sum [energy.cost.this.timestep] of living-agents with [ life.history = "infant" and biological.sex = "male" ] 
+    sum [energy.cost.this.timestep] of living-agents with [ life.history = "infant" and biological.sex = "female" ] 
+    sum [energy.cost.this.timestep] of living-agents with [ life.history = "gestatee" and biological.sex = "male" ] 
+    sum [energy.cost.this.timestep] of living-agents with [ life.history = "gestatee" and biological.sex = "female" ]  
+    
+  ))
+  
+  file-close
+
+end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;  
+;  .8888b                            dP 
+;  88   "                            88 
+;  88aaa  .d8888b. .d8888b. .d8888b. 88 
+;  88     88'  `88 88'  `"" 88'  `88 88 
+;  88     88.  .88 88.  ... 88.  .88 88 
+;  dP     `88888P' `88888P' `88888P8 dP 
+;                                       
+;                                    
+; --------------------------------------------------------------------------------------------------------- ;
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to record-actions ; agent subroutine
+  
+  let file-path ( word path-to-experiment "actions-" simulation-id "-" my.identity ".csv" )
+  
+  if ( not file-exists? file-path and simulation-id != 0 )
+  
+  [ file-open file-path
+    file-print csv:to-string (list (list 
+      
+      "date-and-time"
+      "path-to-experiment"
+      "model-version"
+      "model-structure"
+      "genotype-reader"
+      "simulation-id"
+      "behaviorspace-experiment-name"
+      "population" 
+      "genotype"
+      "plant-annual-cycle" 
+      "plant-daily-cycle" 
+      "plant-seasonality" 
+      "plant-quality"
+      "plant-minimum-neighbors" 
+      "plant-maximum-neighbors" 
+      "world-width" 
+      "world-height"
+      "output-results?" 
+      "selection-on?"
+      "deterioration-rate"
+      "maximum-visual-range"
+      "base-litter-size"
+      
+      "timesteps"
+      "solar-status"
+      "current-season"
+      "plant-patchiness"
+      "population-density"
+      "current-plant-abundance"
+      
+      ; subject
+      "color" 
+      "heading" 
+      "xcor" 
+      "ycor" 
+      "my.identity" 
+      "age.in.ticks" 
+      "generation.number"
+      "biological.sex" 
+      "life.history" 
+      "fertility.status" 
+      "group.identity" 
+      "is.alive" 
+      "carried.items"
+      "yellow.signal" 
+      "red.signal" 
+      "blue.signal"
+      "body.size" 
+      "body.shade" 
+      "is.resting"
+      "hidden.chance"
+      "fully.decayed"
+      "survival.chance" 
+      "energy.supply"
+      "bite.capacity" 
+      "mutation.chance"
+      "sex.ratio" 
+      "litter.size" 
+      "conception.chance"
+      "visual.angle" 
+      "visual.range" 
+      "day.perception"
+      "night.perception" 
+      "yellow.chance" 
+      "red.chance" 
+      "blue.chance"
+      "birthing.chance" 
+      "weaning.chance" 
+      "infancy.chance"
+      "juvenility.chance" 
+      "adulthood.chance" 
+      "x.magnitude" 
+      "y.magnitude"
+      "distance.traveled"  
+      "foraging.gains"  
+      "total.energy.gains"
+      "total.energy.cost"
+      "foraging.gains.this.timestep"
+      "energy.gains.this.timestep"
+      "energy.cost.this.timestep"
+      "help-from-count"
+      "attack-from-count"
+      "copulations-count"
+      "unique-mates-count"
+      "conceptions-count"
+      "group-transfers-count"
+      "unique-group-transfers-count"
+      "infanticide-count"
+      "whole.related.help.cost"
+      "half.related.help.cost"
+      "fourth.related.help.cost"
+      "eighth.related.help.cost"
+      "not.related.help.cost"
+      "whole.related.attack.cost"
+      "half.related.attack.cost"
+      "fourth.related.attack.cost"
+      "eighth.related.attack.cost"
+      "not.related.attack.cost"
+      
+      "action-ego"
+      "action-target"
+      "action-name"
+      "action-cost"
+      
+    )) ]
+  
+  file-open file-path
+  
+  let action-list filter [ a -> item 0 a = self or item 1 a = self ] actions-completed-this-timestep
+  
+  foreach action-list [ action ->
+    
+    if ( is-anima1? item 0 action ) [
+      
+      ask ( item 0 action ) [
+        
+        file-print csv:to-string ( list ( list
+          
+          date-and-time
+          path-to-experiment
+          model-version
+          model-structure
+          genotype-reader
+          simulation-id
+          behaviorspace-experiment-name
+          population
+          genotype
+          plant-annual-cycle
+          plant-daily-cycle
+          plant-seasonality
+          plant-quality
+          plant-minimum-neighbors
+          plant-maximum-neighbors
+          world-width
+          world-height
+          output-results?
+          selection-on?
+          deterioration-rate
+          maximum-visual-range
+          base-litter-size
+          
+          ticks
+          solar-status
+          current-season
+          plant-patchiness
+          population-density
+          current-plant-abundance
+          
+          ; subject
+          color
+          heading 
+          xcor
+          ycor
+          my.identity
+          age.in.ticks 
+          generation.number
+          biological.sex
+          life.history
+          fertility.status 
+          group.identity
+          is.alive
+          carried.items
+          yellow.signal
+          red.signal
+          blue.signal
+          body.size
+          body.shade
+          is.resting
+          hidden.chance
+          fully.decayed
+          survival.chance 
+          energy.supply
+          bite.capacity
+          mutation.chance
+          sex.ratio
+          litter.size
+          conception.chance
+          visual.angle
+          visual.range
+          day.perception
+          night.perception
+          yellow.chance
+          red.chance
+          blue.chance
+          birthing.chance
+          weaning.chance 
+          infancy.chance
+          juvenility.chance
+          adulthood.chance
+          x.magnitude
+          y.magnitude
+          distance.traveled
+          foraging.gains
+          total.energy.gains
+          total.energy.cost
+          foraging.gains.this.timestep
+          energy.gains.this.timestep
+          energy.cost.this.timestep
+          help-from-count
+          attack-from-count
+          copulations-count
+          unique-mates-count
+          conceptions-count
+          group-transfers-count
+          unique-group-transfers-count
+          infanticide-count
+          whole.related.help.cost
+          half.related.help.cost
+          fourth.related.help.cost
+          eighth.related.help.cost
+          not.related.help.cost
+          whole.related.attack.cost
+          half.related.attack.cost
+          fourth.related.attack.cost
+          eighth.related.attack.cost
+          not.related.attack.cost
+          
+          ifelse-value ( is-anima1? item 0 action ) [ [my.identity] of item 0 action ] [ item 0 action ]
+          ifelse-value ( is-anima1? item 1 action ) [ [my.identity] of item 1 action ] [ item 1 action ]
+          item 2 action
+          item 3 action
+          
+  ))]]]
+  
+  file-close 
+  
+end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 ;--------------------------------------------------------------------------------------------------------------------
 ; AGENT FUNCTIONS
 ;--------------------------------------------------------------------------------------------------------------------
@@ -2657,12 +2762,23 @@ to-report lactation-duration report ifelse-value ( ticks.at.weaning = 0 or ticks
 to-report juvenile-duration report ifelse-value ( ticks.at.sexual.maturity = 0 or ticks.at.weaning = 0 ) [ 0 ] [ ( ticks.at.sexual.maturity - ticks.at.weaning ) ] end
 to-report lifespan report ( ticks.at.death - ticks.at.conception ) end
 
-  ; defensive programming needed here
-to-report lifetime-plant-abundance report mean sublist plant-abundance-record ( length plant-abundance-record - how-many-records ) ( length plant-abundance-record )  end ; must account for list emptiness
-to-report lifetime-plant-patchiness report mean sublist plant-patchiness-record  ( length plant-patchiness-record  - how-many-records ) ( length plant-patchiness-record  ) end
-to-report lifetime-population-size report mean sublist population-size-record ( length population-size-record - how-many-records ) ( length population-size-record ) end
+to-report lifetime-plant-abundance 
+  let subrecord sublist plant-abundance-record ( length plant-abundance-record - how-many-records ) ( length plant-abundance-record ) 
+  report ifelse-value ( length subrecord < 1 ) [ "NA" ] [ mean subrecord ]
+end
+
+to-report lifetime-plant-patchiness 
+  let subrecord sublist plant-patchiness-record  ( length plant-patchiness-record  - how-many-records ) ( length plant-patchiness-record  ) 
+  report ifelse-value ( length subrecord < 1 ) [ "NA" ] [ mean subrecord ]
+end
+
+to-report lifetime-population-size 
+  let subrecord sublist population-size-record ( length population-size-record - how-many-records ) ( length population-size-record ) 
+  report ifelse-value ( length subrecord < 1 ) [ "NA" ] [ mean subrecord ]
+end
   
 to-report how-many-records report ceiling (( ticks.at.death - ticks.at.conception ) / timestep-interval ) end
+ 
   
 ;--------------------------------------------------------------------------------------------------------------------
 ; OBSERVER FUNCTIONS
@@ -3284,14 +3400,24 @@ to-report male-unique-female-matings-maximum report ifelse-value ( length male-u
 to-report male-unique-female-matings-minimum report ifelse-value ( length male-unique-female-matings-list < 1 ) [ "NA" ] [ min male-unique-female-matings-list ] end
 to-report male-unique-female-matings-mean report ifelse-value ( length male-unique-female-matings-list < 1 ) [ "NA" ] [ mean male-unique-female-matings-list ] end
 to-report male-unique-female-matings-variance report ifelse-value ( length male-unique-female-matings-list < 2 ) [ "NA" ] [ variance male-unique-female-matings-list ] end
-to-report total-population-male-unique-female-matings report length remove-duplicates reduce sentence [ copulations.history ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end 
+to-report total-population-male-unique-female-matings 
+  let reporter 0
+  let male-copulations [ copulations.history ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ]
+  if ( length male-copulations > 0 ) [
+    set reporter length remove-duplicates reduce sentence male-copulations ]
+  report reporter end 
   
 to-report female-unique-male-matings-list report [ length remove-duplicates copulations.history ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
 to-report female-unique-male-matings-maximum report ifelse-value ( length female-unique-male-matings-list < 1 ) [ "NA" ] [ max female-unique-male-matings-list ] end
 to-report female-unique-male-matings-minimum report ifelse-value ( length female-unique-male-matings-list < 1 ) [ "NA" ] [ min female-unique-male-matings-list ] end
 to-report female-unique-male-matings-mean report ifelse-value ( length female-unique-male-matings-list < 1 ) [ "NA" ] [ mean female-unique-male-matings-list ] end
 to-report female-unique-male-matings-variance report ifelse-value ( length female-unique-male-matings-list < 2 ) [ "NA" ] [ variance female-unique-male-matings-list ] end
-to-report total-population-female-unique-male-matings report length remove-duplicates reduce sentence [ copulations.history ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
+to-report total-population-female-unique-male-matings 
+  let reporter 0
+  let female-copulations [ copulations.history ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] 
+  if ( length female-copulations > 0 ) [
+    set reporter length remove-duplicates reduce sentence female-copulations ]
+  report reporter end 
   
 to-report male-total-group-transfers-list report [ length group.transfers.history ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
 to-report male-total-group-transfers-maximum report ifelse-value ( length male-total-group-transfers-list < 1 ) [ "NA" ] [ max male-total-group-transfers-list ] end
@@ -3324,13 +3450,23 @@ to-report male-infanticide-count-maximum report ifelse-value ( length male-infan
 to-report male-infanticide-count-minimum report ifelse-value ( length male-infanticide-count-list < 1 ) [ "NA" ] [ min male-infanticide-count-list ] end
 to-report male-infanticide-count-mean report ifelse-value ( length male-infanticide-count-list < 1 ) [ "NA" ] [ mean male-infanticide-count-list ] end
 to-report male-infanticide-count-variance report ifelse-value ( length male-infanticide-count-list < 2 ) [ "NA" ] [ variance male-infanticide-count-list ] end
-to-report total-population-male-infanticide-count report length filter [ i -> any? anima1s with [ not is.alive and my.identity = i ] ] remove-duplicates reduce sentence [ infanticide.history ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] end
+to-report total-population-male-infanticide-count 
+  let reporter 0
+  let male-infanticides [ infanticide.history ] of decayed-agents with [ biological.sex = "male" and life.history = "adult" ] 
+  if ( length male-infanticides > 0 ) [
+    set reporter length filter [ i -> any? anima1s with [ not is.alive and my.identity = i ] ] remove-duplicates reduce sentence male-infanticides ]
+ report reporter end
         
 to-report female-infanticide-count-list report [ length filter [ i -> any? anima1s with [ not is.alive and my.identity = i ] ] remove-duplicates infanticide.history ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
 to-report female-infanticide-count-maximum report ifelse-value ( length female-infanticide-count-list < 1 ) [ "NA" ] [ max female-infanticide-count-list ] end
 to-report female-infanticide-count-minimum report ifelse-value ( length female-infanticide-count-list < 1 ) [ "NA" ] [ min female-infanticide-count-list ] end
 to-report female-infanticide-count-mean report ifelse-value ( length female-infanticide-count-list < 1 ) [ "NA" ] [ mean female-infanticide-count-list ] end
 to-report female-infanticide-count-variance report ifelse-value ( length female-infanticide-count-list < 2 ) [ "NA" ] [ variance female-infanticide-count-list ] end
-to-report total-population-female-infanticide-count report length filter [ i -> any? anima1s with [ not is.alive and my.identity = i ] ] remove-duplicates reduce sentence [ infanticide.history ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ] end
+to-report total-population-female-infanticide-count 
+  let reporter 0
+  let female-infanticides [ infanticide.history ] of decayed-agents with [ biological.sex = "female" and life.history = "adult" ]
+  if ( length female-infanticides > 0 ) [
+    set reporter length filter [ i -> any? anima1s with [ not is.alive and my.identity = i ] ] remove-duplicates reduce sentence female-infanticides ]
+  report reporter  end
 
 

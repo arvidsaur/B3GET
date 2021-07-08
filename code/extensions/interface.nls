@@ -1,15 +1,25 @@
+; ========================================================================================================= ;  
+;
+;
+;  dP 888888ba  d888888P  88888888b  888888ba   88888888b  .d888888   a88888b.  88888888b 
+;  88 88    `8b    88     88         88    `8b  88        d8'    88  d8'   `88  88        
+;  88 88     88    88    a88aaaa    a88aaaa8P' a88aaaa    88aaaaa88a 88        a88aaaa    
+;  88 88     88    88     88         88   `8b.  88        88     88  88         88        
+;  88 88     88    88     88         88     88  88        88     88  Y8.   .88  88        
+;  dP dP     dP    dP     88888888P  dP     dP  dP        88     88   Y88888P'  88888888P 
+;  
+; ========================================================================================================= ;
 
-;--------------------------------------------------------------------------------------------------------------------
-;
-;   oo            dP                     .8888b
-;                 88                     88   "
-;   dP 88d888b. d8888P .d8888b. 88d888b. 88aaa  .d8888b. .d8888b. .d8888b.
-;   88 88'  `88   88   88ooood8 88'  `88 88     88'  `88 88'  `"" 88ooood8
-;   88 88    88   88   88.  ... 88       88     88.  .88 88.  ... 88.  ...
-;   dP dP    dP   dP   `88888P' dP       dP     `88888P8 `88888P' `88888P'
-;
-; © 2021 K N Crouse   
-;--------------------------------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;                                                                                         
+;                                                                                        
+;  dP                  dP     dP                              
+;  88                  88     88                              
+;  88d888b. dP    dP d8888P d8888P .d8888b. 88d888b. .d8888b. 
+;  88'  `88 88    88   88     88   88'  `88 88'  `88 Y8ooooo. 
+;  88.  .88 88.  .88   88     88   88.  .88 88    88       88 
+;  88Y8888' `88888P'   dP     dP   `88888P' dP    dP `88888P' 
+;                                                             
+; --------------------------------------------------------------------------------------------------------- ;  
 
 to setup-button  
   if ( simulation-id != 0 and ticks > 100000 )       ; If there is a current simulation that has already been running for a while
@@ -54,15 +64,16 @@ to import-genotype-button
   import-genotype
 end
 
-;-----------------------------------------------------------------------------
-;                                                                dP          
-;                                                                88          
-; .d8888b. .d8888b. 88d8b.d8b. 88d8b.d8b. .d8888b. 88d888b. .d888b88 .d8888b. 
-; 88'  `"" 88'  `88 88'`88'`88 88'`88'`88 88'  `88 88'  `88 88'  `88 Y8ooooo. 
-; 88.  ... 88.  .88 88  88  88 88  88  88 88.  .88 88    88 88.  .88       88 
-; `88888P' `88888P' dP  dP  dP dP  dP  dP `88888P8 dP    dP `88888P8 `88888P' 
-;                                                                            
-;-----------------------------------------------------------------------------                                                                          
+; --------------------------------------------------------------------------------------------------------- ;  
+;
+;                                                                  dP          
+;                                                                  88          
+;  .d8888b. .d8888b. 88d8b.d8b. 88d8b.d8b. .d8888b. 88d888b. .d888b88 .d8888b. 
+;  88'  `"" 88'  `88 88'`88'`88 88'`88'`88 88'  `88 88'  `88 88'  `88 Y8ooooo. 
+;  88.  ... 88.  .88 88  88  88 88  88  88 88.  .88 88    88 88.  .88       88 
+;  `88888P' `88888P' dP  dP  dP dP  dP  dP `88888P8 dP    dP `88888P8 `88888P' 
+;                                                                              
+; --------------------------------------------------------------------------------------------------------- ;                                                                                                             
 
 to command
   
@@ -167,7 +178,7 @@ to command
   ;"-- receiving-history"
   ;"-- carried-history"
   ;"-- aid-history"
-  ;"-- harm-history"
+  ;"-- attack-history"
 
 
 
@@ -279,10 +290,10 @@ to default-settings
   set plant-quality 5.0
   set plant-minimum-neighbors 0
   set plant-maximum-neighbors 8
-  set population "Hamadryas"
-  set genotype "hamadryas"
-  ; plot
-  ; output
+  set population "population"
+  set genotype "genotype"
+  clear-plot
+  clear-output
 
   parameter-report
   
@@ -561,7 +572,7 @@ to output-decisions
     
     
   ][ 
-    foreach decisions-made-this-timsetep [ decision -> 
+    foreach decisions-made-this-timestep [ decision -> 
         let caller-name but-first but-last (word item 0 decision )
         let target-name but-first but-last (word item 1 decision )
         let action-name item 2 decision
@@ -591,7 +602,7 @@ to output-actions
         output-print ( word " " caller-name "   " target-name "   " action-name "   " cost-name  )]]
     
   ][ 
-    foreach actions-completed-this-timsetep [ action -> 
+    foreach actions-completed-this-timestep [ action -> 
       let caller-name but-first but-last (word item 0 action )
       let target-name but-first but-last (word item 1 action )
       let action-name item 2 action
@@ -642,18 +653,19 @@ to output-genotype
   ]
 end
 
-;-----------------------------------------------------------------------------   
+; --------------------------------------------------------------------------------------------------------- ;  
 ;
-;            dP            dP            
-;            88            88            
-;   88d888b. 88 .d8888b. d8888P .d8888b. 
-;   88'  `88 88 88'  `88   88   Y8ooooo. 
-;   88.  .88 88 88.  .88   88         88 
-;   88Y888P' dP `88888P'   dP   `88888P' 
-;   88                                   
-;   dP                                   
-;-----------------------------------------------------------------------------   
-
+;           dP            dP            
+;           88            88            
+;  88d888b. 88 .d8888b. d8888P .d8888b. 
+;  88'  `88 88 88'  `88   88   Y8ooooo. 
+;  88.  .88 88 88.  .88   88         88 
+;  88Y888P' dP `88888P'   dP   `88888P' 
+;  88                                   
+;  dP                                  
+;
+; --------------------------------------------------------------------------------------------------------- ;  
+ 
 to display-results 
   
   if ( simulation-id != 0 ) [ ; commands only work when a simulation is active
@@ -676,7 +688,7 @@ end
 ;-----------------------------------------------------------------------------   
 
 to plot-individuals-columns
-  let input selected-display
+  let input "groups" ;selected-display
   let individual-list get-sorted-individuals                        ; get sorted list of living agents
   let plot-list []                                                  ; initialize list of values to be plotted
   let row-list []
@@ -712,7 +724,7 @@ end
 ;-----------------------------------------------------------------------------   
 
 to plot-groups-columns
-  let input selected-display
+  let input "groups" ;selected-display
   let sorted-groups get-sorted-groups
   let group-list [] 
   let color-list []
@@ -780,7 +792,7 @@ end
 ;-----------------------------------------------------------------------------   
 
 to plot-evolution-generations
-  let input selected-display
+  let input "groups"  ;selected-display
   let selected-individuals get-sorted-individuals
   let max-generation max [generation.number] of anima1s with [member? self selected-individuals ]
   let plot-list []
@@ -1142,7 +1154,7 @@ end
 ;;    ( input = "receiving.history" ) [ receiving.history ]
 ;;    ( input = "carried.history" ) [ length carried.history ]
 ;;    ( input = "aid-history" ) [ length help.from.history ]
-;;    ( input = "harm-history" ) [ length attack.from.history ]
+;;    ( input = "attack-history" ) [ length attack.from.history ]
 ;;      
 ;;    [])
 ;;  ]

@@ -1,20 +1,116 @@
-;----------------------------------------------------------------------------------------------
+; ========================================================================================================= ;
 ; 
-;                            dP                   oo          
-;                            88                               
-; .d8888b. 88d888b. .d8888b. 88 dP    dP .d8888b. dP .d8888b. 
-; 88'  `88 88'  `88 88'  `88 88 88    88 Y8ooooo. 88 Y8ooooo. 
-; 88.  .88 88    88 88.  .88 88 88.  .88       88 88       88 
-; `88888P8 dP    dP `88888P8 dP `8888P88 `88888P' dP `88888P' 
-;                                    .88                      
-;                                d8888P                       
-;
+;                                                                                    
+; .d888888  888888ba   .d888888  dP        dP    dP .d88888b  dP .d88888b  
+;d8'    88  88    `8b d8'    88  88        Y8.  .8P 88.    "' 88 88.    "' 
+;88aaaaa88a 88     88 88aaaaa88a 88         Y8aa8P  `Y88888b. 88 `Y88888b. 
+;88     88  88     88 88     88  88           88          `8b 88       `8b 
+;88     88  88     88 88     88  88           88    d8'   .8P 88 d8'   .8P 
+;88     88  dP     dP 88     88  88888888P    dP     Y88888P  dP  Y88888P  
+;                                                                          
+;            
 ; © 2021 K N Crouse  
-;
-;
-;----------------------------------------------------------------------------------------------
+; ========================================================================================================= ;
 
-    ;reduce-to-unique-vectors                                     ; Reduce to unique set of decision vectors
+to thesis-setup
+  
+  clear-all                                                    ; Delete all current settings in the simulation.
+  reset-ticks                                                  ; Reset the timesteps to zero.
+  
+  set path-to-experiment "../results/thesis/"
+  set genotype-reader "sta2us"
+  set output-results? true 
+  set selection-on? false
+  set plant-annual-cycle 1000
+  set plant-daily-cycle 10
+  set plant-seasonality 0.5
+  set plant-quality 5
+  set deterioration-rate -0.01
+
+  set simulation-summary-ticks 5000 
+  set simulation-scan-ticks 250 
+  set group-scan-ticks 1000 
+  set individual-scan-ticks 0 
+  set view-scan-ticks 1000 
+  set genotype-scan-ticks 1000
+  set focal-follow-rate 0
+  set record-individuals true 
+  set verification-rate 1E-6
+  set record-world-ticks 0
+  set simulation-stop-at 10000
+  
+  set plant-maximum-neighbors read-from-string last behaviorspace-experiment-name
+  
+  ( ifelse
+    ( first behaviorspace-experiment-name = "A" ) [ 
+      set focal-follow-rate 1E-4 
+      set record-individuals true 
+      set record-world-ticks 10000 ]
+    ( first behaviorspace-experiment-name = "B" ) [ set genotype-reader "gat3s" ]
+    ( first behaviorspace-experiment-name = "C" ) [ set plant-annual-cycle 10000 ]
+    ( first behaviorspace-experiment-name = "D" ) [ set plant-daily-cycle 100 ]
+    ( first behaviorspace-experiment-name = "E" ) [ set plant-seasonality 0 ]
+    ( first behaviorspace-experiment-name = "F" ) [ set plant-seasonality 1 ]
+    ( first behaviorspace-experiment-name = "G" ) [ set plant-quality 1 ]
+    ( first behaviorspace-experiment-name = "H" ) [ set plant-quality 5 ]
+    ( first behaviorspace-experiment-name = "I" ) [ set deterioration-rate -0.001 ]
+    ( first behaviorspace-experiment-name = "J" ) [ set model-structure lput "aspatial" model-structure ]
+    ( first behaviorspace-experiment-name = "K" ) [ set model-structure lput "reaper" model-structure ]
+    ( first behaviorspace-experiment-name = "L" ) [ set model-structure lput "stork" model-structure ]
+    ( first behaviorspace-experiment-name = "M" ) [ set model-structure lput "ideal-form" model-structure ]
+    ( first behaviorspace-experiment-name = "N" ) [ 
+      set model-structure lput "free-lunch" model-structure 
+      set model-structure lput "reaper" model-structure ]
+    ( first behaviorspace-experiment-name = "O" ) [ set model-structure lput "no-evolution" model-structure ]
+    ( first behaviorspace-experiment-name = "P" ) [ set model-structure lput "uninvadable" model-structure ]
+    [  ] )
+  
+  ( ifelse 
+    ( item 1 behaviorspace-experiment-name = "C" ) [
+      set population "Chimpanzees"
+      set genotype "chimpanzees" ]
+    ( item 1 behaviorspace-experiment-name = "G" )[
+      set population "Geladas"
+      set genotype "geladas" ]
+    ( item 1 behaviorspace-experiment-name = "H" )[
+      set population "Hamadryas"
+      set genotype "hamadryas" ]
+    ( item 1 behaviorspace-experiment-name = "O" )[
+      set population "Olives"
+      set genotype "olives" ]
+    [])
+  
+  ; give simulation-id specific configuration: sDO17B means
+  ; simulation of WORLD-D, Baboons seed population,
+  ; run B (instead of A), plant-minimum-neighbors = 1 and
+  ; plant-maximum-neighbors = 7
+  ifelse ( plant-minimum-neighbors < plant-maximum-neighbors ) [
+    print "if"
+    print ( word "s" but-last behaviorspace-experiment-name plant-minimum-neighbors plant-maximum-neighbors "A" )
+    set simulation-id ( word "s" but-last behaviorspace-experiment-name plant-minimum-neighbors plant-maximum-neighbors "A" )
+    print simulation-id
+  ][
+    let min-holder plant-minimum-neighbors
+    let max-holder plant-maximum-neighbors
+    set plant-minimum-neighbors max-holder - 1
+    set plant-maximum-neighbors min-holder
+    set simulation-id ( word "s" but-last behaviorspace-experiment-name plant-minimum-neighbors plant-maximum-neighbors "B" )
+    print "else"
+  ]
+  
+  setup-parameters                                             ; Setup the global parameter settings.
+  setup-patches                                                ; Initialize the plants for a new simulation.
+  import-population                                            ; Create an initial population of indiviudals
+  import-genotype                                              ; and their genotypes from user files.
+  
+  output-print (word                                           ; Once setup is complete, display the current
+    " Simulation " simulation-id " "                           ; state of the new simulation.
+    behaviorspace-run-number " end setup at "
+    date-and-time )
+  
+end
+
+;reduce-to-unique-vectors                                     ; Reduce to unique set of decision vectors
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
@@ -599,3 +695,68 @@ to attack-victims
     inspect self 
   ]
 end
+
+
+
+;to reduce-to-unique-vectors
+;
+;  let initial-decisions decision.vectors
+;  let reduced-decisions []
+;
+;  foreach initial-decisions [ original-vector ->
+;    let original-ego item 0 original-vector
+;    let original-target item 1 original-vector
+;    let original-action item 2 original-vector
+;    let original-weight item 3 original-vector
+;    let vector-doesnt-exist true
+;
+;    let index 0
+;    foreach reduced-decisions [ reduced-vector ->
+;      let reduced-ego item 0 reduced-vector
+;      let reduced-target item 1 reduced-vector
+;      let reduced-action item 2 reduced-vector
+;      let reduced-weight item 3 reduced-vector
+;
+;      if ( reduced-ego = original-ego ) and ( reduced-target = original-target ) and ( reduced-action = original-action ) [
+;        set vector-doesnt-exist false
+;        set reduced-weight ifelse-value ( is-number? reduced-weight ) [ reduced-weight ] [ 0 ]
+;        set original-weight ifelse-value ( is-number? original-weight ) [ original-weight ] [ 0 ]
+;        let new-vector ( list self reduced-target reduced-action ( reduced-weight + original-weight ) false )
+;        set reduced-decisions remove-item index reduced-decisions
+;        set reduced-decisions lput new-vector reduced-decisions ]
+;      set index index + 1
+;    ]
+;    if vector-doesnt-exist [ set reduced-decisions lput ( list self original-target original-action original-weight false ) reduced-decisions ]
+;  ]
+;  set decision.vectors reduced-decisions
+;end
+
+
+;to get-decision [ g ]
+;  let my-environment my.environment
+;  let ego-status status-of self
+;  if ( length g = 5 and is-string? item 1 g and is-string? item 2 g and is-string? item 3 g and is-number? item 4 g ) [ ; checks that allele correctly organized
+;    let gene-ego item 1 g
+;    let gene-other item 2 g
+;    let gene-action item 3 g
+;    let gene-weight item 4 g
+;    
+;    ; Check that first CODON matches self
+;    if first-string-is-part-of-last? ( gene-ego ) ( ego-status ) [
+;      
+;      ; Consider status-of others in the environment
+;      foreach my-environment [ other-guy ->
+;        let other-status status-of other-guy 
+;        
+;        ; Check that second CODON matches other
+;        if first-string-is-part-of-last? ( gene-other ) ( other-status ) [
+;          
+;          let distance-to-target distance other-guy
+;          set distance-to-target ifelse-value ( distance-to-target > 1 ) [ distance-to-target ] [ 1 ]
+;          print (list self other-guy ( sta7us-get-action gene-action ) precision ( gene-weight / ( distance-to-target ^ 2 )) 10 false ) 
+;          
+;        ]
+;      ]
+;    ]
+;  ]  
+;end

@@ -1,322 +1,221 @@
-;----------------------------------------------------------------------------------------------
+; ========================================================================================================= ;
 ;
-;             dP            d8888b.                   
-;             88                `88                   
-;  .d8888b. d8888P .d8888b. .aaadP' dP    dP .d8888b. 
-;  Y8ooooo.   88   88'  `88 88'     88    88 Y8ooooo. 
-;        88   88   88.  .88 88.     88.  .88       88 
-;  `88888P'   dP   `88888P8 Y88888P `88888P' `88888P' 
-;                                                                                                  
-; © 2020 K N Crouse                                              
-;----------------------------------------------------------------------------------------------
+;  .88888.   88888888b 888888ba   .88888.  d888888P dP    dP  888888ba   88888888b 
+; d8'   `88  88        88    `8b d8'   `8b    88    Y8.  .8P  88    `8b  88        
+; 88        a88aaaa    88     88 88     88    88     Y8aa8P  a88aaaa8P' a88aaaa    
+; 88   YP88  88        88     88 88     88    88       88     88         88        
+; Y8.   .88  88        88     88 Y8.   .8P    88       88     88         88        
+;  `88888'   88888888P dP     dP  `8888P'     dP       dP     dP         88888888P 
+;                                                                                 
+;                                                                                
+; 888888ba   88888888b  .d888888  888888ba   88888888b  888888ba  
+;  88    `8b  88        d8'    88  88    `8b  88         88    `8b 
+; a88aaaa8P' a88aaaa    88aaaaa88a 88     88 a88aaaa    a88aaaa8P' 
+;  88   `8b.  88        88     88  88     88  88         88   `8b. 
+;  88     88  88        88     88  88    .8P  88         88     88 
+;  dP     dP  88888888P 88     88  8888888P   88888888P  dP     dP                                                                
+;             
+; ========================================================================================================= ;
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+;            dP            d8888b.                   
+;            88                `88                   
+; .d8888b. d8888P .d8888b. .aaadP' dP    dP .d8888b. 
+; Y8ooooo.   88   88'  `88 88'     88    88 Y8ooooo. 
+;       88   88   88.  .88 88.     88.  .88       88 
+; `88888P'   dP   `88888P8 Y88888P `88888P' `88888P' 
+;                                                                  
+; --------------------------------------------------------------------------------------------------------- ;
 ; 
 ; This extension contains all functions that allow anima1s to make decisions from their 
-; genotypes. 
+; genotypes and current environment. 
 ;
 ; List of all genotype cod0ns:
 ; 
 ; MAINTENANCE  CODE  DESCRIPTION                
 ;
-; 2019-09-XX    a    is an adult
-; 2019-09-XX    b    is bigger than myself
-; 2019-09-XX    c    is cycling
-; 2019-09-XX    d    is a plant (not an anima1)
-; 2019-09-XX    e    is myself
-; 2019-09-XX    f    is female
-; 2019-09-XX    g    is a gestatee
-; 2019-09-XX    h    is healthier than myself
-; 2019-09-XX    i    is an infant
-; 2019-09-XX    j    is a juvenile
-; 2019-09-XX    k    is kin (relatedness > 0.2) ; target is 0.25 or more related
-; 2019-09-XX    l    is lactating
-; 2019-09-XX    m    is a male
-; 2019-09-XX    n    is a group member or location
-; 2019-09-XX    o    is another (not myself)
-; 2019-09-XX    p    is pregnant
-; 2019-09-XX    q    is not kin (relatedness <= 0.2)
-; 2019-09-XX    r    is smaller than myself
-; 2019-09-XX    s    is resting
-; 2019-09-XX    t    is neither carrying or carried by myself
-; 2019-09-XX    u    is a stranger (none-group member)
-; 2019-09-XX    v    is alive
-; 2019-09-XX    w    is dead
-; 2019-09-XX    x    is sicker than myself
-; 2019-09-XX    y    is carried by myself
-; 2019-09-XX    z    is an anima1 (not a plant)
-; 2019-09-XX    ¥    is carrying myself
-; 2019-09-XX    α    has yellow signal on
-; 2019-09-XX    å    has yellow signal off
-; 2019-09-XX    β    has red signal on
-; 2019-09-XX    ß    has red signal off
-; 2019-09-XX    ɣ    has blue signal on
-; 2019-09-XX    œ    has blue signal off
-; 2019-09-XX    *    is observed during the day
-; 2019-09-XX    -    is observed during the night
-; 2019-09-XX   0-9   displayed color
-; 2020-09-XX    .    is not resting
-; XXXX-XX-XX    <    is within near range
-; XXXX-XX-XX    |    is neither too near or far
-; XXXX-XX-XX    >    is close to edge of 
-; XXXX-XX-XX    ⋅    is alone
-; XXXX-XX-XX    ∴    is not alone
+; 2021-07-06    a    is an adult
+; 2021-07-06    b    is bigger than myself
+; 2021-07-06    c    is cycling
+; 2021-07-06    d    is a plant (not an anima1)
+; 2021-07-06    e    is myself
+; 2021-07-06    f    is female
+; 2021-07-06    g    is a gestatee
+; 2021-07-06    h    is healthier than myself
+; 2021-07-06    i    is an infant
+; 2021-07-06    j    is a juvenile
+; 2021-07-06    k    is kin (relatedness > 0.2) ; target is 0.25 or more related
+; 2021-07-06    l    is lactating
+; 2021-07-06    m    is a male
+; 2021-07-06    n    is a group member or location
+; 2021-07-06    o    is another (not myself)
+; 2021-07-06    p    is pregnant
+; 2021-07-06    q    is not kin (relatedness <= 0.2)
+; 2021-07-06    r    is smaller than myself
+; 2021-07-06    s    is resting
+; 2021-07-06    t    is neither carrying or carried by myself
+; 2021-07-06    u    is a stranger (none-group member)
+; 2021-07-06    v    is alive
+; 2021-07-06    w    is dead
+; 2021-07-06    x    is sicker than myself
+; 2021-07-06    y    is carried by myself
+; 2021-07-06    z    is an anima1 (not a plant)
+; 2021-07-06    ¥    is carrying myself
+; 2021-07-06    α    has yellow signal on
+; 2021-07-06    å    has yellow signal off
+; 2021-07-06    β    has red signal on
+; 2021-07-06    ß    has red signal off
+; 2021-07-06    ɣ    has blue signal on
+; 2021-07-06    œ    has blue signal off
+; 2021-07-06    *    is observed during the day
+; 2021-07-06    -    is observed during the night
+; 2021-07-06   0-9   displayed color
+; 2021-07-06    .    is not resting
+; 2021-07-06    <    is within near range
+; 2021-07-06    |    is neither too near or far
+; 2021-07-06    >    is close to edge of view range
+; 2021-07-06    ⋅    is alone
+; 2021-07-06    ∴    is not alone
 ;         
-; 2019-08-26   --> survival-chance
-; 2019-08-26   --> body-size
-; 2019-08-26   --> body-shade
-; XXXX-XX-XX   --> visual-angle
-; XXXX-XX-XX   --> visual-range
-; 2019-08-26   --> day-perception
-; 2019-08-26   --> night-perception
-; 2019-08-26   --> conception-chance
-; 2020-04-XX   --> bite-capacity
-; 2019-08-26   --> mutation-chance
-; 2019-08-26   --> sex-ratio
-; 2019-08-26   --> litter-size
-; 2019-08-26   --> turn-right
-; 2019-08-26   --> turn-left
-; 2019-08-26   --> go-forward
-; 2020-XX-XX   --> set-heading 
-; 2020-XX-XX   --> set-heading-random
-; 2020-XX-XX   --> hide
-; XXXX-XX-XX   --> rest
-; 2019-08-26   --> yellow-signal
-; 2019-08-26   --> red-signal
-; 2019-08-26   --> blue-signal
-; 2019-08-26   --> check-infancy
-; 2019-08-26   --> check-birth
-; 2019-08-26   --> check-juvenility
-; 2019-08-26   --> check-weaning
-; 2019-08-26   --> check-adulthood   
+; 2021-07-06   --> survival-chance
+; 2021-07-06   --> body-size
+; 2021-07-06   --> body-shade
+; 2021-07-06   --> visual-angle
+; 2021-07-06   --> visual-range
+; 2021-07-06   --> day-perception
+; 2021-07-06   --> night-perception
+; 2021-07-06   --> conception-chance
+; 2021-07-06   --> bite-capacity
+; 2021-07-06   --> mutation-chance
+; 2021-07-06   --> sex-ratio
+; 2021-07-06   --> litter-size
+; 2021-07-06   --> turn-right
+; 2021-07-06   --> turn-left
+; 2021-07-06   --> go-forward
+; 2021-07-06   --> set-heading 
+; 2021-07-06   --> set-heading-random
+; 2021-07-06   --> hide
+; 2021-07-06   --> rest
+; 2021-07-06   --> yellow-signal
+; 2021-07-06   --> red-signal
+; 2021-07-06   --> blue-signal
+; 2021-07-06   --> check-infancy
+; 2021-07-06   --> check-birth
+; 2021-07-06   --> check-juvenility
+; 2021-07-06   --> check-weaning
+; 2021-07-06   --> check-adulthood   
 ;
-; 2020-04-01   --> move-toward 
-; 2020-04-01   --> move-away-from
-; 2020-04-01   --> match-heading
-; 2019-10-16   --> supply-to 
-; 2019-10-16   --> demand-from  
-; 2019-10-16   --> eat   
-; 2019-09-XX   --> join 
-; 2019-08-26   --> leave
-; 2020-XX-XX   --> recruit
-; 2020-XX-XX   --> kick-out
-; 2019-09-XX   --> pick-up  
-; 2019-10-16   --> put-down 
-; 2020-04-XX   --> cling-to  
-; 2020-04-XX   --> squirm-from 
-; 2019-09-XX   --> help  
-; 2019-09-XX   --> hurt 
-; 2019-10-16   --> mate-with 
+; 2021-07-06   --> move-toward 
+; 2021-07-06   --> move-away-from
+; 2021-07-06   --> supply-to 
+; 2021-07-06   --> demand-from  
+; 2021-07-06   --> eat   
+; 2021-07-06   --> join 
+; 2021-07-06   --> leave
+; 2021-07-06   --> recruit
+; 2021-07-06   --> kick-out
+; 2021-07-06   --> pick-up  
+; 2021-07-06   --> put-down 
+; 2021-07-06   --> cling-to  
+; 2021-07-06   --> squirm-from 
+; 2021-07-06   --> help  
+; 2021-07-06   --> attack 
+; 2021-07-06   --> mate-with 
 ; 
-;----------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 
-;----------------------------------------------------------------------------------------------
-; MAKE DECISIONS
+; --------------------------------------------------------------------------------------------------------- ;
 ;
-; Reporter that returns a list of decision vectors generated from genotype.
+; GENERATE A LIST OF DECISIONS VECTORS
 ;
-; Caller: anima1
-; ENVIRONMENT: list of turtles (both plants and anima1s) observed by the caller.
-;----------------------------------------------------------------------------------------------
+; Reporter that returns a list of decision vectors generated from genotype and current environment of the
+; caller. The environment is a list of turtles (both plants and anima1s) observed by the caller.
+;
+; ENTRY
+;
+; EXIT: A list of decision vectors representing the decisions of the caller.
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
-; original subroutine (working but need code to call reduce-to-unique-vectors) :
-
-to-report sta7us-get-decisions [ my-environment ] ; 300ms incl time / timestep
+to-report sta2us-get-decisions [ my-environment ] 
   
-  let meself self
-  let current-energy energy.supply
-  let ego-status status-of meself
-  let decision-vectors []
-  let conspecifics-list []
-  let status-list []
+  let ego-status status-of self                                ; Keep a record of caller's status.
+  let decision-vectors []                                      ; Initialize a list for decision vectors.
 
-  let status-table table:make
-  foreach my-environment [ obj ->
-    if ( is-patch? obj ) [ table:put status-table ( [pmy.identity] of obj ) ( status-of obj ) ]
-    if ( is-anima1? obj ) [ table:put status-table ( [my.identity] of obj ) ( status-of obj ) ]
-  ]
+  let status-table table:make                                  ; Create a table to temporarily store
+  foreach my-environment [ obj ->                              ; the status code of each object
+    if ( is-patch? obj ) [                                     ; in the caller's current environment.
+      table:put status-table                                   
+      ( [pmy.identity] of obj ) 
+      ( status-of obj ) ]
+    if ( is-anima1? obj ) [ 
+      table:put status-table 
+      ( [my.identity] of obj ) 
+      ( status-of obj ) ] ]
   
-  foreach (sentence chromosome.I chromosome.II) [ g ->
+  foreach (sentence chromosome.I chromosome.II) [ g ->         ; Proceed through each allele in the 
+                                                               ; caller's genotype.
     
-    if ( length g = 5 and is-string? item 1 g and is-string? item 2 g and is-string? item 3 g and is-number? item 4 g ) [ ; checks that allele correctly organized
-      let gene-ego item 1 g
-      let gene-other item 2 g
-      let gene-action item 3 g
-      let gene-weight item 4 g
+    if ( length g = 5 and                                      ; Check that the allele structure
+      is-string? item 1 g and                                  ; matches what is expected from the
+      is-string? item 2 g and                                  ; sta2us genotype reader.
+      is-string? item 3 g and 
+      is-number? item 4 g ) [                                  
       
-      ; Check that first CODON matches self
-      if first-string-is-part-of-last? ( gene-ego ) ( ego-status ) [
+      let gene-ego item 1 g                                    ; Identify each component of the
+      let gene-other item 2 g                                  ; current allele.
+      let gene-action item 3 g                                 
+      let gene-weight item 4 g                                 
+      
+      if first-string-is-part-of-last?                         ; If the caller's status matches  
+      ( gene-ego ) ( ego-status ) [                            ; the first codon...
         
-        ; Consider status-of others in the environment
-        foreach my-environment [ other-guy ->
-          let other-status table:get status-table ifelse-value ( is-patch? other-guy ) [ [pmy.identity] of other-guy ] [ [my.identity] of other-guy ]
-          
-          ; Check that second CODON matches other
-          if first-string-is-part-of-last? ( gene-other ) ( other-status ) [
+        foreach my-environment [ other-guy ->                  ; Proceed through each object                
+          let other-status table:get                           ; in the environment and 
+          status-table ifelse-value                            ; identify its status.
+          ( is-patch? other-guy ) 
+          [ [pmy.identity] of other-guy ] 
+          [ [my.identity] of other-guy ]
+
+          if first-string-is-part-of-last?                     ; If the object's status matches the second  
+          ( gene-other ) ( other-status ) [                    ; codon then object becomes target.
+                                                               
+            let distance-to-target distance other-guy          ; Calculate the distance between caller 
+            set distance-to-target ifelse-value                ; and target, which is one if the caller
+            ( distance-to-target > 1 )                         ; and target are closer than one unit apart.
+            [ distance-to-target ] [ 1 ]
             
-            let distance-to-target distance other-guy
-            set distance-to-target ifelse-value ( distance-to-target > 1 ) [ distance-to-target ] [ 1 ]
-            set decision-vectors lput (list meself other-guy ( sta7us-get-action gene-action ) precision ( gene-weight / ( distance-to-target ^ 2 )) 10 false ) decision-vectors 
+            set decision-vectors lput (list                    ; Create a new decision vector
+              self                                             ; that identifies caller,
+              other-guy                                        ; target,
+              ( sta2us-get-action gene-action )                ; which action to take,
+              precision ( gene-weight /                        ; how much it costs,
+                ( distance-to-target ^ 2 )) 10                 ; and that this action 
+              false ) decision-vectors                         ; has not yet been performed.
 
           ]
         ]
       ]
     ]
   ]
+  report decision-vectors                                      ; Report the final list of decision vectors.
   
-  report decision-vectors
 end
 
-;to-report sta7us-get-decisions [ my-environment ] ; 300ms incl time / timestep
-;  
-;  let meself self
-;  let current-energy energy.supply
-;  let ego-status status-of meself
-;  let decision-vectors []
-;  let conspecifics-list []
-;  let status-list []
+; --------------------------------------------------------------------------------------------------------- ;
 ;
-;  let status-table table:make
-;  foreach my-environment [ obj ->
-;    if ( is-patch? obj ) [ table:put status-table ( [pmy.identity] of obj ) ( status-of obj ) ]
-;    if ( is-anima1? obj ) [ table:put status-table ( [my.identity] of obj ) ( status-of obj ) ]
-;  ]
-;  
-;  foreach (sentence chromosome.I chromosome.II) [ g ->
-;    
-;    if ( length g = 5 and is-string? item 1 g and is-string? item 2 g and is-string? item 3 g and is-number? item 4 g ) [ ; checks that allele correctly organized
-;      let gene-ego item 1 g
-;      let gene-other item 2 g
-;      let gene-action item 3 g
-;      let gene-weight item 4 g
-;      
-;      ; Check that first CODON matches self
-;      if first-string-is-part-of-last? ( gene-ego ) ( ego-status ) [
-;        
-;        ; Consider status-of others in the environment
-;        foreach my-environment [ other-guy ->
-;          let other-status table:get status-table ifelse-value ( is-patch? other-guy ) [ [pmy.identity] of other-guy ] [ [my.identity] of other-guy ]
-;          
-;          ; Check that second CODON matches other
-;          if first-string-is-part-of-last? ( gene-other ) ( other-status ) [
-;            
-;            let distance-to-target distance other-guy
-;            set distance-to-target ifelse-value ( distance-to-target > 1 ) [ distance-to-target ] [ 1 ]
-;            
-;            let new-ego meself
-;            let new-target other-guy
-;            let new-action ( sta7us-get-action gene-action )
-;            let new-weight precision ( gene-weight / ( distance-to-target ^ 2 )) 10
-;            
-;            let vector-doesnt-exist true
-;            let index 0
-;            foreach decision-vectors [ vector ->
-;              let vector-ego item 0 vector
-;              let vector-target item 1 vector
-;              let vector-action item 2 vector
-;              let vector-weight item 3 vector
-;              
-;              if ( vector-ego = new-ego ) and ( vector-target = new-target ) and ( vector-action = new-action ) [
-;                set vector-doesnt-exist false
-;                set vector-weight ifelse-value ( is-number? vector-weight ) [ vector-weight ] [ 0 ]
-;                set new-weight ifelse-value ( is-number? new-weight ) [ new-weight ] [ 0 ]
-;                let new-vector ( list new-ego new-target new-action ( vector-weight + new-weight ) false )
-;                set decision-vectors remove-item index decision-vectors
-;                set decision-vectors lput new-vector decision-vectors ]
-;              set index index + 1
-;            ]
-;            if vector-doesnt-exist [ set decision-vectors lput ( list new-ego new-target new-action new-weight false ) decision-vectors ]
-;            
-;          ]
-;        ]
-;      ]
-;    ]
-;  ]
-;  
-;  report decision-vectors
-;end
-
-;to reduce-to-unique-vectors
+; REPORT UP TO DATE ACTION NAME
 ;
-;  let initial-decisions decision.vectors
-;  let reduced-decisions []
+; This subroutine ensures that outdated action codons can still be linked to updated action names.
 ;
-;  foreach initial-decisions [ original-vector ->
-;    let original-ego item 0 original-vector
-;    let original-target item 1 original-vector
-;    let original-action item 2 original-vector
-;    let original-weight item 3 original-vector
-;    let vector-doesnt-exist true
+; ENTRY: action-code is the codon taken from a genotype.
 ;
-;    let index 0
-;    foreach reduced-decisions [ reduced-vector ->
-;      let reduced-ego item 0 reduced-vector
-;      let reduced-target item 1 reduced-vector
-;      let reduced-action item 2 reduced-vector
-;      let reduced-weight item 3 reduced-vector
+; EXIT: Report the up-to-date name of the action.
 ;
-;      if ( reduced-ego = original-ego ) and ( reduced-target = original-target ) and ( reduced-action = original-action ) [
-;        set vector-doesnt-exist false
-;        set reduced-weight ifelse-value ( is-number? reduced-weight ) [ reduced-weight ] [ 0 ]
-;        set original-weight ifelse-value ( is-number? original-weight ) [ original-weight ] [ 0 ]
-;        let new-vector ( list self reduced-target reduced-action ( reduced-weight + original-weight ) false )
-;        set reduced-decisions remove-item index reduced-decisions
-;        set reduced-decisions lput new-vector reduced-decisions ]
-;      set index index + 1
-;    ]
-;    if vector-doesnt-exist [ set reduced-decisions lput ( list self original-target original-action original-weight false ) reduced-decisions ]
-;  ]
-;  set decision.vectors reduced-decisions
-;end
+; --------------------------------------------------------------------------------------------------------- ;
 
-
-;to get-decision [ g ]
-;  let my-environment my.environment
-;  let ego-status status-of self
-;  if ( length g = 5 and is-string? item 1 g and is-string? item 2 g and is-string? item 3 g and is-number? item 4 g ) [ ; checks that allele correctly organized
-;    let gene-ego item 1 g
-;    let gene-other item 2 g
-;    let gene-action item 3 g
-;    let gene-weight item 4 g
-;    
-;    ; Check that first CODON matches self
-;    if first-string-is-part-of-last? ( gene-ego ) ( ego-status ) [
-;      
-;      ; Consider status-of others in the environment
-;      foreach my-environment [ other-guy ->
-;        let other-status status-of other-guy 
-;        
-;        ; Check that second CODON matches other
-;        if first-string-is-part-of-last? ( gene-other ) ( other-status ) [
-;          
-;          let distance-to-target distance other-guy
-;          set distance-to-target ifelse-value ( distance-to-target > 1 ) [ distance-to-target ] [ 1 ]
-;          print (list self other-guy ( sta7us-get-action gene-action ) precision ( gene-weight / ( distance-to-target ^ 2 )) 10 false ) 
-;          
-;        ]
-;      ]
-;    ]
-;  ]  
-;end
-
-;----------------------------------------------------------------------------------------------
-; GET MUTATION
-;
-; Returns a randomly selected codon to occasionally introduce novel mutations into a population.
-;
-; CALLER: anima1
-;----------------------------------------------------------------------------------------------
-
-to-report sta7us-get-mutation [ original-codon type-of-mutation ] ; numbers, letters, both
-  report ( ifelse-value 
-    ( is-number? original-codon and ( type-of-mutation = "numbers" or type-of-mutation = "both" ) ) [ ( one-of [ 1 -1 ] ) * get-updated-value original-codon ( one-of [ 1 -1 ] ) ]
-    ( member? original-codon action-code-list and ( type-of-mutation = "letters" or type-of-mutation = "both" ) ) [ one-of action-code-list ]
-    [ ifelse-value ( type-of-mutation = "letters" or type-of-mutation = "both" ) [ generate-status ] [ original-codon ]] ) 
-end
-
-;--------------------------------------------------------------------------------------------------------------------
-; REPORTERS
-;--------------------------------------------------------------------------------------------------------------------
-
-to-report sta7us-get-action [ action-code ]
+to-report sta2us-get-action [ action-code ]
 
   report
   (ifelse-value
@@ -377,6 +276,35 @@ to-report sta7us-get-action [ action-code ]
   
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; GENERATE A MUTATED VERSION OF THE INPUT CODON
+;
+; Returns a randomly selected codon to occasionally introduce novel mutations into a population.
+;
+; CALLER: anima1
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to-report sta2us-get-mutation [ original-codon type-of-mutation ] ; numbers, letters, both
+  report ( ifelse-value 
+    ( is-number? original-codon and ( type-of-mutation = "numbers" or type-of-mutation = "both" ) ) [ ( one-of [ 1 -1 ] ) * get-updated-value original-codon ( one-of [ 1 -1 ] ) ]
+    ( member? original-codon action-code-list and ( type-of-mutation = "letters" or type-of-mutation = "both" ) ) [ one-of action-code-list ]
+    [ ifelse-value ( type-of-mutation = "letters" or type-of-mutation = "both" ) [ generate-status ] [ original-codon ]] ) 
+end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to-report status-of [ target ]
   let status-report ""
 
@@ -399,7 +327,7 @@ to-report status-of [ target ]
     let target-rest ifelse-value ( [is.resting] of target = true ) [ "s" ] [ "." ]
     let target-color (word "" round [color] of target "" ifelse-value ( shade-of? color [color] of target) [ "#" ] [ "" ])
     let target-proximity (ifelse-value ( distance-to-target < 0.5 * size ) [ "<" ] ( distance-to-target > 0.66 * maximum-visual-range * visual.range ) [ ">" ] [ "|" ] )
-    let target-alone ifelse-value ( count anima1s with [ group.identity = [group.identity] of target ] > 1 ) [ "∴" ] [ "⋅" ]
+    let target-alone ifelse-value ( [ solitary? ] of target = false ) [ "∴" ] [ "⋅" ]
     set status-report (word status-report 
       target-kind 
       target-self 
@@ -429,6 +357,18 @@ to-report status-of [ target ]
   report status-report
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to-report first-string-is-part-of-last? [ string1 string2 ]
   let first-is-part-of-last true
   let index 0
@@ -439,6 +379,18 @@ to-report first-string-is-part-of-last? [ string1 string2 ]
       set index index + 1 ]]
   report first-is-part-of-last
 end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report status-code-list
   report [ 
@@ -452,19 +404,77 @@ to-report status-code-list
     "∴" "⋅" "<" ">" "|" ]
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to-report action-code-list
   report [ 
-    "survival-chance" "body-size" "body-shade" 
-    "day-perception" "night-perception" "visual-angle" "visual-range" 
-    "conception-chance" "bite-capacity" "mutation-chance" "sex-ratio" "litter-size" 
-    "turn-right" "turn-left" "go-forward" "set-heading" "hide" "rest" "set-heading-random"
-    "yellow-signal" "red-signal" "blue-signal" 
-    "check-infancy" "check-birth" "check-juvenility" "check-weaning" "check-adulthood" 
-    "move-toward" "move-away-from" "supply-to" "demand-from" "eat"
-    "join" "leave" "recruit" "kick-out"
-    "pick-up" "put-down" "cling-to" "squirm-from"
-    "help" "hurt" "mate-with" "do-nothing" ]
+    "survival-chance" 
+    "body-size" 
+    "body-shade" 
+    "day-perception" 
+    "night-perception" 
+    "visual-angle" 
+    "visual-range" 
+    "conception-chance" 
+    "bite-capacity" 
+    "mutation-chance" 
+    "sex-ratio" 
+    "litter-size" 
+    "turn-right" 
+    "turn-left" 
+    "go-forward" 
+    "set-heading" 
+    "hide" 
+    "rest" 
+    "set-heading-random"
+    "yellow-signal" 
+    "red-signal" 
+    "blue-signal" 
+    "check-infancy" 
+    "check-birth" 
+    "check-juvenility" 
+    "check-weaning" 
+    "check-adulthood" 
+    "move-toward" 
+    "move-away-from" 
+    "supply-to" 
+    "demand-from" 
+    "eat"
+    "join" 
+    "leave" 
+    "recruit" 
+    "kick-out"
+    "pick-up" 
+    "put-down" 
+    "cling-to" 
+    "squirm-from"
+    "help" 
+    "hurt" 
+    "mate-with" 
+    "do-nothing" ]
 end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report sta2us-codon-exists [ codon ]
   report
@@ -472,8 +482,22 @@ to-report sta2us-codon-exists [ codon ]
   ( member? codon action-code-list or first-string-is-part-of-last? codon ( reduce word status-code-list ) ) ; codon is either an action or part of the status codons list
 end
 
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
 to-report generate-status
   let new-status one-of status-code-list
   repeat ( random 5 ) [ set new-status ( word new-status one-of status-code-list ) ]
   report new-status
 end
+
+
