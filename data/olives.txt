@@ -7,7 +7,7 @@
 1| i e body-size 1E-3
 1| jf e body-size 1E-4
 1| jm e body-size 1E-4
-1| e e body-shade 9E-5        
+0| e e body-shade 8E-5        
 1| i e visual-range 3E-3
 1| i e visual-angle 3E-3
 1| i e day-perception 3E-3
@@ -37,12 +37,25 @@
 0| e -e rest 1E-9         
 1| am βqnv move-toward 1E-4
 1| c amqnv move-toward 1E-4
-0| a oahv move-toward -1E-5     
-0| f ovu> move-toward -1E-5      olives_avoid_getting_too_close_to_other_troops
-0| f ovn< move-toward -1E-5      olives_avoid_getting_too_close_to_group_members
-0| f ovn> move-toward 1E-3      olives_stay_in_proximity_with_their_troop
-0| f oafkv move-toward 1E-7      olive_females_associate_with_female_kin
-0| am afv move-toward 1E-3       olive_males_associate_with_adult_females
+1| a oahv move-toward -1E-4     
+0| e oavu> move-toward -1E-4      olives_avoid_getting_too_close_to_other_troops
+0| e oavn> move-toward 1E-1       olives_stay_in_proximity_with_their_troop
+1| af ikv move-toward 0           
+1| af iqv move-toward 0             
+1| af jkv move-toward 0              
+1| af jqv move-toward 0
+1| af oamkv move-toward 0
+1| af oamqv move-toward 0
+1| af oafkv move-toward 0
+1| af oafqv move-toward 0
+1| am ikv move-toward 0
+1| am iqv move-toward 0
+1| am jkv move-toward 0
+1| am jqv move-toward 0
+1| am oamkv move-toward 0
+1| am oamqv move-toward 0
+1| am oafkv move-toward 0
+1| am oafqv move-toward 0
 1| j d53 move-toward 1E-5
 1| j d54 move-toward 1E-6
 1| j d55 move-toward 1E-7
@@ -63,48 +76,48 @@
 1| i lv¥ demand-from 1E-9
 1| j d eat 1E-9
 1| a d eat 1E-9         
-0| am⋅ fquv< join 1E-3          olive_solitary_males_join_nonkin_females
+0| am⋅ fquv< join 1E-2          olive_solitary_males_join_nonkin_females
 0| jm∴ e leave 1E-9             olive_males_leave_as_juveniles
 0| am∴ afnkv leave 1E-9         olive_adult_males_leave_when_female_kin
-1| am∴ afnqv leave -1E-9       olive_males_do_not_leave_if_nonkin_females_present
+0| am∴ afnqv leave -1E-6        olive_males_do_not_leave_if_nonkin_females_present
 1| af jy put-down 1E-9
-1| af ik help 0           
-1| af iq help 0             
-1| af jk help 0              
-1| af jq help 0
-1| af oamk help 0
-1| af oamq help 0
-1| af oafk help 0
-1| af oafq help 0
-1| am ik help 0
-1| am iq help 0
-1| am jk help 0
-1| am jq help 0
-1| am oamk help 0
-1| am oamq help 0
-1| am oafk help 0
-1| am oafq help 0
-1| af ik attack 0
-1| af iq attack 0
-1| af jk attack 0
-1| af jq attack 0
-1| af oamk attack 0
-1| af oamq attack 0
-1| af oafk attack 0
-1| af oafq attack 0
-1| am ik attack 0
-1| am iq attack 0           
-1| am jk attack 0
-1| am jq attack 0          
-1| am oamk attack 0        
-1| am oamq attack 0         
-1| am oafk attack 0
-1| am oafq attack 0       
+1| af ikv help 0           
+1| af iqv help 0             
+1| af jkv help 0              
+1| af jqv help 0
+1| af oamkv help 0
+1| af oamqv help 0
+1| af oafkv help 0
+1| af oafqv help 0
+1| am ikv help 0
+1| am iqv help 0
+1| am jkv help 0
+1| am jqv help 0
+1| am oamkv help 0
+1| am oamqv help 0
+1| am oafkv help 0
+1| am oafqv help 0
+1| af ikv attack 0
+1| af iqv attack 0
+1| af jkv attack 0
+1| af jqv attack 0
+1| af oamkv attack 0
+1| af oamqv attack 0
+1| af oafkv attack 0
+1| af oafqv attack 0
+1| am ikv attack 0
+1| am iqv attack 0           
+1| am jkv attack 0
+1| am jqv attack 0              
+1| am oamkv attack 1E-1            olive_male_attack       
+1| am oamqv attack 1E-1             olive_male_attack 
+1| am oafkv attack 0
+1| am oafqv attack 0       
 1| am βqnv mate-with 1E-5
 1| c amqnv mate-with 1E-5   
-5| e zd do-nothing 1E-9
-5| e zd do-nothing 1E-9
-5| e zd do-nothing 1E-9
+5| e zd do-nothing 0
+5| e zd do-nothing 0
+5| e zd do-nothing 0
 
 1| e e survival-chance 5.1E-3
 0| e e0 survival-chance -5.1E-3
@@ -112,7 +125,7 @@
 1| i e body-size 1E-3
 1| jf e body-size 1E-4
 1| jm e body-size 1E-4
-1| e e body-shade 9E-5        
+0| e e body-shade 9E-5        
 1| i e visual-range 3E-3
 1| i e visual-angle 3E-3
 1| i e day-perception 3E-3
@@ -142,12 +155,25 @@
 0| e -e rest 1E-9         
 1| am βqnv move-toward 1E-4
 1| c amqnv move-toward 1E-4
-0| a oahv move-toward -1E-5     
-0| f ovu> move-toward -1E-5      olives_avoid_getting_too_close_to_other_troops
-0| f ovn< move-toward -1E-5      olives_avoid_getting_too_close_to_group_members
-0| f ovn> move-toward 1E-3      olives_stay_in_proximity_with_their_troop
-0| f oafkv move-toward 1E-7      olive_females_associate_with_female_kin
-0| am afv move-toward 1E-3       olive_males_associate_with_adult_females
+1| a oahv move-toward -1E-4     
+0| e oavu> move-toward -1E-4      olives_avoid_getting_too_close_to_other_troops
+0| e oavn> move-toward 1E-1       olives_stay_in_proximity_with_their_troop
+1| af ikv move-toward 0           
+1| af iqv move-toward 0             
+1| af jkv move-toward 0              
+1| af jqv move-toward 0
+1| af oamkv move-toward 0
+1| af oamqv move-toward 0
+1| af oafkv move-toward 0
+1| af oafqv move-toward 0
+1| am ikv move-toward 0
+1| am iqv move-toward 0
+1| am jkv move-toward 0
+1| am jqv move-toward 0
+1| am oamkv move-toward 0
+1| am oamqv move-toward 0
+1| am oafkv move-toward 0
+1| am oafqv move-toward 0
 1| j d53 move-toward 1E-5
 1| j d54 move-toward 1E-6
 1| j d55 move-toward 1E-7
@@ -168,45 +194,45 @@
 1| i lv¥ demand-from 1E-9
 1| j d eat 1E-9
 1| a d eat 1E-9         
-0| am⋅ fquv< join 1E-3          olive_solitary_males_join_nonkin_females
+0| am⋅ fquv< join 1E-2          olive_solitary_males_join_nonkin_females
 0| jm∴ e leave 1E-9             olive_males_leave_as_juveniles
 0| am∴ afnkv leave 1E-9         olive_adult_males_leave_when_female_kin
-1| am∴ afnqv leave -1E-9       olive_males_do_not_leave_if_nonkin_females_present
+0| am∴ afnqv leave -1E-6        olive_males_do_not_leave_if_nonkin_females_present
 1| af jy put-down 1E-9
-1| af ik help 0           
-1| af iq help 0             
-1| af jk help 0              
-1| af jq help 0
-1| af oamk help 0
-1| af oamq help 0
-1| af oafk help 0
-1| af oafq help 0
-1| am ik help 0
-1| am iq help 0
-1| am jk help 0
-1| am jq help 0
-1| am oamk help 0
-1| am oamq help 0
-1| am oafk help 0
-1| am oafq help 0
-1| af ik attack 0
-1| af iq attack 0
-1| af jk attack 0
-1| af jq attack 0
-1| af oamk attack 0
-1| af oamq attack 0
-1| af oafk attack 0
-1| af oafq attack 0
-1| am ik attack 0
-1| am iq attack 0           
-1| am jk attack 0
-1| am jq attack 0          
-1| am oamk attack 0        
-1| am oamq attack 0         
-1| am oafk attack 0
-1| am oafq attack 0       
+1| af ikv help 0           
+1| af iqv help 0             
+1| af jkv help 0              
+1| af jqv help 0
+1| af oamkv help 0
+1| af oamqv help 0
+1| af oafkv help 0
+1| af oafqv help 0
+1| am ikv help 0
+1| am iqv help 0
+1| am jkv help 0
+1| am jqv help 0
+1| am oamkv help 0
+1| am oamqv help 0
+1| am oafkv help 0
+1| am oafqv help 0
+1| af ikv attack 0
+1| af iqv attack 0
+1| af jkv attack 0
+1| af jqv attack 0
+1| af oamkv attack 0
+1| af oamqv attack 0
+1| af oafkv attack 0
+1| af oafqv attack 0
+1| am ikv attack 0
+1| am iqv attack 0           
+1| am jkv attack 0
+1| am jqv attack 0              
+1| am oamkv attack 1E-1            olive_male_attack       
+1| am oamqv attack 1E-1             olive_male_attack 
+1| am oafkv attack 0
+1| am oafqv attack 0       
 1| am βqnv mate-with 1E-5
 1| c amqnv mate-with 1E-5   
-5| e zd do-nothing 1E-9
-5| e zd do-nothing 1E-9
-5| e zd do-nothing 1E-9
+5| e zd do-nothing 0
+5| e zd do-nothing 0
+5| e zd do-nothing 0
