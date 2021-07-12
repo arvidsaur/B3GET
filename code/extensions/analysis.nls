@@ -24,20 +24,37 @@ to thesis-setup
   set plant-annual-cycle 1000
   set plant-daily-cycle 10
   set plant-seasonality 0.5
-  set plant-quality 5
+  set plant-quality 3
   set deterioration-rate -0.01
+  
+  set maximum-population-size 150
+  set minimum-population-size 150
 
-  set simulation-summary-ticks 5000 
+  ; final settings
+  
+  set simulation-summary-ticks 25000 
   set simulation-scan-ticks 250 
-  set group-scan-ticks 1000 
+  set group-scan-ticks 10000 
   set individual-scan-ticks 0 
-  set view-scan-ticks 1000 
-  set genotype-scan-ticks 1000
+  set view-scan-ticks 10000 
+  set genotype-scan-ticks 10000
   set focal-follow-rate 0
-  set record-individuals true 
+  set record-individuals false 
   set verification-rate 1E-6
-  set record-world-ticks 0
-  set simulation-stop-at 10000
+  set record-world-ticks 100000
+  set simulation-stop-at 100000
+  
+;  set simulation-summary-ticks 1000 
+;  set simulation-scan-ticks 250 
+;  set group-scan-ticks 1000 
+;  set individual-scan-ticks 0 
+;  set view-scan-ticks 1000 
+;  set genotype-scan-ticks 100
+;  set focal-follow-rate 1E-4 
+;  set record-individuals false 
+;  set verification-rate 1E-6
+;  set record-world-ticks 1000
+;  set simulation-stop-at 1000
   
   set plant-maximum-neighbors read-from-string last behaviorspace-experiment-name
   
@@ -45,8 +62,9 @@ to thesis-setup
     ( first behaviorspace-experiment-name = "A" ) [ 
       set focal-follow-rate 1E-4 
       set record-individuals true 
-      set record-world-ticks 10000 ]
-    ( first behaviorspace-experiment-name = "B" ) [ set genotype-reader "gat3s" ]
+      ;set record-world-ticks 100000 
+    ]
+    ( first behaviorspace-experiment-name = "B" ) [ set plant-annual-cycle 10000 set plant-daily-cycle 100 ]
     ( first behaviorspace-experiment-name = "C" ) [ set plant-annual-cycle 10000 ]
     ( first behaviorspace-experiment-name = "D" ) [ set plant-daily-cycle 100 ]
     ( first behaviorspace-experiment-name = "E" ) [ set plant-seasonality 0 ]
@@ -55,12 +73,11 @@ to thesis-setup
     ( first behaviorspace-experiment-name = "H" ) [ set plant-quality 5 ]
     ( first behaviorspace-experiment-name = "I" ) [ set deterioration-rate -0.001 ]
     ( first behaviorspace-experiment-name = "J" ) [ set model-structure lput "aspatial" model-structure ]
-    ( first behaviorspace-experiment-name = "K" ) [ set model-structure lput "reaper" model-structure ]
-    ( first behaviorspace-experiment-name = "L" ) [ set model-structure lput "stork" model-structure ]
-    ( first behaviorspace-experiment-name = "M" ) [ set model-structure lput "ideal-form" model-structure ]
-    ( first behaviorspace-experiment-name = "N" ) [ 
-      set model-structure lput "free-lunch" model-structure 
-      set model-structure lput "reaper" model-structure ]
+    ( first behaviorspace-experiment-name = "K" ) [ set model-structure lput "stork" model-structure ]
+    ( first behaviorspace-experiment-name = "L" ) [ set model-structure lput "reaper" model-structure ]
+    ( first behaviorspace-experiment-name = "M" ) [ 
+      set model-structure lput "ideal-form" model-structure set model-structure lput "stork" model-structure ]
+    ( first behaviorspace-experiment-name = "N" ) [ set model-structure lput "free-lunch" model-structure ]
     ( first behaviorspace-experiment-name = "O" ) [ set model-structure lput "no-evolution" model-structure ]
     ( first behaviorspace-experiment-name = "P" ) [ set model-structure lput "uninvadable" model-structure ]
     [  ] )
@@ -78,6 +95,24 @@ to thesis-setup
     ( item 1 behaviorspace-experiment-name = "O" )[
       set population "Olives"
       set genotype "olives" ]
+    ( item 1 behaviorspace-experiment-name = "Q" ) [
+      set population "Chimpanzees"
+      set genotype "geladas" ]
+    ( item 1 behaviorspace-experiment-name = "R" )[
+      set population "Chimpanzees"
+      set genotype "hamadryas" ]
+    ( item 1 behaviorspace-experiment-name = "S" )[
+      set population "Chimpanzees"
+      set genotype "olives" ]
+    ( item 1 behaviorspace-experiment-name = "T" )[
+      set population "Geladas"
+      set genotype "chimpanzees" ]
+    ( item 1 behaviorspace-experiment-name = "U" ) [
+      set population "Hamadryas"
+      set genotype "chimpanzees" ]
+    ( item 1 behaviorspace-experiment-name = "V" )[
+      set population "Olives"
+      set genotype "chimpanzees" ]
     [])
   
   ; give simulation-id specific configuration: sDO17B means
@@ -85,17 +120,13 @@ to thesis-setup
   ; run B (instead of A), plant-minimum-neighbors = 1 and
   ; plant-maximum-neighbors = 7
   ifelse ( plant-minimum-neighbors < plant-maximum-neighbors ) [
-    print "if"
-    print ( word "s" but-last behaviorspace-experiment-name plant-minimum-neighbors plant-maximum-neighbors "A" )
     set simulation-id ( word "s" but-last behaviorspace-experiment-name plant-minimum-neighbors plant-maximum-neighbors "A" )
-    print simulation-id
   ][
     let min-holder plant-minimum-neighbors
     let max-holder plant-maximum-neighbors
     set plant-minimum-neighbors max-holder - 1
     set plant-maximum-neighbors min-holder
     set simulation-id ( word "s" but-last behaviorspace-experiment-name plant-minimum-neighbors plant-maximum-neighbors "B" )
-    print "else"
   ]
   
   setup-parameters                                             ; Setup the global parameter settings.
@@ -703,6 +734,34 @@ end
 
 
 
+;-----------------------------------------------------------------------------       
+; SEED POPULATION
+;-----------------------------------------------------------------------------   
+
+to seed-population
+  let population-choice substring useful-commands 3 length useful-commands
+  set path-to-experiment "../data/"
+  set population population-choice
+  set genotype population-choice
+  import-population
+end
+
+
+
+;---------------------------------------------------------------------------------------------------------------------------------
+; GUI OUPUT FUNCTIONS 
+;---------------------------------------------------------------------------------------------------------------------------------
+
+;to-report go-runtime
+;  profiler:reset
+;  profiler:start
+;  repeat 1 [ go ]
+;  report profiler:inclusive-time "go"
+;end
+
+
+
+
 ;to reduce-to-unique-vectors
 ;
 ;  let initial-decisions decision.vectors
@@ -765,3 +824,553 @@ end
 ;    ]
 ;  ]  
 ;end
+
+
+;
+;;;-----------------------------------------------------------------------------       
+;;; VIEW HISTORY
+;;;-----------------------------------------------------------------------------   
+;;
+;;to output-history
+;;  let anima1-to-inspect one-of anima1s with [ self = subject ]
+;;  output-header (word " HISTORY : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [my.identity ] of anima1-to-inspect ) ] )
+;;  
+;;  output-print ( word " Total energy gained: "
+;;    ifelse-value ( anima1-to-inspect != nobody ) 
+;;    [ [ precision total.energy.gains 2 ] of subject ] 
+;;    [ ( word precision ( sum [ total.energy.gains ] of anima1s with [ biological.sex = "female"] ) 2 " (females) " precision ( sum [ total.energy.gains ] of anima1s with [ biological.sex = "male"] ) 2 " (males) " ) ] )
+;;  
+;;  output-print ( word " Total energy cost: "
+;;    ifelse-value ( anima1-to-inspect != nobody ) 
+;;    [ [ precision total.energy.cost 2 ] of subject ] 
+;;    [ ( word precision ( sum [ total.energy.cost ] of anima1s with [ biological.sex = "female"] ) 2 " (females) " precision ( sum [ total.energy.cost ] of anima1s with [ biological.sex = "male"]) 2 " (males) " ) ] )
+;;  
+;;  output-print ( word " Total energy gained by foraging: "
+;;    ifelse-value ( anima1-to-inspect != nobody ) 
+;;    [ [ precision foraging.gains 2 ] of subject ] 
+;;    [ ( word precision ( sum [ foraging.gains ] of anima1s with [ biological.sex = "female"] ) 2 " (females) " precision ( sum [ foraging.gains ] of anima1s with [ biological.sex = "male"]) 2 " (males) " ) ] )
+;;  
+;;  output-print ( word " Number of helpful behaviors: "
+;;    ifelse-value ( anima1-to-inspect != nobody ) 
+;;    [ [ length help.from.history ] of subject ] 
+;;    [ ( word sum [ length help.from.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length help.from.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
+;;  
+;;  output-print ( word " Number of aggressive behaviors: "
+;;    ifelse-value ( anima1-to-inspect != nobody ) 
+;;    [ [ length attack.from.history ] of subject ] 
+;;    [ ( word sum [ length attack.from.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length attack.from.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
+;;  
+;;  output-print ( word " Number of infanticides: "
+;;    ifelse-value ( anima1-to-inspect != nobody ) 
+;;    [ [ length infanticide.history ] of subject ] 
+;;    [ ( word sum [ length infanticide.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length infanticide.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
+;;  
+;;  output-print ( word " Number of copulations: "
+;;    ifelse-value ( anima1-to-inspect != nobody ) 
+;;    [ [ length copulations.history ] of subject ] 
+;;    [ ( word sum [ length copulations.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length copulations.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
+;;  
+;;  output-print ( word " Number of conceptions: "
+;;    ifelse-value ( anima1-to-inspect != nobody ) 
+;;    [ [ length conceptions.history ] of subject ] 
+;;    [ ( word sum [ length conceptions.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length conceptions.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
+;;  
+;;  output-print ( word " Number of group transfers: "
+;;    ifelse-value ( anima1-to-inspect != nobody ) 
+;;    [ [ length group.transfers.history ] of subject ] 
+;;    [ ( word sum [ length group.transfers.history ] of anima1s with [ biological.sex = "female"] " (females) " sum [ length group.transfers.history ] of anima1s with [ biological.sex = "male"] " (males) " ) ] )
+;;  
+;;end
+;;
+;;;-----------------------------------------------------------------------------       
+;;; VIEW STATUS
+;;;-----------------------------------------------------------------------------   
+;;
+;;to output-status
+;;  let anima1-to-inspect one-of anima1s with [ self = subject ]
+;;  output-header (word " STATUS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [ my.identity ] of anima1-to-inspect ) ] )
+;;  
+;;  ;output-print ( word " Number of individuals: " count anima1z )
+;;  output-print ( word " Number of females: " count anima1z with [ biological.sex = "female" ] )
+;;  output-print ( word " Number of males: " count anima1z with [ biological.sex = "male" ] )
+;;  
+;;  let group-list []
+;;  let group-size-list []
+;;  let females-in-group []
+;;  let males-in-group []
+;;  let juveniles-in-group []
+;;  let infants-in-group []
+;;  let gestatees-in-group []
+;;  
+;;  ask anima1z [ if ( not member? group.identity group-list ) [ set group-list lput group.identity group-list ]]
+;;  foreach group-list [ g -> 
+;;    set group-size-list lput ( count anima1z with [ group.identity = g ] ) group-size-list 
+;;    set females-in-group lput ( count anima1z with [ group.identity = g and biological.sex = "female" and life.history = "adult"] ) females-in-group 
+;;    set males-in-group lput ( count anima1z with [ group.identity = g and biological.sex = "male" and life.history = "adult" ] ) males-in-group 
+;;    set juveniles-in-group lput ( count anima1z with [ group.identity = g and life.history = "juvenile" ] ) juveniles-in-group
+;;    set infants-in-group lput ( count anima1z with [ group.identity = g and life.history = "infant" ] ) infants-in-group
+;;    set gestatees-in-group lput ( count anima1z with [ group.identity = g and life.history = "gestatee" ] ) gestatees-in-group
+;;  ]
+;;  
+;;  output-print ( word " Number of groups: " length group-list )
+;;  output-print ( word " Average group size: " precision mean group-size-list 2 )
+;;  output-print ( word " Average number of adult females per group: " precision mean females-in-group 2 )
+;;  output-print ( word " Average number of adult males per group: " precision mean males-in-group 2 )
+;;  output-print ( word " Average number of juveniles per group: " precision mean juveniles-in-group 2 )
+;;  output-print ( word " Average number of infants per group: " precision mean infants-in-group 2 )
+;;  output-print ( word " Average number of gestatees per group: " precision mean gestatees-in-group 2 )
+;;end
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+
+
+
+
+
+
+; save? - this one helps set a group to same color i think+
+to-report get-group-identity-from-color [ color-of-group ]
+  ifelse ( is-number? color-of-group ) [
+    report ( random 999 * 140 + color-of-group )
+  ][
+    report "error: input value is not a number"
+  ]
+end
+
+
+; save? - this one gives random chomrosome identities at first
+to set-random-identity-chromosomes [ length-of-chromosomes ]
+  let get-alphabet [ "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z" ]
+  ifelse ( is-number? length-of-chromosomes ) [
+    set identity.I ""
+    set identity.II ""
+    repeat length-of-chromosomes [ set identity.I (word identity.I one-of get-alphabet ) ]
+    repeat length-of-chromosomes [ set identity.II (word identity.II one-of get-alphabet ) ]
+  ][
+    print "error: input value is not a number"
+  ] 
+end
+
+;to plot-plants [ current-season plant-density ]
+;
+;  repeat 1000 [
+;
+;    let x random-float 8
+;
+;    let seasonal-factor ( ( plant-seasonality * current-season + 1 ) / 2 )
+;    let optimal-neighbor-energy ( plant-minimum-neighbors + plant-maximum-neighbors ) / 2
+;    let neighbor-energy-sd ( optimal-neighbor-energy - plant-minimum-neighbors )
+;    let neighbor-energy x ;( ( sum [penergy.supply] of neighbors ) / plant-quality )
+;
+;    let probability-up ifelse-value ( neighbor-energy-sd = 0 ) [ 0 ] [ ( seasonal-factor * e ^ ( - (( neighbor-energy - optimal-neighbor-energy ) ^ 2 ) / ( 2 * ( neighbor-energy-sd ^ 2 ) )) ) ]
+;    let y ( ( plant-daily-cycle * plant-quality ) / plant-annual-cycle ) * ( plant-density * ( 2 * probability-up - 1 ) + seasonal-factor - plant-density )
+;
+;    plotxy x y
+;
+;  ]
+;
+;end
+
+
+
+
+
+
+
+
+;to-report get-column-results [ agent-list stats-list ]
+;  
+;  let report-list []
+;  foreach stats-list [ i ->
+;    set report-list (sentence report-list get-stats-results i agent-list )
+;  ]
+;  report report-list ; concatinated lists of numbers
+;end
+;
+;to-report get-stats-results [ stats-type agent-list ]
+;  ; foreach get-value-array, ( for each measurement done)
+;  ;    apply stats-type to turn list into number
+;  ; therefore end up with one list of numbers, or list of single number 
+;  
+;  ; return list of numbers
+;  let report-list []
+;  let values get-value-array agent-list selected-display  
+;  
+;  foreach values [ v -> 
+;    set report-list (ifelse-value
+;      ( stats-type = "min" ) [ min v ]
+;      ( stats-type = "max" ) [ max v ]
+;      ( stats-type = "mean" ) [ mean v ]
+;      ( stats-type = "median" ) [ median v ]
+;      ( stats-type = "variance" ) [ variance v ]
+;      [ count v ])
+;  ]
+;  report report-list
+;  
+;;  report (ifelse-value
+;;    ( stats-type = "min" ) [ min get-value-array agent-list selected-display ]
+;;    [])
+;end
+;
+;to-report get-value-array [ agent-list inputs ] ; returns a list of lists, one list for each measurement done on agent-list
+;  let report-list []
+;  
+;;  foreach inputs [ input ->
+;;  
+;;  set report-list lput ( ifelse
+;;;    ( input = "life-history" ) [ foreach [ "gestation" "lactation" "sexual-maturity" "longevity" ] [ l ->  set report-list lput ( get-value-array agent-list l ) report-list ]]
+;;;    ( input = "genotype" )[ get-genotype-measurements agent-list ]
+;;;    ( input = "phenotype" )[ get-phenotype-measurements agent-list ] ;
+;;;    ( input = "kin-selection" )[ get-kin-sselection-measurements agent-list ] ;
+;;;    ( input = "actions" )[ get-action-measurements agent-list ]
+;;;    ( input = "decisions" )[ get-decision-measurements agent-list ]
+;;    ( input = "age" ) [ set report-list lput [ age.in.ticks ] of agent-list ]
+;;    ( input = "generations" ) [ generation.number ]
+;;    ( input = "survival-chance" ) [ survival.chance ]
+;;    ( input = "body-size" ) [ body.size ]
+;;    ( input = "body-shade" ) [ body.shade ]
+;;    ( input = "hidden-chance" ) [ hidden.chance ]
+;;    ( input = "bite-capacity" ) [ bite.capacity ]    
+;;    ( input = "mutation-chance" ) [ mutation.chance ]
+;;    ( input = "sex-ratio" ) [ sex.ratio ]
+;;    ( input = "litter-size" ) [ litter.size ]
+;;    ( input = "conception-chance" ) [ conception.chance ]
+;;    ( input = "visual-angle" ) [ visual.angle ]
+;;    ( input = "visual-range" ) [ visual.range ]
+;;    ( input = "day-perception" ) [ day.perception ]
+;;    ( input = "night-perception" ) [ night.perception ]
+;;    ( input = "yellow-chance" ) [ yellow.chance ]
+;;    ( input = "red-chance" ) [ red.chance ]
+;;    ( input = "blue-chance" ) [ blue.chance ]
+;;    ( input = "birthing-chance" ) [ birthing.chance ]
+;;    ( input = "weaning-chance" ) [ weaning.chance ]
+;;    ( input = "infancy-chance" ) [ infancy.chance ]
+;;    ( input = "juvenility-chance" ) [ juvenility.chance ]
+;;    ( input = "adulthood-chance" ) [ adulthood.chance ]
+;;    ( input = "carried-items" ) [ length carried.items ]
+;;    ( input = "energy-supply" ) [ energy.supply ]
+;;    ( input = "birthing" ) [ ifelse-value ( mother.initiated.birth = true ) [ 2 ] [ 1 ] ]
+;;    ( input = "weaning" ) [ ifelse-value ( mother.initiated.weaning = true ) [ 2 ] [ 1 ] ]
+;;    ( input = "matings" ) [ length copulations.history ]
+;;    ( input = "mating-partners" ) [ length remove-duplicates copulations.history ]
+;;    ( input = "conceptions" ) [ length conceptions.history ]
+;;    ( input = "infanticide" ) [ length infanticide.history ]
+;;    ( input = "group-transfers" ) [ length group.transfers.history ]
+;;    ( input = "travel-distance" ) [ distance.traveled ]
+;;    ( input = "foraging-gains" ) [ foraging.gains ]
+;;    ( input = "total-energy-gains" ) [ total.energy.gains ]
+;;    ( input = "total-energy-cost" ) [ total.energy.cost ]
+;;    ( input = "receiving.history" ) [ receiving.history ]
+;;    ( input = "carried.history" ) [ length carried.history ]
+;;    ( input = "aid-history" ) [ length help.from.history ]
+;;    ( input = "attack-history" ) [ length attack.from.history ]
+;;      
+;;    [])
+;;  ]
+; 
+;  report report-list
+;end
+;
+;to-report get-phenotype-measurements
+;  
+;end
+;
+;to-report get-genotype-measurements
+;  report []
+;end
+;
+;to plot-individuals-decisions 
+;  let individual-list get-sorted-individuals                        ; get sorted list of living agents
+;  let plot-list []                                                  ; initialize list of values to be plotted
+;  
+;  let decisions-list [ 
+;    "survival-chance" "body-size" "body-shade" 
+;    "day-perception" "night-perception" "visual-angle" "visual-range" 
+;    "conception-chance" "bite-capacity" "mutation-chance" "sex-ratio" "litter-size" 
+;    "turn-right" "turn-left" "go-forward" "set-heading" "set-heading-random" 
+;    "hide" "rest" 
+;    "yellow-signal" "red-signal" "blue-signal" 
+;    "check-infancy" "check-juvenility" "check-adulthood" 
+;    "check-birth" "check-weaning" 
+;    "move-toward" "move-away-from" "supply-to" "demand-from" "eat"
+;    "join" "leave" "recruit" "kick-out"
+;    "pick-up" "put-down" "cling-to" "squirm-from"
+;    "help" "hurt" "mate-with" ]
+;  
+;  let color-list [ 
+;    3 5 7 
+;    12 14 16 18
+;    23 25 27 
+;    33 37
+;    43 45 47 
+;    54 56
+;    64 67
+;    73 75 77
+;    82 85 87
+;    93 96 
+;    103 107 
+;    123 125 127
+;    132 134 136 138
+;    142 144 146 148
+;    153 155 157 ]
+;  
+;  foreach individual-list [ i ->                                    ; loop through each individual
+;    
+;    foreach decisions-list [ d ->
+;      
+;      
+;    
+;;    ifelse ( subject = i )                                          ; check if individual is subject
+;;    [ set plot-list lput (list 0 [age.in.ticks] of i ) plot-list ]  ; if yes, then update plot list for red columm
+;;    [ set plot-list lput (list [age.in.ticks] of i 0 ) plot-list ]] ; if no, then update plot list for black column
+;  ]]
+;  ;plot-colored-histogram 1 plot-list color-list                      ; update plot based on plot list
+;end
+;  
+;to plot-groups-groups 
+;  let current-groups sort remove-duplicates [group.identity] of anima1s with [ is.alive ]
+;  let group-composition-list []
+;  
+;  foreach current-groups [ group ->
+;    let this-group-composition []
+;    let y-so-far count anima1s with [ is.alive and group.identity = group ]
+;    foreach [ "gestatee" "infant" "juvenile" "adult" ] [ life-stage ->      
+;      foreach [ "female" "male" ] [ sex ->
+;        set this-group-composition lput y-so-far this-group-composition
+;        set y-so-far y-so-far - count anima1s with [ is.alive and group.identity = group and life.history = life-stage and biological.sex = sex ]
+;      ]
+;    ]
+;    set group-composition-list lput this-group-composition group-composition-list
+;  ] 
+;  ;plot-colored-histogram 1 group-composition-list [ red orange yellow green turquoise sky blue magenta ]
+;end
+;  
+;to plot-lotka-volterra 
+;  clear-all-plots
+;  set-plot-pen-mode 0
+;  set-plot-pen-color green
+;  let index 0
+;  foreach plant-abundance-record [ p ->
+;    plotxy ( 100 * index ) ( ln p )
+;    set index index + 1 ]
+;  plot-pen-up
+;  set index 0
+;  set-plot-pen-color brown
+;  foreach population-size-record [ s ->
+;    plotxy ( 100 * index ) ( ln s )
+;    plot-pen-down
+;    set index index + 1 ]
+;end
+;
+;
+;to reduce-genotype
+;  clear-output
+;  ;REDUCE DECISIONS TO ONE PER TARGET-ACTION COMBO
+;  let reduced-decisions []
+;  
+;  let input-list ( sentence chromosome.i chromosome.ii )
+;  
+;  foreach input-list [ original-vector ->
+;    let original-ego ifelse-value ( length original-vector > 1 ) [ item 1 original-vector ] [ 0 ]
+;    let original-target ifelse-value ( length original-vector > 2 ) [ item 2 original-vector ] [ 0 ]
+;    let original-action ifelse-value ( length original-vector > 3 ) [ item 3 original-vector ] [ 0 ]
+;    let original-weight ifelse-value ( length original-vector > 4 ) [ item 4 original-vector ] [ 0 ]
+;    let vector-doesnt-exist true
+;    
+;    let index 0
+;    foreach reduced-decisions [ reduced-vector ->
+;      let reduced-ego ifelse-value ( length reduced-vector > 1 ) [ item 1 reduced-vector ] [ 0 ]
+;      let reduced-target ifelse-value ( length reduced-vector > 2 ) [ item 2 reduced-vector ] [ 0 ]
+;      let reduced-action ifelse-value ( length reduced-vector > 3 ) [ item 3 reduced-vector ] [ 0 ]
+;      let reduced-weight ifelse-value ( length reduced-vector > 4 ) [ item 4 reduced-vector ] [ 0 ]
+;      
+;      print original-ego
+;      print original-target
+;      print original-action
+;      print original-weight
+;      print reduced-ego
+;      print reduced-target
+;      print reduced-action
+;      print reduced-weight
+;      
+;      if ( reduced-ego = original-ego ) and ( reduced-target = original-target ) and ( reduced-action = original-action ) and is-number? reduced-weight and is-number? original-weight [
+;        set vector-doesnt-exist false
+;        print "match"
+;        let new-vector ( list reduced-ego reduced-target reduced-action ( reduced-weight + original-weight ) )
+;        set reduced-decisions remove-item index reduced-decisions
+;        set reduced-decisions lput new-vector reduced-decisions ]
+;      set index index + 1
+;    ]
+;    if vector-doesnt-exist [ set reduced-decisions lput ( list original-ego original-target original-action original-weight ) reduced-decisions ]
+;    ; print reduced-decisions
+;  ]
+;  foreach reduced-decisions [ d ->
+;    output-print d
+;  ]
+;end
+;
+;
+;
+;
+;
+;;; detelet?
+;
+;
+;
+;
+;
+;
+;
+;;-----------------------------------------------------------------------------       
+;; AGE HISTOGRAM
+;;-----------------------------------------------------------------------------    
+;
+;;to age-histogram
+;;  clear-plot
+;;  set-plot-pen-interval 100
+;;  set-plot-x-range 0 max [ age.in.ticks ] of anima1s with [ is.alive ]
+;;  histogram [ age.in.ticks ] of anima1s with [ is.alive ]
+;;end
+
+
+
+
+
+
+
+
+; --------------------------------------------------------------------------------------------------------- ;     
+;     
+; POPULATION
+;
+; ENTRY
+;
+; EXIT
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+;to plot-population-histogram  ; works! bad runtime
+;  let max-value max [ get-result-from-selected-display ] of anima1z
+;  let column-no 10
+;  let interval precision ( max-value / column-no ) 2
+;  let plot-list []
+;  let lower 0
+;  let upper lower + interval
+;  let selected-individuals get-sorted-individuals
+;  let row-list []
+;  repeat column-no [
+;   ; print lower
+;    ;print upper
+;    set row-list lput (word " " lower " to " upper "") row-list
+;    let agent-count count anima1z with [ get-result-from-selected-display > lower and get-result-from-selected-display <= upper and member? self selected-individuals]
+;    ;let subject? any? anima1z with [ subject = self and get-result-from-selected-display > lower and get-result-from-selected-display <= upper and member? self selected-individuals]
+;    set plot-list lput ( list agent-count ifelse-value ( member? subject selected-individuals ) [ agent-count ][ 0 ] ) plot-list
+;    set lower lower + interval
+;    set upper upper + interval ]
+;  ;print plot-list
+;  plot-colored-histogram interval plot-list [ black red ] 1
+;  
+;  ;output-window input "" (list "column" "interval" "count" ) row-list plot-list 0 0 0
+;end
+
+
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; PRINT SPECIFIED AGENT INFORMATION TO OUTPUT WINDOW
+;
+; This subroutine...
+;
+; ENTRY
+;
+; EXIT
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to print-life-history-key
+  output-print " PLOT KEY :"
+  output-print " blue : adult male "
+  output-print " pink : cycling female" 
+  output-print " magenta : pregnant female"
+  output-print " purple : lactating female"
+  output-print " brown : juvenile male "
+  output-print " orange : juvenile female" 
+  output-print " mustard : infant male"
+  output-print " sunflower : infant female "
+  output-print " forest : gestatee male" 
+  output-print " lime : gestatee female"
+end
+
+
+
+
+
+
+
+
+
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; PRINT SPECIFIED AGENT INFORMATION TO OUTPUT WINDOW
+;
+; This subroutine...
+;
+; ENTRY
+;
+; EXIT
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to-report life-history-number
+  report (ifelse-value
+    ( life.history = "adult" ) [ 1 ]
+    ( life.history = "juvenile" ) [ 2 ]
+    ( life.history = "infant" ) [ 3 ]
+    ( life.history = "gestatee" ) [ 4 ]
+    [ 5 ])
+end
+
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; PRINT SPECIFIED AGENT INFORMATION TO OUTPUT WINDOW
+;
+; This subroutine...
+;
+; ENTRY
+;
+; EXIT
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to-report get-plot-focus-filter
+  report (ifelse-value
+  ( plot-type = "individuals" )[ "Individuals" ]
+  ( plot-type = "groups" )[ "Groups" ]
+  ( plot-type = "population" )[ "Population" ]
+  ( plot-type = "generations" )[ "Generations" ]
+  [ "" ])    
+end
+
+
+
+
+
+
+
+
+
+
+
+
+

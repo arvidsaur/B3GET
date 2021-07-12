@@ -1,21 +1,32 @@
 ; ========================================================================================================= ;
-; 
-;   .88888.   88888888b 888888ba   .88888.  d888888P dP    dP  888888ba   88888888b 
-;  d8'   `88  88        88    `8b d8'   `8b    88    Y8.  .8P  88    `8b  88        
-;  88        a88aaaa    88     88 88     88    88     Y8aa8P  a88aaaa8P' a88aaaa    
-;  88   YP88  88        88     88 88     88    88       88     88         88        
-;  Y8.   .88  88        88     88 Y8.   .8P    88       88     88         88        
-;   `88888'   88888888P dP     dP  `8888P'     dP       dP     dP         88888888P 
-;                                                                                  
+;
+;  .88888.   88888888b 888888ba   .88888.  d888888P dP    dP  888888ba   88888888b 
+; d8'   `88  88        88    `8b d8'   `8b    88    Y8.  .8P  88    `8b  88        
+; 88        a88aaaa    88     88 88     88    88     Y8aa8P  a88aaaa8P' a88aaaa    
+; 88   YP88  88        88     88 88     88    88       88     88         88        
+; Y8.   .88  88        88     88 Y8.   .8P    88       88     88         88        
+;  `88888'   88888888P dP     dP  `8888P'     dP       dP     dP         88888888P 
 ;                                                                                 
-;  888888ba   88888888b  .d888888  888888ba   88888888b  888888ba  
-;   88    `8b  88        d8'    88  88    `8b  88         88    `8b 
-;  a88aaaa8P' a88aaaa    88aaaaa88a 88     88 a88aaaa    a88aaaa8P' 
-;   88   `8b.  88        88     88  88     88  88         88   `8b. 
-;   88     88  88        88     88  88    .8P  88         88     88 
-;   dP     dP  88888888P 88     88  8888888P   88888888P  dP     dP                                                                
-;             
-; ========================================================================================================= ;                
+;                                                                                
+; 888888ba   88888888b  .d888888  888888ba   88888888b  888888ba  
+;  88    `8b  88        d8'    88  88    `8b  88         88    `8b 
+; a88aaaa8P' a88aaaa    88aaaaa88a 88     88 a88aaaa    a88aaaa8P' 
+;  88   `8b.  88        88     88  88     88  88         88   `8b. 
+;  88     88  88        88     88  88    .8P  88         88     88 
+;  dP     dP  88888888P 88     88  8888888P   88888888P  dP     dP                                                            
+;
+;
+; This extension handles the conversion process of taking information about an individual's current
+; environment and genotype to create a set of decision vectors. There are currently two genotype
+; readers: sta2us and gat3s. Each genotype reader is associated with a different genotype organization.
+; Thus, this process only works if the genotype-reader setting and the file used to import the genotype 
+; information are of the same type.
+;
+; © 2021 K N Crouse  
+;
+; ========================================================================================================= ;  
+
+; --------------------------------------------------------------------------------------------------------- ;
 ;                                                   
 ;                      dP   d8888b.          
 ;                      88       `88          
@@ -28,8 +39,10 @@
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 ; 
-; This extension contains all functions that allow anima1s to make decisions from their 
-; genotypes.
+; The gat3s genotype reader is difficult to learn how to use. However, it is also the most expansive
+; in potential behavioral complexity. If you are new to using B3GET, you should start with the sta2us 
+; genotype instead. Below is a list of codes, or codons, that combine to make up the alleles of this 
+; genotype.
 ;
 ; List of all genotype cod0ns:
 ; 
@@ -186,7 +199,7 @@
 ; MTW   2019-10-16   --> mate-with
 ; RST   XXXX-XX-XX   --> rest
 ; 
-;----------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
@@ -203,17 +216,15 @@
 ; Caller: anima1
 ; ENVIRONMENT: list of turtles (both plants and anima1s) observed by the caller.
 ;
-;----------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report gat3s-get-decisions [ environment ]
   report get-iterative-decisions self environment [] true ( sentence chromosome.I chromosome.II ) [] []
 end
 
-;---------------------------------------------------------------------------------------------- 
-; INTERATIVE 'HELPER' FUNCTION 
-;----------------------------------------------------------------------------------------------
-
 ; --------------------------------------------------------------------------------------------------------- ;
+;
+; INTERATIVE 'HELPER' FUNCTION 
 ;
 ; TITLE
 ;
@@ -230,48 +241,58 @@ to-report get-iterative-decisions [ me old-environment old-gates old-boolean old
   let meself self
   let decision-vectors []
   
-  if ( self = subject ) [ print (word "GID: environment - " old-environment "  gates - " old-gates "  boolean - " old-boolean "  feed - "  length old-feed "  targets - " old-targets " vectors - " old-vectors )]
+  if ( self = subject ) [ print (word 
+    "GID: environment - " old-environment 
+    "  gates - " old-gates 
+    "  boolean - " old-boolean 
+    "  feed - " length old-feed 
+    "  targets - " old-targets 
+    " vectors - " old-vectors )]
 
   if ( length old-feed > 0 ) [
     
     let allele first old-feed
     
-    if ( length allele > 0 and is-boolean? first allele ) [ set allele but-first allele ] ; fix to accomodate [1], [2] etc.
+    let mutation-setting-list [ "0|" "1|" "2|" "3|" "4|" "5|" "true|" "false|" ]
+    let initial-codon first allele
+    
+    if ( length allele > 0 and 
+      ( member? initial-codon mutation-setting-list or
+        is-boolean? first allele ) ) [ set allele but-first allele ]
     
     if ( self = subject ) [ print old-feed ]
     if ( self = subject ) [ print allele ]
     
-    ;---------------------------------------------------------------------------------------------- 
+    ;------------------------------------------------------------------------------------------------------ ;
     ; ALLELE CODE IS EMPTY ---> CREATE DECISION VECTORS 
-    ;----------------------------------------------------------------------------------------------
+    ;------------------------------------------------------------------------------------------------------ ;
     
-    ifelse ( length allele = 0 ) [ ; end of allele, so generate decision-vectors from gathered information
-      set decision-vectors ( sentence decision-vectors generate-decision-vectors old-targets old-vectors )
+    ifelse ( length allele = 0 ) [                            ; This is the end of allele, so generate 
+      set decision-vectors ( sentence                         ; decision vectors from gathered information.
+        decision-vectors 
+        generate-decision-vectors old-targets old-vectors )
     ]
     
-    ;---------------------------------------------------------------------------------------------- 
+    ;------------------------------------------------------------------------------------------------------ ;
     ; ALLELE CODE IS NOT EMPTY ---> (READ CODE)
-    ;----------------------------------------------------------------------------------------------
+    ;------------------------------------------------------------------------------------------------------ ;
     
-    [ ; READ THE NEXT CHUNK OF CODE of AN ALLELE
-      
-      ; get new chunk:
-      let split break-apart-allele allele
+    [
+      let split break-apart-allele allele                     ; Get new chunk of allele code
       let section-of-code first split
       let remaining-allele last split
       
       let first-clip first section-of-code
       
-      ; settings for continuing iteration 
-      let new-feed replace-item 0 old-feed remaining-allele
+      let new-feed replace-item 0 old-feed remaining-allele   ; Update settings for continuing iteration. 
       let new-gates [] ;--->
       let new-boolean old-boolean
       let new-targets old-targets
       let new-vectors old-vectors
       
-      ;---------------------------------------------------------------------------------------------- 
+      ;---------------------------------------------------------------------------------------------------- ;
       ; (READ CODE) ---> CODE is a "LOGIC GATE" ---> SAVE LOGIC GATE and MOVE ON
-      ;----------------------------------------------------------------------------------------------
+      ;---------------------------------------------------------------------------------------------------- ;
       
       ifelse ( member? first section-of-code gate-codons ) [
 
@@ -291,17 +312,24 @@ to-report get-iterative-decisions [ me old-environment old-gates old-boolean old
         ; (READ CODE) ---> CODE is a "DECISION" ---> SAVE DECISION and MOVE ON
         ;----------------------------------------------------------------------------------------------
         
-        ifelse ( member? first-clip action-codons ) [ ; this halts if code that is action is not in action-codons
+        ifelse ( member? first-clip action-codons ) [         ; This halts if code that is 
+                                                              ; action is not in action-codons
 
           if ( old-boolean ) [
             let new-action item 0 section-of-code
             let new-weight item 1 section-of-code
  
-            set decision-vectors ( sentence decision-vectors ( get-iterative-decisions me old-environment [] old-boolean (list first new-feed ) old-targets (lput (list new-action new-weight ) old-vectors))) ; continues with just remaining bit of allele, if any
+            set decision-vectors ( sentence                   ; Continue with just remaining 
+              decision-vectors                                ; bit of allele, if any.
+              ( get-iterative-decisions me old-environment 
+                [] old-boolean (list first new-feed ) 
+                old-targets 
+                (lput (list new-action new-weight ) 
+                  old-vectors))) 
           ]
-          ; settings for continuing iteration 
-          set new-boolean true ; really?
-          set new-feed ( but-first new-feed ) ; rest of interative decisions starts with rest of feed ---,,,?>
+          
+          set new-boolean true ; really?                      ; Settings for continuing iteration 
+          set new-feed ( but-first new-feed )                 ; Decisions starts with rest of feed ---,,,?>
           set new-targets []
           set new-vectors []
         ]
@@ -346,7 +374,16 @@ to-report get-iterative-decisions [ me old-environment old-gates old-boolean old
           
       ]]
       
-      set decision-vectors ( sentence decision-vectors ( get-iterative-decisions me old-environment new-gates new-boolean new-feed new-targets new-vectors ) ) ;<?'''----
+      set decision-vectors ( sentence 
+        decision-vectors 
+        ( get-iterative-decisions 
+          me 
+          old-environment 
+          new-gates 
+          new-boolean 
+          new-feed 
+          new-targets 
+          new-vectors ) ) ;<?'''----
 
   ]]
   
@@ -358,15 +395,15 @@ end
 ;
 ; TITLE
 ;
-; This subroutine...
+; This subroutine make each combination of vectors and targets to create decision-vector.
 ;
-; ENTRY: entry 1...
+; ENTRY: old-targets old-vectors
 ;
 ; EXIT: exit 1...
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
-to-report generate-decision-vectors [ old-targets old-vectors ]; Make each combination of vectors and targets to create decision-vector
+to-report generate-decision-vectors [ old-targets old-vectors ]
   let decs []
   foreach old-targets [ new-target ->
     foreach old-vectors [ v ->
@@ -380,7 +417,7 @@ end
 ;
 ; TITLE
 ;
-; This subroutine...
+; This subroutine separates allele into next chunk and remaining allele.
 ;
 ; ENTRY: entry 1...
 ;
@@ -396,7 +433,7 @@ to-report break-apart-allele [ allele ] ; SLOW
   let section-of-code []
   let section-length 0
   let part-of-chunk true
-  ; separate allele into next chunk and remaining allele
+                       
   foreach allele [ c ->
     ifelse ( not part-of-chunk ) [
       set remaining-allele lput c remaining-allele
@@ -545,13 +582,15 @@ to-report read-code [ code target ]
     ( code = "MID" and is-anima1? target ) [ [my.identity] of target ]
     ( code = "SEX" and is-anima1? target ) [ [biological.sex] of target ]
     ( code = "LFH" and is-anima1? target ) [ [life.history] of target ] 
-;    ( code = "FER" and is-anima1? target ) [ ifelse-value ( member? "show-fertility" model-structure ) [ [fertility.status] of target ] [ "" ]]  
     ( code = "GRP" and is-anima1? target ) [ [group.identity] of target ]  
     ( code = "ALV" and is-anima1? target ) [ [is.alive] of target ] 
     ( code = "YON" and is-anima1? target ) [ [yellow.signal] of target ] 
     ( code = "RON" and is-anima1? target ) [ [red.signal] of target ]
     ( code = "BON" and is-anima1? target ) [ [blue.signal] of target ]
-    ( code = "SIG" and is-anima1? target ) [ (word ifelse-value ( [yellow.signal] of target ) [ "Y" ] [ "" ] ifelse-value ( [red.signal] of target ) [ "R" ] [ "" ] ifelse-value ( [blue.signal] of target ) [ "B" ] [ "" ]) ]
+    ( code = "SIG" and is-anima1? target ) [ ( word 
+    ifelse-value ( [yellow.signal] of target ) [ "Y" ] [ "" ] 
+    ifelse-value ( [red.signal] of target ) [ "R" ] [ "" ]
+    ifelse-value ( [blue.signal] of target ) [ "B" ] [ "" ]) ]
     ( code = "SIZ" and is-anima1? target ) [ [size] of target ]
     ( code = "SHD" and is-anima1? target ) [ [body.shade] of target ]
     ( code = "COL" and is-anima1? target ) [ [round color] of target ] ; update to plants
@@ -631,13 +670,13 @@ to-report read-code [ code target ]
     [ false ])
 end
 
-;----------------------------------------------------------------------------------------------
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; GET-MUTATION
 ;
 ; Returns a randomly selected codon to occasionally introduce novel mutations into a population.
 ;
 ; CALLER: anima1
-; --------------------------------------------------------------------------------------------------------- ;
 ;
 ; TITLE
 ;

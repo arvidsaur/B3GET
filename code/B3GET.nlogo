@@ -242,17 +242,17 @@ patches-own [
 ; 'model-structure' defines the overall conditions for the simulation.
 ;  - 'no-plants' means plant growth is inhibited.
 ;  - 'reaper' means individuals are randomly selected to die when the total number of individuals across
-;     the entire spatial structure exceeds 'n' individuals, where 'n' is 100.
-;  - 'sower' means individuals are randomly selected to reproduce until the total number of individuals
-;     across the entire spatial structure exceeds 'n' individuals, where 'n' is 100.
+;     the entire spatial structure exceeds 'n' individuals, where 'n' is minimum-population-size.
+;  - 'stork' means individuals are randomly selected to reproduce until the total number of individuals
+;     across the entire spatial structure exceeds 'n' individuals, where 'n' is maximum-population-size.
 ;  - 'aspatial' means that interactions among individuals are global, not restricted to neighboring spatial
 ;     patches.
 ;  - 'free-lunch' means that individuals may perform behaviors even if depleted of energy.
 ;  - 'no-evolution' means the evolutionary mechanisms are disabled.
 ;  - 'ideal-form' means simulated individuals conceived in the model acquire traits representing the average
 ;     of the entire population at the time.
-;  - 'uninvadable' means evolution occurs without mutation, only with recombination and other simulated
-;     genetic mechanisms.
+;  - 'uninvadable' means evolution occurs with recombination and other simulated genetic mechanisms but
+;     without mutation.
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
@@ -274,6 +274,8 @@ globals [
   deterioration-rate               ; Rate at which anima1s experience a decrease in survival chance
   maximum-visual-range             ; Maximum possible range for an anima1's cone of perception
   base-litter-size                 ; Maximum possible litter size of an anima1
+  maximum-population-size          ; The maximum population size when the "reaper" code is activated.
+  minimum-population-size          ; The minimum population size when the "stork" code is activated.
 
   solar-status                     ; Whether it is currently day or night in the simulation
   current-season                   ; Current time of year in the simulation
@@ -377,8 +379,9 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to setup-parameters
-  set model-version "1.2.0-Beta4"                              ; Model version of B3GET.
-  set model-structure ( sentence "baseline" model-structure )  ; A simulation has a baseline model structure.
+  set model-version "1.2.0-Beta-2021-07-10"                    ; Model version of B3GET.
+  if ( model-structure = 0 ) [
+    set model-structure [ "baseline" ] ]                       ; A simulation has a baseline model structure.
   set start-date-and-time date-and-time                        ; by default.
 
   if ( path-to-experiment = "" )                               ; By default, the path-to-experiment is
@@ -395,6 +398,12 @@ to setup-parameters
 
   if ( base-litter-size = 0 )                                  ; This value must be set to a nonzero positive
   [ set base-litter-size 10 ]                                  ; integer in order for conception to occur.
+
+  if ( maximum-population-size = 0 )                           ; Only used for "reaper" code
+  [ set maximum-population-size 150 ]
+
+  if ( minimum-population-size = 0 )                           ; Only used for "stork" code
+  [ set minimum-population-size 150 ]
 
   set verification-results []                                  ; These global variables are lists that need
   set plant-abundance-record []                                ; to be initialized here so that they can be
@@ -484,10 +493,10 @@ to-report generate-timestamp
   (time:create "")                                             ; on New Year's Eve.
   "seconds"
 
-  set time-difference time-difference                          ; Create a little randomness to this time differece
-  + random 1000 - random 1000                                  ; so that mutiple files may be created within
-  let hex-list [ "0" "1" "2" "3" "4" "5" "6" "7" "8" "9"       ; the same second and not usually cause file
-    "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M"        ; write collisions.
+  set time-difference time-difference                          ; Create a little randomness to this time
+  + random 1000 - random 1000                                  ; difference so that mutiple files may be
+  let hex-list [ "0" "1" "2" "3" "4" "5" "6" "7" "8" "9"       ; created withinthe same second and not usually
+    "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M"        ; cause file write collisions.
     "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z" ]      ; Create a list of numbers and letters.
 
   while [ time-difference > 0 ] [                              ; Generate a hexadecimal code based on
@@ -727,7 +736,8 @@ to global-update
     set current-season                                         ; Calculate the current season
     ( cos (( 360 / plant-annual-cycle ) * ticks ))             ; which oscillates sinusoidally with time.
 
-    if ( ticks-on-interval? timestep-interval ) [
+    if ( ticks-on-interval? timestep-interval and
+      any? anima1s with [is.alive] ) [
 
       set plant-abundance-record lput                          ; Periodically record the total amount
       sum [penergy.supply] of patches                          ; of energy available in all plants.
@@ -796,16 +806,12 @@ end
 ;
 ; UPDATE THE ATTRIBUTES OF ALL PLANTS FOR THIS TIMESTEP
 ;
-; This routine is called once per time step to update all individual cells in
-; the environment. This update only involves plants.
-;
-; Each plant has a maximum energy that it can accumulate at any moment, and that
-; maximum energy varies with season and other parameters. In this model the
-; present energy of a plant increases by a fixed amount each time step as part of
-; plant growth, and decreases by plants being consumed by animals, and also can
-; decrease by reductions in the maximum energy allowed.
-;
-; Plant growth does not occur if the model-structure includes "no-plants."
+; This subroutine is called once per time step to update all individual plants in the environment. Each
+; plant has a maximum energy that it can accumulate at any moment, and that maximum energy varies with
+; season and other parameters. In this model the present energy of a plant increases by a fixed amount each
+; time step as part of plant growth, and decreases by plants being consumed by animals, and also can decrease
+;  by reductions in the maximum energy allowed. Plant growth does not occur if the model-structure includes
+; "no-plants."
 ;
 ; ENTRY: model-structure is set to "no-plants"
 ;
@@ -822,6 +828,8 @@ end
 ;
 ; EXIT:  update-patches
 ;
+;        update-terminal-energy
+;
 ;         'season' defines the abstract season at the current value of 'tick'
 ;          on a cosine scale.
 ;
@@ -832,31 +840,30 @@ end
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
-
 to plants-update
 
   carefully [
 
-    ifelse ( member? "no-plants" model-structure )             ; If the model-structure setting contains "no-plants"
-    [ ask patches with [ pcolor != brown + 1 ]                 ; then for patches that are not currently brown
-      [ set pcolor brown + 1 ]]                                ; set their color to brown.
+    ifelse ( member? "no-plants" model-structure )             ; If the model-structure setting contains
+    [ ask patches with [ pcolor != brown + 1 ]                 ; "no-plants" then for patches that are not
+      [ set pcolor brown + 1 ]]                                ; currently brown set their color to brown.
 
-    [ if ( solar-status = "DAY" ) [                            ;
-        let season current-season                              ;
-        let density ( sum [penergy.supply] of patches )        ;
-        / ( count patches * plant-quality )                    ;
+    [ if ( solar-status = "DAY" ) [                            ; If it is currently daytime, perform the
+        let season current-season                              ; following. First, calculate the current season
+        let density ( sum [penergy.supply] of patches )        ; and the current population density.
+        / ( count patches * plant-quality )
 
-        ask patches [                                          ;
-          update-terminal-energy season density                ;
+        ask patches [                                          ; Then for each plant, adjust its terminal energy
+          update-terminal-energy season density                ; based on seasonal factors and local neighbors.
 
-          set penergy.supply penergy.supply                    ;
-          + plant-quality / plant-annual-cycle                 ;
+          set penergy.supply penergy.supply                    ; Each plant also grows in energy based on
+          + plant-quality / plant-annual-cycle                 ; user set year length and max plant energy allowed.
 
-          if penergy.supply > pterminal.energy                 ;
-          [ set penergy.supply pterminal.energy ]]]            ;
+          if penergy.supply > pterminal.energy                 ; The program makes sure to keep the amount
+          [ set penergy.supply pterminal.energy ]]]            ; of energy it possesses lower or equal to its
+                                                               ; terminal energy setting.
 
-      ask patches [ update-patch-color ] ]                     ; Both day and night update the visuals of plants.
-                                                               ; Otherwise update plant growth in all patches
+      ask patches [ update-patch-color ] ]                     ; Both day and night, update the visuals of plants.
 
   ] [ print ( word "PLANTS UPDATE ERROR: " error-message ) ]   ; If error occurs, print out error message.
 end
@@ -865,58 +872,66 @@ end
 ;
 ; INCREASE OR DECREASE A PLANT'S TERMINAL ENERGY VALUE
 ;
-; This subroutine is called once per time step per plant.
-; As plants grow, their energy content increases to a maximum, their "terminal
-; energy," and during winter that energy can decrease. Also, as they are eaten,
-; their energy content decreases, but not their terminal energy.
-; This subroutine calculates the change in energy content, but also updates the
-; plant terminal energy, which can NOT QUITE RIGHT -- FIX...
+; This subroutine is called once per timestep per plant. As plants grow, their energy content increases
+; to a maximum, called their "terminal energy." This subroutine calculates the change in this terminal
+; energy value based on both seasonal factors and local environmenal conditions. For example, summer
+; usually results in an increased terminal energy and winter usually results in a decreased terminal energy.
+; Additionally, depending on user settings, the plants may experience overcrowding from too many plant
+; neighbors, which results in decreased terminal energy. Likewise, the terminal energy can decrease from
+; undercrowding. However, if the plant is currently in optimal conditions with respect to its local
+; plant neighbors, then its terminal energy may increase.
 ;
 ; ENTRY: 'plant-season' specifies the abstract season on a cosine scale, as
 ;          defined above.
+;
 ;        'plant-density' specifies the average energy per plant, as a proportion
 ;          of the maximum plant quality.
 ;
-; EXIT: exit1...
+;         plant-seasonality  plant-minimum-neighbors plant-maximum-neighbors
+;         plant-daily-cycle  plant-quality plant-annual-cycle
+;
+;         information on the plants surrounding the current plant
+;
+; EXIT: the plant's terminal energy is adjusted up or down within bounds.
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to update-terminal-energy [ plant-season plant-density ]
 
-  let seasonal-factor (                                        ;
-    ( plant-seasonality * plant-season + 1 ) / 2 )             ;
+  let seasonal-factor (                                        ; Calculate the degree of impact
+    ( plant-seasonality * plant-season + 1 ) / 2 )             ; that the season has on the plants.
 
-  let optimal-neighbor-energy (                                ;
-    plant-minimum-neighbors + plant-maximum-neighbors ) / 2    ;
+  let optimal-neighbor-energy (                                ; Calculate the optimal number of neighbors
+    plant-minimum-neighbors + plant-maximum-neighbors ) / 2    ; that a plant should currently desire.
 
-  let neighbor-energy-sd (                                     ;
-    optimal-neighbor-energy                                    ;
-    - plant-minimum-neighbors )                                ;
+  let neighbor-energy-sd (                                     ; Calculate the range around the optimal
+    optimal-neighbor-energy                                    ; desired neighbors that the plant will
+    - plant-minimum-neighbors )                                ; also find satisfying conditions.
 
-  let neighbor-energy (                                        ;
-    mean ( list                                                ;
-      (sum [penergy.supply] of neighbors)                      ;
-      (sum [pterminal.energy] of neighbors) )                  ;
-    / plant-quality )                                          ;
+  let neighbor-energy (                                        ; Calculate the number of neighbors surrounding
+    mean ( list                                                ; a plant based on their energy settings
+      (sum [penergy.supply] of neighbors)                      ; with respect to the user specified amount of
+      (sum [pterminal.energy] of neighbors) )                  ; energy allowed.
+    / plant-quality )
 
-  let probability-up ifelse-value                              ;
-  ( neighbor-energy-sd = 0 ) [ 0 ] [                           ;
-    ( 1 * e ^ (                                                ;
-      - (( neighbor-energy - optimal-neighbor-energy ) ^ 2 )   ;
-      / ( 2 * ( neighbor-energy-sd ^ 2 ) )) ) ]                ;
+  let probability-up ifelse-value                              ; Calculate the degree to which the plant
+  ( neighbor-energy-sd = 0 ) [ 0 ] [                           ; finds itself in ideal neighbor conditions.
+    ( 1 * e ^ (
+      - (( neighbor-energy - optimal-neighbor-energy ) ^ 2 )
+      / ( 2 * ( neighbor-energy-sd ^ 2 ) )) ) ]
 
-  let y (                                                      ;
-    ( plant-daily-cycle * plant-quality )                      ;
-    / plant-annual-cycle ) * (                                 ;
-    plant-density *                                            ;
-    ( 2 * probability-up - 1 ) +                               ;
-    seasonal-factor -                                          ;
-    plant-density )                                            ;
+  let y (                                                      ; Calculate the adjustment in
+    ( plant-daily-cycle * plant-quality )                      ; the plant's maximum amount
+    / plant-annual-cycle ) * (                                 ; of energy allowed based on the amount
+    plant-density *                                            ; of neighbors and other general seasonal
+    ( 2 * probability-up - 1 ) +                               ; factors using the above calculations.
+    seasonal-factor -
+    plant-density )
 
-  set pterminal.energy ( pterminal.energy + random-float y )   ;
-  if pterminal.energy >= plant-quality                         ;
-  [ set pterminal.energy plant-quality ]                       ;
-  if pterminal.energy <= 0.000 [ set pterminal.energy 0.000 ]  ;
+  set pterminal.energy ( pterminal.energy + random-float y )   ; Update the plants terminal energy setting,
+  if pterminal.energy >= plant-quality                         ; which sets its mamimum allowed energy and
+  [ set pterminal.energy plant-quality ]                       ; also keep this value within world bounds.
+  if pterminal.energy <= 0.000 [ set pterminal.energy 0.000 ]
 
 end
 
@@ -924,12 +939,13 @@ end
 ;
 ; UPDATE COLOR OF A PLANT BASED ON ITS CURRENT ENERGY SUPPLY AND TERMINAL ENERGY
 ;
-; This soubroutine is called by each plant once per timestep and updates the
-; color of the plant, which can be viewed in the interface.
+; This soubroutine is called by each plant once per timestep and updates the color of the plant, which can
+; be viewed in the interface. A plant with a high amount of energy will appear darker than a plant with a
+; low amount of energy.
 ;
-; ENTRY: entry 1...
+; ENTRY:  pterminal.energy penergy.supply plant-quality ?
 ;
-; EXIT: exit 1...
+; EXIT:   The plant's color is updated
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
@@ -952,11 +968,27 @@ end
 ;
 ; PERFORM ALL GLOBAL UPDATES FOR ANIMA1S
 ;
+; This subroutine handles all anima1 operations that are not handled by the main environment-decision-action
+; operations. In other words, this subroutine includes all operations that the anima1s themselves do
+; not pay energy for, but instead the environment imposes on the individuals. First, the environment
+; imposes mortality on the anima1s such that indivudals who have a lower survival chance are more likely
+; to die. The environment also imposes that each individual's survival chance dcreases every timestep.
+;
+; Other operations do not affect the anima1s directly but instead are related to tracking variables
+; for user purposes only. These include variables related to instantaneous energy gains and losses,
+; and the repositories anima1s use for viewing their environment and making decisions. This subroutine
+; also handles the appearance of individuals in the simulation view.
+;
+; This subroutine is also associated with two model-structure settings: "reaper" and "stork"
 ; This organization ensures that 100 individuals stay alive at all times.... essentially ; random mating
+; In particular, this subroutine handles death, and reporduction if model-structure includes "stork"
 ;
-; ENTRY:
 ;
-; EXIT:
+; ENTRY: The simulation is running and a population of anima1s exists
+;
+; EXIT: Anima1s updated attributes
+;
+;       It is possible that new anima1s were created if "stork"
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
@@ -964,63 +996,68 @@ to animals-update
 
   carefully [
 
-    ifelse ( member? "reaper" model-structure ) [                   ;
-      if ( count anima1s with [ is.alive ] > 100 ) [                ;
-        ask n-of ( count anima1s with [ is.alive ] - 100 ) anima1s  ;
-        [ set-to-dead ]]                                            ;
-      ask anima1s with [ not fully.decayed and is.alive = false ]   ;
-      [ check-mortality ] ]                                         ;
+    ifelse ( member? "reaper" model-structure ) [                   ; If the current model structure includes
+      if ( count anima1s with [ is.alive ] >                        ; "reaper" then randomly select individuals
+        maximum-population-size ) [                                 ; to die until the population size is below
+        ask n-of ( count anima1s with [ is.alive ] -                ; set number of indiviudals.
+          maximum-population-size ) anima1s
+        [ set-to-dead ]]
+      ask anima1s with [ not fully.decayed and is.alive = false ]   ; Check individuals who have died if they
+      [ check-mortality ] ]                                         ; should fully decay.
 
-    [ ask anima1s with [ not fully.decayed ]                        ;
-      [ check-mortality ] ]                                         ;
+    [ ask anima1s with [ not fully.decayed ]                        ; When "reaper" is not included, the anima1s
+      [ check-mortality ] ]                                         ; undergo regular death processes.
 
 
-    if ( member? "stork" model-structure ) [                        ; UPDATE AGENTS : reproduction ( when model-structure = "stork" )
-      if (count anima1s with [ is.alive ] < 100 ) [                 ;
-        repeat ( 100 - count anima1s with [ is.alive ]) [           ;
-          if ( ( count anima1s with [                               ;
-            biological.sex = "male" and                             ;
-            life.history = "adult" and                              ;
-            is.alive ] > 0 )                                        ; if there is at least one adult male
-            and ( count anima1s with [                              ;
-              biological.sex = "female" and                         ;
-              life.history = "adult" and                            ;
-              fertility.status = "cycling" and                      ;
-              is.alive ] > 0 ) )                                    ; and one adult cycling female left in the simulation,
-          [ ask one-of anima1s with [                               ;
-            biological.sex = "female" and                           ;
-            life.history = "adult" and                              ;
-            fertility.status = "cycling" and                        ;
-            is.alive ]                                              ; randomly select one adult male and one cycling female,
-            [ conceive-with ( one-of anima1s with [                 ;
-              biological.sex = "male" and                           ;
-              life.history = "adult" and                            ;
-              is.alive ] ) ]]]]]                                    ; and the female spontaneously conceives a new offspring from their alleles
+    if ( member? "stork" model-structure ) [                        ; If the current model structure includes
+      if (count anima1s with [ is.alive ] <                         ; "stork" then randomly select individuals
+        minimum-population-size ) [                                 ; to reproduce until the population size
+        repeat ( minimum-population-size -                          ; is above a set number of individuals.
+          count anima1s with [ is.alive ]) [
+          if ( ( count anima1s with [
+            biological.sex = "male" and
+            life.history = "adult" and
+            is.alive ] > 0 )                                        ; There must be at least one adult male
+            and ( count anima1s with [                              ; and one adult cycling female left in order
+              biological.sex = "female" and                         ; for conception to occur.
+              life.history = "adult" and
+              fertility.status = "cycling" and
+              is.alive ] > 0 ) )
+          [ ask one-of anima1s with [
+            biological.sex = "female" and
+            life.history = "adult" and
+            fertility.status = "cycling" and
+            is.alive ]
+            [ conceive-with ( one-of anima1s with [
+              biological.sex = "male" and
+              life.history = "adult" and
+              is.alive ] ) ]]]]]
 
     ask anima1s with [ not fully.decayed ] [
 
-      set foraging.gains.this.timestep 0                            ;
-      set energy.gains.this.timestep 0                              ;
-      set energy.cost.this.timestep 0                               ;
-      set my.environment []                                         ;
-      set decision.vectors []                                       ;
+      set foraging.gains.this.timestep 0                            ; Some variables are cleared each timestep
+      set energy.gains.this.timestep 0                              ; to be used again in the subsequent timestep.
+      set energy.cost.this.timestep 0
+      set my.environment []
+      set decision.vectors []
       set actions.completed []                                      ; Clear memory from the previous timestep.
       set age.in.ticks age.in.ticks + 1                             ; Advance the individual's age by one timestep.
 
-      deteriorate                                                   ; Advance the individual's decay for this time step.
-      update-appearance                                             ; Update the visual appearance to match.
+      deteriorate                                                   ; Advance the individual's decay for this time
+      update-appearance                                             ; step. Update the visual appearance to match.
 
       if ( not empty? carried.items ) [                             ; If the carrier has moved, bring all the
         foreach carried.items [ itm ->                              ; carried items along.
           ask itm [ move-to myself ]]]
 
-      ask patch-here [                                              ; Record individual's
-        set pgroups.here but-first pgroups.here
-        set pgroups.here lput [group.identity] of myself pgroups.here
+      ask patch-here [                                              ; Update territory ranges based on each
+        set pgroups.here but-first pgroups.here                     ; anima1's present location.
+        set pgroups.here lput
+        [group.identity] of myself pgroups.here
         set pgroup.identity one-of modes pgroups.here ]
 
-      ;set cause.of.death ""
-    ]                                      ;
+      set cause.of.death ""
+    ]
 
   ] [ print ( word "INDVIDUALS UPDATE ERROR: " error-message ) ]    ; If error occurs, print out error message.
 
@@ -1034,9 +1071,10 @@ end
 ; the caller's chance of survival. The deterioration-rate is a negative number ( i.e. -0.001 )
 ;
 ; ENTRY:  survival.chance | The caller's unique value for their chance of survival to the next timestep.
+;
 ;         deterioration-rate | A global variable set by the user to drive the rate of decay in environment.
 ;
-; EXIT:
+; EXIT: NA
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
@@ -1053,9 +1091,12 @@ end
 ; as fully decayed and is not longer present in the environment.
 ;
 ; ENTRY:  survival.chance
+;
 ;         is.alive
 ;
-; EXIT:
+; EXIT: set-to-dead
+;
+;       remove-from-environment
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
@@ -1071,25 +1112,25 @@ end
 ; UPDATE CALLER TO BE DEAD
 ;
 ; The caller's status is updated to dead, which triggers some tracking records and visual changes. The
-; caller's state is perminantly set to dead.
+; caller's state is perminantly set to dead and it can no longer be seen by other individuals.
 ;
-; ENTRY:
+; ENTRY: is.alive group.identity, anima1s in group
 ;
-; EXIT:
+; EXIT:  ticks.at.death death.group.identity
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to set-to-dead
-  set is.alive false                                           ;
-  set ticks.at.death ticks                                     ;
-  set death.group.identity group.identity                      ;
-  set death.group.size ( count anima1s with [                  ;
-    is.alive and                                               ;
-    group.identity = [group.identity] of myself ] )            ;
-  set label "x"                                                ;
-  set my.environment []                                        ;
-  set decision.vectors []                                      ;
-  set actions.completed []                                     ;
+  set is.alive false                                           ; Update the anima1 to be dead.
+  set ticks.at.death ticks                                     ; Record information about the anima1
+  set death.group.identity group.identity                      ; at the time of death, including the current
+  set death.group.size ( count anima1s with [                  ; time, and information about their current
+    is.alive and                                               ; group.
+    group.identity = [group.identity] of myself ] )
+  set label "x"                                                ; Visually display that anima1 has died.
+  set my.environment []                                        ; Clear all active records.
+  set decision.vectors []
+  set actions.completed []
   ask anima1s with
   [ my.mother = [my.identity] of myself and is.alive ] [       ; Update probable future cause of death of
     set cause.of.death ( word "Mother has died." ) ]           ; a mother's offspring.
@@ -1097,85 +1138,97 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; UPDATE CALLER TO BE DEAD AND FULLY DECAYED
+; UPDATE CALLER TO BE FULLY DECAYED
 ;
 ; An individual who dies is still available in the environment for living individuals to interact with. For
-; exmaple, a living individual may want to eat a dead individual.
+; exmaple, a living individual may want to eat a dead individual. However, eventually, a dead anima1's body
+; is fully decayed such that another individual cannot interact with it. This subroutine handles this
+; process to completely remove an anima1 from view in the environment. However, the anima1 still exists
+; to be examined by the user.
 ;
-; ENTRY:
+; ENTRY: ticks.at.death carried.items of others and myself
 ;
-; EXIT:
+; EXIT:  Anima1 is completely removed from view.
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to remove-from-environment
-  if ( ticks.at.death = 0 ) [ set ticks.at.death ticks ]       ;
-  ask anima1s with [ member? myself carried.items ]            ;
-  [ set carried.items                                          ;
-    remove myself remove-duplicates                            ;
-    carried.items ]                                            ;  remove me from other agent's carried.items
-  set carried.items []                                         ; remove others from my carried items
-  set hidden? true                                             ;
-  set fully.decayed true                                       ;
-  set label " "                                                ;
+  if ( ticks.at.death = 0 ) [ set ticks.at.death ticks ]       ; Record when the anima1 died ("reaper" only).
+  ask anima1s with [ member? myself carried.items ]
+  [ set carried.items                                          ; Remove this anima1 from other
+    remove myself remove-duplicates                            ; anima1's carried items.
+    carried.items ]
+  set carried.items []                                         ; Remove others from my carried items
+  set hidden? true                                             ; Remove anima1 from view.
+  set fully.decayed true                                       ; Update the anima1 to fully decayed
+  set label " "                                                ; Remove the label that indicated it was dead.
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; UPDATE VISUAL DISPLAY TO MATCH CURRENT ATTRIBUTES
 ;
-; This subroutine...
+; This subroutine updates the size and overall appearance of an anima1 at each timestep. During the course
+; of an anima1's life, they can grow larger, change in coloration, and signals. This subroutine ensures that
+; the appearance of the anima1 accurately reflects these changes.
 ;
-; ENTRY: entry 1...
+; ENTRY: The anima1's body.size, group.identity, is.alive are known
 ;
-; EXIT: exit 1...
+; EXIT: The anima1's size and shape are updated.
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to update-appearance
-  set size body.size                                           ;
-  set label ifelse-value                                       ;
-  ( is.alive ) [ " " ] [ "x" ]                                 ;
-  set color round (                                            ;
-    wrap-color group.identity + 5 - ( 10 ^ body.shade ))       ;
-  set shape get-shape                                          ;
+  set size body.size                                           ; Update the size.
+  set label ifelse-value
+  ( is.alive ) [ " " ] [ "x" ]                                 ; If the anima1 has died, display an 'X'
+  set color round (                                            ; Update the color.
+    wrap-color group.identity + 5 - ( 10 ^ body.shade ))
+  set shape get-shape                                          ; Udate the shape.
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; DETERMINE THE CURRENT SHAPE OF CALLER
 ;
-; This subroutine...
+; This subroutine determines the appropriate shape to display depending on many factors of its current
+; state. The base shape is either a triangle for males or a circle for females. The eye size and spacing
+; is calculated from the anima1's visual attributes and depends on the current time of day. The shape may
+; also include
 ;
-; ENTRY: entry 1...
+; ENTRY: The attributes of the anima1 accurately represent its current state: 'biological.sex,'
+;        'visual.range,' 'visual.angle,' 'day.perception,' 'night.perception,' 'is.resting,' 'is.alive,'
+;        'yellow.signal,' 'red.signal,' and 'blue.signal' are all defined above.
 ;
-; EXIT: exit 1...
+;        The current 'solar-status' is either DAY or NIGHT.
+;
+; EXIT:  NA
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to-report get-shape
-  let base_shape ifelse-value                                  ;
-  ( biological.sex = "male" ) [ "triangle" ] [ "circle" ]      ;
-  let eye_size ( ifelse-value                                  ;
-    ( visual.range < ( 1 / 3 ) ) [ "1" ]                       ;
-    ( visual.range < ( 2 / 3 ) ) [ "2" ] [ "3" ] )             ;
-  let eye_spacing ( ifelse-value                               ;
-    ( visual.angle < ( 1 / 3 ) ) [ "1" ]                       ;
-    ( visual.angle < ( 2 / 3 ) ) [ "2" ] [ "3" ] )             ;
-  let current-perception ifelse-value                          ;
-  ( solar-status = "DAY" )                                     ;
-  [ day.perception ]                                           ;
-  [ night.perception ]                                         ;
-  let eye_acuity ( ifelse-value                                ;
-    ( is.resting or not is.alive ) [ "1" ]                     ;
-    ( current-perception > 0.5 ) [ "3" ]                       ;
-    ( current-perception > 0 ) [ "2" ] [ "1" ] )               ;
-  let a_on ifelse-value yellow.signal [ "a" ] [ "" ]           ;
-  let b_on ifelse-value red.signal [ "b" ] [ "" ]              ;
-  let c_on ifelse-value blue.signal [ "c" ] [ "" ]             ;
+  let base_shape ifelse-value                                  ; Determine whether the base shape should be
+  ( biological.sex = "male" ) [ "triangle" ] [ "circle" ]      ; triangle or circle depending on the sex.
+  let eye_size ( ifelse-value
+    ( visual.range < ( 1 / 3 ) ) [ "1" ]                       ; Determine the degree of eye size and spacing
+    ( visual.range < ( 2 / 3 ) ) [ "2" ] [ "3" ] )             ; from anima1 visual attributes.
+  let eye_spacing ( ifelse-value
+    ( visual.angle < ( 1 / 3 ) ) [ "1" ]
+    ( visual.angle < ( 2 / 3 ) ) [ "2" ] [ "3" ] )
+  let current-perception ifelse-value                          ; Determine the pupil shape based on the
+  ( solar-status = "DAY" )                                     ; time of day and the anima1's ability
+  [ day.perception ]                                           ; to see during that time.
+  [ night.perception ]
+  let eye_acuity ( ifelse-value
+    ( is.resting or not is.alive ) [ "1" ]
+    ( current-perception > 0.5 ) [ "3" ]
+    ( current-perception > 0 ) [ "2" ] [ "1" ] )
+  let a_on ifelse-value yellow.signal [ "a" ] [ "" ]           ; Determine whether the color
+  let b_on ifelse-value red.signal [ "b" ] [ "" ]              ; signals are on or off
+  let c_on ifelse-value blue.signal [ "c" ] [ "" ]
 
-  report ( word base_shape eye_size eye_spacing                ;
-    eye_acuity a_on b_on c_on )                                ;
+  report ( word base_shape eye_size eye_spacing                ; Report the appropriate shape
+    eye_acuity a_on b_on c_on )                                ; based on the above information.
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -1223,6 +1276,7 @@ end
 ; timestep for each individual are:
 ;
 ; ========================================================================================================= ;
+
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
 ;                             oo                                                           dP
@@ -1289,10 +1343,11 @@ to consider-environment
               lput myself my.environment ] ] ] ] ]
 
     let current-perception ifelse-value ( solar-status = "DAY" ) ; Current perceptive abilities are based own
-    [ day.perception ] [ night.perception ]                      ; visual attributes and on whether it is day or night.
-    set my.environment up-to-n-of                                ; If current perceptive abilities are
+    [ day.perception ] [ night.perception ]                      ; visual attributes and on whether it is day
+    set my.environment up-to-n-of                                ; or night. If current perceptive abilities are
     ceiling ( current-perception * length my.environment )       ; less than 100%, randomly remove some objects
-    my.environment                                               ; from environment to correspond with limited perceptive abilities.
+    my.environment                                               ; from environment to correspond with limited
+                                                                 ; perceptive abilities.
 
     if ( life.history = "gestatee" )                             ; If the individual is a gestatee,
     [ if ( my.mother != nobody )                                 ; put the gestatee in the mother's
@@ -1309,11 +1364,11 @@ to consider-environment
         if ( is.alive and not member? myself my.environment )
         [ set my.environment lput myself my.environment ] ]]
 
-    set my.environment lput self my.environment                  ; Individual also adds itself to current environment.
-    set my.environment remove-duplicates my.environment          ; Remove any duplicate objects from current environment.
+    set my.environment lput self my.environment                  ; Individual is also in current environment.
+    set my.environment remove-duplicates my.environment          ; Duplicate objects are not considered.
 
-  ] [ print ( word "CONSIDER ENVIRONMENT ERROR - " my.identity " : " error-message ) ] ; If error occurs, print out error message.
-
+  ] [ print ( word "CONSIDER ENVIRONMENT ERROR - " my.identity " : " error-message ) ] ; If error occurs
+                                                                                       ; print out error message.
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -1327,23 +1382,27 @@ end
 ;
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
+
+; --------------------------------------------------------------------------------------------------------- ;
 ;
-; GENERATE LIST OF DECISIONS FROM CURRENT ENVIRONMENT AND GENOTYPE
+; GENERATE LIST OF CALLER DECISIONS FROM CURRENT ENVIRONMENT AND GENOTYPE
 ;
 ; The main purpose of this subroutine is to access the appropriate subroutines to translate a genotype into
 ; decision vectors, based on the current environment. There are two languages that genotypes can be written
 ; in: sta2us and gat3s. The appropriate subrotuines in B3GET vary according to which genotype language is
-; used. The user can manually set which genotype reader to use by selecting the genotype-reader in the interface,
-; otherwise B3GET will use the sta2us genotype reader by default.
+; used. The user can manually set which genotype reader to use by selecting the genotype-reader in the
+; interface, otherwise B3GET will use the sta2us genotype reader by default.
 ;
 ; ENTRY: genotype-reader contains either "sta2us" or "gat3s", based on genotype language used.
 ;
 ;        my.environment, as described above, defines the current environment of the caller.
 ;
 ;
-; EXIT: decision.vectors, as described above, includes all decisions that the caller made from its genotype and environment.
+; EXIT: decision.vectors, as described above, includes all decisions that the caller made from its genotype and
+;       environment.
 ;
-;       decisions-made-this-timestep, as described above, defines the global record of decisions is updated with caller's decisions.
+;       decisions-made-this-timestep, as described above, defines the global record of decisions is updated with
+;       caller's decisions.
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
@@ -1356,13 +1415,14 @@ to make-decisions
       [ sta2us-get-decisions my.environment ]                    ; get decisions based on a sta2us genotype.
       ( genotype-reader = "gat3s" )                              ; If gentoype reader is gat3s,
       [ gat3s-get-decisions my.environment ]                     ; get decisions based on a gat3s genotype.
-      [ sta2us-get-decisions my.environment ] )                  ; If not specified, assume current genotype reader is sta2us.
+      [ sta2us-get-decisions my.environment ] )                  ; If not specified, assume current genotype
+                                                                 ; reader is sta2us.
+    foreach decision.vectors [ d ->                              ; Add this individual's decision to the global
 
-    foreach decision.vectors [ d ->                              ; Add this individual's decision to the global pool of decisions.
-      set decisions-made-this-timestep lput d decisions-made-this-timestep ]
+      set decisions-made-this-timestep lput d decisions-made-this-timestep ]        ; pool of decisions.
 
-  ] [ print ( word "MAKE DECISIONS ERROR - " my.identity " : " error-message ) ]    ; If error occurs, print out error message.
-
+  ] [ print ( word "MAKE DECISIONS ERROR - " my.identity " : " error-message ) ]    ; If error occurs, print
+                                                                                    ; out error message.
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -1376,6 +1436,8 @@ end
 ;
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
+
+; --------------------------------------------------------------------------------------------------------- ;
 ;
 ; CALLER PERFORMS EACH ACTION LISTED IN ITS DECISION VECTORS IF IT HAS SUFFICIENT ENERGY
 ;
@@ -1383,9 +1445,9 @@ end
 ; vectors. The caller will pay an energy cost to perform each action based on the value listed in the
 ; corresponding decision. However, the caller will not be able to perform the action if it does not have
 ; sufficient energy to do so. If the caller does have enough energy, this subroutine triggers the appropriate
-; subroutine that corresponds to the action. For clarity, the names of each action exactly match the corresponding
-; name for each subroutine. The caller is also prohibited from performing certain actions if they are currently
-; resting.
+; subroutine that corresponds to the action. For clarity, the names of each action exactly match the
+; corresponding name for each subroutine. The caller is also prohibited from performing certain actions if
+; they are currently resting.
 ;
 ; ENTRY: List of decisions vectors for the caller.
 ;
@@ -1413,14 +1475,14 @@ to do-actions
                                                                  ; the action, then the action can be performed.
 
         let target item 1 vector                                 ; Identify the target of the decision.
-        let action item 2 vector                                 ; Identify which action the caller has decided to take.
-        let cost item 3 vector                                   ; Identify how much the action will cost.
+        let action item 2 vector                                 ; Identify which action the caller has decided
+        let cost item 3 vector                                   ; to take. Identify how much the action will cost.
 
         if ( is.resting = false )                                ; These actions can only be performed if the caller
                                                                  ; is not resting.
 
-        [ ( ifelse                                               ; Call the subroutine that corresponds with the action name.
-
+        [ ( ifelse                                               ; Call the subroutine that corresponds with
+                                                                 ; the action name.
           action = "move-toward" [ move-toward target cost ]
           action = "move-away-from" [ move-toward target ( - cost ) ]
           action = "turn-right" [ turn-right cost ]
@@ -1442,7 +1504,8 @@ to do-actions
           action = "mate-with" [ if ( check-distance target ) [ mate-with target cost ] ]
           [])]
 
-        ( ifelse                                                 ; These actions can be performed resting or not resting.
+        ( ifelse                                                 ; These actions can be performed resting
+                                                                 ; or not resting.
 
           action = "hide" [ hide cost ]
           action = "rest" [ rest cost ]
@@ -1472,7 +1535,8 @@ to do-actions
       ]
     ]
 
-  ] [ print ( word "DO ACTIONS ERROR - " my.identity " : " error-message ) ] ; If error occurs, print out error message.
+  ] [ print ( word "DO ACTIONS ERROR - " my.identity " : " error-message ) ] ; If error occurs,
+                                                                             ; print out error message.
 
 end
 
@@ -1537,7 +1601,7 @@ end
 to-report check-energy [ vector ]
   let cost item 3 vector                                       ; Identify the cost of the decision.
   let abs-cost abs cost
-  let passes-energy-check ifelse-value                         ; Confirm if caller's energy is sufficient for cost.
+  let passes-energy-check ifelse-value                         ; Confirm if caller's energy is sufficient.
   ( member? "free-lunch" model-structure )                     ; If B3GET is set to "free lunch"
   [ true ]                                                     ; then any amount of energy is sufficient.
   [ energy.supply > abs-cost and abs-cost > 0 ]                ; Otherwise, the energy is sufficient if
@@ -1660,6 +1724,58 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
+; CALLER UPDATES HIDDEN STATUS
+;
+; This subroutine first updates the hidden chance attribute based on the cost. Then, if the caller
+; is not a gestatee, it determines if it is hidden base on the probability set by hidden cost.
+;
+; ENTRY: cost
+;
+;       hidden chance
+;
+; EXIT: The callers hidden? variable is updated.
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to hide [ cost ]
+  complete-action self "hide" cost                           ; Record that this action has started.
+  set hidden.chance get-updated-value hidden.chance cost     ; Apply update procedure to hidden chance.
+  if ( life.history != "gestatee" ) [                        ; Check that the caller is not a gestatee
+    ifelse ( random-float 1.0 < hidden.chance ) [            ; and then calculate a probability of
+      set hidden? true                                       ; being hidden.
+      complete-action self "is-hidden" 0
+    ][                                                       ; Update status to be hidden or not
+      set hidden? false                                      ; hidden based on probability calculation.
+      complete-action self "not-hidden" 0
+  ]]
+end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; CALLER UPDATES RESTING STATUS
+;
+; This subroutine determines if the caller is resting based on the cost of the action. The caller is
+; updated to hiding if the cost is a positive number and to not hiding if the cost is a negative
+; number.
+;
+; ENTRY: cost
+;
+; EXIT: Update caller status for resting
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to rest [ cost ]
+  complete-action self "rest" cost                          ; Record that this action has started.
+  if ( cost > 0 ) [                                         ; Set the caller to resting if the cost is a
+    set is.resting true                                     ; positive number.
+    complete-action self "is-resting" 0 ]                   ; Record that this action has been completed.
+  if ( cost < 0 ) [                                         ; Set the caller to not resting if the cost
+    set is.resting false                                    ; is a negative number.
+    complete-action self "not-resting" 0 ]                  ; Record that this action has been completed.
+end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ;  oo            dP                                         dP   oo
 ;                88                                         88
 ;  dP 88d888b. d8888P 88d888b. .d8888b. .d8888b. .d8888b. d8888P dP .d8888b. 88d888b. .d8888b.
@@ -1672,7 +1788,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; CALLER UPDATES ITS SURVIVAL CHANCE ATTRIBUTE [CL]
+; CALLER UPDATES SURVIVAL CHANCE [CL]
 ;
 ; ENTRY: cost | The amount of energy spent to update this attribute.
 ;
@@ -1690,7 +1806,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; CALLER UPDATES ITS BODY SIZE ATTRIBUTE
+; CALLER UPDATES BODY SIZE
 ;
 ; ENTRY: cost | The amount of energy spent to update this attribute.
 ;
@@ -1708,7 +1824,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; CALLER UPDATES ITS BODY SHADE ATTRIBUTE
+; CALLER UPDATES BODY SHADE
 ;
 ; ENTRY: cost | The amount of energy spent to update this attribute.
 ;
@@ -1726,7 +1842,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; CALLER UPDATES ITS VISUAL RANGE ATTRIBUTE
+; CALLER UPDATES VISUAL RANGE
 ;
 ; ENTRY: cost | The amount of energy spent to update this attribute.
 ;
@@ -1744,7 +1860,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; CALLER UPDATES ITS VISUAL ANGLE ATTRIBUTE
+; CALLER UPDATES VISUAL ANGLE
 ;
 ; ENTRY: cost | The amount of energy spent to update this attribute.
 ;
@@ -1762,7 +1878,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; CALLER UPDATES ITS DAY PERCEPTION ATTRIBUTE
+; CALLER UPDATES DAY PERCEPTION
 ;
 ; ENTRY: cost | The amount of energy spent to update this attribute.
 ;
@@ -1780,7 +1896,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; CALLER UPDATES ITS NIGHT PERCEPTION ATTRIBUTE
+; CALLER UPDATES NIGHT PERCEPTION
 ;
 ; ENTRY: cost | The amount of energy spent to update this attribute.
 ;
@@ -1798,7 +1914,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; CALLER UPDATES ITS CONCEPTION CHANCE ATTRIBUTE
+; CALLER UPDATES CONCEPTION CHANCE
 ;
 ; ENTRY: cost | The amount of energy spent to update this attribute.
 ;
@@ -1816,7 +1932,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; CALLER UPDATES ITS BITE CAPACITY ATTRIBUTE
+; CALLER UPDATES BITE CAPACITY
 ;
 ; ENTRY: cost | The amount of energy spent to update this attribute.
 ;
@@ -1834,7 +1950,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; CALLER UPDATES ITS MUTATION CHANCE ATTRIBUTE
+; CALLER UPDATES MUTATION CHANCE
 ;
 ; ENTRY: cost | The amount of energy spent to update this attribute.
 ;
@@ -1852,7 +1968,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; CALLER UPDATES ITS SEX RATIO ATTRIBUTE
+; CALLER UPDATES SEX RATIO
 ;
 ; ENTRY: cost | The amount of energy spent to update this attribute.
 ;
@@ -1870,7 +1986,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; CALLER UPDATES ITS LITTER SIZE ATTRIBUTE
+; CALLER UPDATES LITTER SIZE
 ;
 ; ENTRY: cost | The amount of energy spent to update this attribute.
 ;
@@ -1900,18 +2016,25 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; CALLER UPDATES HEADING WITH RESPECT TO TARGET
 ;
-; This subroutine...
+; This subroutine calculates a new heading for the caller with respect to the target. First, the position
+; difference between the caller and target are calculated along the x and y axes. If this difference is
+; non-zero, then a magnitude of difference if calculated based on the cost and the angle between the
+; target and the caller. Finally, these magnitudes are used to determine the new heading.
 ;
-; ENTRY: entry 1...
+; ENTRY: target
 ;
-; EXIT: exit 1...
+;        cost
+;
+;        Positions of the caller and target
+;
+; EXIT:  Caller magnitude preferrences and heading are updated
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to move-toward [ target cost ]
-  complete-action target "move-toward" cost                    ; Record that this action has been completed.
+  complete-action target "move-toward" cost                    ; Record that this action has started.
 
   if (target != nobody ) [
 
@@ -1924,10 +2047,9 @@ to move-toward [ target cost ]
       [ [pxcor] of target ]
       [ [xcor] of target ] ) - [xcor] of self )
 
-    ; these lines check if agent is looking at target across one of the edges of the world, which would not calculate the angle correctly
-    if ( ycor-difference > maximum-visual-range and
-      ycor-difference > 0 )
-    [ set ycor-difference ycor-difference - 100 ]
+    if ( ycor-difference > maximum-visual-range and            ; Check if the anima1 is looking at target
+      ycor-difference > 0 )                                    ; across one of the edges of the world
+    [ set ycor-difference ycor-difference - 100 ]              ; so that the angles are calculated correctly.
     if ( xcor-difference > maximum-visual-range and
       xcor-difference > 0 )
     [ set xcor-difference xcor-difference - 100 ]
@@ -1938,19 +2060,16 @@ to move-toward [ target cost ]
       xcor-difference < 0 )
     [ set xcor-difference xcor-difference + 100 ]
 
-    if ( not ( ycor-difference = 0 and
-      xcor-difference = 0 ) ) [ ; If the target isn't in the exact same location as self
+    if ( not ( ycor-difference = 0 and                         ; Make sure target isn't in
+      xcor-difference = 0 ) ) [                                ; the exact same location as self.
 
-      ; calculate angle to target
-      let angle atan xcor-difference ycor-difference
+      let angle atan xcor-difference ycor-difference           ; Calculate angle to the target.
       if ( cost < 0 ) [ set angle angle - 180 ]
 
-      ; set magnitudes based on cost
-      set x.magnitude x.magnitude + (abs cost * sin angle)
+      set x.magnitude x.magnitude + (abs cost * sin angle)     ; Set direction magnitudes based on energy cost.
       set y.magnitude y.magnitude + (abs cost * cos angle) ]
 
-    ; set heading based on magnitudes
-    set heading ifelse-value
+    set heading ifelse-value                                   ; Set current heading based on magnitudes.
     ( x.magnitude = 0 and y.magnitude = 0 )
     [ heading ]
     [ ( atan x.magnitude y.magnitude ) ]
@@ -1959,7 +2078,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; CALLER UPDATES HEADING BASED ON CURRENT HEADING
 ;
 ; This subroutine...
 ;
@@ -1970,16 +2089,16 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to turn-right [ cost ]
-  complete-action self "turn" cost
-  if ( cost > 0 ) [ right ( 360 * cost )
-    complete-action self "turn-right" 0 ]
-  if ( cost < 0 ) [ left ( 360 * abs cost )
-    complete-action self "turn-left" 0 ]
+  complete-action self "turn" cost                             ; Record that this action has started.
+  if ( cost > 0 ) [ right ( 360 * cost )                       ; Turn tight if cost is positive.
+    complete-action self "turn-right" 0 ]                      ; Record that this action has been completed.
+  if ( cost < 0 ) [ left ( 360 * abs cost )                    ; Turn left if cost is negative.
+    complete-action self "turn-left" 0 ]                       ; Record that this action has been completed.
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; CALLER MOVES FORWARD OR BACKWARD
 ;
 ; This subroutine...
 ;
@@ -1990,27 +2109,33 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to go-forward [ cost ]
-  complete-action self "go-forward" cost
+  complete-action self "go-forward" cost                       ; Record that this action has started.
   if ( life.history != "gestatee" ) [
 
-    ifelse ( cost < 0 ) [ right 180 complete-action self "went-backward" 0] [ complete-action self "went-forward" 0 ]
-    let sum-weight size
-    foreach carried.items [ object -> set sum-weight sum-weight + [size] of object ]
-    let travel-distance ifelse-value ( sum-weight > 0 ) [ (size * (sqrt (( 2 * abs cost ) / sum-weight )) ) ] [ 0 ]
-    forward travel-distance
+    ifelse ( cost < 0 )                                        ;
+    [ right 180 complete-action self "went-backward" 0]        ; Record that this action has been completed.
+    [ complete-action self "went-forward" 0 ]                  ;
+    let sum-weight size                                        ;
+    foreach carried.items [ object ->                          ;
+      set sum-weight sum-weight + [size] of object ]           ;
+    let travel-distance ifelse-value                           ;
+    ( sum-weight > 0 )                                         ;
+    [ (size * (sqrt (( 2 * abs cost ) / sum-weight )) ) ]      ;
+    [ 0 ]                                                      ;
+                                                               ;
+    forward travel-distance                                    ;
 
-    set x.magnitude 0
-    set y.magnitude 0
+    set x.magnitude 0                                          ;
+    set y.magnitude 0                                          ;
 
-    ; track travel
-    set distance.traveled distance.traveled + travel-distance
+    set distance.traveled distance.traveled + travel-distance  ; track travel
 
   ]
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; CALLER UPDATES HEADING TO SPECIFIED VALUE
 ;
 ; This subroutine...
 ;
@@ -2021,76 +2146,42 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to set-heading [ cost ]
-  complete-action self "set-heading" cost
+  complete-action self "set-heading" cost                     ; Record that this action has started.
   set heading cost * 360
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; CALLER UPDATES HEADING WITH A RANDOM DEVIATION
 ;
 ; This subroutine...
 ;
-; ENTRY: entry 1...
+; ENTRY: cost
 ;
-; EXIT: exit 1...
+;        Current heading and location are known.
+;
+; EXIT: Heading updated
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to set-heading-random [ cost ]
-  complete-action self "set-heading-random" cost
-  let x-difference 2 * x.magnitude * 100000 * cost
-  if ( x-difference = 0 ) [ set x-difference 100000 * cost ]
-  if ( x-difference > 1E10 ) [ set x-difference 1E10 ]
-  set x.magnitude x.magnitude + random-float x-difference - random-float x-difference
-  let y-difference 2 * y.magnitude * 100000 * cost
-  if ( y-difference = 0 ) [ set y-difference 100000 * cost ]
-  if ( y-difference > 1E10 ) [ set y-difference 1E10 ]
-  set y.magnitude y.magnitude + random-float y-difference - random-float y-difference
-  set heading ifelse-value ( x.magnitude = 0 and y.magnitude = 0 ) [ heading ] [ ( atan x.magnitude y.magnitude ) ]
-end
-
-; --------------------------------------------------------------------------------------------------------- ;
-;
-; TITLE
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
-
-to hide [ cost ]
-  complete-action self "hide" cost
-  set hidden.chance get-updated-value hidden.chance cost
-  if ( life.history != "gestatee" ) [
-    ifelse ( random-float 1.0 < hidden.chance ) [
-      set hidden? true
-      complete-action self "is-hidden" 0
-    ][
-      set hidden? false
-      complete-action self "not-hidden" 0
-  ]]
-end
-
-; --------------------------------------------------------------------------------------------------------- ;
-;
-; TITLE
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
-
-to rest [ cost ]
-  complete-action self "rest" cost
-  if ( cost > 0 ) [ set is.resting true complete-action self "is-resting" 0 ]
-  if ( cost < 0 ) [ set is.resting false complete-action self "not-resting" 0 ]
+  complete-action self "set-heading-random" cost               ; Record that this action has started.
+  let x-difference 2 * x.magnitude * 100000 * cost             ;
+  if ( x-difference = 0 )                                      ;
+  [ set x-difference 100000 * cost ]                           ;
+  if ( x-difference > 1E10 )                                   ;
+  [ set x-difference 1E10 ]                                    ;
+  set x.magnitude x.magnitude +                                ;
+  random-float x-difference - random-float x-difference        ;
+  let y-difference 2 * y.magnitude * 100000 * cost             ;
+  if ( y-difference = 0 ) [ set y-difference 100000 * cost ]   ;
+  if ( y-difference > 1E10 ) [ set y-difference 1E10 ]         ;
+  set y.magnitude y.magnitude +                                ;
+  random-float y-difference - random-float y-difference        ;
+  set heading ifelse-value                                     ;
+  ( x.magnitude = 0 and y.magnitude = 0 )                      ;
+  [ heading ]                                                  ;
+  [ ( atan x.magnitude y.magnitude ) ]                         ;
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -2108,73 +2199,82 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; CALLER UPDATES YELLOW SIGNAL STATUS
 ;
-; This subroutine...
+; This subroutine first updates the caller's yellow signal according to the cost. Then, it calculates
+; the probability of the caller turning yellow, and updates the status of this caller's signal accordingly.
 ;
-; ENTRY: entry 1...
+; ENTRY: cost
 ;
-; EXIT: exit 1...
+;        yellow.signal
+;
+; EXIT: Signal status is updated.
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to yellow-signal [ cost ]
-  complete-action self "yellow-signal" cost
-  set yellow.chance get-updated-value yellow.chance cost
-  ifelse ( random-float 1.0 < yellow.chance ) [
-    set yellow.signal true
-    complete-action self "yellow-signal-on" 0
-  ][
-    set yellow.signal false
-    complete-action self "yellow-signal-off" 0
+  complete-action self "yellow-signal" cost                    ; Record that this action has started.
+  set yellow.chance get-updated-value yellow.chance cost       ; Apply update procedure to yellow chance.
+  ifelse ( random-float 1.0 < yellow.chance ) [                ; Check the probability of turning yellow
+    set yellow.signal true                                     ; and do so if needed.
+    complete-action self "yellow-signal-on" 0                  ; Record that this action has been completed.
+  ][                                                           ;
+    set yellow.signal false                                    ; Turn yellow signal off if needed.
+    complete-action self "yellow-signal-off" 0                 ; Record that this action has been completed.
   ]
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; CALLER UPDATES RED SIGNAL STATUS
 ;
-; This subroutine...
+; This subroutine first updates the caller's red signal according to the cost. Then, it calculates
+; the probability of the caller turning red, and updates the status of this caller's signal accordingly.
 ;
-; ENTRY: entry 1...
+; ENTRY: cost
 ;
-; EXIT: exit 1...
+;        red.signal
+;
+; EXIT: Signal status is updated.
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to red-signal [ cost ]
-  complete-action self "red-signal" cost
-  set red.chance get-updated-value red.chance cost
-  ifelse ( random-float 1.0 < red.chance ) [
-    set red.signal true
-    complete-action self "red-signal-on" 0
-  ][
-    set red.signal false
-    complete-action self "red-signal-off" 0
+  complete-action self "red-signal" cost                       ; Record that this action has started.
+  set red.chance get-updated-value red.chance cost             ; Apply update procedure to red chance.
+  ifelse ( random-float 1.0 < red.chance ) [                   ; Check the probability of turning red
+    set red.signal true                                        ; and do so if needed.
+    complete-action self "red-signal-on" 0                     ; Record that this action has been completed.
+  ][                                                           ;
+    set red.signal false                                       ; Turn red signal off if needed.
+    complete-action self "red-signal-off" 0                    ; Record that this action has been completed.
   ]
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; CALLER UPDATES BLUE SIGNAL STATUS
 ;
-; This subroutine...
+; This subroutine first updates the caller's blue signal according to the cost. Then, it calculates
+; the probability of the caller turning blue, and updates the status of this caller's signal accordingly.
 ;
-; ENTRY: entry 1...
+; ENTRY: cost
 ;
-; EXIT: exit 1...
+;        blue.signal
+;
+; EXIT: Signal status is updated.
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to blue-signal [ cost ]
-  complete-action self "blue-signal" cost
-  set blue.chance get-updated-value blue.chance cost
-  ifelse ( random-float 1.0 < blue.chance ) [
-    set blue.signal true
-    complete-action self "blue-signal-on" 0
-  ][
-    set blue.signal false
-    complete-action self "blue-signal-off" 0
+  complete-action self "blue-signal" cost                      ; Record that this action has started.
+  set blue.chance get-updated-value blue.chance cost           ; Apply update procedure to blue chance.
+  ifelse ( random-float 1.0 < blue.chance ) [                  ; Check the probability of turning blue
+    set blue.signal true                                       ; and do so if needed.
+    complete-action self "blue-signal-on" 0                    ; Record that this action has been completed.
+  ][                                                           ;
+    set blue.signal false                                      ; Turn blue signal off if needed.
+    complete-action self "blue-signal-off" 0                   ; Record that this action has been completed.
   ]
 end
 
@@ -2192,7 +2292,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; CALLER DEVELOPS INTO INFANT
 ;
 ; This subroutine...
 ;
@@ -2203,20 +2303,21 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to check-infancy [ cost ]
-  complete-action self "check-infancy" cost
-  ifelse ( my.mother = nobody )
-  [ set-to-dead ] ; gestatees die if mother is dead
-  [ set infancy.chance get-updated-value infancy.chance cost
-    complete-action self "update-infancy-chance" 0
-    if ( life.history = "gestatee" and random-float 1.0 < infancy.chance ) [
-      ask my.mother [ give-birth ]
+  complete-action self "check-infancy" cost                    ; Record that this action has started.
+  ifelse ( my.mother = nobody )                                ;
+  [ set-to-dead ]                                              ; gestatees die if mother is dead
+  [ set infancy.chance get-updated-value infancy.chance cost   ; Apply update procedure to infancy chance.
+    complete-action self "update-infancy-chance" 0             ; Record that this action has been completed.
+    if ( life.history = "gestatee" and                         ;
+      random-float 1.0 < infancy.chance ) [                    ;
+      ask my.mother [ give-birth ]                             ;
     ]
   ]
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; CALLER DETERMINES IF THEY SHOULD GIVE BIRTH
 ;
 ; This subroutine...
 ;
@@ -2227,40 +2328,43 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to check-birth [ cost ]
-  complete-action self "check-birth" cost
-  set birthing.chance get-updated-value birthing.chance cost
-  complete-action self "update-birthing-chance" 0
-  if ( fertility.status = "pregnant" and random-float 1.0 < birthing.chance ) [
-    ask my-offspring with [ life.history = "gestatee" ] [ set mother.initiated.birth true ]
-    give-birth
+  complete-action self "check-birth" cost                      ; Record that this action has started.
+  set birthing.chance get-updated-value birthing.chance cost   ; Apply update procedure to birthing chance.
+  complete-action self "update-birthing-chance" 0              ; Record that this action has been completed.
+  if ( fertility.status = "pregnant" and                       ;
+    random-float 1.0 < birthing.chance ) [                     ;
+    ask my-offspring with [ life.history = "gestatee" ] [      ;
+      set mother.initiated.birth true ]                        ;
+    give-birth                                                 ;
   ]
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; CALLER GIVES BIRTH
 ;
 ; This subroutine...
 ;
 ; ENTRY: entry 1...
 ;
-; EXIT: exit 1...
+; EXIT: Caller updates status from pregnant to lactating.
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to give-birth
-  complete-action self "give-birth" 0
-  if ( fertility.status = "pregnant" ) [
-    set fertility.status "lactating"
-    ask my-offspring with [ life.history = "gestatee" ] [ update-to-infant ]
-    set birthing.chance 0
-    complete-action self "gave-birth" 0
+  complete-action self "give-birth" 0                          ; Record that this action has started.
+  if ( fertility.status = "pregnant" ) [                       ;
+    set fertility.status "lactating"                           ;
+    ask my-offspring with [ life.history = "gestatee" ]        ;
+    [ update-to-infant ]                                       ;
+    set birthing.chance 0                                      ;
+    complete-action self "gave-birth" 0                        ; Record that this action has been completed.
   ]
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; GENERATE A LIST OF CALLER'S OFFSPRING
 ;
 ; This subroutine...
 ;
@@ -2271,14 +2375,15 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to-report my-offspring
-  report ifelse-value ( biological.sex = "female" )
-  [ anima1s with [ my.mother = myself ]]
-  [ anima1s with [ father.identity = [my.identity] of myself ]]
+  report ifelse-value ( biological.sex = "female" )            ;
+  [ anima1s with [ my.mother = myself ]]                       ;
+  [ anima1s with [                                             ;
+    father.identity = [my.identity] of myself ]]               ;
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; CALLER BECOMES AN INFANT
 ;
 ; This subroutine...
 ;
@@ -2289,20 +2394,20 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to update-to-infant
-  if ( is.alive ) [
-    complete-action self "update-to-infant" 0
-    set life.history "infant"
-    set fertility.status " "
-    set hidden? false
-    set is.resting false
-    set ticks.at.birth ticks
-    set label "i"
+  complete-action self "update-to-infant" 0                    ; Record that this action has started.
+  if ( is.alive ) [                                            ;
+    set life.history "infant"                                  ;
+    set fertility.status " "                                   ;
+    set hidden? false                                          ;
+    set is.resting false                                       ;
+    set ticks.at.birth ticks                                   ;
+    set label "i"                                              ;
   ]
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; CALLER DEVELOPS INTO JUVENILE
 ;
 ; This subroutine...
 ;
@@ -2313,19 +2418,21 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to check-juvenility [ cost ]
-  complete-action self "check-juvenility" cost
-  set juvenility.chance get-updated-value juvenility.chance cost
-  complete-action self "update-juvenility-chance" 0
-  if ( life.history = "infant" and random-float 1.0 < juvenility.chance ) [
-    ifelse ( my.mother = nobody )
-    [ update-to-juvenile ]
-    [ ask my.mother [ wean-offspring ]]
+  complete-action self "check-juvenility" cost                 ; Record that this action has started.
+  set juvenility.chance                                        ;
+  get-updated-value juvenility.chance cost                     ; Apply update procedure to juvenility chance.
+  complete-action self "update-juvenility-chance" 0            ; Record that this action has been completed.
+  if ( life.history = "infant" and                             ;
+    random-float 1.0 < juvenility.chance ) [                   ;
+    ifelse ( my.mother = nobody )                              ;
+    [ update-to-juvenile ]                                     ;
+    [ ask my.mother [ wean-offspring ]]                        ;
   ]
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; CALLER DETERMINES IF THEY SHOULD STOP LACTATING
 ;
 ; This subroutine...
 ;
@@ -2336,18 +2443,20 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to check-weaning [ cost ]
-  complete-action self "check-weaning" cost
-  set weaning.chance get-updated-value weaning.chance cost
-  complete-action self "update-weaning-chance" 0
-  if ( fertility.status = "lactating" and random-float 1.0 < weaning.chance ) [
-    ask my-offspring with [ life.history = "infant" ] [ set mother.initiated.weaning true ]
-    wean-offspring
+  complete-action self "check-weaning" cost                    ; Record that this action has started.
+  set weaning.chance get-updated-value weaning.chance cost     ; Apply update procedure to weaning chance.
+  complete-action self "update-weaning-chance" 0               ; Record that this action has been completed.
+  if ( fertility.status = "lactating" and                      ;
+    random-float 1.0 < weaning.chance ) [                      ;
+    ask my-offspring with [ life.history = "infant" ] [        ;
+      set mother.initiated.weaning true ]                      ;
+    wean-offspring                                             ;
   ]
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; CALLER WEANS OFFSPRING
 ;
 ; This subroutine...
 ;
@@ -2358,18 +2467,19 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to wean-offspring
-  complete-action self "wean-offspring" 0
-  if ( fertility.status = "lactating" ) [
-    set fertility.status "cycling"
-    ask my-offspring with [ life.history = "infant" ] [ update-to-juvenile ]
-    set weaning.chance 0
-    complete-action self "weaned-offspring" 0
+  complete-action self "wean-offspring" 0                      ; Record that this action has started.
+  if ( fertility.status = "lactating" ) [                      ;
+    set fertility.status "cycling"                             ;
+    ask my-offspring with [ life.history = "infant" ] [        ;
+      update-to-juvenile ]                                     ;
+    set weaning.chance 0                                       ;
+    complete-action self "weaned-offspring" 0                  ; Record that this action has been completed.
   ]
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; CALLER BECOMES A JUVENILE
 ;
 ; This subroutine...
 ;
@@ -2380,20 +2490,23 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to update-to-juvenile
-  if ( is.alive ) [
-    complete-action self "update-to-juvenile" 0
-    set life.history "juvenile"
-    set fertility.status " "
-    set ticks.at.weaning ticks
-    let my-meta-id my.identity
-    set label "j"
-    ask anima1s with [ member? my-meta-id infanticide.history ] [ set infanticide.history remove my-meta-id remove-duplicates infanticide.history ]
+  complete-action self "update-to-juvenile" 0                  ; Record that this action has started.
+  if ( is.alive ) [                                            ;
+    set life.history "juvenile"                                ;
+    set fertility.status " "                                   ;
+    set ticks.at.weaning ticks                                 ;
+    let my-meta-id my.identity                                 ;
+    set label "j"                                              ;
+    ask anima1s with                                           ;
+    [ member? my-meta-id infanticide.history ]                 ;
+    [ set infanticide.history remove my-meta-id                ;
+      remove-duplicates infanticide.history ]                  ;
   ]
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; CALLER DEVELOPS INTO ADULT
 ;
 ; This subroutine...
 ;
@@ -2404,17 +2517,19 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to check-adulthood [ cost ]
-  complete-action self "check-adulthood" cost
-  set adulthood.chance get-updated-value adulthood.chance cost
-  complete-action self "update-adulthood-chance" 0
-  if ( life.history = "juvenile" and random-float 1.0 < adulthood.chance ) [
-    update-to-adult
+  complete-action self "check-adulthood" cost                  ; Record that this action has started.
+  set adulthood.chance                                         ;
+  get-updated-value adulthood.chance cost                      ; Apply update procedure to adulthood chance.
+  complete-action self "update-adulthood-chance" 0             ; Record that this action has been completed.
+  if ( life.history = "juvenile" and                           ;
+    random-float 1.0 < adulthood.chance ) [                    ;
+    update-to-adult                                            ;
   ]
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; CALLER BECOMES AN ADULT
 ;
 ; This subroutine...
 ;
@@ -2425,13 +2540,14 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to update-to-adult
-  if ( is.alive ) [
-    complete-action self "update-to-adult" 0
-    set life.history "adult"
-    set fertility.status ifelse-value ( biological.sex = "male" ) [ " " ] [ "cycling" ]
-    set ticks.at.sexual.maturity ticks
-    set adult.hidden.chance hidden.chance
-    set adult.survival.chance survival.chance
+  complete-action self "update-to-adult" 0                     ; Record that this action has started.
+  if ( is.alive ) [                                            ;
+    set life.history "adult"                                   ;
+    set fertility.status ifelse-value                          ;
+    ( biological.sex = "male" ) [ " " ] [ "cycling" ]          ;
+    set ticks.at.sexual.maturity ticks                         ;
+    set adult.hidden.chance hidden.chance                      ;
+    set adult.survival.chance survival.chance                  ;
     set adult.body.size body.size
     set adult.body.shade body.shade
     set adult.energy.supply energy.supply
@@ -2465,7 +2581,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; CALLER PROVIDES ENERGY TO TARGET
 ;
 ; This subroutine...
 ;
@@ -2476,21 +2592,22 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to supply-to [ target cost ]
-  complete-action target "supply-to" cost
-  if ( target != self and
-    is-anima1? target and
-    [ is.alive ] of target = true and
-    ( fertility.status = "lactating"
-      or fertility.status = "pregnant" ) ) [
-    let target-cost get-action-cost-of target "demand-from"
-    let net-cost ( cost + target-cost )
-    if ( net-cost > 0 ) [ ask target [ receive-from myself net-cost ] ]
+  complete-action target "supply-to" cost                      ; Record that this action has started.
+  if ( target != self and                                      ;
+    is-anima1? target and                                      ;
+    [ is.alive ] of target = true and                          ;
+    ( fertility.status = "lactating"                           ;
+      or fertility.status = "pregnant" ) ) [                   ;
+    let target-cost get-action-cost-of target "demand-from"    ;
+    let net-cost ( cost + target-cost )                        ;
+    if ( net-cost > 0 ) [                                      ;
+      ask target [ receive-from myself net-cost ] ]            ;
   ]
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; CALLER REQUESTS ENERGY FROM TARGET
 ;
 ; This subroutine...
 ;
@@ -2501,17 +2618,23 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to demand-from [ target cost ]
-  complete-action target "demand-from" cost
-  if ( target != self and is-anima1? target and [ is.alive ] of target = true and ( life.history = "gestatee" or life.history = "infant" ) ) [
-    let target-supply-cost get-action-cost-of target "supply-to"
-    let net-cost ( cost + target-supply-cost )
-    if ( net-cost > 0 ) [ receive-from target net-cost ]
+  complete-action target "demand-from" cost                    ; Record that this action has started.
+  if ( target != self and                                      ;
+    is-anima1? target and                                      ;
+    [ is.alive ] of target = true and                          ;
+    ( life.history = "gestatee" or                             ;
+      life.history = "infant" ) ) [                            ;
+    let target-supply-cost                                     ;
+    get-action-cost-of target "supply-to"                      ;
+    let net-cost ( cost + target-supply-cost )                 ;
+    if ( net-cost > 0 ) [                                      ;
+      receive-from target net-cost ]                           ;
   ]
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; CALLER INITIATES CONSUMPTION OF TARGET
 ;
 ; This subroutine...
 ;
@@ -2522,15 +2645,17 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to eat [ target cost ]
-  complete-action target "eat" cost
-  if ( life.history = "juvenile" or life.history = "adult" or life.history = "senescent" and ( is-patch? target or is-anima1? target )) [
-    receive-from target cost
+  complete-action target "eat" cost                            ; Record that this action has started.
+  if ( life.history = "juvenile" or                            ;
+    life.history = "adult" and                                 ;
+    ( is-patch? target or is-anima1? target )) [               ;
+    receive-from target cost                                   ;
   ]
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; CALLER TAKES ENERGY FROM TARGET
 ;
 ; This subroutine...
 ;
@@ -2541,18 +2666,30 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to receive-from [ target cost ]
-  complete-action target "receive-from" cost
-  if ( cost > 0 and is-anima1? target or is-patch? target ) [
+  complete-action target "receive-from" cost                   ; Record that this action has started.
+  if ( cost > 0 and
+    is-anima1? target or
+    is-patch? target ) [
     let energy-wanted get-updated-value bite.capacity cost
-    let energy-supply ifelse-value ( is-patch? target ) [ [ penergy.supply ] of target ] [ [ energy.supply ] of target ]
-    let energy-received ifelse-value ( energy-wanted < energy-supply ) [ energy-wanted ] [ energy-supply ]
+    let energy-supply ifelse-value
+    ( is-patch? target )
+    [ [ penergy.supply ] of target ]
+    [ [ energy.supply ] of target ]
+    let energy-received ifelse-value
+    ( energy-wanted < energy-supply )
+    [ energy-wanted ]
+    [ energy-supply ]
     if ( energy-received > 0 ) [
       complete-action target "update-energy" 0
       update-energy energy-received
       ifelse ( is-patch? target )
-      [ ask target [ set penergy.supply penergy.supply - energy-received ]]
+      [ ask target [
+        set penergy.supply penergy.supply -
+        energy-received ]]
       [ ask target [ update-energy ( - energy-received ) ]]
-      if ( life.history = "juvenile" or life.history = "adult" and is-patch? target ) [
+      if ( life.history = "juvenile" or
+        life.history = "adult" and
+        is-patch? target ) [
         set foraging.gains.this.timestep foraging.gains.this.timestep + energy-received
         set foraging.gains foraging.gains + energy-received ] ; only juveniles and adults can eat plants
   ]]
@@ -2584,22 +2721,22 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to join [ target cost ]
-  complete-action target "join" cost                            ; Record that this action has been completed.
+  complete-action target "join" cost                            ; Record that this action has started.
   if ( is-anima1? target and [ is.alive ] of target = true
     and [ group.identity ] of target != group.identity ) [      ; Check that the target is able to interact.
     let my-cost 0                                               ; Establish placeholder values to track caller
-    let target-cost 0                                           ; and target decisions about caller joining the group.
-    ask anima1s with                                            ; Identify all individuals
+    let target-cost 0                                           ; and target decisions about caller joining
+    ask anima1s with                                            ; the group. Identify all individuals
     [ group.identity = [group.identity] of target ] [           ; in the same group as the target.
-      set my-cost my-cost + get-action-cost-of myself "join"    ; Record the caller's total energy cost to join group.
-      set target-cost target-cost +                             ; Record any decisions that group members made
-      [ get-action-cost-of myself "recruit" ] of myself         ; about caller joining the group.
+      set my-cost my-cost + get-action-cost-of myself "join"    ; Record the caller's total energy cost to join
+      set target-cost target-cost +                             ; group. Record any decisions that group members
+      [ get-action-cost-of myself "recruit" ] of myself         ; made about caller joining the group.
     ]
     let probability ( my-cost + target-cost )
-    / ( abs my-cost + abs target-cost + 0.0000000001 )          ; The probability of caller joining group depends on
-    if ( random-float 1.0 <= probability )                      ; the relative costs paid by caller and group members.
-    [ join-group ([group.identity] of target) ]                 ; If the probability is high enough, caller joins group.
-  ]
+    / ( abs my-cost + abs target-cost + 0.0000000001 )          ; The probability of caller joining group depends
+    if ( random-float 1.0 <= probability )                      ; on the relative costs paid by caller and group
+    [ join-group ([group.identity] of target) ]                 ; members. If the probability is high enough,
+  ]                                                             ; caller joins group.
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -2617,23 +2754,23 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to leave [ target cost ]
-  complete-action target "leave" cost                           ; Record that this action has been completed.
+  complete-action target "leave" cost                           ; Record that this action has started.
   if ( is-anima1? target and [ is.alive ] of target = true
     and [ group.identity ] of target = group.identity ) [       ; Check that the target is able to interact.
     let my-cost 0                                               ; Establish placeholder values to track caller
-    let target-cost 0                                           ; and target decisions about caller leaving the group.
-    ask anima1s with                                            ; Identify all individuals
+    let target-cost 0                                           ; and target decisions about caller leaving the
+    ask anima1s with                                            ; group. Identify all individuals
     [ group.identity = [group.identity] of target ] [           ; in the same group as the target.
-      set my-cost my-cost + get-action-cost-of myself "leave"   ; Record the caller's total energy cost to leave group.
-      set target-cost target-cost +                             ; Record any decisions that group members made
-      [ get-action-cost-of myself "expel" ] of myself           ; about caller leaving the group.
+      set my-cost my-cost + get-action-cost-of myself "leave"   ; Record the caller's total energy cost to leave
+      set target-cost target-cost +                             ; group. Record any decisions that group members
+      [ get-action-cost-of myself "expel" ] of myself           ; made about caller leaving the group.
     ]
     let probability ( my-cost + target-cost )
-    / ( abs my-cost + abs target-cost + 0.0000000001 )          ; The probability of caller joining group depends on
-    if ( random-float 1.0 <= probability                        ; the relative costs paid by caller and group members.
-      or ( probability = 0 and cost = 0 ))
-    [ leave-group ]                                             ; If the probability is high enough, caller leaves group.
-  ]
+    / ( abs my-cost + abs target-cost + 0.0000000001 )          ; The probability of caller joining group depends
+    if ( random-float 1.0 <= probability                        ; on the relative costs paid by caller and group
+      or ( probability = 0 and cost = 0 ))                      ; members.
+    [ leave-group ]                                             ; If the probability is high enough, caller leaves
+  ]                                                             ; group.
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -2651,23 +2788,23 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to recruit [ target cost ]
-  complete-action target "recruit" cost                           ; Record that this action has been completed.
+  complete-action target "recruit" cost                           ; Record that this action has started.
   if ( is-anima1? target and [ is.alive ] of target = true
     and [ group.identity ] of target != group.identity ) [        ; Check that the target is able to interact.
-    let our-cost 0                                                ; Establish placeholder values to track group members
-    let target-cost 0                                             ; and target decisions about recruiting the target.
-    ask anima1s with                                              ; Identify all individuals
+    let our-cost 0                                                ; Establish placeholder values to track group
+    let target-cost 0                                             ; members and target decisions about recruiting
+    ask anima1s with                                              ; the target. Identify all individuals
     [ group.identity = [group.identity] of myself ] [             ; in the same group as the caller.
       set our-cost our-cost +                                     ; Record any decisions that group members made
       [ get-action-cost-of myself "recruit" ] of target           ; about caller being recruited to the group.
-      set target-cost target-cost +                               ; Record the target's total energy cost to join group.
-      get-action-cost-of target "join"
+      set target-cost target-cost +                               ; Record the target's total energy cost to join
+      get-action-cost-of target "join"                            ; group.
     ]
     let probability ( our-cost + target-cost )
-    / ( abs our-cost + abs target-cost + 0.0000000001 )           ; The probability of caller joining group depends on
-    if ( random-float 1.0 <= probability )                        ; the relative costs paid by target and group members.
-    [ ask target [ join-group [group.identity] of myself ]]       ; If the probability is high enough, target joins group.
-  ]
+    / ( abs our-cost + abs target-cost + 0.0000000001 )           ; The probability of caller joining group depends
+    if ( random-float 1.0 <= probability )                        ; on the relative costs paid by target and group
+    [ ask target [ join-group [group.identity] of myself ]]       ; members. If the probability is high enough, target
+  ]                                                               ; joins group.
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -2685,23 +2822,23 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to expel [ target cost ]
-  complete-action target "expel" cost                             ; Record that this action has been completed.
+  complete-action target "expel" cost                             ; Record that this action has started.
   if ( is-anima1? target and [ is.alive ] of target = true
     and [ group.identity ] of target = group.identity ) [         ; Check that the target is able to interact.
-    let our-cost 0                                                ; Establish placeholder values to track group members
-    let target-cost 0                                             ; and target decisions about expelling the target.
-    ask anima1s with                                              ; Identify all individuals
+    let our-cost 0                                                ; Establish placeholder values to track group
+    let target-cost 0                                             ; members and target decisions about expelling the
+    ask anima1s with                                              ; target. Identify all individuals
     [ group.identity = [group.identity] of myself ] [             ; in the same group as the caller.
       set our-cost our-cost +                                     ; Record any decisions that group members made
       [ get-action-cost-of myself "expel" ] of target             ; about caller being expelled by the group.
-      set target-cost target-cost +                               ; Record the target's total energy cost to leave group.
-      get-action-cost-of target "leave"
+      set target-cost target-cost +                               ; Record the target's total energy cost to leave
+      get-action-cost-of target "leave"                           ; group.
     ]
     let probability ( our-cost + target-cost )
-    / ( abs our-cost + abs target-cost + 0.0000000001 )           ; The probability of caller joining group depends on
-    if ( random-float 1.0 <= probability )                        ; the relative costs paid by target and group members.
-    [ ask target [ leave-group ]]                                 ; If the probability is high enough, target leaves group.
-  ]
+    / ( abs our-cost + abs target-cost + 0.0000000001 )           ; The probability of caller joining group depends
+    if ( random-float 1.0 <= probability )                        ; on the relative costs paid by target and group
+    [ ask target [ leave-group ]]                                 ; members. If the probability is high enough, target
+  ]                                                               ; leaves group.
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -2720,7 +2857,7 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to join-group [ group-id ]
-  complete-action self "join-group" 0                          ; Record that this action is completed.
+  complete-action self "join-group" 0                          ; Record that this action has started.
   ifelse ( group.identity != group-id ) [                      ; If the caller is not already parf of group:
 
     leave self 0                                               ; Determine if the caller leaves current group.
@@ -2779,7 +2916,7 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to pick-up [ target cost ]
-  complete-action target "pick-up" cost                        ; Record that this action has been completed.
+  complete-action target "pick-up" cost                        ; Record that this action has started.
   if ( is-anima1? target ) [                                   ; Check that the target is able to interact.
     let caller-cost [ get-action-cost-of myself "pick-up" ] of target
     let target-cost get-action-cost-of target "cling-to"
@@ -2804,7 +2941,7 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to put-down [ target cost ]
-  complete-action target "put-down" cost                       ; Record that this action has been completed.
+  complete-action target "put-down" cost                       ; Record that this action has started.
   if ( is-anima1? target ) [                                   ; Check that the target is able to interact.
     let caller-cost [ get-action-cost-of myself "put-down" ] of target
     let target-cost get-action-cost-of target "squirm-from"
@@ -2830,14 +2967,14 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to cling-to [ target cost ]
-  complete-action target "cling-to" cost                       ; Record that this action has been completed.
+  complete-action target "cling-to" cost                       ; Record that this action has started.
   if ( is-anima1? target ) [                                   ; Check that the target is able to interact.
     let caller-cost [ get-action-cost-of myself "cling-to" ] of target
     let target-cost get-action-cost-of target "pick-up"
-    let probability ( caller-cost + target-cost )              ; The probability of caller clinging to target depends on
-    / ( abs caller-cost + abs target-cost + 0.0000000001 )     ; the relative costs paid by caller and target.
-    if ( random-float 1.0 <= probability )                     ; If the probability is high enough, target carries caller.
-    [ ask target [ carry myself ] ]]
+    let probability ( caller-cost + target-cost )              ; The probability of caller clinging to target
+    / ( abs caller-cost + abs target-cost + 0.0000000001 )     ; depends on the relative costs paid by caller
+    if ( random-float 1.0 <= probability )                     ; and target. If the probability is high enough,
+    [ ask target [ carry myself ] ]]                           ; target carries caller.
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -2855,14 +2992,14 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to squirm-from [ target cost ]
-  complete-action target "squirm-from" cost                    ; Record that this action has been completed.
+  complete-action target "squirm-from" cost                    ; Record that this action has started.
   if ( is-anima1? target ) [                                   ; Check that the target is able to interact.
     let caller-cost [ get-action-cost-of myself "squirm-from" ] of target
     let target-cost get-action-cost-of target "put-down"
-    let probability ( caller-cost + target-cost )              ; The probability of caller squirming from to target depends on
-    / ( abs caller-cost + abs target-cost + 0.0000000001 )     ; the relative costs paid by caller and target.
-    if ( random-float 1.0 <= probability )                     ; If the probability is high enough, target drops caller.
-    [ ask target [ drop myself ] ]]
+    let probability ( caller-cost + target-cost )              ; The probability of caller squirming from to target
+    / ( abs caller-cost + abs target-cost + 0.0000000001 )     ; depends on the relative costs paid by caller and
+    if ( random-float 1.0 <= probability )                     ; target. If the probability is high enough, target
+    [ ask target [ drop myself ] ]]                            ; drops caller.
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -2879,20 +3016,20 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to carry [ target ]
-  complete-action target "carry" 0                             ; Record that this action has been completed.
+  complete-action target "carry" 0                             ; Record that this action has started.
   if ( not member? target [carried.items] of anima1s ) [       ; Check that the target is able to interact.
 
     ask anima1s with [ member? target carried.items ] [        ; Prompt any individual currently carrying the
       put-down target 0 ]                                      ; target to put down the target.
 
-    ifelse ( [ is-not-carried? ] of target ) [                 ; If the target is not being carried
-      set carried.items lput target carried.items              ; caller's carried items updates to include target.
-      ask target [ move-to myself ]                            ; The target's location is updated to match the caller.
-      set label "^"                                            ; Visually indicate that caller has picked up target.
-      complete-action target "carry-complete" 0  ]             ; Record that the individual has now joined the group.
-
-    [ complete-action target "still-carried-by-another" 0 ]    ; Record that the individual remained in previous group.
-  ]
+    ifelse ( [ is-not-carried? ] of target ) [                 ; If the target is not being carried caller's
+      set carried.items lput target carried.items              ; carried items updates to include target.
+      ask target [ move-to myself ]                            ; The target's location is updated to match the
+      set label "^"                                            ; caller. Visually indicate that caller has picked
+      complete-action target "carry-complete" 0  ]             ; up target. Record that the individual has now
+                                                               ; joined the group.
+    [ complete-action target "still-carried-by-another" 0 ]    ; Record that the individual remained in previous
+  ]                                                            ; group.
 end
 
 to-report is-not-carried? report not any? anima1s with [ member? myself carried.items ] end
@@ -2910,10 +3047,10 @@ to-report is-not-carried? report not any? anima1s with [ member? myself carried.
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to drop [ target ]
-  complete-action target "drop" 0                              ; Record that this action has been completed.
+  complete-action target "drop" 0                              ; Record that this action has started.
   if ( member? target carried.items ) [                        ; Check that the target is able to interact.
-    set carried.items remove target                            ; Target is removed from current inventory of caller.
-    remove-duplicates carried.items
+    set carried.items remove target                            ; Target is removed from current inventory of
+    remove-duplicates carried.items                            ; caller.
     set label "*"                                              ; Visually indicate that the caller has dropped target.
     complete-action target "drop-complete" 0                   ; Record that the target has been dropped by target.
   ]
@@ -2934,7 +3071,7 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to help [ target cost ]
-  complete-action target "help" cost                           ; Record that this action has been completed.
+  complete-action target "help" cost                           ; Record that this action has started.
   if ( is-anima1? target ) [                                   ; Check that the target is able to interact.
     let caller-cost [ get-action-cost-of                       ; Identify how much energy the caller and
       myself "help" ] of target                                ; target have paid for this help interaction.
@@ -2964,7 +3101,7 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to aid [ target cost ]
-  complete-action target "aid" 0                               ; Record that this action has been started.
+  complete-action target "aid" 0                               ; Record that this action has started.
   if ( is-anima1? target and                                   ; Check that the target is able to interact
     [ is.alive ] of target = true and cost > 0) [              ; and if the cost is a positive value.
 
@@ -3016,7 +3153,7 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to attack [ target cost ]
-  complete-action target "attack" cost                         ; Record that this action has been completed.
+  complete-action target "attack" cost                         ; Record that this action has started.
   if ( is-anima1? target ) [                                   ; Check that the target is able to interact.
     let caller-cost [ get-action-cost-of                       ; Identify how much energy the caller and
       myself "attack" ] of target                              ; target have paid for this help interaction.
@@ -3051,7 +3188,7 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to harm [ target cost ]
-  complete-action target "harm" 0                              ; Record that this action has been started.
+  complete-action target "harm" 0                              ; Record that this action has started.
   if ( is-anima1? target and                                   ; Check that the target is able to interact
     [ is.alive ] of target = true and cost > 0) [              ; and if the cost is a positive value.
 
@@ -3172,7 +3309,7 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to mate-with [ target cost ]
-  complete-action target "mate-with" cost                      ; Record that this action occurred.
+  complete-action target "mate-with" cost                      ; Record that this action has started.
 
   if ( cost > 0                                                ; Perform a check to make sure that
     and is-anima1? target                                      ; copulation only occurs when certain
@@ -3235,7 +3372,7 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to conceive-with [ target ]
-  complete-action target "conceive-with" 0
+  complete-action target "conceive-with" 0                     ; Record that this action has started.
   if ( biological.sex = "female"                               ; Perform a final check to make sure that
     and fertility.status = "cycling"                           ; conception only occurs if the caller and
     and life.history = "adult"                                 ; target fit a set of criteria, including
@@ -3383,7 +3520,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; PHENOTYPE OF CALLER IS INITIALIZED
+; CALLER'S PHENOTYPE IS SET TO STARTING CONDITIONS
 ;
 ;
 ; ENTRY:
@@ -3425,7 +3562,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; PHENOTYPE OF CALLER IS INITIALIZED IF MODEL-STRUCTURE IS IDEAL-FORM
+; CALLER'S PHENOTYPE IS INITIALIZED FOR 'IDEAL-FORM' MODEL-STRUCTURE
 ;
 ;
 ; ENTRY:
@@ -3480,7 +3617,8 @@ end
 ;
 ;         Caller has complete knowledge of current configuration of chromosome.I and chromosome.II
 ;
-; EXIT:   When this subroutine is complete, both chromosome.I and chromosome.II have been updated with any modifications.
+; EXIT:   When this subroutine is complete, both chromosome.I and chromosome.II have been updated with
+;         any modifications.
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
@@ -3578,7 +3716,8 @@ end
 ;
 ;         Caller has complete knowledge of current configuration of chromosome.I and chromosome.II
 ;
-; EXIT:   When this subroutine is complete, both chromosome.I and chromosome.II have been updated with any modifications.
+; EXIT:   When this subroutine is complete, both chromosome.I and chromosome.II have been updated with
+;         any modifications.
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
@@ -3643,43 +3782,43 @@ to-report mutate-chromosome [ input-chromosome mutation-chance-per-locus ]
     let updated-alleles (list allele)                            ; in chromosome supplied on entry.
 
     let first-allele first allele
+                                                                 ; The allele is able to mutate if
+    if ( ( first-allele != "0|"                                  ; the first codon is not '0' or false
+      or first-allele = true )                                   ; Check whether the allele is able to mutate.
+      and random-float 1.0 < mutation-chance-per-locus ) [       ; Check the probability of mutation.
 
-    if ( ( first-allele != "0|"                                  ; The allele is able to mutate if the first codon is not [0] or false
-      or first-allele = true )                                   ; Check whether the allele is mutable and if   ; this line is for capatibility with older genotype files that have a boolean in first position
-      and random-float 1.0 < mutation-chance-per-locus ) [       ; probability dictates that it should be changed.
-
-      let choice ( ifelse-value                                  ; Check first-allele for range of mutation choices allowed
-        ( first-allele = "1|" ) [ 1 ]
+      let choice ( ifelse-value                                  ; Check for range of mutation
+        ( first-allele = "1|" ) [ 1 ]                            ; choices allowed.
         ( first-allele = "2|" ) [ one-of [ 1 2 ] ]
         ( first-allele = "3|" ) [ one-of [ 1 2 3 ] ]
         ( first-allele = "4|" ) [ one-of [ 1 2 3 4 5 ] ]
         ( first-allele = "5|" ) [ one-of [ 1 2 3 4 5 6 7 ] ]
-        [ one-of [ 1 2 3 4 5 6 7 ] ] )                           ; Or return any choice when first-allele is true
+        [ one-of [ 1 2 3 4 5 6 7 ] ] )                           ; Or any choice is allowed if not specified.
 
       (ifelse                                                    ; Select the proper case.
 
                                                                  ; Prepare to mutate the allele
-        ( choice < 6 ) [                                         ; Generate a random number between 0 and 4.
+        ( choice < 6 ) [
           let new-allele []
-          let random-index random ( length allele - 1 ) + 1      ; excludes first codon from mutation
+          let random-index random ( length allele - 1 ) + 1      ; Exclude the first codon from mutation.
           let index 0
           foreach allele [ codon ->                              ; Proceed to examine each codon in the allele.
             ( ifelse
 
-              ( choice = 1                                       ; CHOICE 1: mutate codon if it is a number
-                and random-index = index                         ;
+              ( choice = 1
+                and random-index = index                         ; CHOICE 1: mutate codon if it is a number
                 and not member? "uninvadable" model-structure )  ; unless the structure is uninvadable.
               [ set new-allele
                 lput get-mutation codon "numbers" new-allele ]
 
-              ( choice = 2                                       ; CHOICE 2: mutate codon, letters only unless the structure is uninvadable.
-                and random-index = index
+              ( choice = 2                                       ; CHOICE 2: mutate codon, letters only
+                and random-index = index                         ; unless the structure is uninvadable.
                 and not member? "uninvadable" model-structure )
               [ set new-allele
                 lput get-mutation codon "letters" new-allele ]
 
-              ( choice = 3                                       ; CHOICE 3: mutate codon, both numbers and letters unless the structure is uninvadable.
-                and random-index = index
+              ( choice = 3                                       ; CHOICE 3: mutate codon, both numbers and
+                and random-index = index                         ; letters unless the structure is uninvadable.
                 and not member? "uninvadable" model-structure )
               [ set new-allele
                 lput get-mutation codon "both" new-allele ]
@@ -3879,7 +4018,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-4.0
+0.0
 .1
 1
 NIL
@@ -3920,7 +4059,7 @@ plant-seasonality
 plant-seasonality
 0
 1
-0.5
+0.0
 .05
 1
 NIL
@@ -3973,7 +4112,7 @@ INPUTBOX
 995
 191
 population
-Olives
+population
 1
 0
 String
@@ -3984,7 +4123,7 @@ INPUTBOX
 995
 265
 genotype
-olives
+NIL
 1
 0
 String
@@ -4047,8 +4186,8 @@ CHOOSER
 588
 useful-commands
 useful-commands
-"help-me" "meta-report" "show-territories" "---------------------" " > OPERATIONS   " "---------------------" "parameter-settings" "default-settings" "model-structure" "-- aspatial" "-- free-lunch" "-- ideal-form" "-- no-evolution" "-- no-plants" "-- reaper" "-- signal-fertility" "-- stork" "-- uninvadable" "clear-population" "new-population" "reset-plants" "save-world" "import-world" "save-simulation" "output-results" "---------------------" " > VERIFICATION " "---------------------" "dynamic-check" "-- true" "-- false" "runtime-check" "visual-check" "-- attack-pattern" "-- dine-and-dash" "-- life-history-channel" "-- musical-pairs" "-- night-and-day" "-- popularity-context" "-- speed-mating" "-- square-dance" "-- supply-and-demand" "---------------------" " > DISPLAY RESULTS   " "---------------------" "age" "generations" "life-history" "genotype" "phenotype" "-- survival-chance" "-- body-size" "-- body-shade" "-- fertility-status" "-- hidden-chance" "-- bite-capacity" "-- mutation-chance" "-- sex-ratio" "-- litter-size" "-- conception-chance" "-- visual-angle" "-- visual-range" "-- day-perception" "-- night-perception" "-- yellow-chance" "-- red-chance" "-- blue-chance" "-- birthing-chance" "-- weaning-chance" "-- infancy-chance" "-- juvenility-chance" "-- adulthood-chance" "carried-items" "energy-supply" "behaviors" "-- environment" "-- decisions" "-- actions" "-- birthing" "-- weaning" "-- matings" "-- mating-partners" "-- conceptions" "-- infanticide" "-- group-transfers" "-- travel-distance" "-- foraging-gains" "-- total-energy-gains" "-- total-energy-cost" "-- receiving-history" "-- carried-history" "-- aid-history" "-- harm-history"
-18
+"help-me" "meta-report" "---------------------" " > OPERATIONS   " "---------------------" "parameter-settings" "default-settings" "model-structure" "-- aspatial" "-- free-lunch" "-- ideal-form" "-- no-evolution" "-- no-plants" "-- reaper" "-- stork" "-- uninvadable" "clear-population" "reset-plants" "save-world" "import-world" "output-results" "---------------------" " > VERIFICATION " "---------------------" "dynamic-check" "-- true" "-- false" "runtime-check" "visual-check" "-- attack-pattern" "-- dine-and-dash" "-- life-history-channel" "-- musical-pairs" "-- night-and-day" "-- popularity-context" "-- speed-mating" "-- square-dance" "-- supply-and-demand" "---------------------" " > DISPLAY RESULTS   " "---------------------" "age" "generations" "genotype" "phenotype" "-- survival-chance" "-- body-size" "-- body-shade" "-- fertility-status" "-- hidden-chance" "-- bite-capacity" "-- mutation-chance" "-- sex-ratio" "-- litter-size" "-- conception-chance" "-- visual-angle" "-- visual-range" "-- day-perception" "-- night-perception" "carried-items" "energy-supply" "behaviors" "-- environment" "-- decisions" "-- actions" "-- matings" "-- mating-partners" "-- conceptions" "-- infanticide" "-- group-transfers" "-- travel-distance" "-- foraging-gains" "-- total-energy-gains" "-- total-energy-cost" "show-territories"
+74
 
 BUTTON
 1063
@@ -4127,7 +4266,7 @@ plant-quality
 plant-quality
 .1
 100
-100.0
+5.4
 .1
 1
 NIL
@@ -4158,7 +4297,7 @@ selection-on?
 PLOT
 849
 646
-1708
+1707
 917
 plot
 x
@@ -4194,9 +4333,9 @@ genotype-reader
 
 SWITCH
 1429
-605
+606
 1519
-638
+639
 adults
 adults
 1
@@ -4205,20 +4344,20 @@ adults
 
 SWITCH
 1326
-605
+606
 1424
-638
+639
 juveniles
 juveniles
-1
+0
 1
 -1000
 
 SWITCH
 1232
-605
+606
 1322
-638
+639
 infants
 infants
 1
@@ -4227,9 +4366,9 @@ infants
 
 SWITCH
 1126
-605
+606
 1227
-638
+639
 gestatees
 gestatees
 1
@@ -4238,9 +4377,9 @@ gestatees
 
 SWITCH
 1523
-605
+606
 1613
-638
+639
 males
 males
 1
@@ -4249,9 +4388,9 @@ males
 
 SWITCH
 1617
-605
+606
 1707
-638
+639
 females
 females
 1
@@ -4265,7 +4404,7 @@ CHOOSER
 639
 plot-type
 plot-type
-"individuals" "groups" "population" "generations"
+"individuals" "groups" "generations"
 0
 
 OUTPUT

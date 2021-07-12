@@ -46,7 +46,7 @@ to update-metafile [ type-of-interaction name-of-file metafile-notes ]
   set observation-notes                                           ; 
   ( word metafile-notes " " observation-notes )                   ; 
   
-  let filename "../results/metafile.csv"                          ;
+  let filename "../data/metafile.csv"                             ;
   
   if ( not file-exists? filename )                                ; If filename does not exist  
   [                                                               ;  
@@ -232,7 +232,6 @@ to import-population
             ( breed = anima1s and header = "age.in.ticks" ) [ set age.in.ticks value ]
             ( breed = anima1s and header = "generation.number" ) [ set generation.number value ]
             ( breed = anima1s and header = "my.mother" ) [ set my.mother value ]
-            ( breed = anima1s and header = "home-range?" ) [ if ( value = true ) [ set-home-range ]]
             ( breed = anima1s and header = "mother.identity" ) [ set mother.identity value ]
             ( breed = anima1s and header = "father.identity" ) [ set father.identity value ]
             ( breed = anima1s and header = "natal.group.identity" ) [ set natal.group.identity value ]
@@ -293,7 +292,7 @@ to import-population
     let table-of-ids table:make
     ask anima1s [
       
-      ifelse ( table:has-key? table-of-ids my.identity ) 
+      ifelse ( table:has-key? table-of-ids my.identity or my.identity = 9999999 ) 
       [ let new-id random 9999999
         table:put table-of-ids my.identity new-id
         set my.identity new-id ]
@@ -351,33 +350,11 @@ to import-population
       update-appearance ; One the agent is updated with its attributes, update its appearance to match
     ]
     
-    update-metafile "population" population (word "POPULATION " population " IMPORTED")
+    update-metafile "population" population (word "POPULATION IMPORTED: " population )
     output-print " Population import successful."
     
   ][ set population "" ] ; If the population file cannot be found, set the population textbox to blank
   
-end
-
-; --------------------------------------------------------------------------------------------------------- ;
-;
-; TITLE
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
-
-to set-home-range
-  ask patches in-radius 10
-  [ 
-    set pgroups.here []
-    repeat 100 [ set pgroups.here lput [group.identity] of myself pgroups.here ]
-    set pgroup.identity [group.identity] of myself 
-    set pcolor pgroup.identity + 3 
-  ]
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -485,7 +462,6 @@ to save-population ; create popup window if can't find file location (maybe fold
       "chromosome.I" 
       "chromosome.II" 
       "my.mother" 
-      "home-range?"
     )
     
     ask anima1s with [ is.alive ] [ 
@@ -547,8 +523,7 @@ to save-population ; create popup window if can't find file location (maybe fold
           ( text = "y.magnitude" ) [ y.magnitude ]
           ( text = "chromosome.I" ) [ csv:to-string chromosome.I ]
           ( text = "chromosome.II" ) [ csv:to-string chromosome.II ]
-          ( text = "my.mother" ) [ ifelse-value ( my.mother != nobody ) [ [my.identity] of my.mother ] [ nobody ] ]
-          ( text = "home-range?" ) [ "" ])
+          ( text = "my.mother" ) [ ifelse-value ( my.mother != nobody ) [ [my.identity] of my.mother ] [ nobody ] ] )
         
         set data-list lput value data-list ]
       
@@ -561,7 +536,7 @@ to save-population ; create popup window if can't find file location (maybe fold
     file-open filename
     csv:to-file filename ( sentence (list header ) body )
     file-close
-    update-metafile "population" population (word "POPULATION " population " SAVED")
+    update-metafile "population" population (word "POPULATION SAVED: " population)
     output-print " Population successfully saved."
   ]
  
@@ -598,10 +573,11 @@ to import-genotype
   
   let first-codon-list [ "0|" "1|" "2|" "3|" "4|" "5|" ]
   
-  let file-to-open ( word path-to-experiment genotype ".txt" ) ; first try accessing file in designated file path
-  if not file-exists? file-to-open [ set file-to-open ( word "../data/" genotype ".txt" ) ] ; then try the data folder
+  let file-to-open ( word path-to-experiment genotype ".txt" )      ; First try accessing file in designated
+  if not file-exists? file-to-open [                                ; file path
+    set file-to-open ( word "../data/" genotype ".txt" ) ]          ; then try the data folder
   
-  ifelse file-exists? file-to-open [  ; check in both places
+  ifelse file-exists? file-to-open [                                ; check in both places
     
     ask anima1s [
       
@@ -614,40 +590,46 @@ to import-genotype
         let row (csv:from-row file-read-line " ")
         
         ifelse ( row = [""] ) 
-        [ set row false ]         ; If row is "empty" converted to format for next line
+        [ set row false ]                                           ; If row is "empty" converted to format
+                                                                    ; for next line
         [
  
-          let contains-a-codon? false                                      ; Initially, the current allele is not known to contain a legitimate codon ( based on current genotype reader )
-          let filtered-allele []                                           ; Make a new allele that is empty
+          let contains-a-codon? false                               ; Initially, the current allele is not known to contain a legitimate codon ( based on current genotype reader )
+          let filtered-allele []                                    ; Make a new allele that is empty
           
-          foreach row [ itm ->                                          ; For each codon in the allele...
+          foreach row [ itm ->                                      ; For each codon in the allele...
             
             if ( subject = self ) [ print itm ]
             
-            let codon-exists ( ifelse-value                                ; ...Check if the codon exists in the current genotype reader lexicon
-              ( genotype-reader = "sta2us" ) [ sta2us-codon-exists itm ]   ; - sta2us genotype reader check
-              ( genotype-reader = "gat3s" ) [ gat3s-codon-exists itm ]     ; - gat3s genotype reader check
-              [ sta2us-codon-exists itm ])                                 ; - or sta2us by default
+            let codon-exists ( ifelse-value                         ; ...Check if the codon exists in the current genotype reader lexicon
+              ( genotype-reader = "sta2us" ) 
+              [ sta2us-codon-exists itm ]                           ; - sta2us genotype reader check
+              ( genotype-reader = "gat3s" ) 
+              [ gat3s-codon-exists itm ]                            ; - gat3s genotype reader check
+              [ sta2us-codon-exists itm ])                          ; - or sta2us by default
             
-            if codon-exists [                                              ; If the current codon IS in the current genotype reader lexicon
-              set contains-a-codon? true ]                                 ; Acknowledge that the current allele contains a legitimate codon
+            if codon-exists [                                       ; If the current codon IS in the current genotype reader lexicon
+              set contains-a-codon? true ]                          ; Acknowledge that the current allele contains a legitimate codon
             
-            if codon-exists or is-number? itm or is-boolean? itm or member? itm first-codon-list [         ; If current codon IS part of lexicon, OR it is either a number or boolean
-              set filtered-allele lput itm filtered-allele ]               ; Add the current codon to the new allele
+            if codon-exists or 
+            is-number? itm or 
+            is-boolean? itm or
+            member? itm first-codon-list [                          ; If current codon IS part of lexicon, OR it is either a number or boolean
+              set filtered-allele lput itm filtered-allele ]        ; Add the current codon to the new allele
           ]
           
-          set row ifelse-value ( contains-a-codon? )                        ; If current allele contains a legitimate codon
-          [ filtered-allele ]                                              ; report the new allele 
-          [ false ]                                                        ; Report FALSE to communicate that this allele should not be imported to population
+          set row ifelse-value ( contains-a-codon? )                ; If current allele contains a legitimate codon
+          [ filtered-allele ]                                       ; report the new allele 
+          [ false ]                                                 ; Report FALSE to communicate that this allele should not be imported to population
 
         ]
         
         (ifelse 
-          ( row = false                            ; If the row from the genotype file contains nothing
-            and length chromosome.I > 0 )          ; And the first chromosome contains at least one allele
-          [ set first-chromosome? false ]          ; Switch to filling in the second chromosome with alleles
-          
-          ( first-chromosome? )                    ; If currently filling in first chromosome
+          ( row = false                                             ; If the row from the genotype file contains nothing
+            and length chromosome.I > 0 )                           ; And the first chromosome contains at least one allele
+          [ set first-chromosome? false ]                           ; Switch to filling in the second chromosome with alleles
+           
+          ( first-chromosome? )                                     ; If currently filling in first chromosome
           [ if ( row != false ) 
             [ set chromosome.I lput row chromosome.I ]]
           [ if ( row != false ) 
@@ -657,7 +639,7 @@ to import-genotype
       file-close
     ]
     
-    update-metafile "genotype" genotype (word "GENOTYPE " genotype " IMPORTED")
+    update-metafile "genotype" genotype (word "GENOTYPE IMPORTED: " genotype)
     output-print " Genotype import successful."
     
   ] [ set genotype "" ]
@@ -682,7 +664,7 @@ to save-genotype
   output-header (word " SAVE GENOTYPE : organism " my.identity  )
   if ( genotype = "" ) [ if ( subject != nobody ) [ set genotype (word [my.identity] of subject ) ]]
   ( csv:to-file ( word path-to-experiment genotype ".txt" ) combined-chromosomes " " )
-  update-metafile "genotype" genotype (word "GENOTYPE " genotype " SAVED")
+  update-metafile "genotype" genotype (word "GENOTYPE SAVED: " genotype )
   output-print " Genotype successfully saved."
 end
 

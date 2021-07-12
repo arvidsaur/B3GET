@@ -13,8 +13,17 @@
 ; a88aaaa8P' a88aaaa    88aaaaa88a 88     88 a88aaaa    a88aaaa8P' 
 ;  88   `8b.  88        88     88  88     88  88         88   `8b. 
 ;  88     88  88        88     88  88    .8P  88         88     88 
-;  dP     dP  88888888P 88     88  8888888P   88888888P  dP     dP                                                                
-;             
+;  dP     dP  88888888P 88     88  8888888P   88888888P  dP     dP                                                            
+;
+;
+; This extension handles the conversion process of taking information about an individual's current
+; environment and genotype to create a set of decision vectors. There are currently two genotype
+; readers: sta2us and gat3s. Each genotype reader is associated with a different genotype organization.
+; Thus, this process only works if the genotype-reader setting and the file used to import the genotype 
+; information are of the same type.
+;
+; © 2021 K N Crouse  
+;
 ; ========================================================================================================= ;
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -28,8 +37,9 @@
 ;                                                                  
 ; --------------------------------------------------------------------------------------------------------- ;
 ; 
-; This extension contains all functions that allow anima1s to make decisions from their 
-; genotypes and current environment. 
+; The sta2us genotype reader is the most straightforward type to use. However, it is also the most limited
+; in potential behavioral complexity. If you are new to using B3GET, you should start with the sta2us 
+; genotype. Below is a list of codes, or codons, that combine to make up the alleles of this genotype.
 ;
 ; List of all genotype cod0ns:
 ; 
@@ -183,7 +193,8 @@ to-report sta2us-get-decisions [ my-environment ]
                                                                
             let distance-to-target distance other-guy          ; Calculate the distance between caller 
             set distance-to-target ifelse-value                ; and target, which is one if the caller
-            ( distance-to-target > 1 )                         ; and target are closer than one unit apart.
+            ( distance-to-target > 1 and                       ; and target are closer than one unit apart.
+              not member? "aspatial" model-structure )         ; or model-structure includes "aspatial"
             [ distance-to-target ] [ 1 ]
             
             set decision-vectors lput (list                    ; Create a new decision vector
@@ -219,58 +230,145 @@ to-report sta2us-get-action [ action-code ]
 
   report
   (ifelse-value
-    ( action-code = "MNT" or action-code = "maintain-body" or action-code = "living-chance" or action-code = "survival-chance") [ "survival-chance" ]
-    ( action-code = "GRW" or action-code = "body-size" ) [ "body-size" ]
-    ( action-code = "BSD" or action-code = "body-shade" ) [ "body-shade" ]
-    ( action-code = "DPR" or action-code = "IPR" or action-code = "day-perception-range" or action-code = "visual-range" ) [ "visual-range" ]
-    ( action-code = "DPA" or action-code = "day-perception-angle" or action-code = "visual-angle" ) [ "visual-angle" ]
-    ( action-code = "NPR" or action-code = "night-perception-range" or action-code = "day-perception" ) [ "day-perception" ]
-    ( action-code = "NPA" or action-code = "night-perception-angle" or action-code = "night-perception" ) [ "night-perception" ]
-    ( action-code = "APR" or action-code = "audio-perception" or action-code = "audio-perception-range" ) [ "audio-perception-range" ] ; not used
-    ( action-code = "APA" or action-code = "audio-perception-angle" ) [ "audio-perception-angle" ] ; not used
-    ( action-code = "VCR" or action-code = "vocal-range" ) [ "vocal-range" ] ; not used
-    ( action-code = "ICC" or action-code = "conception-chance" ) [ "conception-chance" ]
-    ( action-code = "STM" or action-code = "stomach-size" ) [ "bite-capacity" ]   
-    ( action-code = "MTR" or action-code = "mutation-rate" or  action-code = "MTC" or action-code = "mutation-chance") [ "mutation-chance" ]
-    ( action-code = "SXR" or action-code = "sex-ratio" ) [ "sex-ratio" ]
-    ( action-code = "LTS" or action-code = "litter-size" ) [ "litter-size" ]
-    ( action-code = "TRT" or action-code = "turn-right" ) [ "turn-right" ]
-    ( action-code = "TLF" or action-code = "turn-left" ) [ "turn-left" ]
-    ( action-code = "GFD" or action-code = "go-forward" ) [ "go-forward" ]
-    ( action-code = "MOV" or action-code = "move-toward" ) [ "move-toward" ]
+    ( action-code = "MNT" or 
+      action-code = "maintain-body" or 
+      action-code = "living-chance" or 
+      action-code = "survival-chance") [ "survival-chance" ]
+    ( action-code = "GRW" or 
+      action-code = "body-size" ) [ "body-size" ]
+    ( action-code = "BSD" or 
+      action-code = "body-shade" ) [ "body-shade" ]
+    ( action-code = "DPR" or 
+      action-code = "IPR" or 
+      action-code = "day-perception-range" or 
+      action-code = "visual-range" ) [ "visual-range" ]
+    ( action-code = "DPA" or 
+      action-code = "day-perception-angle" or 
+      action-code = "visual-angle" ) [ "visual-angle" ]
+    ( action-code = "NPR" or 
+      action-code = "night-perception-range" or 
+      action-code = "day-perception" ) [ "day-perception" ]
+    ( action-code = "NPA" or 
+      action-code = "night-perception-angle" or 
+      action-code = "night-perception" ) [ "night-perception" ]
+    ( action-code = "APR" or 
+      action-code = "audio-perception" or 
+      action-code = "audio-perception-range" ) [ "audio-perception-range" ] ; not used
+    ( action-code = "APA" or 
+      action-code = "audio-perception-angle" ) [ "audio-perception-angle" ] ; not used
+    ( action-code = "VCR" or 
+      action-code = "vocal-range" ) [ "vocal-range" ] ; not used
+    ( action-code = "ICC" or 
+      action-code = "conception-chance" ) [ "conception-chance" ]
+    ( action-code = "STM" or 
+      action-code = "stomach-size" ) [ "bite-capacity" ]   
+    ( action-code = "MTR" or 
+      action-code = "mutation-rate" or 
+      action-code = "MTC" or 
+      action-code = "mutation-chance") [ "mutation-chance" ]
+    ( action-code = "SXR" or 
+      action-code = "sex-ratio" ) [ "sex-ratio" ]
+    ( action-code = "LTS" or 
+      action-code = "litter-size" ) [ "litter-size" ]
+    ( action-code = "TRT" or 
+      action-code = "turn-right" ) [ "turn-right" ]
+    ( action-code = "TLF" or 
+      action-code = "turn-left" ) [ "turn-left" ]
+    ( action-code = "GFD" or 
+      action-code = "go-forward" ) [ "go-forward" ]
+    ( action-code = "MOV" or 
+      action-code = "move-toward" ) [ "move-toward" ]
     ( action-code = "move-away-from" ) [ "move-away-from" ]
-    ( action-code = "HED" or action-code = "set-heading" ) [ "set-heading" ]
+    ( action-code = "HED" or 
+      action-code = "set-heading" ) [ "set-heading" ]
     ( action-code = "match-heading" ) [ "match-heading" ]
     ( action-code = "set-heading-random" ) [ "set-heading-random" ]
-    ( action-code = "HID" or action-code = "hide" ) [ "hide" ]
+    ( action-code = "HID" or 
+      action-code = "hide" ) [ "hide" ]
     ( action-code = "rest" ) [ "rest" ]
-    ( action-code = "SAC" or action-code = "signal-a-chance" or action-code = "SAO" or action-code = "signal-a-on" or action-code = "signal-alpha-on" or action-code = "yellow-signal-on" or action-code = "yellow-signal" ) [ "yellow-signal" ]
-    ( action-code = "SBC" or action-code = "signal-b-chance" or action-code = "SBO" or action-code = "signal-b-on" or action-code = "signal-beta-on" or action-code = "red-signal-on" or action-code = "red-signal" ) [ "red-signal" ]
-    ( action-code = "SCC" or action-code = "signal-c-chance" or action-code = "SCO" or action-code = "signal-c-on" or action-code = "signal-gamma-on" or action-code = "blue-signal-on" or action-code = "blue-signal") [ "blue-signal" ]
-    ( action-code = "INC" or action-code = "infancy-chance" or action-code = "CKI" or action-code = "check-infancy" ) [ "check-infancy" ]
-    ( action-code = "GVB" or action-code = "birthing-chance" or action-code = "CKB" or action-code = "check-birth" ) [ "check-birth" ]
-    ( action-code = "JVC" or action-code = "juvenile-chance" or action-code = "CKJ" or action-code = "check-juvenility" ) [ "check-juvenility" ]
-    ( action-code = "WEN" or action-code = "weaning-chance" or action-code = "CKW" or action-code = "check-weaning" ) [ "check-weaning" ]
-    ( action-code = "ADC" or action-code = "adult-chance" or action-code = "CKA" or action-code = "check-adulthood" ) [ "check-adulthood" ]
-    ( action-code = "SNC" or action-code = "senescent-chance" ) [ "senescent-chance" ] ; not used
-    ( action-code = "CKS" or action-code = "check-senescence" ) [ "check-senescence" ] ; not used
-    ( action-code = "DSC" or action-code = "digest-stomach" ) [ "digest-stomach" ] ; not used
-    ( action-code = "FAT" or action-code = "reserve-energy" ) [ "reserve-energy" ] ; not used
-    ( action-code = "BRN" or action-code = "burn-reserves" ) [ "burn-reserves" ] ; not used
-    ( action-code = "GFT" or action-code = "supply-to" ) [ "supply-to" ]
-    ( action-code = "RFT" or action-code = "demand-from" ) [ "demand-from" ]
-    ( action-code = "EAT" or action-code = "eat") [ "eat" ]
-    ( action-code = "PKU" or action-code = "pick-up" ) [ "pick-up" ]
-    ( action-code = "SQM" or action-code = "squirm-from" ) [ "squirm-from" ]
-    ( action-code = "PDN" or action-code = "put-down" ) [ "put-down" ]
-    ( action-code = "CLG" or action-code = "cling-to" ) [ "cling-to" ]
-    ( action-code = "ATK" or action-code = "attack" ) [ "attack" ]
-    ( action-code = "HLP" or action-code = "help") [ "help" ]
-    ( action-code = "JNG" or action-code = "join-group-of" or action-code = "join" ) [ "join" ]
-    ( action-code = "LEV" or action-code = "leave-group" or action-code = "LEV" or action-code = "leave" ) [ "leave" ]
-    ( action-code = "RCT" or action-code = "recruit" ) [ "recruit" ]
-    ( action-code = "KCK" or action-code = "kick-out" or action-code = "expel" ) [ "expel" ]
-    ( action-code = "MAT" or action-code = "mate-with") [ "mate-with" ]
+    ( action-code = "SAC" or 
+      action-code = "signal-a-chance" or 
+      action-code = "SAO" or 
+      action-code = "signal-a-on" or 
+      action-code = "signal-alpha-on" or 
+      action-code = "yellow-signal-on" or 
+      action-code = "yellow-signal" ) [ "yellow-signal" ]
+    ( action-code = "SBC" or 
+      action-code = "signal-b-chance" or 
+      action-code = "SBO" or 
+      action-code = "signal-b-on" or 
+      action-code = "signal-beta-on" or 
+      action-code = "red-signal-on" or 
+      action-code = "red-signal" ) [ "red-signal" ]
+    ( action-code = "SCC" or 
+      action-code = "signal-c-chance" or 
+      action-code = "SCO" or 
+      action-code = "signal-c-on" or 
+      action-code = "signal-gamma-on" or 
+      action-code = "blue-signal-on" or 
+      action-code = "blue-signal") [ "blue-signal" ]
+    ( action-code = "INC" or 
+      action-code = "infancy-chance" or 
+      action-code = "CKI" or 
+      action-code = "check-infancy" ) [ "check-infancy" ]
+    ( action-code = "GVB" or 
+      action-code = "birthing-chance" or 
+      action-code = "CKB" or 
+      action-code = "check-birth" ) [ "check-birth" ]
+    ( action-code = "JVC" or 
+      action-code = "juvenile-chance" or 
+      action-code = "CKJ" or 
+      action-code = "check-juvenility" ) [ "check-juvenility" ]
+    ( action-code = "WEN" or 
+      action-code = "weaning-chance" or 
+      action-code = "CKW" or 
+      action-code = "check-weaning" ) [ "check-weaning" ]
+    ( action-code = "ADC" or 
+      action-code = "adult-chance" or 
+      action-code = "CKA" or 
+      action-code = "check-adulthood" ) [ "check-adulthood" ]
+    ( action-code = "SNC" or 
+      action-code = "senescent-chance" ) [ "senescent-chance" ] ; not used
+    ( action-code = "CKS" or 
+      action-code = "check-senescence" ) [ "check-senescence" ] ; not used
+    ( action-code = "DSC" or 
+      action-code = "digest-stomach" ) [ "digest-stomach" ] ; not used
+    ( action-code = "FAT" or 
+      action-code = "reserve-energy" ) [ "reserve-energy" ] ; not used
+    ( action-code = "BRN" or 
+      action-code = "burn-reserves" ) [ "burn-reserves" ] ; not used
+    ( action-code = "GFT" or 
+      action-code = "supply-to" ) [ "supply-to" ]
+    ( action-code = "RFT" or 
+      action-code = "demand-from" ) [ "demand-from" ]
+    ( action-code = "EAT" or 
+      action-code = "eat") [ "eat" ]
+    ( action-code = "PKU" or 
+      action-code = "pick-up" ) [ "pick-up" ]
+    ( action-code = "SQM" or 
+      action-code = "squirm-from" ) [ "squirm-from" ]
+    ( action-code = "PDN" or 
+      action-code = "put-down" ) [ "put-down" ]
+    ( action-code = "CLG" or 
+      action-code = "cling-to" ) [ "cling-to" ]
+    ( action-code = "ATK" or 
+      action-code = "attack" ) [ "attack" ]
+    ( action-code = "HLP" or 
+      action-code = "help") [ "help" ]
+    ( action-code = "JNG" or 
+      action-code = "join-group-of" or 
+      action-code = "join" ) [ "join" ]
+    ( action-code = "LEV" or 
+      action-code = "leave-group" or 
+      action-code = "LEV" or 
+      action-code = "leave" ) [ "leave" ]
+    ( action-code = "RCT" or 
+      action-code = "recruit" ) [ "recruit" ]
+    ( action-code = "KCK" or 
+      action-code = "kick-out" or 
+      action-code = "expel" ) [ "expel" ]
+    ( action-code = "MAT" or 
+      action-code = "mate-with") [ "mate-with" ]
     ( action-code = "do-nothing") [ "do-nothing" ]
     [ action-code ])
   
@@ -281,23 +379,40 @@ end
 ; GENERATE A MUTATED VERSION OF THE INPUT CODON
 ;
 ; Returns a randomly selected codon to occasionally introduce novel mutations into a population.
+; 
 ;
-; CALLER: anima1
+;
+; ENTRY: original-codon
+; 
+;        type-of-mutation is either numbers, letters, both
+;
+; EXIT: 
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
-to-report sta2us-get-mutation [ original-codon type-of-mutation ] ; numbers, letters, both
-  report ( ifelse-value 
-    ( is-number? original-codon and ( type-of-mutation = "numbers" or type-of-mutation = "both" ) ) [ ( one-of [ 1 -1 ] ) * get-updated-value original-codon ( one-of [ 1 -1 ] ) ]
-    ( member? original-codon action-code-list and ( type-of-mutation = "letters" or type-of-mutation = "both" ) ) [ one-of action-code-list ]
-    [ ifelse-value ( type-of-mutation = "letters" or type-of-mutation = "both" ) [ generate-status ] [ original-codon ]] ) 
+to-report sta2us-get-mutation [ original-codon type-of-mutation ] 
+  
+  report ( ifelse-value                                        ;
+    ( is-number? original-codon and                            ;
+      ( type-of-mutation = "numbers" or                        ;
+        type-of-mutation = "both" ) )                          ;
+    [ ( one-of [ 1 -1 ] ) *                                    ;
+      get-updated-value original-codon ( one-of [ 1 -1 ] ) ]   ;
+    ( member? original-codon action-code-list and              ;
+      ( type-of-mutation = "letters" or                        ;
+        type-of-mutation = "both" ) )                          ;
+    [ one-of action-code-list ]                                ;
+    [ ifelse-value ( type-of-mutation = "letters" or           ;
+      type-of-mutation = "both" )                              ;
+      [ generate-status ]                                      ;
+      [ original-codon ]] )                                    ;
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
 ; TITLE
 ;
-; This subroutine...
+; This subroutine... A complete list of letters and corresponding definitions are located above.
 ;
 ; ENTRY: entry 1...
 ;
@@ -319,18 +434,27 @@ to-report status-of [ target ]
     let target-life-history first [life.history] of target
     let target-fertility first [fertility.status] of target
     let target-size ifelse-value ( [size] of target < size ) [ "r" ] [ "b" ]
-    let target-health ( ifelse-value ( [survival.chance] of target > survival.chance + 0.001 ) [ "h" ] ( [survival.chance] of target + 0.001 < survival.chance) [ "x" ] [ "" ] )
+    let target-health ( ifelse-value 
+      ( [survival.chance] of target > survival.chance + 0.001 ) 
+      [ "h" ] ( [survival.chance] of target + 0.001 < survival.chance) [ "x" ] [ "" ] )
     let target-kin ifelse-value ( relatedness-with target > 0.2 ) [ "k" ] [ "q" ]
     let target-group ifelse-value ( [group.identity] of target = group.identity ) [ "n" ] [ "u" ] 
-    let target-carry ifelse-value ( member? target carried.items ) [ "y" ] [ ifelse-value ( member? self [carried.items] of target ) [ "¥" ] [ "t" ] ]
-    let target-signal (word ifelse-value [yellow.signal] of target [ "α" ][ "å" ] ifelse-value [red.signal] of target [ "β" ][ "ß" ] ifelse-value [blue.signal] of target [ "ɣ" ][ "œ" ] )
+    let target-carry ifelse-value 
+    ( member? target carried.items ) [ "y" ] 
+    [ ifelse-value ( member? self [carried.items] of target ) [ "¥" ] [ "t" ] ]
+    let target-signal (word ifelse-value [yellow.signal] of target [ "α" ][ "å" ] 
+      ifelse-value [red.signal] of target [ "β" ][ "ß" ] 
+      ifelse-value [blue.signal] of target [ "ɣ" ][ "œ" ] )
     let target-rest ifelse-value ( [is.resting] of target = true ) [ "s" ] [ "." ]
-    let target-color (word "" round [color] of target "" ifelse-value ( shade-of? color [color] of target) [ "#" ] [ "" ])
-    let target-proximity (ifelse-value ( distance-to-target < 0.5 * size ) [ "<" ] ( distance-to-target > 0.66 * maximum-visual-range * visual.range ) [ ">" ] [ "|" ] )
+    let target-color (word "" round [color] of target "" ifelse-value 
+      ( shade-of? color [color] of target) [ "#" ] [ "" ])
+    let target-proximity (ifelse-value ( distance-to-target < 0.5 * size ) [ "<" ] 
+      ( distance-to-target > 0.66 * maximum-visual-range * visual.range ) [ ">" ] [ "|" ] )
     let target-alone ifelse-value ( [ solitary? ] of target = false ) [ "∴" ] [ "⋅" ]
-    set status-report (word status-report 
-      target-kind 
-      target-self 
+    
+    set status-report (word status-report                    ; 
+      target-kind                                            ;
+      target-self                                            ;
       target-alive 
       target-sex 
       target-life-history
@@ -350,9 +474,13 @@ to-report status-of [ target ]
   if ( is-patch? target ) [ ; PATCHES
     let target-kind "d" 
     let plant-group [pgroup.identity] of target
-    let target-group ifelse-value ( plant-group = 0 or plant-group = group.identity ) [ "n" ] [ "u" ] 
+    let target-group ifelse-value 
+    ( plant-group = 0 or plant-group = group.identity ) [ "n" ] [ "u" ] 
     let target-pcolor (word "" round [pcolor] of target "")
-    set status-report (word status-report word target-kind target-group target-pcolor )]
+    set status-report (word status-report 
+      word target-kind                                      ;
+      target-group                                          ;
+      target-pcolor )]                                      ;
   
   report status-report
 end
@@ -371,12 +499,15 @@ end
 
 to-report first-string-is-part-of-last? [ string1 string2 ]
   let first-is-part-of-last true
-  let index 0
-  if ( is-string? string1 and is-string? string2 ) [
-    let string1-length length string1 ; saves on runtime
-    while [ first-is-part-of-last and index < string1-length ] [
-      if ( not member? item index string1 string2 ) and ( item index string1 != " " ) [ set first-is-part-of-last false ]
-      set index index + 1 ]]
+  let index 0                                              ;
+  if ( is-string? string1 and is-string? string2 ) [       ;
+    let string1-length length string1                      ; saves on runtime
+    while [ first-is-part-of-last and                      ;
+      index < string1-length ] [                           ;
+      if ( not member? item index string1 string2 ) and    ;
+      ( item index string1 != " " )                        ; 
+      [ set first-is-part-of-last false ]                  ;
+      set index index + 1 ]]                               ;
   report first-is-part-of-last
 end
 
@@ -393,10 +524,10 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to-report status-code-list
-  report [ 
-    "a" "b" "c" "d" "e" "f" "g" 
-    "h" "i" "j" "k" "l" "m" "n"
-    "o" "p" "q" "r" "s" "t" "u"
+  report [                                                 ;
+    "a" "b" "c" "d" "e" "f" "g"                            ; 
+    "h" "i" "j" "k" "l" "m" "n"                            ; 
+    "o" "p" "q" "r" "s" "t" "u"                            ;
     "v" "w" "x" "y" "z" "¥" "α" 
     "å" "β" "ß" "ɣ" "œ" "*" "-" 
     "#" "$" "~" "1" "2" "3" "4" 
@@ -478,8 +609,12 @@ end
 
 to-report sta2us-codon-exists [ codon ]
   report
-  codon != "" and not is-number? codon and not is-boolean? codon and
-  ( member? codon action-code-list or first-string-is-part-of-last? codon ( reduce word status-code-list ) ) ; codon is either an action or part of the status codons list
+  codon != "" and                                 ;
+  not is-number? codon and                        ;
+  not is-boolean? codon and                       ;
+  ( member? codon action-code-list or             ;
+    first-string-is-part-of-last? codon           ;
+    ( reduce word status-code-list ) )            ; codon is either an action or part of the status codons list
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -495,8 +630,10 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to-report generate-status
-  let new-status one-of status-code-list
-  repeat ( random 5 ) [ set new-status ( word new-status one-of status-code-list ) ]
+  let new-status one-of status-code-list          ;
+  repeat ( random 5 ) [                           ;
+    set new-status ( word                         ;
+      new-status one-of status-code-list ) ]      ;
   report new-status
 end
 

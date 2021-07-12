@@ -8703,4 +8703,106 @@
       <value value="8"/>
     </enumeratedValueSet>
   </experiment>
+  <experiment name="AQ1" repetitions="1" runMetricsEveryStep="false">
+    <setup>thesis-setup</setup>
+    <go>go</go>
+    <final>thesis-final</final>
+    <exitCondition>ticks = simulation-stop-at</exitCondition>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="AR1" repetitions="1" runMetricsEveryStep="false">
+    <setup>thesis-setup</setup>
+    <go>go</go>
+    <final>thesis-final</final>
+    <exitCondition>ticks = simulation-stop-at</exitCondition>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="AS1" repetitions="1" runMetricsEveryStep="false">
+    <setup>thesis-setup</setup>
+    <go>go</go>
+    <final>thesis-final</final>
+    <exitCondition>ticks = simulation-stop-at</exitCondition>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="AT1" repetitions="1" runMetricsEveryStep="false">
+    <setup>thesis-setup</setup>
+    <go>go</go>
+    <final>thesis-final</final>
+    <exitCondition>ticks = simulation-stop-at</exitCondition>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="AU1" repetitions="1" runMetricsEveryStep="false">
+    <setup>thesis-setup</setup>
+    <go>go</go>
+    <final>thesis-final</final>
+    <exitCondition>ticks = simulation-stop-at</exitCondition>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="AV1" repetitions="1" runMetricsEveryStep="false">
+    <setup>thesis-setup</setup>
+    <go>go</go>
+    <final>thesis-final</final>
+    <exitCondition>ticks = simulation-stop-at</exitCondition>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+      <value value="1"/>
+      <value value="2"/>
+      <value value="3"/>
+      <value value="4"/>
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+  </experiment>
 </experiments>

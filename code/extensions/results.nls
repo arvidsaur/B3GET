@@ -7,9 +7,7 @@
 ;   88     88  88        d8'   .8P Y8.   .8P 88           88    d8'   .8P 
 ;   dP     dP  88888888P  Y88888P  `Y88888P' 88888888P    dP     Y88888P  
 ;            
-;
-; ========================================================================================================= ;                                                  
-; 
+;                                                
 ; This B3GET extension contains all functions related to output results. Data collection 
 ; can be turned ON or OFF with the OUTPUT-RESULTS? switch on the user interface. When ON is selected, 
 ; the OUTPUT-RESULTS function is applied once every timestep. Agent state variables are accessible 
@@ -18,15 +16,43 @@
 ; extension to run code verification checks. Modify the USER SETTINGS below for specific data
 ; collection preferences.
 ;  
-; --------------------------------------------------------------------------------------------------------- ;
+; ========================================================================================================= ;  
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; COLLECT INFORMATION ON THE CURRENT SIMULATION STATE AND OUTPUT TO EXTERNAL FILES
 ;
-; This subroutine...
+; This subroutine is called once each timestep if the user specifies that 'output-results?' is ON. When
+; in operation, this subroutine determines which information about the surrently running simulation to
+; output at that timestep. The user specifies multiple settings related to what information to gather and
+; output for each timestep.
+; 
+; 
+; 
+; * VERIFICATION:
+; 
+; * SUMMARY:
+;    - Simulations:    
+;    - World
+;    - Individuals
 ;
-; ENTRY: entry 1...
+; * SCANS
+;    - Simulation
+;    - Groups
+;    - Individuals
+;    - View
+;    - Genotype
+; 
+; * FOCAL FOLLOW:
+;
+;
+; ENTRY:    A simulation is currently running and there are anima1s present and their current states are known.
+;
+;           verification-rate  simulation-summary-ticks record-world-ticks record-individuals  
+;           simulation-scan-ticks group-scan-ticks individual-scan-ticks view-scan-ticks genotype-scan-ticks 
+;           focal-follow-rate
+;
+;           path-to-experiment
 ;
 ; EXIT: exit 1...
 ;
@@ -36,110 +62,121 @@ to output-results
   
   carefully [
     
-    ;----------------------------------------------------------------------------------------------     
-    ; VERIFICATION : collect data on outcomes of periodic code verification checks
-    ;----------------------------------------------------------------------------------------------
+    ;-------------------------------------------------------------------------------------------------------     
+    ; VERIFICATION : collect information on outcomes of periodic code verification checks
+    ;-------------------------------------------------------------------------------------------------------   
     
-    if ( verification-rate > 0 and ( random-float 1.0 < verification-rate ) ) [   ; If user wants to collect verification data and dice-roll wins
-      profiler:start ]           ; and start a new profiler recording
-    
-    if ( profiler:calls "go" >= 1 ) [  ; If profiler is running
-      record-verification              ; Record dynamic verification data
-      profiler:stop                    ; and stop the profiler
-      profiler:reset             ; reset the profiler data
+    if ( verification-rate > 0 and                              ; If user wants to collect verification data
+      ( random-float 1.0 < verification-rate ) ) [              ; and dice-roll wins and start a new profiler
+      profiler:start ]                                          ; recording.    
+
+    if ( profiler:calls "go" >= 1 ) [                           ; If profiler is running
+      record-verification                                       ; Record dynamic verification data
+      profiler:stop                                             ; and stop the profiler
+      profiler:reset                                            ; reset the profiler data
     ]                  
     
-    ;----------------------------------------------------------------------------------------------     
-    ; SUMMARY : collect summary data of simulations or individuals
-    ;----------------------------------------------------------------------------------------------
+    ;-------------------------------------------------------------------------------------------------------       
+    ; SUMMARY : collect summary information of simulations or individuals
+    ;-------------------------------------------------------------------------------------------------------   
     
-    if ( simulation-summary-ticks > 0 and ticks = simulation-summary-ticks ) [ simulation-summary ]
-    if ( record-world-ticks > 0 and ticks = record-world-ticks ) [ record-world ]
-    if ( record-individuals = true ) [ ask anima1s with [ ticks.at.death > 0 and ticks = ( ticks.at.death + 1 ) ] [ individual-summary ] ]
+    if ( simulation-summary-ticks > 0 and                       ;         
+      ticks = simulation-summary-ticks )                        ;
+    [ simulation-summary ]                                      ;
     
-    ;----------------------------------------------------------------------------------------------     
-    ; SCAN : collect data on the current state of simulations, groups, or individuals
-    ;----------------------------------------------------------------------------------------------
+    if ( record-world-ticks > 0 and                             ;
+      ticks = record-world-ticks )                              ;
+    [ record-world ]                                            ;
     
-    if ( simulation-scan-ticks > 0 and ticks > 0 and ticks-on-interval? simulation-scan-ticks ) [ 
-      scan-simulation
+    if ( record-individuals = true ) [                          ;
+      ask anima1s with [ ticks.at.death > 0 and                 ;
+        ticks = ( ticks.at.death + 1 ) ]                        ;
+      [ individual-summary ] ]                                  ;
+    
+    ;-------------------------------------------------------------------------------------------------------        
+    ; SCAN : collect information on the current state of simulations, groups, or individuals
+    ;-------------------------------------------------------------------------------------------------------   
+    
+    if ( simulation-scan-ticks > 0 and                          ;
+      ticks > 0 and                                             ;
+      ticks-on-interval? simulation-scan-ticks )                ;
+    [ scan-simulation ]                                         ;
+    
+    if ( group-scan-ticks > 0 and                               ;
+      ticks > 0 and                                             ;
+      ticks-on-interval? group-scan-ticks ) [                   ;
+      if ( any? anima1s with [ is.alive ] ) [                   ;
+        foreach remove-duplicates                               ;
+        [ group.identity ] of anima1s with [ is.alive ]         ;
+        [ g -> scan-group g ]] ]                                ;
+    
+    if ( individual-scan-ticks > 0 and                          ;
+      ticks > 0 and                                             ;
+      ticks-on-interval? individual-scan-ticks ) [              ;
+      if ( any? anima1s with [ is.alive ] ) [                   ;
+        ask anima1s with [ is.alive ] [ scan-individual ]]]     ; 
+    
+    if ( view-scan-ticks > 0 and                                ;
+      ticks-on-interval? view-scan-ticks ) [                    ;
+      let saved-subject subject                                 ;
+      reset-perspective                                         ;
+      export-view ( word path-to-experiment                     ;
+        "view-" simulation-id "-" ticks ".png")                 ;
+      output-territories                                        ;
+      export-view ( word path-to-experiment                     ;
+        "territories-" simulation-id "-" ticks ".png")          ;
+      if ( saved-subject != nobody )                            ;
+      [ watch saved-subject ]                                   ;
     ]
     
-    if ( group-scan-ticks > 0 and ticks > 0 and ticks-on-interval? group-scan-ticks ) [ 
-      if ( any? anima1s with [ is.alive ] ) [ foreach remove-duplicates [ group.identity ] of anima1s with [ is.alive ] [ g -> scan-group g ]]
-    ]
+    if ( genotype-scan-ticks > 0 and                            ;
+      ticks > 0 and
+      ticks-on-interval? genotype-scan-ticks and                ;
+      any? anima1s with [ is.alive ] ) [                        ;
+      scan-genotype ]                                           ;
     
-    if ( individual-scan-ticks > 0 and ticks > 0 and ticks-on-interval? individual-scan-ticks ) [ 
-      if ( any? anima1s with [ is.alive ] ) [ ask anima1s with [ is.alive ] [ scan-agent ]]
-    ]
+    ;-------------------------------------------------------------------------------------------------------        
+    ; FOCAL FOLLOW: collect very fine-grained details about a single individual
+    ;-------------------------------------------------------------------------------------------------------   
+     
+    if ( focal-follow-rate > 0 and                              ; There is a small chance to starting                           
+      subject = nobody ) [                                      ; "following" an anima1 if they were born
+      if ( random-float 1.0 < focal-follow-rate and             ; this timestep.
+        any? anima1s with [ age.in.ticks = 0 ] ) [               
+        watch one-of anima1s with [ age.in.ticks = 0 ] ]]        
     
-    if ( view-scan-ticks > 0 and ticks-on-interval? view-scan-ticks ) [
-      let saved-subject subject
-      reset-perspective
-      export-view ( word path-to-experiment "view-" simulation-id "-" ticks ".png")
-      output-territories
-      export-view ( word path-to-experiment "territories-" simulation-id "-" ticks ".png")
-      if ( saved-subject != nobody ) [ watch saved-subject ]
-    ]
+    if ( focal-follow-rate > 0 and                              ; When focal subject dies and fully decays,
+      subject != nobody and                                     ; stop following them.
+      [fully.decayed] of subject = true ) 
+    [ reset-perspective ]                               
     
-    if ( genotype-scan-ticks > 0 and ticks-on-interval? genotype-scan-ticks and any? anima1s with [ is.alive ] ) [
-      scan-genotype
-    ]
+    if ( focal-follow-rate > 0 and                              ; If currently "following" an anima1,
+      subject != nobody ) [                                     ; record information about this subject.
+      ask subject [ record-actions ]]
     
-    ;----------------------------------------------------------------------------------------------     
-    ; FOCAL FOLLOW
-    ;----------------------------------------------------------------------------------------------
-    
-    ; There is a small chance to starting "following" an agent if they were born this timestep 
-    if ( focal-follow-rate > 0 and subject = nobody ) [ if ( random-float 1.0 < focal-follow-rate and any? anima1s with [ age.in.ticks = 0 ] ) [ watch one-of anima1s with [ age.in.ticks = 0 ] ]]
-    
-    if ( focal-follow-rate > 0 and subject != nobody and [fully.decayed] of subject = true ) [ reset-perspective ] ; when focal subject dies and fully decays, stop following them
-    
-    ; If currently "following" an agent, take records of this subject
-    if ( focal-follow-rate > 0 and subject != nobody ) [ 
-      ask subject [ record-actions ]
-    ]
-    
-  ] [ print ( word "OUTPUT RESULTS ERROR: " error-message ) ]
+  ] [ print ( word "OUTPUT RESULTS ERROR: " error-message ) ]   ; If an error occur, display error message.
   
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
-
-to scan-all-groups
-  foreach remove-duplicates [ group.identity ] of anima1s with [ is.alive ] [ g -> scan-group g ]
-end
-
-
-; --------------------------------------------------------------------------------------------------------- ;
-;  
-;                             oo .8888b oo                   oo   dP                     
-;                                88   "                           88                     
-;  dP   .dP .d8888b. 88d888b. dP 88aaa  dP .d8888b. .d8888b. dP d8888P .d8888b. 88d888b. 
-;  88   d8' 88ooood8 88'  `88 88 88     88 88'  `"" 88'  `88 88   88   88'  `88 88'  `88 
-;  88 .88'  88.  ... 88       88 88     88 88.  ... 88.  .88 88   88   88.  .88 88    88 
-;  8888P'   `88888P' dP       dP dP     dP `88888P' `88888P8 dP   dP   `88888P' dP    dP 
-;                                                                                      
-;                                                                                     
+;                             oo .8888b oo                     dP   oo                   
+;                                88   "                        88                        
+;  dP   .dP .d8888b. 88d888b. dP 88aaa  dP .d8888b. .d8888b. d8888P dP .d8888b. 88d888b. 
+;  88   d8' 88ooood8 88'  `88 88 88     88 88'  `"" 88'  `88   88   88 88'  `88 88'  `88 
+;  88 .88'  88.  ... 88       88 88     88 88.  ... 88.  .88   88   88 88.  .88 88    88 
+;  8888P'   `88888P' dP       dP dP     dP `88888P' `88888P8   dP   dP `88888P' dP    dP                                                                                       
+;                                                                                                                                                             
 ; --------------------------------------------------------------------------------------------------------- ;
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; WRITE INFORMATION ON THE VERIFICATION ASSESSMENT TO AN EXTERNAL FILE
 ;
-; This subroutine...
+; This subroutine performs a dynamic check on the current simulation and then prints out
+; a summary of this assessment to an external file. 
 ;
-; ENTRY: entry 1...
+; ENTRY: The simulation is currently running and there are living anima1s.
 ;
 ; EXIT: exit 1...
 ;
@@ -147,13 +184,13 @@ end
 
 to record-verification
 
-  let file-path ( word path-to-experiment "dynamic-verification.csv" ) ; Set the file path for the verification file
-  let new-tape generate-verification-tape                              ; Run the verification subroutine and record data
+  let file-path ( word path-to-experiment "dynamic-verification.csv" ) ; Set the file path for verification file
+  let new-tape generate-verification-tape                              ; Run verification subroutine & record data
   
   ifelse ( not file-exists? file-path and simulation-id != 0 )         ; If the file does not already exist
   
   [ file-open file-path                                                ; Open verification file
-    foreach new-tape [ l -> file-print csv:to-string (list l ) ] ]     ; Record the headers and data to verification file
+    foreach new-tape [ l -> file-print csv:to-string (list l ) ] ]     ; Record headers and data to verification file
   
   [ file-open file-path                                                ; Open verification file
     file-print csv:to-string (list last new-tape ) ]                   ; Record data only to verification file
@@ -175,7 +212,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; WRITE INFORMATION ON THE SIMULATION WORLD TO AN EXTERNAL FILE
 ;
 ; This subroutine...
 ;
@@ -193,7 +230,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; WRITE INFORMATION ON AN INDIVIDUAL TO AN EXTERNAL FILE
 ;
 ; This subroutine...
 ;
@@ -347,9 +384,9 @@ to individual-summary
       "mother.initiated.birth"
       "mother.initiated.weaning"
       
-      "lifetime-mean-plant-abundance"
-      "lifetime-mean-plant-patchiness"
-      "lifetime-mean-population-size"
+;      "lifetime-mean-plant-abundance"
+;      "lifetime-mean-plant-patchiness"
+;      "lifetime-mean-population-size"
 
   )) ]
   
@@ -492,9 +529,9 @@ to individual-summary
     mother.initiated.birth
     mother.initiated.weaning
     
-    lifetime-plant-abundance
-    lifetime-plant-patchiness
-    lifetime-population-size
+;    lifetime-plant-abundance
+;    lifetime-plant-patchiness
+;    lifetime-population-size
 
   ))
   
@@ -504,7 +541,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; WRITE INFORMATION ON THE SIMULATION TO AN EXTERNAL FILE
 ;
 ; This subroutine...
 ;
@@ -1518,7 +1555,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; WRITE INFORMATION ON THE CURRENT STATE OF GENOTYPES TO AN EXTERNAL FILE
 ;
 ; This subroutine...
 ;
@@ -1591,8 +1628,8 @@ to scan-genotype ; agent subroutine, sta2us only
       (sentence
         date-and-time
         path-to-experiment
-        ( csv:to-string model-version )
-        model-structure
+        model-version
+        ( word model-structure )
         genotype-reader
         simulation-id
         behaviorspace-experiment-name
@@ -1623,7 +1660,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; WRITE INFORMATION ON THE CURRENT STATE OF INDIVIDUALS TO AN EXTERNAL FILE
 ;
 ; This subroutine...
 ;
@@ -1633,7 +1670,7 @@ end
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
-to scan-agent
+to scan-individual
   
   let file-path ( word path-to-experiment "individual-scans.csv" )
   
@@ -1854,7 +1891,23 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; WRITE INFORMATION ON THE CURRENT STATE OF ALL GROUPS TO AN EXTERNAL FILE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to scan-all-groups
+  foreach remove-duplicates [ group.identity ] of anima1s with [ is.alive ] [ g -> scan-group g ]
+end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; WRITE INFORMATION ON THE CURRENT STATE OF A GROUP TO AN EXTERNAL FILE
 ;
 ; This subroutine...
 ;
@@ -2148,7 +2201,10 @@ to scan-group [ group-id ]
     
     count living-agents with [ group.identity = group-id and pgroup.identity = group-id ]
     count living-agents with [ group.identity = group-id and pgroup.identity != group-id ]
-    (count living-agents with [ group.identity = group-id and pgroup.identity = group-id ] / ( count living-agents with [ group.identity = group-id and pgroup.identity = group-id ] + count living-agents with [ group.identity = group-id and pgroup.identity != group-id ] + 0.0000000001 ) )
+    (count living-agents with [ group.identity = group-id and pgroup.identity = group-id ] / 
+      ( count living-agents with [ group.identity = group-id and pgroup.identity = group-id ] + 
+        count living-agents with [ group.identity = group-id and pgroup.identity != group-id ] + 
+        0.0000000001 ) )
     
     distance-to-group-members-minimum
     distance-to-group-members-maximum
@@ -2181,7 +2237,9 @@ to scan-group [ group-id ]
     gestatee-male-death-count
     gestatee-female-death-count
     
-    ifelse-value ( (adult-cycling-count + adult-pregnant-count + adult-lactating-count) > 0 ) [ ( total-birth-count / (adult-cycling-count + adult-pregnant-count + adult-lactating-count)) ] [ "NA" ]
+    ifelse-value ( (adult-cycling-count + adult-pregnant-count + adult-lactating-count) > 0 ) 
+    [ ( total-birth-count / (adult-cycling-count + adult-pregnant-count + adult-lactating-count)) ] 
+    [ "NA" ]
     ifelse-value ( current-group-size > 0 ) [ ( total-birth-count / current-group-size) ] [ "NA" ]
     ifelse-value ( current-group-size > 0 ) [ ( total-death-count / current-group-size) ] [ "NA" ]
     ifelse-value ( adult-male-count > 0 ) [ (adult-male-death-count / adult-male-count) ] [ "NA" ]
@@ -2263,7 +2321,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; WRITE INFORMATION ON THE CURRENT STATE OF THE SIMULATION TO AN EXTERNAL FILE
 ;
 ; This subroutine...
 ;
@@ -2480,13 +2538,20 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TITLE
+; WRITE INFORMATION ON THE ACTIONS OF A FOCAL INDIVIDUAL TO AN EXTERNAL FILE
 ;
-; This subroutine...
+; This subroutine is called by the focal subject and results in its current action information being
+; output to an external file. Usually, this subroutine is called once per timestep while the focal 
+; individual is alive in order to track all of their behaviors during its lifetime. This subroutine
+; also gathers information on other individuals who interact with the focal subject at that timestep. The
+; information that is recorded on the focal subject or individuals interacting with the focal subject
+; includes the current state of their attributes and relavent tracking variables, and information on
+; the action that has been performed.
 ;
-; ENTRY: entry 1...
+; ENTRY: The simulation is currently running and the focal subject has access to its attributes, and 
+;        the attributes of those other individuals it is interactign with.
 ;
-; EXIT: exit 1...
+; EXIT:  This subroutine prints out information to an external csv file.
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
@@ -2727,21 +2792,9 @@ to record-actions ; agent subroutine
   
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
-; TITLE
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
-
-;--------------------------------------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------------------------
 ; AGENT FUNCTIONS
-;--------------------------------------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------------------------
 
 to-report focal-subject report self = subject end
 to-report help-from-count report length help.from.history end
@@ -2753,7 +2806,9 @@ to-report group-transfers-count report length group.transfers.history end
 to-report unique-group-transfers-count report length remove-duplicates group.transfers.history end
 
 to-report infanticide-count 
-  let current-infanticide-history filter [ i -> any? anima1s with [ not is.alive and my.identity = i ] ] remove-duplicates infanticide.history   ; must remove individual infants who are still alive at the time of this individual's death ; only count ids from dead anima1s
+  let current-infanticide-history filter [ i ->               ; Before information on infanticide can be
+    any? anima1s with [ not is.alive and my.identity = i ] ]  ; printed, the infants who are still alive
+  remove-duplicates infanticide.history                       ; must be removed from the current list.
   report length current-infanticide-history
 end
 
@@ -2780,15 +2835,15 @@ end
 to-report how-many-records report ceiling (( ticks.at.death - ticks.at.conception ) / timestep-interval ) end
  
   
-;--------------------------------------------------------------------------------------------------------------------
-; OBSERVER FUNCTIONS
-;--------------------------------------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------------------------
+; GLOBAL FUNCTIONS
+;-----------------------------------------------------------------------------------------------------------
   
 to-report living-agents report anima1s with [ is.alive ] end
 to-report decayed-agents report anima1s with [ fully.decayed and generation.number > 0 ] end
   
 to-report plant-patchiness
-  let patch-diameter 2 * maximum-visual-range          ; Patch size is set to visual diameter
+  let patch-diameter 2 * maximum-visual-range          ; The patch size is set to visual diameter
   let patch-list []
   
   let i 0
