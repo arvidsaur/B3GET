@@ -379,8 +379,8 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to setup-parameters
-  set model-version "1.2.0-Beta-2021-07-10"                    ; Model version of B3GET.
-  if ( model-structure = 0 ) [
+  set model-version "1.2.0-Beta-2021-07-18"                    ; Model version of B3GET.
+  if ( model-structure = 0 or model-structure = [] ) [
     set model-structure [ "baseline" ] ]                       ; A simulation has a baseline model structure.
   set start-date-and-time date-and-time                        ; by default.
 
@@ -411,37 +411,37 @@ to setup-parameters
   set population-size-record []
   set actions-completed-this-timestep []
 
-  if ( simulation-summary-ticks = 0 and output-results? )      ; Initialize the simulation with default
+  if ( simulation-summary-ticks = 0 )                          ; Initialize the simulation with default
   [ set simulation-summary-ticks 25000 ]                       ; values for results output settings.
 
-  if ( simulation-scan-ticks = 0 and output-results? )
+  if ( simulation-scan-ticks = 0 )
   [ set simulation-scan-ticks 250 ]
 
-  if ( group-scan-ticks = 0 and output-results? )
+  if ( group-scan-ticks = 0 )
   [ set group-scan-ticks 5000 ]
 
-  if ( individual-scan-ticks = 0 and output-results? )
+  if ( individual-scan-ticks = 0 )
   [ set individual-scan-ticks 0 ]
 
-  if ( view-scan-ticks = 0 and output-results? )
+  if ( view-scan-ticks = 0 )
   [ set view-scan-ticks 5000 ]
 
-  if ( genotype-scan-ticks = 0 and output-results? )
+  if ( genotype-scan-ticks = 0 )
   [ set genotype-scan-ticks 5000 ]
 
-  if ( focal-follow-rate = 0 and output-results? )
+  if ( focal-follow-rate = 0 )
   [ set focal-follow-rate 0.00001 ]
 
-  if ( record-individuals = 0 and output-results? )
+  if ( record-individuals = 0 )
   [ set record-individuals true ]
 
-  if ( verification-rate = 0 and output-results? )
+  if ( verification-rate = 0 )
   [ set verification-rate 1E-6 ]
 
-  if ( record-world-ticks = 0 and output-results? )
+  if ( record-world-ticks = 0 )
   [ set record-world-ticks 25000 ]
 
-  if ( simulation-stop-at = 0 and output-results? )
+  if ( simulation-stop-at = 0 )
   [ set simulation-stop-at 999999999 ]
 
   reset-timer                                                  ; Start the simulation timer
@@ -612,6 +612,8 @@ to go
     "simulation"
     simulation-id
     "SIMULATION STARTED" ]
+
+  if ( ticks = simulation-stop-at + 1 ) [ stop ]             ; Stop at the predetermined timestep.
 
   global-update                                              ; Update the current state of the
   plants-update                                              ; plants and animals in the
@@ -2080,11 +2082,13 @@ end
 ;
 ; CALLER UPDATES HEADING BASED ON CURRENT HEADING
 ;
-; This subroutine...
+; This subroutine allows the caller wants to turn right or left by a specific amount. The cost
+; of this subroutine is exponentially higher than most other actions. Thus, it is not expected to
+; evolve in a population naturally. Instead, this subroutine is used for visual testing purposes.
 ;
-; ENTRY: entry 1...
+; ENTRY: cost
 ;
-; EXIT: exit 1...
+; EXIT: right and left
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
@@ -2100,35 +2104,42 @@ end
 ;
 ; CALLER MOVES FORWARD OR BACKWARD
 ;
-; This subroutine...
+; This subroutine allows the caller to move forward spatially. The amount that an individual can move
+; forward is based on how much energy (cost) the caller put into this action, plus how large in size in
+; the caller and any other objects that the caller is carrying. The higher the energy, the farther the
+; caller will move forward. The higher the net size of the caller and the objects that it is carrying,
+; the less distant the caller will move forward. If the caller pays a negative cost, then the caller moves
+; backward instead of forward.
 ;
-; ENTRY: entry 1...
+; ENTRY: cost
 ;
-; EXIT: exit 1...
+; EXIT: Caller moves forward or backward by the calculated amount.
+;
+;       Records for distance traveled are updated.
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to go-forward [ cost ]
   complete-action self "go-forward" cost                       ; Record that this action has started.
-  if ( life.history != "gestatee" ) [
+  if ( life.history != "gestatee" ) [                          ; Only non-gestatees can move forward.
 
-    ifelse ( cost < 0 )                                        ;
-    [ right 180 complete-action self "went-backward" 0]        ; Record that this action has been completed.
-    [ complete-action self "went-forward" 0 ]                  ;
-    let sum-weight size                                        ;
-    foreach carried.items [ object ->                          ;
-      set sum-weight sum-weight + [size] of object ]           ;
-    let travel-distance ifelse-value                           ;
-    ( sum-weight > 0 )                                         ;
-    [ (size * (sqrt (( 2 * abs cost ) / sum-weight )) ) ]      ;
-    [ 0 ]                                                      ;
-                                                               ;
-    forward travel-distance                                    ;
+    ifelse ( cost < 0 )                                        ; A negative cost means the caller
+    [ right 180 complete-action self "went-backward" 0 ]       ; went backward rather than
+    [ complete-action self "went-forward" 0 ]                  ; moved forward.
+    let sum-weight size                                        ; Calculate the caller's weight plus the
+    foreach carried.items [ object ->                          ; weight of all carried objects.
+      set sum-weight sum-weight + [size] of object ]
+    let travel-distance ifelse-value                           ; Calculate the distance traveled
+    ( sum-weight > 0 )                                         ; based on the cost of this action
+    [ (size * (sqrt (( 2 * abs cost ) / sum-weight )) ) ]      ; and total amount of weight that
+    [ 0 ]                                                      ; must be moved.
 
-    set x.magnitude 0                                          ;
-    set y.magnitude 0                                          ;
+    forward travel-distance                                    ; Move caller by the calculated distance.
 
-    set distance.traveled distance.traveled + travel-distance  ; track travel
+    set x.magnitude 0                                          ; Reset the caller's preference for
+    set y.magnitude 0                                          ; their heading.
+
+    set distance.traveled distance.traveled + travel-distance  ; Track this travel event.
 
   ]
 end
@@ -2137,11 +2148,14 @@ end
 ;
 ; CALLER UPDATES HEADING TO SPECIFIED VALUE
 ;
-; This subroutine...
+; This subroutine allows the caller to orient to a specific heading. The amount that an individual rotates
+; is based on how much energy (cost) the caller put into this action. Each 1/360th unit of energy pays for
+; one degree of rotation. For example, if the caller pays 0.25 then they will rotate 90 degrees, and if the
+; caller pays 1.0 then the caller will rotate 360 degrees.
 ;
-; ENTRY: entry 1...
+; ENTRY: cost
 ;
-; EXIT: exit 1...
+; EXIT: Caller updates its heading according to the cost.
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
@@ -2154,7 +2168,8 @@ end
 ;
 ; CALLER UPDATES HEADING WITH A RANDOM DEVIATION
 ;
-; This subroutine...
+; This subroutine allows the caller to randomly re-orient themselves with respect to their present heading.
+; The amount that an individual rotates is based on how much energy (cost) the caller put into this action.
 ;
 ; ENTRY: cost
 ;
@@ -2166,22 +2181,22 @@ end
 
 to set-heading-random [ cost ]
   complete-action self "set-heading-random" cost               ; Record that this action has started.
-  let x-difference 2 * x.magnitude * 100000 * cost             ;
-  if ( x-difference = 0 )                                      ;
-  [ set x-difference 100000 * cost ]                           ;
-  if ( x-difference > 1E10 )                                   ;
-  [ set x-difference 1E10 ]                                    ;
-  set x.magnitude x.magnitude +                                ;
-  random-float x-difference - random-float x-difference        ;
-  let y-difference 2 * y.magnitude * 100000 * cost             ;
-  if ( y-difference = 0 ) [ set y-difference 100000 * cost ]   ;
-  if ( y-difference > 1E10 ) [ set y-difference 1E10 ]         ;
-  set y.magnitude y.magnitude +                                ;
-  random-float y-difference - random-float y-difference        ;
-  set heading ifelse-value                                     ;
-  ( x.magnitude = 0 and y.magnitude = 0 )                      ;
-  [ heading ]                                                  ;
-  [ ( atan x.magnitude y.magnitude ) ]                         ;
+  let x-difference 2 * x.magnitude * 100000 * cost
+  if ( x-difference = 0 )                                      ; Calculate a new preferred
+  [ set x-difference 100000 * cost ]                           ; heading along the x axis.
+  if ( x-difference > 1E10 )
+  [ set x-difference 1E10 ]
+  set x.magnitude x.magnitude +
+  random-float x-difference - random-float x-difference
+  let y-difference 2 * y.magnitude * 100000 * cost
+  if ( y-difference = 0 ) [ set y-difference 100000 * cost ]   ; Calculate a new preferred heading
+  if ( y-difference > 1E10 ) [ set y-difference 1E10 ]         ; along the y axis.
+  set y.magnitude y.magnitude +
+  random-float y-difference - random-float y-difference
+  set heading ifelse-value
+  ( x.magnitude = 0 and y.magnitude = 0 )
+  [ heading ]                                                  ; Determine the new heading based
+  [ ( atan x.magnitude y.magnitude ) ]                         ; on these calculations.
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -2294,23 +2309,27 @@ end
 ;
 ; CALLER DEVELOPS INTO INFANT
 ;
-; This subroutine...
+; This subroutine enables the caller to invest in their development towards becoming an infant. The degree to
+; which an individual develops is based on how much energy (cost) the caller put into this action. If the
+; caller is sufficiently developed, they become an infant.
 ;
-; ENTRY: entry 1...
+; ENTRY: cost
 ;
-; EXIT: exit 1...
+;        infancy.chance
+;
+; EXIT: give-birth
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to check-infancy [ cost ]
   complete-action self "check-infancy" cost                    ; Record that this action has started.
-  ifelse ( my.mother = nobody )                                ;
-  [ set-to-dead ]                                              ; gestatees die if mother is dead
+  ifelse ( my.mother = nobody )                                ; Caller cannot survive if its mother is dead.
+  [ set-to-dead ]
   [ set infancy.chance get-updated-value infancy.chance cost   ; Apply update procedure to infancy chance.
     complete-action self "update-infancy-chance" 0             ; Record that this action has been completed.
-    if ( life.history = "gestatee" and                         ;
-      random-float 1.0 < infancy.chance ) [                    ;
-      ask my.mother [ give-birth ]                             ;
+    if ( life.history = "gestatee" and                         ; Calculate the probability of becoming
+      random-float 1.0 < infancy.chance ) [                    ; an infant and proceed if necessary.
+      ask my.mother [ give-birth ]
     ]
   ]
 end
@@ -2331,11 +2350,11 @@ to check-birth [ cost ]
   complete-action self "check-birth" cost                      ; Record that this action has started.
   set birthing.chance get-updated-value birthing.chance cost   ; Apply update procedure to birthing chance.
   complete-action self "update-birthing-chance" 0              ; Record that this action has been completed.
-  if ( fertility.status = "pregnant" and                       ;
-    random-float 1.0 < birthing.chance ) [                     ;
-    ask my-offspring with [ life.history = "gestatee" ] [      ;
-      set mother.initiated.birth true ]                        ;
-    give-birth                                                 ;
+  if ( fertility.status = "pregnant" and                       ; Calculate the probability of giving
+    random-float 1.0 < birthing.chance ) [                     ; birth and proceed if necessary.
+    ask my-offspring with [ life.history = "gestatee" ] [
+      set mother.initiated.birth true ]
+    give-birth
   ]
 end
 
@@ -2353,11 +2372,11 @@ end
 
 to give-birth
   complete-action self "give-birth" 0                          ; Record that this action has started.
-  if ( fertility.status = "pregnant" ) [                       ;
-    set fertility.status "lactating"                           ;
-    ask my-offspring with [ life.history = "gestatee" ]        ;
-    [ update-to-infant ]                                       ;
-    set birthing.chance 0                                      ;
+  if ( fertility.status = "pregnant" ) [                       ; If the caller is pregnant,
+    set fertility.status "lactating"                           ; update the caller to be lactating.
+    ask my-offspring with [ life.history = "gestatee" ]        ; Trigger any current gestatees of the
+    [ update-to-infant ]                                       ; caller to become infants.
+    set birthing.chance 0                                      ; Reset pregnancy status.
     complete-action self "gave-birth" 0                        ; Record that this action has been completed.
   ]
 end
@@ -2375,10 +2394,10 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to-report my-offspring
-  report ifelse-value ( biological.sex = "female" )            ;
-  [ anima1s with [ my.mother = myself ]]                       ;
-  [ anima1s with [                                             ;
-    father.identity = [my.identity] of myself ]]               ;
+  report ifelse-value ( biological.sex = "female" )            ; Determine caller's offspring
+  [ anima1s with [ my.mother = myself ]]                       ; by searching for individuals whose mother
+  [ anima1s with [                                             ; or father is the caller.
+    father.identity = [my.identity] of myself ]]
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -2395,13 +2414,13 @@ end
 
 to update-to-infant
   complete-action self "update-to-infant" 0                    ; Record that this action has started.
-  if ( is.alive ) [                                            ;
-    set life.history "infant"                                  ;
-    set fertility.status " "                                   ;
-    set hidden? false                                          ;
-    set is.resting false                                       ;
-    set ticks.at.birth ticks                                   ;
-    set label "i"                                              ;
+  if ( is.alive ) [                                            ; If caller is alive,
+    set life.history "infant"                                  ; update the caller to be an infant.
+    set fertility.status " "                                   ; Caller is initialized with
+    set hidden? false                                          ; infant settings and is no longer hidden
+    set is.resting false                                       ; or resting.
+    set ticks.at.birth ticks                                   ; Record when this development event occurred.
+    set label "i"                                              ; Display that this individual became an infant.
   ]
 end
 
@@ -2419,14 +2438,14 @@ end
 
 to check-juvenility [ cost ]
   complete-action self "check-juvenility" cost                 ; Record that this action has started.
-  set juvenility.chance                                        ;
+  set juvenility.chance
   get-updated-value juvenility.chance cost                     ; Apply update procedure to juvenility chance.
   complete-action self "update-juvenility-chance" 0            ; Record that this action has been completed.
-  if ( life.history = "infant" and                             ;
-    random-float 1.0 < juvenility.chance ) [                   ;
-    ifelse ( my.mother = nobody )                              ;
-    [ update-to-juvenile ]                                     ;
-    [ ask my.mother [ wean-offspring ]]                        ;
+  if ( life.history = "infant" and                             ; Calculate the probability of the caller
+    random-float 1.0 < juvenility.chance ) [                   ; becoming a juvenile and proceed if
+    ifelse ( my.mother = nobody )                              ; necessary.
+    [ update-to-juvenile ]
+    [ ask my.mother [ wean-offspring ]]
   ]
 end
 
@@ -2445,13 +2464,13 @@ end
 to check-weaning [ cost ]
   complete-action self "check-weaning" cost                    ; Record that this action has started.
   set weaning.chance get-updated-value weaning.chance cost     ; Apply update procedure to weaning chance.
-  complete-action self "update-weaning-chance" 0               ; Record that this action has been completed.
-  if ( fertility.status = "lactating" and                      ;
-    random-float 1.0 < weaning.chance ) [                      ;
-    ask my-offspring with [ life.history = "infant" ] [        ;
-      set mother.initiated.weaning true ]                      ;
-    wean-offspring                                             ;
+  if ( fertility.status = "lactating" and
+    random-float 1.0 < weaning.chance ) [                      ; Calculate the probability of the caller
+    ask my-offspring with [ life.history = "infant" ] [        ; weaning her offspring and proceed if
+      set mother.initiated.weaning true ]                      ; necessary.
+    wean-offspring                                             ; Record that the mother initiated this process.
   ]
+  complete-action self "update-weaning-chance" 0               ; Record that this action has been completed.
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -2468,11 +2487,11 @@ end
 
 to wean-offspring
   complete-action self "wean-offspring" 0                      ; Record that this action has started.
-  if ( fertility.status = "lactating" ) [                      ;
-    set fertility.status "cycling"                             ;
-    ask my-offspring with [ life.history = "infant" ] [        ;
-      update-to-juvenile ]                                     ;
-    set weaning.chance 0                                       ;
+  if ( fertility.status = "lactating" ) [                      ; If the caller is currently lactating,
+    set fertility.status "cycling"                             ; update the caller's status to cycling.
+    ask my-offspring with [ life.history = "infant" ] [        ; Trigger any current infants of the caller
+      update-to-juvenile ]                                     ; to become juveniles.
+    set weaning.chance 0                                       ; Reset lactating status.
     complete-action self "weaned-offspring" 0                  ; Record that this action has been completed.
   ]
 end
@@ -2491,16 +2510,16 @@ end
 
 to update-to-juvenile
   complete-action self "update-to-juvenile" 0                  ; Record that this action has started.
-  if ( is.alive ) [                                            ;
-    set life.history "juvenile"                                ;
-    set fertility.status " "                                   ;
-    set ticks.at.weaning ticks                                 ;
-    let my-meta-id my.identity                                 ;
-    set label "j"                                              ;
-    ask anima1s with                                           ;
-    [ member? my-meta-id infanticide.history ]                 ;
-    [ set infanticide.history remove my-meta-id                ;
-      remove-duplicates infanticide.history ]                  ;
+  if ( is.alive ) [                                            ; If the caller is alive,
+    set life.history "juvenile"                                ; update the caller's status to juvenile.
+    set fertility.status " "
+    set label "j"                                              ; Display that the caller became a juvenile.
+    set ticks.at.weaning ticks                                 ; Record when the caller made this
+    let my-meta-id my.identity                                 ; transition and update the records of
+    ask anima1s with                                           ; individuals who attacked the caller to
+    [ member? my-meta-id infanticide.history ]                 ; indicate that they did not commit
+    [ set infanticide.history remove my-meta-id                ; infanticide.
+      remove-duplicates infanticide.history ]
   ]
 end
 
@@ -2518,12 +2537,11 @@ end
 
 to check-adulthood [ cost ]
   complete-action self "check-adulthood" cost                  ; Record that this action has started.
-  set adulthood.chance                                         ;
+  set adulthood.chance
   get-updated-value adulthood.chance cost                      ; Apply update procedure to adulthood chance.
-  complete-action self "update-adulthood-chance" 0             ; Record that this action has been completed.
-  if ( life.history = "juvenile" and                           ;
-    random-float 1.0 < adulthood.chance ) [                    ;
-    update-to-adult                                            ;
+  if ( life.history = "juvenile" and                           ; Calculate the probability of the caller
+    random-float 1.0 < adulthood.chance ) [                    ; becoming an adult and proceed if necessary.
+    update-to-adult
   ]
 end
 
@@ -2541,13 +2559,14 @@ end
 
 to update-to-adult
   complete-action self "update-to-adult" 0                     ; Record that this action has started.
-  if ( is.alive ) [                                            ;
-    set life.history "adult"                                   ;
-    set fertility.status ifelse-value                          ;
-    ( biological.sex = "male" ) [ " " ] [ "cycling" ]          ;
-    set ticks.at.sexual.maturity ticks                         ;
-    set adult.hidden.chance hidden.chance                      ;
-    set adult.survival.chance survival.chance                  ;
+  if ( is.alive ) [                                            ; If the caller is currently alive,
+    set life.history "adult"                                   ; update the caller's status to adult.
+    set fertility.status ifelse-value                          ; Update females to begin cycling.
+    ( biological.sex = "male" ) [ " " ] [ "cycling" ]
+    set label "a"                                              ; Display that the caller became an adult.
+    set ticks.at.sexual.maturity ticks                         ; Record information about the current
+    set adult.hidden.chance hidden.chance                      ; state of the caller upon reaching
+    set adult.survival.chance survival.chance                  ; adulthood.
     set adult.body.size body.size
     set adult.body.shade body.shade
     set adult.energy.supply energy.supply
@@ -2563,7 +2582,6 @@ to update-to-adult
     set adult.yellow.chance yellow.chance
     set adult.red.chance red.chance
     set adult.blue.chance blue.chance
-    set label "a"
   ]
 end
 
@@ -2581,59 +2599,6 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; CALLER PROVIDES ENERGY TO TARGET
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
-
-to supply-to [ target cost ]
-  complete-action target "supply-to" cost                      ; Record that this action has started.
-  if ( target != self and                                      ;
-    is-anima1? target and                                      ;
-    [ is.alive ] of target = true and                          ;
-    ( fertility.status = "lactating"                           ;
-      or fertility.status = "pregnant" ) ) [                   ;
-    let target-cost get-action-cost-of target "demand-from"    ;
-    let net-cost ( cost + target-cost )                        ;
-    if ( net-cost > 0 ) [                                      ;
-      ask target [ receive-from myself net-cost ] ]            ;
-  ]
-end
-
-; --------------------------------------------------------------------------------------------------------- ;
-;
-; CALLER REQUESTS ENERGY FROM TARGET
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
-
-to demand-from [ target cost ]
-  complete-action target "demand-from" cost                    ; Record that this action has started.
-  if ( target != self and                                      ;
-    is-anima1? target and                                      ;
-    [ is.alive ] of target = true and                          ;
-    ( life.history = "gestatee" or                             ;
-      life.history = "infant" ) ) [                            ;
-    let target-supply-cost                                     ;
-    get-action-cost-of target "supply-to"                      ;
-    let net-cost ( cost + target-supply-cost )                 ;
-    if ( net-cost > 0 ) [                                      ;
-      receive-from target net-cost ]                           ;
-  ]
-end
-
-; --------------------------------------------------------------------------------------------------------- ;
-;
 ; CALLER INITIATES CONSUMPTION OF TARGET
 ;
 ; This subroutine...
@@ -2646,10 +2611,10 @@ end
 
 to eat [ target cost ]
   complete-action target "eat" cost                            ; Record that this action has started.
-  if ( life.history = "juvenile" or                            ;
-    life.history = "adult" and                                 ;
-    ( is-patch? target or is-anima1? target )) [               ;
-    receive-from target cost                                   ;
+  if ( life.history = "juvenile" or                            ; Check that the caller and target are
+    life.history = "adult" and                                 ; able to interact.
+    ( is-patch? target or is-anima1? target )) [
+    receive-from target cost                                   ; Caller receives energy from target.
   ]
 end
 
@@ -2667,31 +2632,39 @@ end
 
 to receive-from [ target cost ]
   complete-action target "receive-from" cost                   ; Record that this action has started.
-  if ( cost > 0 and
+  if ( cost > 0 and                                            ; Check that the target is able to interact.
     is-anima1? target or
     is-patch? target ) [
-    let energy-wanted get-updated-value bite.capacity cost
-    let energy-supply ifelse-value
+
+    let energy-wanted get-updated-value bite.capacity cost     ; Calculate how much energy that the caller
+                                                               ; can receive.
+    let energy-supply ifelse-value                             ; Determine how much energy the target has.
     ( is-patch? target )
     [ [ penergy.supply ] of target ]
     [ [ energy.supply ] of target ]
-    let energy-received ifelse-value
-    ( energy-wanted < energy-supply )
-    [ energy-wanted ]
+
+    let energy-received ifelse-value                           ; Determine the actual energy that caller
+    ( energy-wanted < energy-supply )                          ; can receive based on the minimum value
+    [ energy-wanted ]                                          ; from above energy values.
     [ energy-supply ]
-    if ( energy-received > 0 ) [
-      complete-action target "update-energy" 0
-      update-energy energy-received
-      ifelse ( is-patch? target )
-      [ ask target [
+
+    if ( energy-received > 0 ) [                               ; If the actual energy is a positive value:
+      complete-action target "update-energy" 0                 ; Update the caller's energy and record
+      update-energy energy-received                            ; that the transaction occurred.
+
+      ifelse ( is-patch? target )                              ; Reduce the target's energy by the same
+      [ ask target [                                           ; value.
         set penergy.supply penergy.supply -
         energy-received ]]
       [ ask target [ update-energy ( - energy-received ) ]]
-      if ( life.history = "juvenile" or
-        life.history = "adult" and
+
+      if ( life.history = "juvenile" or                        ; In cases where the target is foraging
+        life.history = "adult" and                             ; on plants:
         is-patch? target ) [
-        set foraging.gains.this.timestep foraging.gains.this.timestep + energy-received
-        set foraging.gains foraging.gains + energy-received ] ; only juveniles and adults can eat plants
+        set foraging.gains.this.timestep                       ; Record data on this foraging interaction.
+        foraging.gains.this.timestep + energy-received
+        set foraging.gains
+        foraging.gains + energy-received ]
   ]]
 end
 
@@ -2705,6 +2678,70 @@ end
 ;  dP dP    dP   dP   `88888P' dP       `88888P8 `88888P'   dP   dP `88888P' dP    dP `88888P'
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
+
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; CALLER PROVIDES ENERGY TO TARGET
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to supply-to [ target cost ]
+  complete-action target "supply-to" cost                      ; Record that this action has started.
+  if ( target != self and                                      ; Check that the target is able to interact.
+    is-anima1? target and
+    [ is.alive ] of target = true and                          ; Check that the caller is either pregnant
+    ( fertility.status = "lactating"                           ; or lactating.
+      or fertility.status = "pregnant" ) ) [
+
+    let caller-cost [ get-action-cost-of
+      myself "supply-to" ] of target
+    let target-cost get-action-cost-of target "demand-from"    ; Determine the negotiation between caller
+    let net-cost ( caller-cost + target-cost )                 ; and target.
+    let probability ( caller-cost + target-cost )              ; The probability of caller supplying energy
+    / ( abs caller-cost + abs target-cost + 0.0000000001 )     ; to target depends on the relative costs paid
+    if ( random-float 1.0 <= probability )                     ; by caller and target. If the probability is
+    [ ask target [ receive-from myself net-cost ] ]]           ; high enough, caller gives energy to target.
+
+end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; CALLER REQUESTS ENERGY FROM TARGET
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to demand-from [ target cost ]
+  complete-action target "demand-from" cost                    ; Record that this action has started.
+  if ( target != self and                                      ; Check that the target is able to interact.
+    is-anima1? target and
+    [ is.alive ] of target = true and                          ; Check that the caller is either an infant
+    ( life.history = "gestatee" or                             ; or gestatee.
+      life.history = "infant" ) ) [
+
+    let caller-cost [ get-action-cost-of
+      myself "demand-from" ] of target
+    let target-cost                                            ; Determine the negotiation between caller
+    get-action-cost-of target "supply-to"                      ; and target.
+    let net-cost ( caller-cost + target-cost )
+    let probability ( caller-cost + target-cost )              ; The probability of target supplying energy
+    / ( abs caller-cost + abs target-cost + 0.0000000001 )     ; to caller depends on the relative costs paid
+    if ( random-float 1.0 <= probability )                     ; by caller and target. If the probability is
+    [ receive-from target net-cost ]]                          ; high enough, target gives energy to caller.
+
+end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
@@ -3311,7 +3348,8 @@ end
 to mate-with [ target cost ]
   complete-action target "mate-with" cost                      ; Record that this action has started.
 
-  if ( cost > 0                                                ; Perform a check to make sure that
+  if ( not member? "stork" model-structure
+    and cost > 0                                               ; Perform a check to make sure that
     and is-anima1? target                                      ; copulation only occurs when certain
     and [ is.alive ] of target = true                          ; criteria met, including that the
     and life.history = "adult"                                 ; cost of mating must be greater than 0,
@@ -3326,11 +3364,14 @@ to mate-with [ target cost ]
     and conception.chance > 0
     and [conception.chance] of target > 0 ) [                  ; If all of these criteria are met...
 
-    let my-cost [ get-action-cost-of myself "mate-with" ] of target
-    let target-cost get-action-cost-of target "mate-with"      ; Calculate the probability of copulation,
-    let net-cost ( my-cost + target-cost )                     ; which could be 100% if both parties cooperate
-    let copulation-prob net-cost / my-cost                     ; or a smaller probability if either party resists.
-    if ( random-float 1.0 <= copulation-prob ) [               ; If passes this probability check...
+    let caller-cost [ get-action-cost-of myself "mate-with" ] of target
+    let target-cost get-action-cost-of target "mate-with"
+
+    let net-cost ( caller-cost + target-cost )
+    let probability ( caller-cost + target-cost )              ; The probability of caller mating with
+    / ( abs caller-cost + abs target-cost + 0.0000000001 )     ; the target depends on the relative costs paid
+    if ( random-float 1.0 <= probability ) [                   ; by caller and target. If the probability is
+                                                               ; high enough, caller mates with the target.
 
       set label "!"                                            ; Signal that a successful copulation event occurred.
       set copulations.history lput                             ; Create a record of this copulation event in
@@ -3430,37 +3471,40 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to initialize-from-parents [ m f ]
-  set label-color white                                        ;
+  set label-color white                                        ; The label color is white to be more visible.
   set my.identity random 9999999                               ; Set identity to a random number.
-  let mean-sex-ratio mean (list                                ;
-    [sex.ratio] of m                                           ;
-    [sex.ratio] of f)                                          ;
-  set biological.sex ifelse-value                              ;
-  ( random-float 1.0 < mean-sex-ratio )                        ;
-  ["male"] ["female"]                                          ;
-  set life.history "gestatee"                                  ;
-  set fertility.status " "                                     ;
-  set group.identity [group.identity] of m                     ;
-  set is.alive true                                            ;
-  set carried.items []                                         ;
-  set fully.decayed false                                      ;
-  set energy.supply 0                                          ;
-  set x.magnitude 0                                            ;
-  set y.magnitude 0                                            ;
-  ifelse ( member? "no-evolution" model-structure )            ;
-  [ set chromosome.I [chromosome.I] of m                       ;
-    set chromosome.II [chromosome.II] of m ]                   ;
-  [ setup-chromosomes-from m f ]
+  let mean-sex-ratio mean (list
+    [sex.ratio] of m
+    [sex.ratio] of f)
+  set biological.sex ifelse-value                              ; The probability of becoming male or female
+  ( random-float 1.0 < mean-sex-ratio )                        ; depends on the preferred sex ratio of parents.
+  ["male"] ["female"]
+  set life.history "gestatee"                                  ; New individuals start out as gestatees.
+  set fertility.status " "                                     ; New individuals do not have a fertility status.
+  set group.identity [group.identity] of m                     ; New individuals are given same group identity
+                                                               ; a their mother.
+  set is.alive true
+  set carried.items []                                         ; New individuals start out with their attributes
+  set fully.decayed false                                      ; empty, false, or set to zero.
+  set energy.supply 0
+  set x.magnitude 0
+  set y.magnitude 0
+  ifelse ( member? "no-evolution" model-structure )            ; The "no-evolution" model structure results
+  [ set chromosome.I [chromosome.I] of m                       ; in new offspring inheriting their gentoype
+    set chromosome.II [chromosome.II] of m ]                   ; directly from their mother.
+  [ setup-chromosomes-from m f ]                               ; By default, offspring inherit their genes from
+                                                               ; both parents.
   set my.environment []
   set decision.vectors []
   set actions.completed []
-  set age.in.ticks 0                                           ;
-  set generation.number ( [generation.number] of m + 1 )       ;
+  set age.in.ticks 0
+  set generation.number ( [generation.number] of m + 1 )       ; New individuals have a generation one more
+                                                               ; than their mother.
   set my.mother m
-  set mother.identity [my.identity] of m                       ;
-  set father.identity [my.identity] of f                       ;
-  set natal.group.identity group.identity
-  set natal.group.size count anima1s with [
+  set mother.identity [my.identity] of m                       ; A new individual's identity is inherited from
+  set father.identity [my.identity] of f                       ; both parents.
+  set natal.group.identity group.identity                      ; Record information about the group to
+  set natal.group.size count anima1s with [                    ; which the new individual was born.
     group.identity = [group.identity] of myself
     and is.alive ]
   set death.group.identity 0
@@ -3511,11 +3555,12 @@ to initialize-from-parents [ m f ]
   set copulations.history []
   set conceptions.history []
   set group.transfers.history []
-  set infanticide.history []
-  set cause.of.death "Suspected genetic abnormality."
-  ifelse ( member? "ideal-form" model-structure )
-  [ set-phenotype-to-ideal-form ]
-  [ set-phenotype-to-initialized-form ]
+  set infanticide.history []                                   ; A premature cause of death is assumed to
+  set cause.of.death "Suspected genetic abnormality."          ; be genetic by default.
+  ifelse ( member? "ideal-form" model-structure )              ; The "ideal-form" model-structure sets new
+  [ set-phenotype-to-ideal-form ]                              ; individuals to have population average
+  [ set-phenotype-to-initialized-form ]                        ; attributes. By default, individuals are
+                                                               ; initialized with default attributes.
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;
@@ -3572,9 +3617,9 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to set-phenotype-to-ideal-form
-  ask my.mother [
-    let new-energy-supply ( energy.supply / 2 )
-    set energy.supply new-energy-supply
+  ask my.mother [                                              ; Set the mother's energy to half its
+    let new-energy-supply ( energy.supply / 2 )                ; original value and then give the remaining
+    set energy.supply new-energy-supply                        ; half to the new offspring.
     ask myself [ set energy.supply new-energy-supply ]]
   set hidden? false
   set is.resting false
@@ -3948,7 +3993,7 @@ INPUTBOX
 354
 79
 path-to-experiment
-../data/
+../results/thesis-final-tests/
 1
 0
 String
@@ -4033,7 +4078,7 @@ plant-maximum-neighbors
 plant-maximum-neighbors
 0
 8
-8.0
+4.0
 .1
 1
 NIL
@@ -4059,7 +4104,7 @@ plant-seasonality
 plant-seasonality
 0
 1
-0.0
+0.5
 .05
 1
 NIL
@@ -4112,7 +4157,7 @@ INPUTBOX
 995
 191
 population
-population
+Olives
 1
 0
 String
@@ -4123,7 +4168,7 @@ INPUTBOX
 995
 265
 genotype
-NIL
+olives
 1
 0
 String
@@ -4187,7 +4232,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "meta-report" "---------------------" " > OPERATIONS   " "---------------------" "parameter-settings" "default-settings" "model-structure" "-- aspatial" "-- free-lunch" "-- ideal-form" "-- no-evolution" "-- no-plants" "-- reaper" "-- stork" "-- uninvadable" "clear-population" "reset-plants" "save-world" "import-world" "output-results" "---------------------" " > VERIFICATION " "---------------------" "dynamic-check" "-- true" "-- false" "runtime-check" "visual-check" "-- attack-pattern" "-- dine-and-dash" "-- life-history-channel" "-- musical-pairs" "-- night-and-day" "-- popularity-context" "-- speed-mating" "-- square-dance" "-- supply-and-demand" "---------------------" " > DISPLAY RESULTS   " "---------------------" "age" "generations" "genotype" "phenotype" "-- survival-chance" "-- body-size" "-- body-shade" "-- fertility-status" "-- hidden-chance" "-- bite-capacity" "-- mutation-chance" "-- sex-ratio" "-- litter-size" "-- conception-chance" "-- visual-angle" "-- visual-range" "-- day-perception" "-- night-perception" "carried-items" "energy-supply" "behaviors" "-- environment" "-- decisions" "-- actions" "-- matings" "-- mating-partners" "-- conceptions" "-- infanticide" "-- group-transfers" "-- travel-distance" "-- foraging-gains" "-- total-energy-gains" "-- total-energy-cost" "show-territories"
-74
+67
 
 BUTTON
 1063
@@ -4266,7 +4311,7 @@ plant-quality
 plant-quality
 .1
 100
-5.4
+4.0
 .1
 1
 NIL
@@ -4279,7 +4324,7 @@ SWITCH
 79
 output-results?
 output-results?
-1
+0
 1
 -1000
 
@@ -4338,7 +4383,7 @@ SWITCH
 639
 adults
 adults
-1
+0
 1
 -1000
 
@@ -4349,7 +4394,7 @@ SWITCH
 639
 juveniles
 juveniles
-0
+1
 1
 -1000
 
@@ -4393,7 +4438,7 @@ SWITCH
 639
 females
 females
-1
+0
 1
 -1000
 
@@ -4419,7 +4464,7 @@ OUTPUT
 
 ## WHAT IS IT?
 
-B3GET is designed to test hypotheses in biology by simulating populations of virtual organisms evolving over generations, whose evolutionary outcomes reflect the selection pressures of their environment. Users input population files to seed the initial population and run simulations to evolve these populations - and their genotypes - over generations. Behavioral strategies that are beneficial for their ecological context are expected to emerge.
+B3GET is designed to test hypotheses in biology by simulating populations of virtual organisms evolving over generations, whose evolutionary outcomes reflect the selection pressures of their environment. Users import population files to seed the initial population and run simulations to evolve these populations - and their genotypes - over generations. Behavioral strategies that are beneficial for their ecological context are expected to emerge.
 
 B3GET helps answer fundamental questions in evolutionary biology by offering users a virtual field site to precisely track the evolution of organismal populations. Researchers can use B3GET to: (1) investigate how populations vary in response to ecological pressures; (2) trace evolutionary histories over indefinite time scales and generations; (3) track an individual for every moment of their life from conception to post-mortem decay; (4) create virtual analogues of living species, including primates like baboons and chimpanzees, to answer species-specific questions; and (5) determine the plausible evolutionary pathways of optimal strategies in response to ecological pressures. Users are able to save, edit, and import population and genotype files, offering an array of possibilities for creating controlled biological experiments.
 
@@ -4431,7 +4476,7 @@ B3GET simulates several factors considered important in biology, including life 
 
 ### STARTING UP
 
-B3GET should come with the following file and [folder] structure. These extensions are written to maintain a modular code structure, which promotes: (1) ease in testing and maintenance, (2) ensuring that future innovations will not interfere with other parts of the program.
+B3GET should come with the following file and [folder] structure:
 
 > [B3GET]
 --- [code]

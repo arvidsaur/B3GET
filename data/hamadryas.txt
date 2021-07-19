@@ -36,9 +36,8 @@
 1| am βqnv move-toward 1E-4
 1| c amqnv move-toward 1E-4
 1| a oahv move-toward -1E-4
-0| e oavn> move-toward 1E-1       hamadryas_stay_in_proximity_with_their_unit
-0| e oavu| move-toward -1E-4      hamadryas_avoid_getting_too_close_to_other_units
-0| e oavu> move-toward 1E-1       hamadryas_stay_in_proximity_with_other_units
+0| e oavn> move-toward 1E-1          hamadryas_stay_in_proximity_with_their_unit
+0| e omkvu> move-toward 1E-1         hamadryas_stay_in_proximity_with_other_units
 1| af ikv move-toward 0           
 1| af iqv move-toward 0             
 1| af jkv move-toward 0              
@@ -76,10 +75,11 @@
 1| j d eat 1E-9
 1| a d eat 1E-9         
 0| jm∴ e leave 1E-9              hamadryas_males_leave_as_juveniles
-0| a∴ oanhv leave 1E-9           hamadryas_adults_leave_when_injured
+0| am∴ afnhv leave 1E-9          hamadryas_males_leave_when_injured
 0| f amnv leave -1E-5            hamadryas_females_remain_with_current_male 
-0| am fnqv leave -1E-5           hamadryas_males_prevent_nonkin_females_leaving
-0| am fuqv> recruit 1E-9         hamadryas_males_recruit_nonkin_females
+0| am fnqv expel -1E-5           hamadryas_males_prevent_nonkin_females_leaving
+0| am fuqv< recruit 1E-9         hamadryas_males_recruit_nonkin_females
+1| am omuv⋅< recruit 0           hamadryas_males_may_recruit_other_males
 1| af jy put-down 1E-9
 1| af ikv help 0           
 1| af iqv help 0             
@@ -109,7 +109,7 @@
 1| am iqv attack 0           
 1| am jkv attack 0
 1| am jqv attack 0       
-1| am oamkv attack 1E-1           hamadryas_male_attack
+1| am oamkv attack 1E-5           hamadryas_male_attack
 1| am oamqv attack 1E-1           hamadryas_male_attack
 1| am oafkv attack 0
 1| am oafqv attack 0       
@@ -156,9 +156,8 @@
 1| am βqnv move-toward 1E-4
 1| c amqnv move-toward 1E-4
 1| a oahv move-toward -1E-4
-0| e oavn> move-toward 1E-1       hamadryas_stay_in_proximity_with_their_unit
-0| e oavu| move-toward -1E-4      hamadryas_avoid_getting_too_close_to_other_units
-0| e oavu> move-toward 1E-1       hamadryas_stay_in_proximity_with_other_units
+0| e oavn> move-toward 1E-1          hamadryas_stay_in_proximity_with_their_unit
+0| e omkvu> move-toward 1E-1         hamadryas_stay_in_proximity_with_other_units
 1| af ikv move-toward 0           
 1| af iqv move-toward 0             
 1| af jkv move-toward 0              
@@ -196,10 +195,11 @@
 1| j d eat 1E-9
 1| a d eat 1E-9         
 0| jm∴ e leave 1E-9              hamadryas_males_leave_as_juveniles
-0| a∴ oanhv leave 1E-9           hamadryas_adults_leave_when_injured
+0| am∴ afnhv leave 1E-9          hamadryas_males_leave_when_injured
 0| f amnv leave -1E-5            hamadryas_females_remain_with_current_male 
-0| am fnqv leave -1E-5           hamadryas_males_prevent_nonkin_females_leaving
-0| am fuqv> recruit 1E-9         hamadryas_males_recruit_nonkin_females
+0| am fnqv expel -1E-5           hamadryas_males_prevent_nonkin_females_leaving
+0| am fuqv< recruit 1E-9         hamadryas_males_recruit_nonkin_females
+1| am omuv⋅< recruit 0           hamadryas_males_may_recruit_other_males
 1| af jy put-down 1E-9
 1| af ikv help 0           
 1| af iqv help 0             
@@ -229,7 +229,7 @@
 1| am iqv attack 0           
 1| am jkv attack 0
 1| am jqv attack 0       
-1| am oamkv attack 1E-1           hamadryas_male_attack
+1| am oamkv attack 1E-5           hamadryas_male_attack
 1| am oamqv attack 1E-1           hamadryas_male_attack
 1| am oafkv attack 0
 1| am oafqv attack 0       

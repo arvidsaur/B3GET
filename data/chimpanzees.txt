@@ -37,9 +37,9 @@
 1| am βqnv move-toward 1E-4     
 1| c amqnv move-toward 1E-4    
 1| a oahv move-toward -1E-4  
-0| a oanv> move-toward 1E-5        chimps_form_temporary_foraging_parties	
-0| am oamnv> move-toward 1E-4      chimp_males_are_gregarious
-0| af oanv> move-toward -1E-5      chimp_females_are_not_gregarious
+0| a oanv> move-toward 1E-3        chimps_form_temporary_foraging_parties	
+0| am oamnv> move-toward 1E-2      chimp_males_are_gregarious
+0| af oav> move-toward -1E-3       chimp_females_are_not_gregarious
 0| e du move-toward -1E-5          chimp_general_territorial_behavior
 0| am du move-toward 5E-6          chimp_male_territorial_behavior
 0| jf⋅β du move-toward 1E-5        chimp_juvenile_female_dispersal_behavior
@@ -110,7 +110,7 @@
 1| am iqv attack 0           
 1| am jkv attack 0
 1| am jqv attack 0       
-1| am oamkv attack 1E-1        chimp_male_attack     
+1| am oamkv attack 1E-5        chimp_male_attack     
 1| am oamqv attack 1E-1        chimp_male_attack 
 1| am oafkv attack 0
 1| am oafqv attack 0
@@ -159,9 +159,9 @@
 1| am βqnv move-toward 1E-4     
 1| c amqnv move-toward 1E-4    
 1| a oahv move-toward -1E-4  
-0| a oanv> move-toward 1E-5        chimps_form_temporary_foraging_parties	
-0| am oamnv> move-toward 1E-4      chimp_males_are_gregarious
-0| af oanv> move-toward -1E-5      chimp_females_are_not_gregarious
+0| a oanv> move-toward 1E-3        chimps_form_temporary_foraging_parties	
+0| am oamnv> move-toward 1E-2      chimp_males_are_gregarious
+0| af oav> move-toward -1E-3       chimp_females_are_not_gregarious
 0| e du move-toward -1E-5          chimp_general_territorial_behavior
 0| am du move-toward 5E-6          chimp_male_territorial_behavior
 0| jf⋅β du move-toward 1E-5        chimp_juvenile_female_dispersal_behavior
@@ -232,7 +232,7 @@
 1| am iqv attack 0           
 1| am jkv attack 0
 1| am jqv attack 0       
-1| am oamkv attack 1E-1        chimp_male_attack     
+1| am oamkv attack 1E-5        chimp_male_attack     
 1| am oamqv attack 1E-1        chimp_male_attack 
 1| am oafkv attack 0
 1| am oafqv attack 0

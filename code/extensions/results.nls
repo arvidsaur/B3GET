@@ -23,27 +23,26 @@
 ; COLLECT INFORMATION ON THE CURRENT SIMULATION STATE AND OUTPUT TO EXTERNAL FILES
 ;
 ; This subroutine is called once each timestep if the user specifies that 'output-results?' is ON. When
-; in operation, this subroutine determines which information about the surrently running simulation to
+; in operation, this subroutine determines which information about the currently running simulation to
 ; output at that timestep. The user specifies multiple settings related to what information to gather and
-; output for each timestep.
+; output for each timestep (see related subroutines for more detail):
 ; 
+; * VERIFICATION: records outcome of the verification assertion checks.
 ; 
-; 
-; * VERIFICATION:
-; 
-; * SUMMARY:
-;    - Simulations:    
-;    - World
-;    - Individuals
+; * SUMMARY: records that are expected to happen only once per item per simulation.
+;    - Simulations: information that summarizes what transpired in that simulation.
+;    - World: the NetLogo world file of the current simulation.
+;    - Individuals: lifetime information recorded at the time of death.
 ;
-; * SCANS
-;    - Simulation
-;    - Groups
-;    - Individuals
-;    - View
-;    - Genotype
+; * SCANS: records information about the simulation at predetermined intervals.
+;    - Simulation: information about the current simulation.
+;    - Groups: information about the current composition and behaviors of each group in the simulation.
+;    - Individuals: information about the current state of each individual in the simulation.
+;    - View: an image of the current simulation view.
+;    - Genotype: information about the current allele averages in the simulated population.
+;    - Actions: information about the actions taken by an individual.
 ; 
-; * FOCAL FOLLOW:
+; * FOCAL FOLLOW: records scan and action information about a single individual at every timestep.
 ;
 ;
 ; ENTRY:    A simulation is currently running and there are anima1s present and their current states are known.
@@ -54,7 +53,7 @@
 ;
 ;           path-to-experiment
 ;
-; EXIT: exit 1...
+; EXIT:     exit 1...
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
@@ -80,60 +79,62 @@ to output-results
     ; SUMMARY : collect summary information of simulations or individuals
     ;-------------------------------------------------------------------------------------------------------   
     
-    if ( simulation-summary-ticks > 0 and                       ;         
-      ticks = simulation-summary-ticks )                        ;
-    [ simulation-summary ]                                      ;
+    if ( simulation-summary-ticks > 0 and                       ; If user specifies and        
+      ticks = simulation-summary-ticks )                        ; current timesteps matches interval setting
+    [ simulation-summary ]                                      ; then record summary information on current
+                                                                ; simulation.
     
-    if ( record-world-ticks > 0 and                             ;
-      ticks = record-world-ticks )                              ;
-    [ record-world ]                                            ;
+    if ( record-world-ticks > 0 and                             ; If user specifies to record world and
+      ticks = record-world-ticks )                              ; current timesteps matches specifications
+    [ record-world ]                                            ; then export a NetLogo world file of current
+                                                                ; simulation.
     
-    if ( record-individuals = true ) [                          ;
-      ask anima1s with [ ticks.at.death > 0 and                 ;
-        ticks = ( ticks.at.death + 1 ) ]                        ;
-      [ individual-summary ] ]                                  ;
+    if ( record-individuals = true ) [                          ; If the user specifies then
+      ask anima1s with [ ticks.at.death > 0 and                 ; whenever a new individual dies
+        ticks = ( ticks.at.death + 1 ) ]                        ; record summary information about 
+      [ individual-summary ] ]                                  ; that individual.
     
     ;-------------------------------------------------------------------------------------------------------        
     ; SCAN : collect information on the current state of simulations, groups, or individuals
     ;-------------------------------------------------------------------------------------------------------   
     
-    if ( simulation-scan-ticks > 0 and                          ;
-      ticks > 0 and                                             ;
-      ticks-on-interval? simulation-scan-ticks )                ;
-    [ scan-simulation ]                                         ;
+    if ( simulation-scan-ticks > 0 and                          ; If user specifies to scan simulation and 
+      ticks > 0 and                                             ; the simulation has already been running and
+      ticks-on-interval? simulation-scan-ticks )                ; current timesteps matches interval setting
+    [ scan-simulation ]                                         ; then record information on current simulation.
     
-    if ( group-scan-ticks > 0 and                               ;
-      ticks > 0 and                                             ;
-      ticks-on-interval? group-scan-ticks ) [                   ;
-      if ( any? anima1s with [ is.alive ] ) [                   ;
-        foreach remove-duplicates                               ;
-        [ group.identity ] of anima1s with [ is.alive ]         ;
-        [ g -> scan-group g ]] ]                                ;
+    if ( group-scan-ticks > 0 and                               ; If user specifies to scan groups and 
+      ticks > 0 and                                             ; the simulation has already been running and
+      ticks-on-interval? group-scan-ticks ) [                   ; current timesteps matches interval setting:
+      if ( any? anima1s with [ is.alive ] ) [                   
+        foreach remove-duplicates                               ; For every group that currently exists
+        [ group.identity ] of anima1s with [ is.alive ]         ; record scan information about the individuals
+        [ g -> scan-group g ]] ]                                ; in that group.
     
-    if ( individual-scan-ticks > 0 and                          ;
-      ticks > 0 and                                             ;
-      ticks-on-interval? individual-scan-ticks ) [              ;
-      if ( any? anima1s with [ is.alive ] ) [                   ;
-        ask anima1s with [ is.alive ] [ scan-individual ]]]     ; 
+    if ( individual-scan-ticks > 0 and                          ; If user specifies to scan individuals and    
+      ticks > 0 and                                             ; the simulation has already been running and
+      ticks-on-interval? individual-scan-ticks ) [              ; current timesteps matches interval setting
+      if ( any? anima1s with [ is.alive ] ) [                   ; then scan any individuals who are
+        ask anima1s with [ is.alive ] [ scan-individual ]]]     ; currently alive.
     
-    if ( view-scan-ticks > 0 and                                ;
-      ticks-on-interval? view-scan-ticks ) [                    ;
-      let saved-subject subject                                 ;
-      reset-perspective                                         ;
-      export-view ( word path-to-experiment                     ;
-        "view-" simulation-id "-" ticks ".png")                 ;
-      output-territories                                        ;
-      export-view ( word path-to-experiment                     ;
-        "territories-" simulation-id "-" ticks ".png")          ;
-      if ( saved-subject != nobody )                            ;
-      [ watch saved-subject ]                                   ;
+    if ( view-scan-ticks > 0 and                                ; If user specifies to scan views and   
+      ticks-on-interval? view-scan-ticks ) [                    ; current timesteps matches interval setting:
+      let saved-subject subject                                 ; Record who is the current focal subject.
+      reset-perspective                                         ; Reset the view to be neutral.
+      export-view ( word path-to-experiment                     ; Create an image file of the current
+        "view-" simulation-id "-" ticks ".png")                 ; simulation view.
+      output-territories                                        ; Display the current territory boundaries.
+      export-view ( word path-to-experiment                     ; Create an image gile of the current
+        "territories-" simulation-id "-" ticks ".png")          ; simulation view with territories bountaries.
+      if ( saved-subject != nobody )                            ; Reset the current focal subject to whomever
+      [ watch saved-subject ]                                   ; it was before, or nobody.
     ]
     
-    if ( genotype-scan-ticks > 0 and                            ;
-      ticks > 0 and
-      ticks-on-interval? genotype-scan-ticks and                ;
-      any? anima1s with [ is.alive ] ) [                        ;
-      scan-genotype ]                                           ;
+    if ( genotype-scan-ticks > 0 and                            ; If user specifies to scan genotypes and
+      ticks > 0 and                                             ; the simulation is already running and
+      ticks-on-interval? genotype-scan-ticks and                ; current timesteps matches interval setting
+      any? anima1s with [ is.alive ] ) [                        ; then scan all living individuals to  
+      scan-genotype ]                                           ; obtain averages for allele values (sta2us only).
     
     ;-------------------------------------------------------------------------------------------------------        
     ; FOCAL FOLLOW: collect very fine-grained details about a single individual
@@ -152,7 +153,15 @@ to output-results
     
     if ( focal-follow-rate > 0 and                              ; If currently "following" an anima1,
       subject != nobody ) [                                     ; record information about this subject.
-      ask subject [ record-actions ]]
+      ask subject [ 
+        scan-individual
+        
+        foreach remove-duplicates map [ i -> 
+          item 1 i ] decision.vectors [ a -> 
+          if ( is-anima1? a and a != self ) [                   ; Also record information about who the  
+            ask a [ scan-individual ] ]]                        ; focal subject interacts with.  
+        
+        record-actions ]]
     
   ] [ print ( word "OUTPUT RESULTS ERROR: " error-message ) ]   ; If an error occur, display error message.
   
@@ -184,18 +193,20 @@ end
 
 to record-verification
 
-  let file-path ( word path-to-experiment "dynamic-verification.csv" ) ; Set the file path for verification file
-  let new-tape generate-verification-tape                              ; Run verification subroutine & record data
+  let file-path ( word path-to-experiment "dynamic-verification.csv" ) ; Set the file path for verification file.
+  let new-tape generate-verification-tape                              ; Run verification subroutine & record 
+                                                                       ; data.
   
-  ifelse ( not file-exists? file-path and simulation-id != 0 )         ; If the file does not already exist
-  
-  [ file-open file-path                                                ; Open verification file
-    foreach new-tape [ l -> file-print csv:to-string (list l ) ] ]     ; Record headers and data to verification file
+  ifelse ( not file-exists? file-path and simulation-id != 0 )         ; If the file does not already exist.
   
   [ file-open file-path                                                ; Open verification file
-    file-print csv:to-string (list last new-tape ) ]                   ; Record data only to verification file
+    foreach new-tape [ l -> file-print csv:to-string (list l ) ] ]     ; Record headers and data to verification 
+                                                                       ; file.
   
-  file-close                                                           ; Close verification file
+  [ file-open file-path                                                ; Open verification file
+    file-print csv:to-string (list last new-tape ) ]                   ; Record data only to verification file.
+  
+  file-close                                                           ; Close verification file.
   
 end
 
@@ -242,7 +253,10 @@ end
 
 to individual-summary
   
-  let file-path ( word path-to-experiment "individuals-" population ".csv" )
+  let world-name ifelse-value ( behaviorspace-experiment-name = "" ) [ "" ] [ first behaviorspace-experiment-name  ]
+  let world-file-name ifelse-value ( world-name = "" ) [ "" ] [ ( word world-name "-" ) ]
+  
+  let file-path ( word path-to-experiment "individuals-" world-file-name population ".csv" )
   
   if ( not file-exists? file-path and simulation-id != 0 )
   
@@ -282,6 +296,7 @@ to individual-summary
       "generation.number"
       "biological.sex" 
       "life.history" 
+      
       "fertility.status" 
       "group.identity" 
       "is.alive" 
@@ -315,16 +330,12 @@ to individual-summary
       "adulthood.chance" 
       "x.magnitude" 
       "y.magnitude"
+      
       "distance.traveled" 
       "foraging.gains"  
       "total.energy.gains"
       "total.energy.cost"
-      "lifetime-foraging-gains-per-timestep"
-      "lifetime-energy-gains-per-timestep"
-      "lifetime-energy-cost-per-timestep"
-      "foraging.gains.this.timestep"
-      "energy.gains.this.timestep"
-      "energy.cost.this.timestep"
+
       "help-from-count"
       "attack-from-count"
       "copulations-count"
@@ -333,6 +344,7 @@ to individual-summary
       "group-transfers-count"
       "unique-group-transfers-count"
       "infanticide-count"
+      
       "whole.related.help.cost"
       "half.related.help.cost"
       "fourth.related.help.cost"
@@ -383,10 +395,6 @@ to individual-summary
       "adult.blue.chance"
       "mother.initiated.birth"
       "mother.initiated.weaning"
-      
-;      "lifetime-mean-plant-abundance"
-;      "lifetime-mean-plant-patchiness"
-;      "lifetime-mean-population-size"
 
   )) ]
   
@@ -427,6 +435,7 @@ to individual-summary
     generation.number
     biological.sex
     life.history
+    
     fertility.status 
     group.identity
     is.alive
@@ -460,16 +469,12 @@ to individual-summary
     adulthood.chance
     x.magnitude
     y.magnitude
+    
     distance.traveled 
     foraging.gains
     total.energy.gains
     total.energy.cost
-    ( foraging.gains / (lifespan + 0.0000000001 ))
-    ( total.energy.gains / (lifespan + 0.0000000001))
-    ( total.energy.cost / (lifespan + 0.0000000001))
-    foraging.gains.this.timestep
-    energy.gains.this.timestep
-    energy.cost.this.timestep
+    
     help-from-count
     attack-from-count
     copulations-count
@@ -478,6 +483,7 @@ to individual-summary
     group-transfers-count
     unique-group-transfers-count
     infanticide-count
+    
     whole.related.help.cost
     half.related.help.cost
     fourth.related.help.cost
@@ -529,10 +535,6 @@ to individual-summary
     mother.initiated.birth
     mother.initiated.weaning
     
-;    lifetime-plant-abundance
-;    lifetime-plant-patchiness
-;    lifetime-population-size
-
   ))
   
   file-close
@@ -1569,7 +1571,10 @@ to scan-genotype ; agent subroutine, sta2us only
   
   if ( any? anima1s ) [
     
-    let file-path ( word path-to-experiment "genotypes-" genotype ".csv" )
+    let world-name ifelse-value ( behaviorspace-experiment-name = "" ) [ "" ] [ first behaviorspace-experiment-name  ]
+    let world-file-name ifelse-value ( world-name = "" ) [ "" ] [ ( word world-name "-" ) ]
+    
+    let file-path ( word path-to-experiment "genotypes-" world-file-name genotype ".csv" )
     
     if ( not file-exists? file-path and simulation-id != 0 )
     
@@ -1672,7 +1677,10 @@ end
 
 to scan-individual
   
-  let file-path ( word path-to-experiment "individual-scans.csv" )
+  let world-name ifelse-value ( behaviorspace-experiment-name = "" ) [ "" ] [ first behaviorspace-experiment-name  ]
+  let world-file-name ifelse-value ( world-name = "" ) [ "" ] [ ( word world-name "-" ) ]
+  
+  let file-path ( word path-to-experiment "individual-scans-" world-file-name population ".csv"  )
   
   if ( not file-exists? file-path and simulation-id != 0 )
   
@@ -1919,7 +1927,10 @@ end
 
 to scan-group [ group-id ]
   
-  let file-path ( word path-to-experiment "group-scans-" population ".csv" )
+  let world-name ifelse-value ( behaviorspace-experiment-name = "" ) [ "" ] [ first behaviorspace-experiment-name  ]
+  let world-file-name ifelse-value ( world-name = "" ) [ "" ] [ ( word world-name "-" ) ]
+  
+  let file-path ( word path-to-experiment "group-scans-" world-file-name population ".csv" )
   
   if ( not file-exists? file-path and simulation-id != 0 )
   
@@ -1972,6 +1983,18 @@ to scan-group [ group-id ]
       "distance-to-group-members-median"
       "distance-to-group-members-variance"
       
+      "distance-to-nongroup-members-minimum"
+      "distance-to-nongroup-members-maximum"
+      "distance-to-nongroup-members-mean"
+      "distance-to-nongroup-members-median"
+      "distance-to-nongroup-members-variance"
+      
+      "adult-male-relatedness-to-adult-male"
+      "adult-male-relatedness-to-adult-female"
+      "adult-female-relatedness-to-adult-female"
+      "adult-male-relatedness-to-young"
+      "adult-female-relatedness-to-young"
+      
       "adult-male-count"
       "adult-female-count"
       "adult-cycling-count"
@@ -1997,6 +2020,7 @@ to scan-group [ group-id ]
       "gestatee-male-death-count"
       "gestatee-female-death-count"
       
+      "births-per-male"
       "births-per-female" 
       "per-capita-births"
       "per-capita-deaths"
@@ -2085,7 +2109,48 @@ to scan-group [ group-id ]
   let distance-to-group-members-mean ifelse-value ( length distance-list < 1 ) [ "NA" ] [ mean distance-list ]
   let distance-to-group-members-median ifelse-value ( length distance-list < 1 ) [ "NA" ] [ median distance-list ]
   let distance-to-group-members-variance ifelse-value ( length distance-list < 2 ) [ "NA" ] [ variance distance-list ] 
- 
+  
+  let non-member-distance-list []        
+  ask anima1s with [ is.alive and group.identity = group-id ] [
+    ask other anima1s with [ is.alive and group.identity != group-id ] [
+      set non-member-distance-list lput distance myself non-member-distance-list ]]
+  
+  let distance-to-nongroup-members-minimum ifelse-value ( length non-member-distance-list < 1 ) [ "NA" ] [ min non-member-distance-list ]
+  let distance-to-nongroup-members-maximum ifelse-value ( length non-member-distance-list < 1 ) [ "NA" ] [ max non-member-distance-list ] 
+  let distance-to-nongroup-members-mean ifelse-value ( length non-member-distance-list < 1 ) [ "NA" ] [ mean non-member-distance-list ]
+  let distance-to-nongroup-members-median ifelse-value ( length non-member-distance-list < 1 ) [ "NA" ] [ median non-member-distance-list ]
+  let distance-to-nongroup-members-variance ifelse-value ( length non-member-distance-list < 2 ) [ "NA" ] [ variance non-member-distance-list ]
+  
+  let adult-male-adult-male-list []        
+  ask anima1s with [ is.alive and group.identity = group-id and biological.sex = "male" and life.history = "adult" ] [
+    ask other anima1s with [ is.alive and group.identity = group-id and biological.sex = "male" and life.history = "adult" ] [
+      set adult-male-adult-male-list lput relatedness-with myself adult-male-adult-male-list ]] 
+  let adult-male-relatedness-to-adult-male ifelse-value ( length adult-male-adult-male-list < 1 ) [ "NA" ] [ mean adult-male-adult-male-list ]
+  
+  let adult-male-adult-female-list []        
+  ask anima1s with [ is.alive and group.identity = group-id and biological.sex = "male" and life.history = "adult" ] [
+    ask other anima1s with [ is.alive and group.identity = group-id and biological.sex = "female" and life.history = "adult" ] [
+      set adult-male-adult-female-list lput relatedness-with myself adult-male-adult-female-list ]] 
+  let adult-male-relatedness-to-adult-female ifelse-value ( length adult-male-adult-female-list < 1 ) [ "NA" ] [ mean adult-male-adult-female-list ]
+  
+  let adult-female-adult-female-list []        
+  ask anima1s with [ is.alive and group.identity = group-id and biological.sex = "female" and life.history = "adult" ] [
+    ask other anima1s with [ is.alive and group.identity = group-id and biological.sex = "female" and life.history = "adult" ] [
+      set adult-female-adult-female-list lput relatedness-with myself adult-female-adult-female-list ]] 
+  let adult-female-relatedness-to-adult-female ifelse-value ( length adult-female-adult-female-list < 1 ) [ "NA" ] [ mean adult-female-adult-female-list ]
+  
+  let adult-male-relatedness-to-young-list []        
+  ask anima1s with [ is.alive and group.identity = group-id and biological.sex = "male" and life.history = "adult" ] [
+    ask other anima1s with [ is.alive and group.identity = group-id and life.history != "adult" ] [
+      set adult-male-relatedness-to-young-list lput relatedness-with myself adult-male-relatedness-to-young-list ]] 
+  let adult-male-relatedness-to-young ifelse-value ( length adult-male-relatedness-to-young-list < 1 ) [ "NA" ] [ mean adult-male-relatedness-to-young-list ]
+  
+  let adult-female-relatedness-to-young-list []        
+  ask anima1s with [ is.alive and group.identity = group-id and biological.sex = "female" and life.history = "adult" ] [
+    ask other anima1s with [ is.alive and group.identity = group-id and life.history != "adult" ] [
+      set adult-female-relatedness-to-young-list lput relatedness-with myself adult-female-relatedness-to-young-list ]] 
+  let adult-female-relatedness-to-young ifelse-value ( length adult-female-relatedness-to-young-list < 1 ) [ "NA" ] [ mean adult-female-relatedness-to-young-list ]
+
   let current-group-size count living-agents with [ group.identity = group-id ]
   let adult-male-count count living-agents with [ group.identity = group-id and life.history = "adult" and biological.sex = "male" ]
   let adult-cycling-count count living-agents with [ group.identity = group-id and life.history = "adult" and fertility.status = "cycling" ]
@@ -2211,7 +2276,19 @@ to scan-group [ group-id ]
     distance-to-group-members-mean
     distance-to-group-members-median
     distance-to-group-members-variance
-
+    
+    distance-to-nongroup-members-minimum
+    distance-to-nongroup-members-maximum
+    distance-to-nongroup-members-mean
+    distance-to-nongroup-members-median
+    distance-to-nongroup-members-variance
+    
+    adult-male-relatedness-to-adult-male
+    adult-male-relatedness-to-adult-female
+    adult-female-relatedness-to-adult-female
+    adult-male-relatedness-to-young
+    adult-female-relatedness-to-young
+    
     adult-male-count
     (adult-cycling-count + adult-pregnant-count + adult-lactating-count)
     adult-cycling-count
@@ -2237,6 +2314,9 @@ to scan-group [ group-id ]
     gestatee-male-death-count
     gestatee-female-death-count
     
+    ifelse-value ( adult-male-count > 0 ) 
+    [ ( total-birth-count / adult-male-count ) ] 
+    [ "NA" ]
     ifelse-value ( (adult-cycling-count + adult-pregnant-count + adult-lactating-count) > 0 ) 
     [ ( total-birth-count / (adult-cycling-count + adult-pregnant-count + adult-lactating-count)) ] 
     [ "NA" ]
@@ -2562,6 +2642,7 @@ to record-actions ; agent subroutine
   if ( not file-exists? file-path and simulation-id != 0 )
   
   [ file-open file-path
+    
     file-print csv:to-string (list (list 
       
       "date-and-time"
@@ -2587,6 +2668,37 @@ to record-actions ; agent subroutine
       "maximum-visual-range"
       "base-litter-size"
       
+    ))
+    
+    file-print csv:to-string ( list ( list
+      
+      date-and-time
+      path-to-experiment
+      model-version
+      model-structure
+      genotype-reader
+      simulation-id
+      behaviorspace-experiment-name
+      population
+      genotype
+      plant-annual-cycle
+      plant-daily-cycle
+      plant-seasonality
+      plant-quality
+      plant-minimum-neighbors
+      plant-maximum-neighbors
+      world-width
+      world-height
+      output-results?
+      selection-on?
+      deterioration-rate
+      maximum-visual-range
+      base-litter-size
+      
+    ))
+    
+    file-print csv:to-string (list (list 
+      
       "timesteps"
       "solar-status"
       "current-season"
@@ -2594,81 +2706,14 @@ to record-actions ; agent subroutine
       "population-density"
       "current-plant-abundance"
       
-      ; subject
-      "color" 
-      "heading" 
-      "xcor" 
-      "ycor" 
-      "my.identity" 
-      "age.in.ticks" 
-      "generation.number"
-      "biological.sex" 
-      "life.history" 
-      "fertility.status" 
-      "group.identity" 
-      "is.alive" 
-      "carried.items"
-      "yellow.signal" 
-      "red.signal" 
-      "blue.signal"
-      "body.size" 
-      "body.shade" 
-      "is.resting"
-      "hidden.chance"
-      "fully.decayed"
-      "survival.chance" 
-      "energy.supply"
-      "bite.capacity" 
-      "mutation.chance"
-      "sex.ratio" 
-      "litter.size" 
-      "conception.chance"
-      "visual.angle" 
-      "visual.range" 
-      "day.perception"
-      "night.perception" 
-      "yellow.chance" 
-      "red.chance" 
-      "blue.chance"
-      "birthing.chance" 
-      "weaning.chance" 
-      "infancy.chance"
-      "juvenility.chance" 
-      "adulthood.chance" 
-      "x.magnitude" 
-      "y.magnitude"
-      "distance.traveled"  
-      "foraging.gains"  
-      "total.energy.gains"
-      "total.energy.cost"
-      "foraging.gains.this.timestep"
-      "energy.gains.this.timestep"
-      "energy.cost.this.timestep"
-      "help-from-count"
-      "attack-from-count"
-      "copulations-count"
-      "unique-mates-count"
-      "conceptions-count"
-      "group-transfers-count"
-      "unique-group-transfers-count"
-      "infanticide-count"
-      "whole.related.help.cost"
-      "half.related.help.cost"
-      "fourth.related.help.cost"
-      "eighth.related.help.cost"
-      "not.related.help.cost"
-      "whole.related.attack.cost"
-      "half.related.attack.cost"
-      "fourth.related.attack.cost"
-      "eighth.related.attack.cost"
-      "not.related.attack.cost"
-      
       "action-ego"
       "action-target"
       "action-name"
       "action-cost"
       
-    )) ]
+    ))
+    
+  ]
   
   file-open file-path
   
@@ -2682,104 +2727,12 @@ to record-actions ; agent subroutine
         
         file-print csv:to-string ( list ( list
           
-          date-and-time
-          path-to-experiment
-          model-version
-          model-structure
-          genotype-reader
-          simulation-id
-          behaviorspace-experiment-name
-          population
-          genotype
-          plant-annual-cycle
-          plant-daily-cycle
-          plant-seasonality
-          plant-quality
-          plant-minimum-neighbors
-          plant-maximum-neighbors
-          world-width
-          world-height
-          output-results?
-          selection-on?
-          deterioration-rate
-          maximum-visual-range
-          base-litter-size
-          
           ticks
           solar-status
           current-season
           plant-patchiness
           population-density
           current-plant-abundance
-          
-          ; subject
-          color
-          heading 
-          xcor
-          ycor
-          my.identity
-          age.in.ticks 
-          generation.number
-          biological.sex
-          life.history
-          fertility.status 
-          group.identity
-          is.alive
-          carried.items
-          yellow.signal
-          red.signal
-          blue.signal
-          body.size
-          body.shade
-          is.resting
-          hidden.chance
-          fully.decayed
-          survival.chance 
-          energy.supply
-          bite.capacity
-          mutation.chance
-          sex.ratio
-          litter.size
-          conception.chance
-          visual.angle
-          visual.range
-          day.perception
-          night.perception
-          yellow.chance
-          red.chance
-          blue.chance
-          birthing.chance
-          weaning.chance 
-          infancy.chance
-          juvenility.chance
-          adulthood.chance
-          x.magnitude
-          y.magnitude
-          distance.traveled
-          foraging.gains
-          total.energy.gains
-          total.energy.cost
-          foraging.gains.this.timestep
-          energy.gains.this.timestep
-          energy.cost.this.timestep
-          help-from-count
-          attack-from-count
-          copulations-count
-          unique-mates-count
-          conceptions-count
-          group-transfers-count
-          unique-group-transfers-count
-          infanticide-count
-          whole.related.help.cost
-          half.related.help.cost
-          fourth.related.help.cost
-          eighth.related.help.cost
-          not.related.help.cost
-          whole.related.attack.cost
-          half.related.attack.cost
-          fourth.related.attack.cost
-          eighth.related.attack.cost
-          not.related.attack.cost
           
           ifelse-value ( is-anima1? item 0 action ) [ [my.identity] of item 0 action ] [ item 0 action ]
           ifelse-value ( is-anima1? item 1 action ) [ [my.identity] of item 1 action ] [ item 1 action ]

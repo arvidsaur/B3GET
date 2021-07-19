@@ -24,53 +24,48 @@ to thesis-setup
   set plant-annual-cycle 1000
   set plant-daily-cycle 10
   set plant-seasonality 0.5
-  set plant-quality 3
+  set plant-quality 5
   set deterioration-rate -0.01
   
   set maximum-population-size 150
   set minimum-population-size 150
-
-  ; final settings
   
+  ; final settings 
   set simulation-summary-ticks 25000 
   set simulation-scan-ticks 250 
   set group-scan-ticks 10000 
   set individual-scan-ticks 0 
   set view-scan-ticks 10000 
   set genotype-scan-ticks 10000
-  set focal-follow-rate 0
-  set record-individuals false 
-  set verification-rate 1E-6
+  set focal-follow-rate 1E-3
+  set record-individuals true 
+  set verification-rate 1E-5
   set record-world-ticks 100000
   set simulation-stop-at 100000
   
-;  set simulation-summary-ticks 1000 
+;  set simulation-summary-ticks 500 
 ;  set simulation-scan-ticks 250 
-;  set group-scan-ticks 1000 
+;  set group-scan-ticks 100
 ;  set individual-scan-ticks 0 
-;  set view-scan-ticks 1000 
+;  set view-scan-ticks 100
 ;  set genotype-scan-ticks 100
-;  set focal-follow-rate 1E-4 
-;  set record-individuals false 
-;  set verification-rate 1E-6
+;  set focal-follow-rate 1E-3 
+;  set record-individuals true 
+;  set verification-rate 1E-5
 ;  set record-world-ticks 1000
 ;  set simulation-stop-at 1000
   
-  set plant-maximum-neighbors read-from-string last behaviorspace-experiment-name
+  if ( model-structure = 0 ) [ set model-structure [] ]
   
   ( ifelse
-    ( first behaviorspace-experiment-name = "A" ) [ 
-      set focal-follow-rate 1E-4 
-      set record-individuals true 
-      ;set record-world-ticks 100000 
-    ]
+    ( first behaviorspace-experiment-name = "A" ) [  ]
     ( first behaviorspace-experiment-name = "B" ) [ set plant-annual-cycle 10000 set plant-daily-cycle 100 ]
     ( first behaviorspace-experiment-name = "C" ) [ set plant-annual-cycle 10000 ]
     ( first behaviorspace-experiment-name = "D" ) [ set plant-daily-cycle 100 ]
     ( first behaviorspace-experiment-name = "E" ) [ set plant-seasonality 0 ]
     ( first behaviorspace-experiment-name = "F" ) [ set plant-seasonality 1 ]
-    ( first behaviorspace-experiment-name = "G" ) [ set plant-quality 1 ]
-    ( first behaviorspace-experiment-name = "H" ) [ set plant-quality 5 ]
+    ( first behaviorspace-experiment-name = "G" ) [ set plant-quality 2.5 ]
+    ( first behaviorspace-experiment-name = "H" ) [ set plant-quality 10 ]
     ( first behaviorspace-experiment-name = "I" ) [ set deterioration-rate -0.001 ]
     ( first behaviorspace-experiment-name = "J" ) [ set model-structure lput "aspatial" model-structure ]
     ( first behaviorspace-experiment-name = "K" ) [ set model-structure lput "stork" model-structure ]
@@ -81,6 +76,57 @@ to thesis-setup
     ( first behaviorspace-experiment-name = "O" ) [ set model-structure lput "no-evolution" model-structure ]
     ( first behaviorspace-experiment-name = "P" ) [ set model-structure lput "uninvadable" model-structure ]
     [  ] )
+  
+  ;setup-nine-runs
+  setup-four-runs
+
+  setup-parameters                                             ; Setup the global parameter settings.
+  setup-patches                                                ; Initialize the plants for a new simulation.
+  import-population                                            ; Create an initial population of indiviudals
+  import-genotype                                              ; and their genotypes from user files.
+  
+  output-print (word                                           ; Once setup is complete, display the current
+    " Simulation " simulation-id " "                           ; state of the new simulation.
+    behaviorspace-run-number " end setup at "
+    date-and-time )
+  
+end
+
+to thesis-final
+  simulation-summary
+  if ( record-individuals ) [ ask anima1s with [ is.alive ] [ individual-summary ]]
+end
+
+to setup-four-runs
+  
+  if ( length behaviorspace-experiment-name = 4 ) [
+    
+    set plant-minimum-neighbors read-from-string ( item 1 behaviorspace-experiment-name )
+    set plant-maximum-neighbors read-from-string ( item 2 behaviorspace-experiment-name )
+    
+    ( ifelse 
+      ( population = "Chimpanzees" ) [
+        set genotype "chimpanzees" ]
+      ( population = "Geladas")[
+        set genotype "geladas" ]
+      ( population = "Hamadryas" )[
+        set genotype "hamadryas" ]
+      ( population = "Olives" )[
+        set genotype "olives" ]
+      [])
+    
+    set simulation-id ( word "s" 
+      first behaviorspace-experiment-name 
+      first population
+      plant-minimum-neighbors 
+      plant-maximum-neighbors 
+      item 3 behaviorspace-experiment-name )]
+  
+end
+
+to setup-nine-runs
+  
+  set plant-maximum-neighbors read-from-string last behaviorspace-experiment-name
   
   ( ifelse 
     ( item 1 behaviorspace-experiment-name = "C" ) [
@@ -129,21 +175,21 @@ to thesis-setup
     set simulation-id ( word "s" but-last behaviorspace-experiment-name plant-minimum-neighbors plant-maximum-neighbors "B" )
   ]
   
-  setup-parameters                                             ; Setup the global parameter settings.
-  setup-patches                                                ; Initialize the plants for a new simulation.
-  import-population                                            ; Create an initial population of indiviudals
-  import-genotype                                              ; and their genotypes from user files.
-  
-  output-print (word                                           ; Once setup is complete, display the current
-    " Simulation " simulation-id " "                           ; state of the new simulation.
-    behaviorspace-run-number " end setup at "
-    date-and-time )
-  
 end
 
-to thesis-final
-  simulation-summary
-  if ( record-individuals ) [ ask anima1s with [ is.alive ] [ individual-summary ]]
+to set-results-settings
+  
+  set simulation-summary-ticks 10000     
+  set simulation-scan-ticks 1000         
+  set group-scan-ticks 1000                
+  set individual-scan-ticks 0           
+  set view-scan-ticks 1000                
+  set genotype-scan-ticks 1000            
+  set focal-follow-rate 1E-3               
+  set record-individuals true            
+  set verification-rate 1E-5             
+  set record-world-ticks 0   
+  
 end
 
 ;reduce-to-unique-vectors                                     ; Reduce to unique set of decision vectors
@@ -1364,7 +1410,98 @@ end
 
 
 
+to generate-jobs
+  
+  let worlds [ "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" ]
+  let min-neighbors [ 0 1 2 3 4 5 6 7 ]
+  let max-neighbors [ 1 2 3 4 5 6 7 8 ]
+  let A-or-B [ "A" "B" ]
+  
+  file-open ( word path-to-experiment "thesis.sh" )
+  file-print "#!/bin/bash -l"
+  
+  foreach worlds [ w ->
+    
+    file-open ( word path-to-experiment "thesis.sh" )
+    file-print ( word "./World-" w ".sh" )
+    
+    file-close
+    
+    file-open ( word path-to-experiment "World-" w ".sh" )
+    file-print "#!/bin/bash -l"
+    
+    foreach min-neighbors [ n ->
+      
+      foreach max-neighbors [ x ->
+        
+        foreach A-or-B [ z ->
+          
+          if ( n < x ) [
+            
+            let name (word w n x z )
+            
+            file-open ( word path-to-experiment "World-" w ".sh" )
+            file-print ( word "sbatch " name ".sh" )
+            
+            file-close
+            
+            file-open ( word path-to-experiment name ".sh" )
+            
+            file-print "#!/bin/bash -l"
+            file-print "#SBATCH --time=96:00:00"
+            file-print "#SBATCH --ntasks=24"
+            file-print "#SBATCH --mem=60g"
+            file-print "#SBATCH --mail-type=ALL"
+            file-print "#SBATCH --mail-user=crou0048@umn.edu"
+            file-print "export JAVA_HOME=/usr/java/jre1.8.0_101"
+            file-print (word "/home/lehmanc/crou0048/Desktop/NetLogo\\ 6.2.0/netlogo-headless.sh --model /home/lehmanc/crou0048/Desktop/B3GET/code/B3GET.nlogo --setup-file thesis-experiments.xml --experiment " name " --threads 4")
+            
+            file-close
+            
+  ]]]]]
+  
+end
 
+to generate-experiments
+  
+  file-open ( word path-to-experiment "thesis-experiments.xml" )
+  
+  file-print "<experiments>"
+ 
+  let worlds [ "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" ]
+  let min-neighbors [ 0 1 2 3 4 5 6 7 ]
+  let max-neighbors [ 1 2 3 4 5 6 7 8 ]
+  let A-or-B [ "A" "B" ]
+  
+  foreach worlds [ w ->
+    
+    foreach min-neighbors [ n ->
+      
+      foreach max-neighbors [ x ->
+        
+        foreach A-or-B [ z ->
+          
+          if ( n < x ) [
+            
+            let name (word w n x z )
+            file-print ( word "  <experiment name=\"" name "\" repetitions=\"1\" runMetricsEveryStep=\"false\">" )
+            file-print ( word "    <setup>thesis-setup</setup>" )
+            file-print ( word "    <go>go</go>" )
+            file-print ( word "    <final>thesis-final</final>" )
+            file-print ( word "    <enumeratedValueSet variable=\"population\">" )
+            file-print ( word "      <value value=\"&quot;Chimpanzees&quot;\"/>" )
+            file-print ( word "      <value value=\"&quot;Geladas&quot;\"/>" )
+            file-print ( word "      <value value=\"&quot;Hamadryas&quot;\"/>" )
+            file-print ( word "      <value value=\"&quot;Olives&quot;\"/>" )
+            file-print ( word "    </enumeratedValueSet>" )
+            file-print ( word "  </experiment>" )
+            
+  ]]]]]
+  
+  file-print "</experiments>"
+  file-close
+  
+end
 
 
 

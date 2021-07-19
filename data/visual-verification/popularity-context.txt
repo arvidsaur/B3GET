@@ -11,7 +11,10 @@ false m94 e set-heading 0.75
 false f65 m recruit 0.5
 false m64 f25 join 0.5
 false f95 m24 recruit 0.5
-false f15 m94 expel 0.5
+false f15 m94 recruit 0.5
+false f15 m24 recruit 0.5
+false f15 m64 recruit 0.5
+false f15 m14 expel 0.5
 false m64 f15 leave 0.5
 false m24 f15 leave 0.5
 
