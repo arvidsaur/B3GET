@@ -8,6 +8,6 @@ codemeta.json
 /code/program.cpt
 /output/*
 /data/data-to-ignore/*
-/docs/*
-/results/*
+/docs/docs-to-ignore/*
+/results/results-to-ignore/*
 metafile.csv
