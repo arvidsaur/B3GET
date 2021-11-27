@@ -59,6 +59,11 @@
 ;
 ; * VERIFICATION. Checks the internal code operations.
 ;
+; A note on terminology. This program is documented following the original terminology for computer programs
+; introduced by John von Neumann and others, where there are "routines" and "subroutines." Later refinements
+; added terms like "functions," "methods," and so forth, but this program keeps with the simpler and
+; sufficient terminology.
+
 ; --------------------------------------------------------------------------------------------------------- ;
 
 extensions [ csv profiler table time ]
@@ -569,10 +574,9 @@ end
 ;
 ; The program steps forward hour by hour, and this routine is called once per step. In each step, the program
 ; works across the spatial structure to determine the dynamics during the present time step. This program,
-; therefore, essentially implements an Euler method of simulation<https://en.wikipedia.org/wiki/Euler_method/>
-; across a spatial structure, making it, in the most basic case, essentially a partial-differential equation solver.
-; Considerations such as the Courant condition<https://en.wikipedia.org/wiki/Courant%E2%80%93Friedrichs%E2%80%93Lewy_condition/>
-; must therefore be observed.
+; therefore, essentially implements an Euler method of simulation across a spatial structure, making it, in
+; the most basic case, essentially a partial-differential equation solver. Considerations such as the Courant
+; condition must therefore be observed.
 ;
 ; In each timestep, the program updates global settings, plant settings and anima1 general settings. Then,
 ; anima1s look at their environment, make decisions about how to proceed, and then act on those decisions.
@@ -812,7 +816,7 @@ end
 ; plant has a maximum energy that it can accumulate at any moment, and that maximum energy varies with
 ; season and other parameters. In this model the present energy of a plant increases by a fixed amount each
 ; time step as part of plant growth, and decreases by plants being consumed by animals, and also can decrease
-;  by reductions in the maximum energy allowed. Plant growth does not occur if the model-structure includes
+; by reductions in the maximum energy allowed. Plant growth does not occur if the model-structure includes
 ; "no-plants."
 ;
 ; ENTRY: model-structure is set to "no-plants"
@@ -1073,10 +1077,12 @@ end
 ; the caller's chance of survival. The deterioration-rate is a negative number ( i.e. -0.001 )
 ;
 ; ENTRY:  survival.chance | The caller's unique value for their chance of survival to the next timestep.
+;          Typically this is a number will above 0.99 to support survival across multiple time steps, but
+;          can be any value from 0 to 1.
 ;
-;         deterioration-rate | A global variable set by the user to drive the rate of decay in environment.
+;         deterioration-rate | A global variable set by the user to drive the rate of decay in the environment.
 ;
-; EXIT: NA
+; EXIT:   NA
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
@@ -1086,7 +1092,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; DETERMINE WETHER THE BODY HAS DETERIORATED TO THE POINT OF DEATH OR COMPLETE DECAY
+; DETERMINE WHETHER THE BODY HAS DETERIORATED TO THE POINT OF DEATH OR COMPLETE DECAY
 ;
 ; The caller determines whether they will survive to the next timestep. If the caller is still alive then
 ; the bodily decay process begins. If the decay process is already underway, the caller's body is now marked
@@ -1193,10 +1199,10 @@ end
 ;
 ; DETERMINE THE CURRENT SHAPE OF CALLER
 ;
-; This subroutine determines the appropriate shape to display depending on many factors of its current
-; state. The base shape is either a triangle for males or a circle for females. The eye size and spacing
+; This subroutine determines the appropriate shape to display depending on many factors of the current
+; state of the caller. The base shape is either a triangle for males or a circle for females. The eye size and spacing
 ; is calculated from the anima1's visual attributes and depends on the current time of day. The shape may
-; also include
+; also include colored signals and other features ...
 ;
 ; ENTRY: The attributes of the anima1 accurately represent its current state: 'biological.sex,'
 ;        'visual.range,' 'visual.angle,' 'day.perception,' 'night.perception,' 'is.resting,' 'is.alive,'
@@ -1204,7 +1210,8 @@ end
 ;
 ;        The current 'solar-status' is either DAY or NIGHT.
 ;
-; EXIT:  NA
+; EXIT:  'get-shape' returns a string representing the shape, as processed by NetLogo and as defined in the
+;          Turtle Shapes Editor.  For example, "triangle123" defines a male with ...
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
@@ -1212,22 +1219,24 @@ to-report get-shape
   let base_shape ifelse-value                                  ; Determine whether the base shape should be
   ( biological.sex = "male" ) [ "triangle" ] [ "circle" ]      ; triangle or circle depending on the sex.
   let eye_size ( ifelse-value
+
     ( visual.range < ( 1 / 3 ) ) [ "1" ]                       ; Determine the degree of eye size and spacing
     ( visual.range < ( 2 / 3 ) ) [ "2" ] [ "3" ] )             ; from anima1 visual attributes.
   let eye_spacing ( ifelse-value
     ( visual.angle < ( 1 / 3 ) ) [ "1" ]
     ( visual.angle < ( 2 / 3 ) ) [ "2" ] [ "3" ] )
+
   let current-perception ifelse-value                          ; Determine the pupil shape based on the
   ( solar-status = "DAY" )                                     ; time of day and the anima1's ability
-  [ day.perception ]                                           ; to see during that time.
-  [ night.perception ]
+  [ day.perception ] [ night.perception ]                      ; to see during that time.
   let eye_acuity ( ifelse-value
     ( is.resting or not is.alive ) [ "1" ]
-    ( current-perception > 0.5 ) [ "3" ]
-    ( current-perception > 0 ) [ "2" ] [ "1" ] )
+    ( current-perception > 0.5 )   [ "3" ]
+    ( current-perception > 0 )     [ "2" ] [ "1" ] )
+
   let a_on ifelse-value yellow.signal [ "a" ] [ "" ]           ; Determine whether the color
-  let b_on ifelse-value red.signal [ "b" ] [ "" ]              ; signals are on or off
-  let c_on ifelse-value blue.signal [ "c" ] [ "" ]
+  let b_on ifelse-value red.signal    [ "b" ] [ "" ]           ; signals are on or off.
+  let c_on ifelse-value blue.signal   [ "c" ] [ "" ]
 
   report ( word base_shape eye_size eye_spacing                ; Report the appropriate shape
     eye_acuity a_on b_on c_on )                                ; based on the above information.
@@ -4078,7 +4087,7 @@ plant-maximum-neighbors
 plant-maximum-neighbors
 0
 8
-4.0
+8.0
 .1
 1
 NIL
@@ -4157,7 +4166,7 @@ INPUTBOX
 995
 191
 population
-Olives
+Chimpanzees
 1
 0
 String
@@ -4168,7 +4177,7 @@ INPUTBOX
 995
 265
 genotype
-olives
+chimpanzees
 1
 0
 String
@@ -4232,7 +4241,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "meta-report" "---------------------" " > OPERATIONS   " "---------------------" "parameter-settings" "default-settings" "model-structure" "-- aspatial" "-- free-lunch" "-- ideal-form" "-- no-evolution" "-- no-plants" "-- reaper" "-- stork" "-- uninvadable" "clear-population" "reset-plants" "save-world" "import-world" "output-results" "---------------------" " > VERIFICATION " "---------------------" "dynamic-check" "-- true" "-- false" "runtime-check" "visual-check" "-- attack-pattern" "-- dine-and-dash" "-- life-history-channel" "-- musical-pairs" "-- night-and-day" "-- popularity-context" "-- speed-mating" "-- square-dance" "-- supply-and-demand" "---------------------" " > DISPLAY RESULTS   " "---------------------" "age" "generations" "genotype" "phenotype" "-- survival-chance" "-- body-size" "-- body-shade" "-- fertility-status" "-- hidden-chance" "-- bite-capacity" "-- mutation-chance" "-- sex-ratio" "-- litter-size" "-- conception-chance" "-- visual-angle" "-- visual-range" "-- day-perception" "-- night-perception" "carried-items" "energy-supply" "behaviors" "-- environment" "-- decisions" "-- actions" "-- matings" "-- mating-partners" "-- conceptions" "-- infanticide" "-- group-transfers" "-- travel-distance" "-- foraging-gains" "-- total-energy-gains" "-- total-energy-cost" "show-territories"
-67
+10
 
 BUTTON
 1063
@@ -4311,7 +4320,7 @@ plant-quality
 plant-quality
 .1
 100
-4.0
+6.0
 .1
 1
 NIL
@@ -4324,7 +4333,7 @@ SWITCH
 79
 output-results?
 output-results?
-0
+1
 1
 -1000
 
@@ -4383,7 +4392,7 @@ SWITCH
 639
 adults
 adults
-0
+1
 1
 -1000
 
@@ -4438,7 +4447,7 @@ SWITCH
 639
 females
 females
-0
+1
 1
 -1000
 
