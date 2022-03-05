@@ -1,0 +1,84 @@
+;-------------------------------------------------------------------------------------------------                                                                                                                                                   
+;
+;                    dP                     dP   oo                   
+;                    88                     88                        
+;  .d8888b. .d8888b. 88 .d8888b. .d8888b. d8888P dP .d8888b. 88d888b. 
+;  Y8ooooo. 88ooood8 88 88ooood8 88'  `""   88   88 88'  `88 88'  `88 
+;        88 88.  ... 88 88.  ... 88.  ...   88   88 88.  .88 88    88 
+;  `88888P' `88888P' dP `88888P' `88888P'   dP   dP `88888P' dP    dP 
+;
+;  NetLogo 6.1.0
+;-------------------------------------------------------------------------------------------------
+; 
+; This extension contains all functions that allow users to apply artificial selection
+; on populations of anima1s. B3GET requires access to the following functions in this extension in 
+; order to work properly:
+;
+; ARTIFICIAL-SELECTION
+; 
+; Selection can be turned ON or OFF with the SELECTION-ON? switch on the user interface. When ON is 
+; selected, the ARTIFICIAL-SELECTION function is applied once every timestep.
+;-------------------------------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------------------------------
+; ARTIFICIAL-SELECTION
+;
+; Operation that allows an override of B3GET to artificially cull selected anima1s.
+;-------------------------------------------------------------------------------------------------
+
+to artificial-selection 
+  ask anima1s with [ selected-to-die? ] [ die ] 
+  if ( count anima1s with [not is.dead] > 100 ) [ ask up-to-n-of ( count anima1s with [not is.dead] - 100 ) anima1s [ die ]]
+end
+
+;-------------------------------------------------------------------------------------------------
+; SELECTED-TO-DIE?
+;
+; Selection criteria used to cull the anima1s.
+;-------------------------------------------------------------------------------------------------
+
+to-report selected-to-die?
+  let selected-to-die false
+  
+  if ( life.history = "adult" and body.size < 0.5 ) [ set selected-to-die true ]
+  if ( generation-number < ( max [generation-number] of anima1s - 4 )) [ set selected-to-die true ]
+  if ( energy.supply = 0 and is.dead = false ) [ set selected-to-die true ]
+  ;if ( energy.supply < 0.5 ) [ set selected-to-die true ]
+  ;if ( life_history = "adult" and body.shade < 0.3 ) [ set selected-to-die true ]
+  ;if ( life_history = "adult" and day.perception.range < 0.1 ) [ set selected-to-die true ]
+  ;if ( life_history = "adult" and night.perception.range < 0.1 ) [ set selected-to-die true ]
+  ;if ( life_history = "adult" and audio.perception.range < 0.1 ) [ set selected-to-die true ]  
+  ;if ( life_history = "adult" and day.perception.angle < 0.1 ) [ set selected-to-die true ]
+  ;if ( life_history = "adult" and night.perception.angle < 0.1 ) [ set selected-to-die true ]
+  ;if ( life_history = "adult" and audio.perception.angle < 0.1 ) [ set selected-to-die true ]
+  ;if ( life_history = "adult" and vocal.range < 0.5 ) [ set selected-to-die true ]
+  ;if ( life_history = "adult" and mutation.rate < 0.001 or mutation.rate > 0.1 ) [ set selected-to-die true ]
+  ;if ( life_history = "adult" and sex.ratio < 0.35 or sex.ratio > 0.65 ) [ set selected-to-die true ]
+  ;if ( life_history = "adult" and litter.size > 0.1 ) [ set selected-to-die true ]
+  
+  report selected-to-die
+end
+
+
+;To do list:
+;
+;5. eventually wean animals to initial _living_chance of 0.5
+;6. introduce memory and _memory_stability state variables
+;9. Add to g3notype.nls ability to translate genotype code into human speech
+;12. vocalizations
+;14. fix export function to be independent of chromosome
+;15. update data collection nls
+;16. magnitude x/y actions
+;17. relatedness function
+;
+;Done:
+;
+;2. allow stacking of actions (except for MAKE-DECISIONS!!!)
+;1. new actions SQUIRM and CLING to give carried targets some agency
+;8. add perception angles as well for day, night and audio
+;10. DON"T DELETE DECISIONS!! add a true/false thing like before
+;7. during mutation, only all values with 2 or 3 significant figures
+;4. make sure there aren't any groups without group members (when members die)
+;3. track and make explicit all order of magnitude parameters (i.e. litter-size magnifier)
+;13. fix the life-history and fertility stuff
+;11. Also make sure weights and polarity working properly

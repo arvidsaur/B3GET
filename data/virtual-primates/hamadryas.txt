@@ -110,7 +110,7 @@
 1| am jkv attack 0
 1| am jqv attack 0       
 1| am oamkv attack 1E-5           hamadryas_male_attack
-1| am oamqv attack 1E-1           hamadryas_male_attack
+1| am oamqv attack 1E-3           hamadryas_male_attack
 1| am oafkv attack 0
 1| am oafqv attack 0       
 1| am βqnv mate-with 1E-5
@@ -230,7 +230,7 @@
 1| am jkv attack 0
 1| am jqv attack 0       
 1| am oamkv attack 1E-5           hamadryas_male_attack
-1| am oamqv attack 1E-1           hamadryas_male_attack
+1| am oamqv attack 1E-3           hamadryas_male_attack
 1| am oafkv attack 0
 1| am oafqv attack 0       
 1| am βqnv mate-with 1E-5

@@ -5,7 +5,7 @@
 1| i e body-size 1E-3
 1| jf e body-size 1E-4
 1| jm e body-size 1E-4
-0| e e body-shade 8E-5        
+0| e e body-shade 9E-5        
 1| i e visual-range 3E-3
 1| i e visual-angle 3E-3
 1| i e day-perception 3E-3
@@ -35,9 +35,12 @@
 0| e -e rest 1E-9         
 1| am βqnv move-toward 1E-4
 1| c amqnv move-toward 1E-4
-1| a oahv move-toward -1E-4     
-0| e oavu> move-toward -1E-4      olives_avoid_getting_too_close_to_other_troops
-0| e oavn> move-toward 1E-1       olives_stay_in_proximity_with_their_troop
+1| a oahv move-toward -1E-4      
+0| e oavn> move-toward 1E-1        geladas_stay_in_proximity_with_their_unit
+0| e oavu> move-toward 1E-5        geladas_stay_in_proximity_with_other_units
+0| f oafkv> move-toward 1E-2       gelada_females_associate_with_female_kin
+0| m⋅ omv⋅> move-toward 1E-3       gelada_bachelor_males_associate_with_each_other
+0| am∴ oamuv⋅ move-toward 1E-1     gelada_leader_males_engage_encroaching_bachelor_males
 1| af ikv move-toward 0           
 1| af iqv move-toward 0             
 1| af jkv move-toward 0              
@@ -53,7 +56,7 @@
 1| am oamkv move-toward 0
 1| am oamqv move-toward 0
 1| am oafkv move-toward 0
-1| am oafqv move-toward 0
+1| am oafqv move-toward 1E-2     gelada_males_associate_with_adult_females
 1| j d53 move-toward 1E-5
 1| j d54 move-toward 1E-6
 1| j d55 move-toward 1E-7
@@ -74,10 +77,11 @@
 1| i lv¥ demand-from 1E-9
 1| j d eat 1E-9
 1| a d eat 1E-9         
-0| am⋅ fquv< join 1E-2          olive_solitary_males_join_nonkin_females
-0| jm∴ e leave 1E-9             olive_males_leave_as_juveniles
-0| am∴ afnkv leave 1E-9         olive_adult_males_leave_when_female_kin
-0| am∴ afnqv leave -1E-6        olive_males_do_not_leave_if_nonkin_females_present
+0| am⋅ fquv< join 1E-2          gelada_solitary_males_join_nonkin_females
+0| jm∴ e leave 1E-9             gelada_males_leave_as_juveniles
+0| am∴ afnhv leave 1E-9         gelada_adult_males_leave_when_injured
+0| am∴ ⋅oamvu recruit -1E-1     gelada_males_prevent_others_from_joining
+0| af oafvnq leave 1E-9         gelada_females_fission_because_nonkin
 1| af jy put-down 1E-9
 1| af ikv help 0           
 1| af iqv help 0             
@@ -106,9 +110,10 @@
 1| am ikv attack 0
 1| am iqv attack 0           
 1| am jkv attack 0
-1| am jqv attack 0              
-1| am oamkv attack 1E-1             olive_male_attack       
-1| am oamqv attack 1E-1             olive_male_attack 
+1| am jqv attack 0          
+1| am oamkv attack 1E-5         gelada_male_attack
+1| am oamqv attack 1E-3         gelada_male_attack
+0| m⋅ omv⋅ attack -1E-3         gelada_bachelor_males_dont_attack_each_other
 1| am oafkv attack 0
 1| am oafqv attack 0       
 1| am βqnv mate-with 1E-5
@@ -153,9 +158,12 @@
 0| e -e rest 1E-9         
 1| am βqnv move-toward 1E-4
 1| c amqnv move-toward 1E-4
-1| a oahv move-toward -1E-4     
-0| e oavu> move-toward -1E-4      olives_avoid_getting_too_close_to_other_troops
-0| e oavn> move-toward 1E-1       olives_stay_in_proximity_with_their_troop
+1| a oahv move-toward -1E-4      
+0| e oavn> move-toward 1E-1        geladas_stay_in_proximity_with_their_unit
+0| e oavu> move-toward 1E-5        geladas_stay_in_proximity_with_other_units
+0| f oafkv> move-toward 1E-2       gelada_females_associate_with_female_kin
+0| m⋅ omv⋅> move-toward 1E-3       gelada_bachelor_males_associate_with_each_other
+0| am∴ oamuv⋅ move-toward 1E-1     gelada_leader_males_engage_encroaching_bachelor_males
 1| af ikv move-toward 0           
 1| af iqv move-toward 0             
 1| af jkv move-toward 0              
@@ -171,7 +179,7 @@
 1| am oamkv move-toward 0
 1| am oamqv move-toward 0
 1| am oafkv move-toward 0
-1| am oafqv move-toward 0
+1| am oafqv move-toward 1E-2     gelada_males_associate_with_adult_females
 1| j d53 move-toward 1E-5
 1| j d54 move-toward 1E-6
 1| j d55 move-toward 1E-7
@@ -192,10 +200,11 @@
 1| i lv¥ demand-from 1E-9
 1| j d eat 1E-9
 1| a d eat 1E-9         
-0| am⋅ fquv< join 1E-2          olive_solitary_males_join_nonkin_females
-0| jm∴ e leave 1E-9             olive_males_leave_as_juveniles
-0| am∴ afnkv leave 1E-9         olive_adult_males_leave_when_female_kin
-0| am∴ afnqv leave -1E-6        olive_males_do_not_leave_if_nonkin_females_present
+0| am⋅ fquv< join 1E-2          gelada_solitary_males_join_nonkin_females
+0| jm∴ e leave 1E-9             gelada_males_leave_as_juveniles
+0| am∴ afnhv leave 1E-9         gelada_adult_males_leave_when_injured
+0| am∴ ⋅oamvu recruit -1E-1     gelada_males_prevent_others_from_joining
+0| af oafvnq leave 1E-9         gelada_females_fission_because_nonkin
 1| af jy put-down 1E-9
 1| af ikv help 0           
 1| af iqv help 0             
@@ -224,9 +233,10 @@
 1| am ikv attack 0
 1| am iqv attack 0           
 1| am jkv attack 0
-1| am jqv attack 0              
-1| am oamkv attack 1E-1             olive_male_attack       
-1| am oamqv attack 1E-1             olive_male_attack 
+1| am jqv attack 0          
+1| am oamkv attack 1E-5         gelada_male_attack
+1| am oamqv attack 1E-3         gelada_male_attack
+0| m⋅ omv⋅ attack -1E-3         gelada_bachelor_males_dont_attack_each_other
 1| am oafkv attack 0
 1| am oafqv attack 0       
 1| am βqnv mate-with 1E-5

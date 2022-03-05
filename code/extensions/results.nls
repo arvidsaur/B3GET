@@ -1047,10 +1047,17 @@ to simulation-summary ; observer subroutine
       "female-infanticide-count-mean"
       "female-infanticide-count-variance"       
       "total-population-female-infanticide-count"
+      "mean-population-relatedness"
       
   )) ]
   
   file-open simulations-file-path
+  
+  let relatedness-list []        
+  ask anima1s with [ is.alive ] [
+    ask other anima1s with [ is.alive ] [
+      set relatedness-list lput relatedness-with myself relatedness-list ]] 
+  let mean-relatedness ifelse-value ( length relatedness-list < 1 ) [ "NA" ] [ mean relatedness-list ]
   
   file-print csv:to-string ( list ( list
     
@@ -1539,6 +1546,7 @@ to simulation-summary ; observer subroutine
     female-infanticide-count-mean
     female-infanticide-count-variance       
     total-population-female-infanticide-count
+    mean-relatedness
     
   ))
   

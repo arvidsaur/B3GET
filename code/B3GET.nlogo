@@ -70,7 +70,6 @@ extensions [ csv profiler table time ]
 
 __includes [ ; For more information on local extensions, see the corresponding files.
 
-  "extensions/analysis.nls"
   "extensions/data.nls"
   "extensions/gat3s.nls"
   "extensions/interface.nls"
@@ -486,7 +485,7 @@ end
 ;
 ; ENTRY: NA
 ;
-; EXIT: NA
+; EXIT: Returns
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
@@ -516,7 +515,7 @@ end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
-; SETUP PLANTS AT THE START OF A NEW SIMULATION [CL]
+; SETUP PLANTS AT THE START OF A NEW SIMULATION
 ;
 ; The plant environment must be set up at the start of each simulation. During this process, the NetLogo
 ; patches, or cells, include a few starting conditions. First, they are given a random amount of potential
@@ -902,10 +901,49 @@ end
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
+;to update-terminal-energy [ plant-season plant-density ]
+;
+;  let seasonal-factor (                                        ; Calculate the degree of impact
+;    ( plant-seasonality * plant-season + 1 ) / 2 )             ; that the season has on the plants.
+;
+;  let optimal-neighbor-energy (                                ; Calculate the optimal number of neighbors
+;    plant-minimum-neighbors + plant-maximum-neighbors ) / 2    ; that a plant should currently desire.
+;
+;  let neighbor-energy-sd (                                     ; Calculate the range around the optimal
+;    optimal-neighbor-energy                                    ; desired neighbors that the plant will
+;    - plant-minimum-neighbors )                                ; also find satisfying conditions.
+;
+;  let neighbor-energy (                                        ; Calculate the number of neighbors surrounding
+;    mean ( list                                                ; a plant based on their energy settings
+;      (sum [penergy.supply] of neighbors)                      ; with respect to the user specified amount of
+;      (sum [pterminal.energy] of neighbors) )                  ; energy allowed.
+;    / plant-quality )
+;
+;  let probability-up ifelse-value                              ; Calculate the degree to which the plant
+;  ( neighbor-energy-sd = 0 ) [ 0 ] [                           ; finds itself in ideal neighbor conditions.
+;    ( 1 * e ^ (
+;      - (( neighbor-energy - optimal-neighbor-energy ) ^ 2 )
+;      / ( 2 * ( neighbor-energy-sd ^ 2 ) )) ) ]
+;
+;  let y (                                                      ; Calculate the adjustment in
+;    ( plant-daily-cycle * plant-quality )                      ; the plant's maximum amount
+;    / plant-annual-cycle ) * (                                 ; of energy allowed based on the amount
+;    plant-density *                                            ; of neighbors and other general seasonal
+;    ( 2 * probability-up - 1 ) +                               ; factors using the above calculations.
+;    seasonal-factor -
+;    plant-density )
+;
+;  set pterminal.energy ( pterminal.energy + random-float y )   ; Update the plants terminal energy setting,
+;  if pterminal.energy >= plant-quality                         ; which sets its mamimum allowed energy and
+;  [ set pterminal.energy plant-quality ]                       ; also keep this value within world bounds.
+;  if pterminal.energy <= 0.000 [ set pterminal.energy 0.000 ]
+;
+;end
+
 to update-terminal-energy [ plant-season plant-density ]
 
   let seasonal-factor (                                        ; Calculate the degree of impact
-    ( plant-seasonality * plant-season + 1 ) / 2 )             ; that the season has on the plants.
+    plant-seasonality * plant-season )             ; that the season has on the plants.
 
   let optimal-neighbor-energy (                                ; Calculate the optimal number of neighbors
     plant-minimum-neighbors + plant-maximum-neighbors ) / 2    ; that a plant should currently desire.
@@ -929,10 +967,10 @@ to update-terminal-energy [ plant-season plant-density ]
   let y (                                                      ; Calculate the adjustment in
     ( plant-daily-cycle * plant-quality )                      ; the plant's maximum amount
     / plant-annual-cycle ) * (                                 ; of energy allowed based on the amount
-    plant-density *                                            ; of neighbors and other general seasonal
-    ( 2 * probability-up - 1 ) +                               ; factors using the above calculations.
-    seasonal-factor -
-    plant-density )
+    plant-density                                           ; of neighbors and other general seasonal
+    * probability-up                               ; factors using the above calculations.
+    * seasonal-factor )
+  print y
 
   set pterminal.energy ( pterminal.energy + random-float y )   ; Update the plants terminal energy setting,
   if pterminal.energy >= plant-quality                         ; which sets its mamimum allowed energy and
@@ -4002,7 +4040,7 @@ INPUTBOX
 354
 79
 path-to-experiment
-../results/thesis-final-tests/
+../results/
 1
 0
 String
@@ -4072,7 +4110,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-0.0
+5.0
 .1
 1
 NIL
@@ -4113,7 +4151,7 @@ plant-seasonality
 plant-seasonality
 0
 1
-0.5
+1.0
 .05
 1
 NIL
@@ -4166,7 +4204,7 @@ INPUTBOX
 995
 191
 population
-Chimpanzees
+population
 1
 0
 String
@@ -4177,7 +4215,7 @@ INPUTBOX
 995
 265
 genotype
-chimpanzees
+NIL
 1
 0
 String
@@ -4241,7 +4279,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "meta-report" "---------------------" " > OPERATIONS   " "---------------------" "parameter-settings" "default-settings" "model-structure" "-- aspatial" "-- free-lunch" "-- ideal-form" "-- no-evolution" "-- no-plants" "-- reaper" "-- stork" "-- uninvadable" "clear-population" "reset-plants" "save-world" "import-world" "output-results" "---------------------" " > VERIFICATION " "---------------------" "dynamic-check" "-- true" "-- false" "runtime-check" "visual-check" "-- attack-pattern" "-- dine-and-dash" "-- life-history-channel" "-- musical-pairs" "-- night-and-day" "-- popularity-context" "-- speed-mating" "-- square-dance" "-- supply-and-demand" "---------------------" " > DISPLAY RESULTS   " "---------------------" "age" "generations" "genotype" "phenotype" "-- survival-chance" "-- body-size" "-- body-shade" "-- fertility-status" "-- hidden-chance" "-- bite-capacity" "-- mutation-chance" "-- sex-ratio" "-- litter-size" "-- conception-chance" "-- visual-angle" "-- visual-range" "-- day-perception" "-- night-perception" "carried-items" "energy-supply" "behaviors" "-- environment" "-- decisions" "-- actions" "-- matings" "-- mating-partners" "-- conceptions" "-- infanticide" "-- group-transfers" "-- travel-distance" "-- foraging-gains" "-- total-energy-gains" "-- total-energy-cost" "show-territories"
-10
+16
 
 BUTTON
 1063
@@ -4320,7 +4358,7 @@ plant-quality
 plant-quality
 .1
 100
-6.0
+10.0
 .1
 1
 NIL
@@ -4382,7 +4420,7 @@ CHOOSER
 316
 genotype-reader
 genotype-reader
-"sta2us" "gat3s"
+"sta2us"
 0
 
 SWITCH
@@ -4468,8 +4506,26 @@ OUTPUT
 598
 12
 
+PLOT
+1729
+141
+2146
+476
+plot 1
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot sum [penergy.supply] of patches / count patches"
+
 @#$#@#$#@
-# B3GET 1.2.0 INFORMATION
+# B3GET 1.2.1 INFORMATION
 
 ## WHAT IS IT?
 
@@ -4479,32 +4535,13 @@ B3GET helps answer fundamental questions in evolutionary biology by offering use
 
 ## HOW IT WORKS
 
-B3GET simulates several factors considered important in biology, including life history trade-offs, investment in body size, variation in aggression, sperm competition, infanticide, and competition over access to food and mates. B3GET calculates each agent’s decision-vectors from its diploid chromosomes and current environmental context. These decision-vectors dictate movement, body growth, desire to mate and eat, and other agent actions. Chromosomes are modified during recombination and mutation, resulting in behavioral strategies that evolve over generations.
+B3GET simulates several factors considered important in biology, including life history trade-offs, investment in body size, variation in aggression, sperm competition, infanticide, and competition over access to food and mates. B3GET calculates each animal’s decision-vectors from its diploid chromosomes and current environmental context. These decision-vectors dictate movement, body growth, desire to mate and eat, and other animal actions. Chromosomes are modified during recombination and mutation, resulting in behavioral strategies that evolve over generations.
 
 ## HOW TO USE IT
 
 ### STARTING UP
 
-B3GET should come with the following file and [folder] structure:
-
-> [B3GET]
---- [code]
------- B3GET.nlogo
------- [ extensions ]
---------- commands.nls
---------- data.nls
---------- sta7us.nls
---------- import-export.nls
---------- selection.nls
---------- verification.nls
---- [data]
------- genotype.txt
------- population.csv
---- [results]
---- [docs]
------- B3GET-ODD-protocol.pdf
-
-B3GET starts with PATH-TO-EXPERIMENT set to [../results/], which means that any files generated during simulation will be saved in the [results] folder. Initially, POPULATION is set to [population] and GENOTYPE is set to [genotype], which are files included during download. With these settings, you can just click SETUP and GO to start your first simulation! Please refer to the descriptions of the controls below to perform more complex tasks.
+B3GET starts with PATH-TO-EXPERIMENT set to [../results/], which means that any files generated during simulation will be saved in the [results] folder. Initially, POPULATION is set to [population], which is a file included during download. With these settings, you can just click SETUP and GO to start your first simulation! Please refer to the descriptions of the controls below to perform more complex tasks.
 
 ### PRIMARY CONTROLS
 
@@ -4574,12 +4611,12 @@ INTERFACE: controls the extra commands to use during experimentation.
 GAT3S: a more complex genotype reader.
 RESULTS: controls for generating data.
 STA2US: a simple genotype file reader.
-SELECTION: controls for artificial selection of agents during simulation.
+SELECTION: controls for artificial selection of animals during simulation.
 VERIFICATION: the verification code for this model.
 
 ### NEW EXPERIMENT
 
-If you want to start a new experiment and store information in a separate place, simply create a new folder in [data] and make sure to update the PATH-TO-EXPERIMENT with this new folder path. You must add a poulation file to this new folder (the default file popu1ation would be a fine choice), and update the POPULATION input to this population file name. You can also add a genotype file and update the GENOTYPE input, but this is not neccessary because the population file also contains the genotypes for every agent.
+If you want to start a new experiment and store information in a separate place, simply create a new folder in [data] and make sure to update the PATH-TO-EXPERIMENT with this new folder path. You must add a poulation file to this new folder (the default file popu1ation would be a fine choice), and update the POPULATION input to this population file name. You can also add a genotype file and update the GENOTYPE input, but this is not neccessary because the population file also contains the genotypes for every animal.
 
 ## THINGS TO NOTICE
 
@@ -4593,7 +4630,7 @@ The file system of B3GET allows the user to directly modify genotype and populat
 
 Cite this model:
 
-Crouse, Kristin (2020). “B3GET” (Version 1.1.0). CoMSES Computational Model Library. Retrieved from: https://www.comses.net/codebases/6b10f629-7958-4b31-b489-d51c17d0f5b8/releases/1.1.0/
+Crouse, Kristin (2021). “B3GET” (Version 1.2.1). CoMSES Computational Model Library. Retrieved from: https://www.comses.net/codebases/6b10f629-7958-4b31-b489-d51c17d0f5b8/releases/1.2.1/
 
 Peer-reviewed publication on an earlier version of this model:
 
@@ -4601,7 +4638,7 @@ Crouse, K. N., Miller, C. M., & Wilson, M. L. (2019). New approaches to modeling
 
 ## COPYRIGHT AND LICENSE
 
-© 2020 K N Crouse
+© 2021 K N Crouse
 
 The model may be freely used, modified and redistributed provided this copyright is included and the resulting models are not used for profit.
 
@@ -4612,37 +4649,37 @@ Contact K N Crouse at crou0048@umn.edu if you have questions about its use.
 
 ## Actions
 
-Agent actions are either intra-actions, which can only modify the state of the agent performing the action, or inter-actions, which can modify the state of other 'target' agents adjacent to the performing agent.
+Animal actions are either intra-actions, which can only modify the state of the animal performing the action, or inter-actions, which can modify the state of other 'target' animals adjacent to the performing animal.
 
 ### INTRA-ACTIONS
 
-MAINTENANCE: agents must maintain their body to continue living.
-GROWTH: agents are conceived with a very small body size and must grow to get bigger.
-APPEARANCE: agents can alter their color, shade and which colored stripes are visible.
-PERCEPTION: agents must invest in their perceptive abilities in order to 'see'.
-VOCALS: agents must invest in their vocal range to project auditory communication.
-REPRODUCTION: agents must invest in reproduction in order to successfully conceive.
-OFFSPRING: agents can influence the litter size and biological sex of their offspring.
-MOVEMENT: agents can invest energy in turning and moving forward.
-LIFE HISTORY: agents control the timing of development and fertilty.
+MAINTENANCE: animals must maintain their body to continue living.
+GROWTH: animals are conceived with a very small body size and must grow to get bigger.
+APPEARANCE: animals can alter their color, shade and which colored stripes are visible.
+PERCEPTION: animals must invest in their perceptive abilities in order to 'see'.
+VOCALS: animals must invest in their vocal range to project auditory communication.
+REPRODUCTION: animals must invest in reproduction in order to successfully conceive.
+OFFSPRING: animals can influence the litter size and biological sex of their offspring.
+MOVEMENT: animals can invest energy in turning and moving forward.
+LIFE HISTORY: animals control the timing of development and fertilty.
 
 ### INTER-ACTIONS
 
-NURSING: mother agents can supply energy to their offspring.
-EATING: agents can eat both plants and other dead agents.
-CARRYING: agents can pick up and put down other agents, and in turn agents can cling to or squirm away from other agents.
-FIGHTING: agents can attack each other, which increases the receiver's mortality risk.
-HELPING: agents can also help each other, decreasing the receiver's mortality risk.
-TRANSFERS: agents can join or leave the group of another individual.
-MATING: agents mate with each other to conceive offspring, gestated by the mother.
+NURSING: mother animals can supply energy to their offspring.
+EATING: animals can eat both plants and other dead animals.
+CARRYING: animals can pick up and put down other animals, and in turn animals can cling to or squirm away from other animals.
+FIGHTING: animals can attack each other, which increases the receiver's mortality risk.
+HELPING: animals can also help each other, decreasing the receiver's mortality risk.
+TRANSFERS: animals can join or leave the group of another individual.
+MATING: animals mate with each other to conceive offspring, gestated by the mother.
 
 ## Genotypes
 
-The actions listed above are the range of possible actions that an agent can take. However, whether an agent performs these actions, how much effort they put into doing so, and who they target is up to their genotype. An indefinite number of genotype file configurations are possible, as long as they include the following: (1) each row represents one allele, (2) these alleles represent self-contained procedures that generate decision-vectors from considering the environment as input, and (3) each row contains a list of codons that can be altered during recombination and mutation. This version of B3GET comes with two genotype file extensions: sta7us and g8tes (beta version). Specific information about each file type can be found within those extension files.
+The actions listed above are the range of possible actions that an animal can take. However, whether an animal performs these actions, how much effort they put into doing so, and who they target is up to their genotype. An indefinite number of genotype file configurations are possible, as long as they include the following: (1) each row represents one allele, (2) these alleles represent self-contained procedures that generate decision-vectors from considering the environment as input, and (3) each row contains a list of codons that can be altered during recombination and mutation. This version of B3GET comes with two genotype file extensions: sta7us and g8tes (beta version). Specific information about each file type can be found within those extension files.
 
 ## Phenotypes
 
-When agents perform actions, for the most part this results in changes in the state variables of themselves or others. These states can be thought of as an organism's phenotype, the set of virtual 'organs' which emerges from a combination of an organism's genotype and its life experiences interacting with its environment.
+When animals perform actions, for the most part this results in changes in the state variables of themselves or others. These states can be thought of as an organism's phenotype, the set of virtual 'organs' which emerges from a combination of an organism's genotype and its life experiences interacting with its environment.
 
 ### VISIBLE 'ORGANS'
 
@@ -4651,13 +4688,13 @@ COLOR: color represents group identity and shade correlates with age.
 SEX: either "male" or "female".
 LIFE HISTORY: "gestatee", "infant", "juvenile", or "adult".
 FERILITY: is "cycling", "pregnant" or "lactating" for adult females.
-HEALTH: liklihood of an agent living to the next timestep.
-ENERGY: agents can see the energy supply of another agent.
-ALIVE: agents can see whether an agent is dead or alive.
-SIGNALS: agents can display phenotypic signals, which appear as colored stripes.
-GROUP: agents can tell whether or not they have the same group identity.
+HEALTH: liklihood of an animal living to the next timestep.
+ENERGY: animals can see the energy supply of another animal.
+ALIVE: animals can see whether an animal is dead or alive.
+SIGNALS: animals can display phenotypic signals, which appear as colored stripes.
+GROUP: animals can tell whether or not they have the same group identity.
 KINSHIP: check the chromosomes to deteremine degree of relatedness to that individual.
-INVENTORY: a list of other agents that are being carried.
+INVENTORY: a list of other animals that are being carried.
 
 ### LIFE HISTORY 'ORGAN' CONSTRAINTS
 
@@ -4670,18 +4707,15 @@ ADULT: able to conceive offspring
 CYCLING: females are able to conceive
 PREGNANT: females enter this state upon conception, now able to nurse
 LACTATING: females enter this state upon weaning, and are able to nurse
-SENESCENT: unable to conceive or nurse
 
 ### HIDDEN 'ORGANS'
 
 REPRODUCTION: determines the ability to conceive and create offspring.
 PERCEPTION: determines the ability to perceive the environment.
-VOCALS: determines the ability to project sound.
 REGULATORS: determines the chance of changing current state of signal or trait.
 DIRECTION: tracks the overall preferred direction to go.
-CHROMOSOMES: diploid chromosomes regulate the innate actions of the agent.
+CHROMOSOMES: diploid chromosomes regulate the innate actions of the animal.
 DECISION CENTER: where decisions live in the mind before becoming actionable.
-MEMORY STORAGE: storage for learned actions and agents, places, things.
 
 .
 @#$#@#$#@

@@ -1,0 +1,178 @@
+;----------------------------------------------------------------------------------------------
+;
+;        dP            dP            
+;        88            88            
+;  .d888b88 .d8888b. d8888P .d8888b. 
+;  88'  `88 88'  `88   88   88'  `88 
+;  88.  .88 88.  .88   88   88.  .88 
+;  `88888P8 `88888P8   dP   `88888P8 
+;
+;----------------------------------------------------------------------------------------------     
+; 
+; This B3GET extension contains all functions related to data collection. B3GET requires access 
+; to the COLLECT-DATA function in this extension in order to collect data on its anima1s.
+; Data collection can be turned ON or OFF with the COLLECT-DATA? switch on the user interface. 
+; When ON is selected, the COLLECT-DATA function is applied once every timestep.
+;
+; list up here all agent state variables so users know what they can access.
+;----------------------------------------------------------------------------------------------
+
+to collect-data
+  
+  ;----------------------------------------------------------------------------------------------     
+  ; SIMULATIONS
+  ;----------------------------------------------------------------------------------------------
+  
+  if ( ticks = 1 ) [ crt 1 [ record-simulation die ]]
+  
+  ;----------------------------------------------------------------------------------------------     
+  ; VERIFICATION
+  ;----------------------------------------------------------------------------------------------
+  
+  if ( random-float 1.0 < 0.0001 ) [ save-verification-to "verification.csv" ]
+  
+  ;----------------------------------------------------------------------------------------------     
+  ; SCANS
+  ;----------------------------------------------------------------------------------------------
+  
+  if ( ticks > 0 and ceiling (ticks / 100) = (ticks / 100) ) 
+  [ 
+    if ( any? groups ) [ ask groups [ scan-group ]]
+    if ( any? anima1s ) [ ask anima1s with [ generation-number > 0 ] [ scan-anima1 ]] ; decisions
+  ]
+  
+  ;----------------------------------------------------------------------------------------------     
+  ; CENSUS
+  ;----------------------------------------------------------------------------------------------
+  
+  ask anima1s with [ ticks-at-death > 0 and ticks = ( ticks-at-death + 1 ) and generation-number > 0 ] [ record-anima1 ]
+  ask groups with [ age = 0 ] [ record-group ]
+  
+  ;----------------------------------------------------------------------------------------------     
+  ; FOCAL FOLLOWS
+  ;----------------------------------------------------------------------------------------------
+  
+  ; There is a small chance to starting "following" an agent if they were born this timestep 
+  if ( subject = nobody ) [ if ( random-float 1.0 < 0.00001 and any? anima1s with [ age = 0 and generation-number > 0 ] ) [ follow one-of anima1s with [ age = 0 and generation-number > 0 ] ]]
+  
+  ; If currently "following" an agent, take records of this subject
+  if ( subject != nobody ) [ 
+    ask subject [ scan-anima1 ] ; how to scan all actions coming in and out?
+  ]
+  
+end
+
+;--------------------------------------------------------------------------------------------------------------------
+; OPERATORS
+;--------------------------------------------------------------------------------------------------------------------
+
+to record-simulation
+  export-turtle-to 
+  (word path-to-experiment "/simulations.csv" )
+  (list "date-and-time" "model-version" "simulation-id" "population" "genotype"
+    "plant-annual-cycle" "plant-seasonality" "plant-minimum-neighbors" 
+    "plant-maximum-neighbors" "plant-daily-cycle" )
+end
+
+to record-group
+  export-turtle-to 
+  (word path-to-experiment "/groups.csv" ) 
+  (list "date-and-time" "model-version" "simulation-id" "ticks" "meta-id" "color" "xcor" "ycor" )
+end
+
+to record-anima1
+  export-turtle-to
+  (word path-to-experiment "/animals.csv" )
+  (list "date-and-time" "model-version" "simulation-id" "ticks" "meta-id"
+    "biological.sex" "chromosome.I" "chromosome.II"
+    "life-history-at-death" "fertility-at-death" "energy-at-death" "living-chance-at-death"
+    "generation-number" "mother-identity" "father-identity"  "natal-group-id" 
+    "natal-group-size" "focal-subject" "ticks-at-conception"  
+    "ticks-at-birth" "ticks-at-weaning" "ticks-at-sexual-maturity"
+    "ticks-at-senescence" "ticks-at-death" "cause-of-death" 
+    "adult-body-size" "adult-body-shade" "adult-perception-range"
+    "adult-mutation-chance" "adult-sex-ratio" "adult-litter-size" "adult-conception-chance" 
+    "mother-initiated-birth" "mother-initiated-weaning"
+    "lifetime-foraging-gains" "lifetime-foraging-losses" "lifetime-helping-benefit" "lifetime-helping-cost"
+    "lifetime-matings-count" "lifetime-mates-count" "lifetime-matings" 
+    "lifetime-conceptions-count" "lifetime-infanticide-count"
+    "lifetime-group-transfers" "lifetime-distance-traveled" "lifetime-cells-occupied" 
+  )
+end
+
+to scan-group
+  export-turtle-to 
+  (word path-to-experiment "/group_scan.csv" )  
+  (list "date-and-time" "model-version" "simulation-id" "ticks" "meta-id" 
+    "total-birth-count" "current-group-size" "adult-female-group-size" "incoming-group-contest-competition" "world-population-density" "total-energy-gained" 
+    "gestatee-female-energy-gained" "gestatee-male-energy-gained" "infant-female-energy-gained" "infant-male-energy-gained" 
+    "juvenile-female-energy-gained" "juvenile-male-energy-gained" "adult-cycling-energy-gained" "adult-pregnant-energy-gained" 
+    "adult-lactating-energy-gained" "adult-male-energy-gained" "senescent-female-energy-gained" "senescent-male-energy-gained" 
+    "distance-traveled" )
+end
+
+to scan-anima1
+  export-turtle-to 
+  (word path-to-experiment "/animal_scan.csv" ) 
+  (list "date-and-time" "model-version" "simulation-id" "ticks" "meta-id" 
+    "color" "heading" "xcor" "ycor" "age"
+    "biological.sex" "life.history" "female.fertility" "energy.supply"
+    "group.identity" "is.dead" "alpha.signal" "beta.signal" "gamma.signal"
+    "living.chance" "body.size" "body.shade" "mutation.chance"
+    "sex.ratio" "litter.size" "conception.chance"
+    "day.perception.angle" "night.perception.angle" "audio.perception.angle"
+    "day.perception.range" "night.perception.range" "audio.perception.range"
+    "alpha.chance" "beta.chance" "gamma.chance"
+    "birthing.chance" "weaning.chance" "infancy.chance"
+    "juvenility.chance" "adulthood.chance" "senescency.chance"
+    "x.magnitude" "y.magnitude"
+    "distance-traveled" "foraging-gains" "foraging-losses" "helping-benefit" "helping-cost" )
+end
+
+to scan-decisions
+;  foreach decision.vectors [ d ->
+;    export-turtle-to 
+;    (word path-to-experiment "/decisions_scan.csv" )  
+;    (list "date-and-time" "model-version" "simulation-id" "ticks" 
+;      ;(item 0 d) (item 1 d) (item 2 d) (item 3 d) (item 4 d) (item 5 d)
+;      "ego-target-relatedness" "within-group" )]
+end
+
+;--------------------------------------------------------------------------------------------------------------------
+; REPORTERS
+;--------------------------------------------------------------------------------------------------------------------
+
+;:::: global :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+to-report world-population-density report count turtles / ( world-width * world-height ) end
+  
+;:::: groups :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+to-report current-group-size report group-size end  
+to-report group-members report anima1s with [ group.identity = [meta-id] of myself ] end
+to-report adult-female-group-size report count anima1s with [ group.identity = [meta-id] of myself and biological.sex = "female" and life.history = "adult" ] end  
+to-report incoming-group-contest-competition report "" end ; not done
+  
+;:::: anima1s :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+  
+to-report life-history-at-death report life.history end
+to-report fertility-at-death report female.fertility end
+to-report energy-at-death report energy.supply end
+to-report living-chance-at-death report living.chance end
+to-report focal-subject report self = subject end
+to-report lifetime-foraging-gains report foraging-gains end
+to-report lifetime-foraging-losses report foraging-losses end
+to-report lifetime-helping-benefit report helping-benefit end
+to-report lifetime-helping-cost report helping-cost end
+to-report lifetime-matings-count report length matings-list end
+to-report lifetime-mates-count report length remove-duplicates matings-list end
+to-report lifetime-matings report matings-list end
+to-report lifetime-conceptions-count report length conceptions-list end
+to-report lifetime-infanticide-count report length infanticide-list end
+to-report lifetime-group-transfers report length group-transfers-list end
+to-report lifetime-distance-traveled report distance-traveled end
+to-report lifetime-cells-occupied report length cells-occupied end
+  
+
+  
+

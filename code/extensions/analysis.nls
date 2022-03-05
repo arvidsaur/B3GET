@@ -24,20 +24,20 @@ to thesis-setup
   set plant-annual-cycle 1000
   set plant-daily-cycle 10
   set plant-seasonality 0.5
-  set plant-quality 5
+  set plant-quality 4
   set deterioration-rate -0.01
   
-  set maximum-population-size 150
-  set minimum-population-size 150
+  set maximum-population-size 200
+  set minimum-population-size 200
   
   ; final settings 
   set simulation-summary-ticks 25000 
   set simulation-scan-ticks 250 
-  set group-scan-ticks 10000 
+  set group-scan-ticks 2000 
   set individual-scan-ticks 0 
   set view-scan-ticks 10000 
   set genotype-scan-ticks 10000
-  set focal-follow-rate 1E-3
+  set focal-follow-rate 1E-4
   set record-individuals true 
   set verification-rate 1E-5
   set record-world-ticks 100000
@@ -64,8 +64,8 @@ to thesis-setup
     ( first behaviorspace-experiment-name = "D" ) [ set plant-daily-cycle 100 ]
     ( first behaviorspace-experiment-name = "E" ) [ set plant-seasonality 0 ]
     ( first behaviorspace-experiment-name = "F" ) [ set plant-seasonality 1 ]
-    ( first behaviorspace-experiment-name = "G" ) [ set plant-quality 2.5 ]
-    ( first behaviorspace-experiment-name = "H" ) [ set plant-quality 10 ]
+    ( first behaviorspace-experiment-name = "G" ) [ set plant-quality 2 ]
+    ( first behaviorspace-experiment-name = "H" ) [ set plant-quality 6 ]
     ( first behaviorspace-experiment-name = "I" ) [ set deterioration-rate -0.001 ]
     ( first behaviorspace-experiment-name = "J" ) [ set model-structure lput "aspatial" model-structure ]
     ( first behaviorspace-experiment-name = "K" ) [ set model-structure lput "stork" model-structure ]
