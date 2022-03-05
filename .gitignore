@@ -6,6 +6,7 @@ codemeta.json
 /code/autosave*
 /code/config.cpt
 /code/program.cpt
+/code/Work with Clarence on code/*
 /output/*
 /data/data-to-ignore/*
 /docs/docs-to-ignore/*
