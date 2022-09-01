@@ -1504,10 +1504,294 @@ to generate-experiments
 end
 
 
+to protopan-generate-experiments
+  
+  file-open ( word path-to-experiment "protopan.xml" )
+  
+  file-print "<experiments>"
+ 
+  let plants [ "P" "H" ]
+  let seasonality [ "S" "C" ]
+  let quality [ 3 4 5 6 ]
+  let A-D [ "A" "B" "C" "D" ]
+  
+  foreach plants [ p ->
+    
+    foreach seasonality [ s ->
+      
+      foreach A-D [ z ->
+        
+        let name ( word p s z )
+        file-print ( word "  <experiment name=\"" name "\" repetitions=\"1\" runMetricsEveryStep=\"false\">" )
+        file-print ( word "    <setup>protopan-setup</setup>" )
+        file-print ( word "    <go>go</go>" )
+        file-print ( word "    <final>protopan-final</final>" )
+        file-print ( word "    <enumeratedValueSet variable=\"plant-quality\">" )
+        file-print ( word "      <value value=\"3\"/>" )
+        file-print ( word "      <value value=\"4\"/>" )
+        file-print ( word "      <value value=\"5\"/>" )
+        file-print ( word "      <value value=\"6\"/>" )
+        file-print ( word "    </enumeratedValueSet>" )
+        file-print ( word "  </experiment>" )
+        
+  ]]]
+  
+  file-print "</experiments>"
+  file-close
+  
+end
 
 
+to protopan-generate-jobs
+  
+  let plants [ "P" "H" ]
+  let seasonality [ "S" "C" ]
+  let quality [ 3 4 5 6 ]
+  let A-D [ "A" "B" "C" "D" ]
+  
+  file-open ( word path-to-experiment "protopan.sh" )
+  file-print "#!/bin/bash -l"
+  
+  foreach plants [ p ->
+    
+    foreach seasonality [ s ->
+      
+      foreach A-D [ z ->
+        
+        let name (word p s z )
+        
+        file-open ( word path-to-experiment "protopan.sh" )
+        file-print ( word "sbatch -p max " name ".sh" )
+        
+        file-close
+        
+        file-open ( word path-to-experiment name ".sh" )
+        
+        file-print "#!/bin/bash -l"
+        file-print "#SBATCH --time=30-0:00:00"
+        file-print "#SBATCH --ntasks=24"
+        file-print "#SBATCH --mem=60g"
+        file-print "#SBATCH --mail-type=ALL"
+        file-print "#SBATCH --mail-user=crou0048@umn.edu"
+        file-print "export JAVA_HOME=/usr/java/jre1.8.0_101"
+        file-print (word "/home/lehmanc/crou0048/Desktop/NetLogo\\ 6.2.0/netlogo-headless.sh --model /home/lehmanc/crou0048/Desktop/B3GET/code/B3GET.nlogo --setup-file protopan.xml --experiment " name " --threads 4")
+        
+        file-close
+        
+  ]]]
+  
+end
+
+to protopan-setup
+  
+  clear-all                                                    ; Delete all current settings in the simulation.
+  reset-ticks                                                  ; Reset the timesteps to zero.
+  
+  set path-to-experiment "../results/ProtoPan/b3get-output/"
+  set genotype-reader "sta2us"
+  set output-results? true 
+  set selection-on? false
+  set plant-annual-cycle 1000
+  set plant-daily-cycle 10
+  ;set plant-seasonality 0.5
+  ;set plant-quality 4
+  set deterioration-rate -0.01
+  
+  ;set maximum-population-size 200
+  ;set minimum-population-size 200
+  
+  ; final settings 
+  set simulation-summary-ticks 100000 
+  set simulation-scan-ticks 250 
+  set group-scan-ticks 100000 
+  set individual-scan-ticks 0 
+  set view-scan-ticks 100000 
+  set genotype-scan-ticks 10000
+  set focal-follow-rate 1E-4
+  set record-individuals true 
+  set verification-rate 1E-5
+  set record-world-ticks 1000000
+  set simulation-stop-at 1000000
+  
+  set population "ProtoPan"
+  set genotype "protopan"
+  
+;  set simulation-summary-ticks 500 
+;  set simulation-scan-ticks 250 
+;  set group-scan-ticks 100
+;  set individual-scan-ticks 0 
+;  set view-scan-ticks 100
+;  set genotype-scan-ticks 100
+;  set focal-follow-rate 1E-3 
+;  set record-individuals true 
+;  set verification-rate 1E-5
+;  set record-world-ticks 1000
+;  set simulation-stop-at 1000
+  
+  if ( model-structure = 0 ) [ set model-structure [] ]
+ 
+ ; TO DO FOR PROTOPAN
+  
+  if ( first behaviorspace-experiment-name = "P" ) [ set plant-minimum-neighbors 4 set plant-maximum-neighbors 6 ]
+  if ( first behaviorspace-experiment-name = "H" ) [ set plant-minimum-neighbors 2 set plant-maximum-neighbors 4 ]
+  if ( item 1 behaviorspace-experiment-name = "S" ) [ set plant-seasonality 1 ]
+  if ( item 1 behaviorspace-experiment-name = "C" ) [ set plant-seasonality 0 ]
+  
+  
+  
+;  ( ifelse
+;    ( first behaviorspace-experiment-name = "A" ) [  ]
+;    ( first behaviorspace-experiment-name = "B" ) [ set plant-annual-cycle 10000 set plant-daily-cycle 100 ]
+;    ( first behaviorspace-experiment-name = "C" ) [ set plant-annual-cycle 10000 ]
+;    ( first behaviorspace-experiment-name = "D" ) [ set plant-daily-cycle 100 ]
+;    ( first behaviorspace-experiment-name = "E" ) [ set plant-seasonality 0 ]
+;    ( first behaviorspace-experiment-name = "F" ) [ set plant-seasonality 1 ]
+;    ( first behaviorspace-experiment-name = "G" ) [ set plant-quality 2 ]
+;    ( first behaviorspace-experiment-name = "H" ) [ set plant-quality 6 ]
+;    ( first behaviorspace-experiment-name = "I" ) [ set deterioration-rate -0.001 ]
+;    ( first behaviorspace-experiment-name = "J" ) [ set model-structure lput "aspatial" model-structure ]
+;    ( first behaviorspace-experiment-name = "K" ) [ set model-structure lput "stork" model-structure ]
+;    ( first behaviorspace-experiment-name = "L" ) [ set model-structure lput "reaper" model-structure ]
+;    ( first behaviorspace-experiment-name = "M" ) [ 
+;      set model-structure lput "ideal-form" model-structure set model-structure lput "stork" model-structure ]
+;    ( first behaviorspace-experiment-name = "N" ) [ set model-structure lput "free-lunch" model-structure ]
+;    ( first behaviorspace-experiment-name = "O" ) [ set model-structure lput "no-evolution" model-structure ]
+;    ( first behaviorspace-experiment-name = "P" ) [ set model-structure lput "uninvadable" model-structure ]
+;    [  ] )
+;  
+;  if ( length behaviorspace-experiment-name = 4 ) [
+;    
+;    set plant-minimum-neighbors read-from-string ( item 1 behaviorspace-experiment-name )
+;    set plant-maximum-neighbors read-from-string ( item 2 behaviorspace-experiment-name )
+;    
+;    ( ifelse 
+;      ( population = "Chimpanzees" ) [
+;        set genotype "chimpanzees" ]
+;      ( population = "Geladas")[
+;        set genotype "geladas" ]
+;      ( population = "Hamadryas" )[
+  ;        set genotype "hamadryas" ]
+  ;      ( population = "Olives" )[
+  ;        set genotype "olives" ]
+  ;      [])
+  ;    
+  ;]
+  
+  set simulation-id ( word 
+    generate-simulation-id
+    "-"
+    item 0 behaviorspace-experiment-name 
+    item 1 behaviorspace-experiment-name 
+    plant-quality
+    item 2 behaviorspace-experiment-name )
+  
+  setup-parameters                                             ; Setup the global parameter settings.
+  setup-patches                                                ; Initialize the plants for a new simulation.
+  import-population                                            ; Create an initial population of indiviudals
+  import-genotype                                              ; and their genotypes from user files.
+  
+  output-print (word                                           ; Once setup is complete, display the current
+    " Simulation " simulation-id " "                           ; state of the new simulation.
+    behaviorspace-run-number " end setup at "
+    date-and-time )
+  
+end
+
+to protopan-final
+  simulation-summary
+  if ( record-individuals ) [ ask anima1s with [ is.alive ] [ individual-summary ]]
+end
 
 
+to protopan-BYTE-extraction
+  
+  let selected-byte-worlds [ 
+    "wAC46A" "wAC46B" "wAC24A" "wAC24B" "wEC46A" "wEC46B" "wEC24A" "wEC24B"
+    "wFC46A" "wFC46B" "wFC24A" "wFC24B" "wGC46A" "wGC46B" "wGC24A" "wGC24B" 
+    "wHC46A" "wHC46B" "wHC24A" "wHC24B" ]
+  
+  foreach selected-byte-worlds [ w -> 
+    
+    let file-path ( word "../results/results-to-ignore/BYTE/b3get-output/" w "-100000.csv" )
+    import-world file-path
+    
+    set path-to-experiment "../results/ProtoPan/"
+;    simulation-summary
+;    
+;    reset-perspective                                         
+;    export-view ( word path-to-experiment                     
+;      "view-" simulation-id "-" ticks ".png")                 
+;    output-territories                                        
+;    export-view ( word path-to-experiment                  
+;      "territories-" simulation-id "-" ticks ".png")  
+;    
+;    if ( any? anima1s with [ is.alive ] ) [                       
+;      scan-genotype ] 
+    
+    ask anima1s with [ is.alive = false and generation.number > ( max [generation.number] of anima1s - 3 ) and life.history = "adult" ] [
+      fill-in-blank-data
+      individual-summary
+    ]
+    
+  ]
+  
+end
 
 
+; --------------------------------------------------------------------------------------------------------- ;
+; PUT BACK IN SEX-SPECIFIC DATA ON ATTACK AND HELP FROM BYTE SIMULATIONS
+; --------------------------------------------------------------------------------------------------------- ;
 
+to fill-in-blank-data
+  
+  let target self
+  
+  foreach attack.from.history [ i ->
+    
+    let ego one-of anima1s with [ my.identity = i ]
+    
+    if ( [life.history] of ego = "adult" and [life.history] of target = "adult" and [biological.sex] of ego = "male" and [group.identity] of ego = [group.identity] of target ) [
+      set from.ingroup.male.attack.count from.ingroup.male.attack.count + 1 ]
+    if ( [life.history] of ego = "adult" and [life.history] of target = "adult" and [biological.sex] of ego = "male" and [group.identity] of ego != [group.identity] of target ) [
+      set from.nongroup.male.attack.count from.nongroup.male.attack.count + 1 ]
+    if ( [life.history] of ego = "adult" and [life.history] of target = "adult" and [biological.sex] of ego = "female" and [group.identity] of ego = [group.identity] of target ) [
+      set from.ingroup.female.attack.count from.ingroup.female.attack.count + 1 ]
+    if ( [life.history] of ego = "adult" and [life.history] of target = "adult" and [biological.sex] of ego = "female" and [group.identity] of ego != [group.identity] of target ) [
+      set from.nongroup.female.attack.count from.nongroup.female.attack.count + 1 ]
+    
+    if ( [life.history] of ego = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "male" and [group.identity] of ego = [group.identity] of target ) [
+      ask target [ set to.ingroup.male.attack.count to.ingroup.male.attack.count + 1 ]]
+    if ( [life.history] of ego = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "male" and [group.identity] of ego != [group.identity] of target ) [
+      ask target [ set to.nongroup.male.attack.count to.nongroup.male.attack.count + 1]]
+    if ( [life.history] of ego = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "female" and [group.identity] of ego = [group.identity] of target ) [
+      ask target [ set to.ingroup.female.attack.count to.ingroup.female.attack.count + 1 ]]
+    if ( [life.history] of ego = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "female" and [group.identity] of ego != [group.identity] of target ) [
+      ask target [ set to.nongroup.female.attack.count to.nongroup.female.attack.count + 1]]
+    
+  ]
+  
+  foreach help.from.history [ j ->
+    
+    let ego one-of anima1s with [ my.identity = j ]
+    
+    if ( [life.history] of ego = "adult" and [life.history] of target = "adult" and [biological.sex] of ego = "male" and [group.identity] of ego = [group.identity] of target ) [
+      set from.ingroup.male.help.count from.ingroup.male.help.count + 1 ]
+    if ( [life.history] of ego = "adult" and [life.history] of target = "adult" and [biological.sex] of ego = "male" and [group.identity] of ego != [group.identity] of target ) [
+      set from.nongroup.male.help.count from.nongroup.male.help.count + 1 ]
+    if ( [life.history] of ego = "adult" and [life.history] of target = "adult" and [biological.sex] of ego = "female" and [group.identity] of ego = [group.identity] of target ) [
+      set from.ingroup.female.help.count from.ingroup.female.help.count + 1 ]
+    if ( [life.history] of ego = "adult" and [life.history] of target = "adult" and [biological.sex] of ego = "female" and [group.identity] of ego != [group.identity] of target ) [
+      set from.nongroup.female.help.count from.nongroup.female.help.count + 1 ]
+    
+    if ( [life.history] of ego = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "male" and [group.identity] of ego = [group.identity] of target ) [
+      ask target [ set to.ingroup.male.help.count to.ingroup.male.help.count + 1 ]]
+    if ( [life.history] of ego = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "male" and [group.identity] of ego != [group.identity] of target ) [
+      ask target [ set to.nongroup.male.help.count to.nongroup.male.help.count + 1 ]]
+    if ( [life.history] of ego = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "female" and [group.identity] of ego = [group.identity] of target ) [
+      ask target [ set to.ingroup.female.help.count to.ingroup.female.help.count + 1 ]]
+    if ( [life.history] of ego = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "female" and [group.identity] of ego != [group.identity] of target ) [
+      ask target [ set to.nongroup.female.help.count to.nongroup.female.help.count + 1 ]]
+    
+  ]
+  
+end
