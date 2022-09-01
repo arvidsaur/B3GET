@@ -6,9 +6,11 @@ codemeta.json
 /code/autosave*
 /code/config.cpt
 /code/program.cpt
-/code/Work with Clarence on code/*
+/code/dev/*
 /output/*
-/data/data-to-ignore/*
-/docs/docs-to-ignore/*
-/results/results-to-ignore/*
+/data/dev/*
+/docs/dev/*
+/results/dev/*
+/results/BYTE/*
+/results/ProtoPan/*
 metafile.csv
