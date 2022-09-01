@@ -63,13 +63,14 @@
 ; introduced by John von Neumann and others, where there are "routines" and "subroutines." Later refinements
 ; added terms like "functions," "methods," and so forth, but this program keeps with the simpler and
 ; sufficient terminology.
-
+;
 ; --------------------------------------------------------------------------------------------------------- ;
 
 extensions [ csv profiler table time ]
 
 __includes [ ; For more information on local extensions, see the corresponding files.
 
+  "extensions/analysis.nls"
   "extensions/data.nls"
   "extensions/gat3s.nls"
   "extensions/interface.nls"
@@ -219,7 +220,98 @@ anima1s-own [
   conceptions.history              ; Record of individuals who conceived with this anima1
   group.transfers.history          ; Record of groups to which this anima1 has joined
   infanticide.history              ; Record of infants who have been killed by this anima1
-  cause.of.death ]                 ; A description of the most likely reason why the individual died
+  cause.of.death                   ; A description of the most likely reason why the individual died
+
+  from.ingroup.male.attack.count
+  from.nongroup.male.attack.count
+  from.ingroup.female.attack.count
+  from.nongroup.female.attack.count
+
+  from.ingroup.male.attack.energy.spent
+  from.nongroup.male.attack.energy.spent
+  from.ingroup.female.attack.energy.spent
+  from.nongroup.female.attack.energy.spent
+
+  to.ingroup.male.attack.count
+  to.nongroup.male.attack.count
+  to.ingroup.female.attack.count
+  to.nongroup.female.attack.count
+
+  to.ingroup.male.attack.energy.spent
+  to.nongroup.male.attack.energy.spent
+  to.ingroup.female.attack.energy.spent
+  to.nongroup.female.attack.energy.spent
+
+  from.ingroup.male.help.count
+  from.nongroup.male.help.count
+  from.ingroup.female.help.count
+  from.nongroup.female.help.count
+
+  from.ingroup.male.help.energy.spent
+  from.nongroup.male.help.energy.spent
+  from.ingroup.female.help.energy.spent
+  from.nongroup.female.help.energy.spent
+
+  to.ingroup.male.help.count
+  to.nongroup.male.help.count
+  to.ingroup.female.help.count
+  to.nongroup.female.help.count
+
+  to.ingroup.male.help.energy.spent
+  to.nongroup.male.help.energy.spent
+  to.ingroup.female.help.energy.spent
+  to.nongroup.female.help.energy.spent
+
+  to.ingroup.male.juvenile.attack.count
+  to.nongroup.male.juvenile.attack.count
+  to.ingroup.female.juvenile.attack.count
+  to.nongroup.female.juvenile.attack.count
+
+  to.ingroup.male.juvenile.attack.energy.spent
+  to.nongroup.male.juvenile.attack.energy.spent
+  to.ingroup.female.juvenile.attack.energy.spent
+  to.nongroup.female.juvenile.attack.energy.spent
+
+  to.ingroup.male.infant.attack.count
+  to.nongroup.male.infant.attack.count
+  to.ingroup.female.infant.attack.count
+  to.nongroup.female.infant.attack.count
+
+  to.ingroup.male.infant.attack.energy.spent
+  to.nongroup.male.infant.attack.energy.spent
+  to.ingroup.female.infant.attack.energy.spent
+  to.nongroup.female.infant.attack.energy.spent
+
+  to.ingroup.male.juvenile.help.count
+  to.nongroup.male.juvenile.help.count
+  to.ingroup.female.juvenile.help.count
+  to.nongroup.female.juvenile.help.count
+
+  to.ingroup.male.juvenile.help.energy.spent
+  to.nongroup.male.juvenile.help.energy.spent
+  to.ingroup.female.juvenile.help.energy.spent
+  to.nongroup.female.juvenile.help.energy.spent
+
+  to.ingroup.male.infant.help.count
+  to.nongroup.male.infant.help.count
+  to.ingroup.female.infant.help.count
+  to.nongroup.female.infant.help.count
+
+  to.ingroup.male.infant.help.energy.spent
+  to.nongroup.male.infant.help.energy.spent
+  to.ingroup.female.infant.help.energy.spent
+  to.nongroup.female.infant.help.energy.spent
+
+  timesteps.cycling.with.red.signal
+  timesteps.cycling.without.red.signal
+  timesteps.pregnant.with.red.signal
+  timesteps.pregnant.without.red.signal
+  timesteps.lactating.with.red.signal
+  timesteps.lactating.without.red.signal
+  timesteps.noncycling.with.red.signal
+  timesteps.noncycling.without.red.signal
+
+]
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
@@ -1039,6 +1131,18 @@ to animals-update
               is.alive ] ) ]]]]]
 
     ask anima1s with [ not fully.decayed ] [
+
+      (ifelse                                                       ; Record information on fertility and red signal
+
+        ( fertility.status = "cycling" and red.signal = TRUE ) [ set timesteps.cycling.with.red.signal timesteps.cycling.with.red.signal + 1 ]
+        ( fertility.status = "cycling" and red.signal = FALSE ) [ set timesteps.cycling.without.red.signal timesteps.cycling.without.red.signal + 1 ]
+        ( fertility.status = "pregnant" and red.signal = TRUE ) [ set timesteps.pregnant.with.red.signal timesteps.pregnant.with.red.signal + 1 ]
+        ( fertility.status = "pregnant" and red.signal = FALSE ) [ set timesteps.pregnant.without.red.signal timesteps.pregnant.without.red.signal + 1 ]
+        ( fertility.status = "lactating" and red.signal = TRUE ) [ set timesteps.lactating.with.red.signal timesteps.lactating.with.red.signal + 1 ]
+        ( fertility.status = "lactating" and red.signal = FALSE ) [ set timesteps.lactating.without.red.signal timesteps.lactating.without.red.signal + 1 ]
+        ( fertility.status = "" or fertility.status = " " and red.signal = TRUE ) [ set timesteps.noncycling.with.red.signal timesteps.noncycling.with.red.signal + 1 ]
+        ( fertility.status = "" or fertility.status = " " and red.signal = FALSE ) [ set timesteps.noncycling.without.red.signal timesteps.noncycling.without.red.signal + 1 ]
+        [])
 
       set foraging.gains.this.timestep 0                            ; Some variables are cleared each timestep
       set energy.gains.this.timestep 0                              ; to be used again in the subsequent timestep.
@@ -3180,6 +3284,62 @@ to aid [ target cost ]
     [ set not.related.help.cost
       not.related.help.cost + cost ]
 
+    if ( life.history = "adult" and [life.history] of target = "adult" and biological.sex = "male" and group.identity = [group.identity] of target ) [
+      ask target [
+        set from.ingroup.male.help.count from.ingroup.male.help.count + 1
+        set from.ingroup.male.help.energy.spent from.ingroup.male.help.energy.spent + cost ]]
+    if ( life.history = "adult" and [life.history] of target = "adult" and biological.sex = "male" and group.identity != [group.identity] of target ) [
+      ask target [
+        set from.nongroup.male.help.count from.nongroup.male.help.count + 1
+        set from.nongroup.male.help.energy.spent from.nongroup.male.help.energy.spent + cost ]]
+    if ( life.history = "adult" and [life.history] of target = "adult" and biological.sex = "female" and group.identity = [group.identity] of target ) [
+      ask target [
+        set from.ingroup.female.help.count from.ingroup.female.help.count + 1
+        set from.ingroup.female.help.energy.spent from.ingroup.female.help.energy.spent + cost ]]
+    if ( life.history = "adult" and [life.history] of target = "adult" and biological.sex = "female" and group.identity != [group.identity] of target ) [
+      ask target [
+        set from.nongroup.female.help.count from.nongroup.female.help.count + 1
+        set from.nongroup.female.help.energy.spent from.nongroup.female.help.energy.spent + cost ]]
+
+    if ( life.history = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "male" and group.identity = [group.identity] of target ) [
+      set to.ingroup.male.help.count to.ingroup.male.help.count + 1
+      set to.ingroup.male.help.energy.spent to.ingroup.male.help.energy.spent + cost ]
+    if ( life.history = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "male" and group.identity != [group.identity] of target ) [
+      set to.nongroup.male.help.count to.nongroup.male.help.count + 1
+      set to.nongroup.male.help.energy.spent to.nongroup.male.help.energy.spent + cost ]
+    if ( life.history = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "female" and group.identity = [group.identity] of target ) [
+      set to.ingroup.female.help.count to.ingroup.female.help.count + 1
+      set to.ingroup.female.help.energy.spent to.ingroup.female.help.energy.spent + cost ]
+    if ( life.history = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "female" and group.identity != [group.identity] of target ) [
+      set to.nongroup.female.help.count to.nongroup.female.help.count + 1
+      set to.nongroup.female.help.energy.spent to.nongroup.female.help.energy.spent + cost ]
+
+    if ( life.history = "adult" and [life.history] of target = "juvenile" and [biological.sex] of target = "male" and group.identity = [group.identity] of target ) [
+        set to.ingroup.male.juvenile.help.count to.ingroup.male.juvenile.help.count + 1
+        set to.ingroup.male.juvenile.help.energy.spent to.ingroup.male.juvenile.help.energy.spent + cost ]
+    if ( life.history = "adult" and [life.history] of target = "juvenile" and [biological.sex] of target = "male" and group.identity != [group.identity] of target ) [
+      set to.nongroup.male.juvenile.help.count to.nongroup.male.juvenile.help.count + 1
+      set to.nongroup.male.juvenile.help.energy.spent to.nongroup.male.juvenile.help.energy.spent + cost ]
+    if ( life.history = "adult" and [life.history] of target = "juvenile" and [biological.sex] of target = "female" and group.identity = [group.identity] of target ) [
+      set to.ingroup.female.juvenile.help.count to.ingroup.female.juvenile.help.count + 1
+      set to.ingroup.female.juvenile.help.energy.spent to.ingroup.female.juvenile.help.energy.spent + cost ]
+    if ( life.history = "adult" and [life.history] of target = "juvenile" and [biological.sex] of target = "female" and group.identity != [group.identity] of target ) [
+      set to.nongroup.female.juvenile.help.count to.nongroup.female.juvenile.help.count + 1
+      set to.nongroup.female.juvenile.help.energy.spent to.nongroup.female.juvenile.help.energy.spent + cost ]
+
+    if ( life.history = "adult" and [life.history] of target = "infant" and [biological.sex] of target = "male" and group.identity = [group.identity] of target ) [
+      set to.ingroup.male.infant.help.count to.ingroup.male.infant.help.count + 1
+      set to.ingroup.male.infant.help.energy.spent to.ingroup.male.infant.help.energy.spent + cost ]
+    if ( life.history = "adult" and [life.history] of target = "infant" and [biological.sex] of target = "male" and group.identity != [group.identity] of target ) [
+      set to.nongroup.male.infant.help.count to.nongroup.male.infant.help.count + 1
+      set to.nongroup.male.infant.help.energy.spent to.nongroup.male.infant.help.energy.spent + cost ]
+    if ( life.history = "adult" and [life.history] of target = "infant" and [biological.sex] of target = "female" and group.identity = [group.identity] of target ) [
+      set to.ingroup.female.infant.help.count to.ingroup.female.infant.help.count + 1
+      set to.ingroup.female.infant.help.energy.spent to.ingroup.female.infant.help.energy.spent + cost ]
+    if ( life.history = "adult" and [life.history] of target = "infant" and [biological.sex] of target = "female" and group.identity != [group.identity] of target ) [
+      set to.nongroup.female.infant.help.count to.nongroup.female.infant.help.count + 1
+      set to.nongroup.female.infant.help.energy.spent to.nongroup.female.infant.help.energy.spent + cost ]
+
     complete-action target "aid-complete" 0   ]                ; Record that this action has been completed.
 end
 
@@ -3267,6 +3427,62 @@ to harm [ target cost ]
     if ( relatedness-with-target <= 0.05 )
     [ set not.related.attack.cost
       not.related.attack.cost + cost ]
+
+    if ( life.history = "adult" and [life.history] of target = "adult" and biological.sex = "male" and group.identity = [group.identity] of target ) [
+      ask target [
+        set from.ingroup.male.attack.count from.ingroup.male.attack.count + 1
+        set from.ingroup.male.attack.energy.spent from.ingroup.male.attack.energy.spent + cost ]]
+    if ( life.history = "adult" and [life.history] of target = "adult" and biological.sex = "male" and group.identity != [group.identity] of target ) [
+      ask target [
+        set from.nongroup.male.attack.count from.nongroup.male.attack.count + 1
+        set from.nongroup.male.attack.energy.spent from.nongroup.male.attack.energy.spent + cost ]]
+    if ( life.history = "adult" and [life.history] of target = "adult" and biological.sex = "female" and group.identity = [group.identity] of target ) [
+      ask target [
+        set from.ingroup.female.attack.count from.ingroup.female.attack.count + 1
+        set from.ingroup.female.attack.energy.spent from.ingroup.female.attack.energy.spent + cost ]]
+    if ( life.history = "adult" and [life.history] of target = "adult" and biological.sex = "female" and group.identity != [group.identity] of target ) [
+      ask target [
+        set from.nongroup.female.attack.count from.nongroup.female.attack.count + 1
+        set from.nongroup.female.attack.energy.spent from.nongroup.female.attack.energy.spent + cost ]]
+
+    if ( life.history = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "male" and group.identity = [group.identity] of target ) [
+        set to.ingroup.male.attack.count to.ingroup.male.attack.count + 1
+        set to.ingroup.male.attack.energy.spent to.ingroup.male.attack.energy.spent + cost ]
+    if ( life.history = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "male" and group.identity != [group.identity] of target ) [
+      set to.nongroup.male.attack.count to.nongroup.male.attack.count + 1
+      set to.nongroup.male.attack.energy.spent to.nongroup.male.attack.energy.spent + cost ]
+    if ( life.history = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "female" and group.identity = [group.identity] of target ) [
+      set to.ingroup.female.attack.count to.ingroup.female.attack.count + 1
+      set to.ingroup.female.attack.energy.spent to.ingroup.female.attack.energy.spent + cost ]
+    if ( life.history = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "female" and group.identity != [group.identity] of target ) [
+      set to.nongroup.female.attack.count to.nongroup.female.attack.count + 1
+      set to.nongroup.female.attack.energy.spent to.nongroup.female.attack.energy.spent + cost ]
+
+    if ( life.history = "adult" and [life.history] of target = "juvenile" and [biological.sex] of target = "male" and group.identity = [group.identity] of target ) [
+        set to.ingroup.male.juvenile.attack.count to.ingroup.male.juvenile.attack.count + 1
+        set to.ingroup.male.juvenile.attack.energy.spent to.ingroup.male.juvenile.attack.energy.spent + cost ]
+    if ( life.history = "adult" and [life.history] of target = "juvenile" and [biological.sex] of target = "male" and group.identity != [group.identity] of target ) [
+      set to.nongroup.male.juvenile.attack.count to.nongroup.male.juvenile.attack.count + 1
+      set to.nongroup.male.juvenile.attack.energy.spent to.nongroup.male.juvenile.attack.energy.spent + cost ]
+    if ( life.history = "adult" and [life.history] of target = "juvenile" and [biological.sex] of target = "female" and group.identity = [group.identity] of target ) [
+      set to.ingroup.female.juvenile.attack.count to.ingroup.female.juvenile.attack.count + 1
+      set to.ingroup.female.juvenile.attack.energy.spent to.ingroup.female.juvenile.attack.energy.spent + cost ]
+    if ( life.history = "adult" and [life.history] of target = "juvenile" and [biological.sex] of target = "female" and group.identity != [group.identity] of target ) [
+      set to.nongroup.female.juvenile.attack.count to.nongroup.female.juvenile.attack.count + 1
+      set to.nongroup.female.juvenile.attack.energy.spent to.nongroup.female.juvenile.attack.energy.spent + cost ]
+
+    if ( life.history = "adult" and [life.history] of target = "infant" and [biological.sex] of target = "male" and group.identity = [group.identity] of target ) [
+      set to.ingroup.male.infant.attack.count to.ingroup.male.infant.attack.count + 1
+      set to.ingroup.male.infant.attack.energy.spent to.ingroup.male.infant.attack.energy.spent + cost ]
+    if ( life.history = "adult" and [life.history] of target = "infant" and [biological.sex] of target = "male" and group.identity != [group.identity] of target ) [
+      set to.nongroup.male.infant.attack.count to.nongroup.male.infant.attack.count + 1
+      set to.nongroup.male.infant.attack.energy.spent to.nongroup.male.infant.attack.energy.spent + cost ]
+    if ( life.history = "adult" and [life.history] of target = "infant" and [biological.sex] of target = "female" and group.identity = [group.identity] of target ) [
+      set to.ingroup.female.infant.attack.count to.ingroup.female.infant.attack.count + 1
+      set to.ingroup.female.infant.attack.energy.spent to.ingroup.female.infant.attack.energy.spent + cost ]
+    if ( life.history = "adult" and [life.history] of target = "infant" and [biological.sex] of target = "female" and group.identity != [group.identity] of target ) [
+      set to.nongroup.female.infant.attack.count to.nongroup.female.infant.attack.count + 1
+      set to.nongroup.female.infant.attack.energy.spent to.nongroup.female.infant.attack.energy.spent + cost ]
 
     if ( [ life.history ] of target = "infant" and             ; If target is an infant and the caller
       target != self and                                       ; has not previously harmed the target,
@@ -4001,7 +4217,7 @@ INPUTBOX
 354
 79
 path-to-experiment
-../results/
+../data/virtual-primates/
 1
 0
 String
@@ -4071,7 +4287,7 @@ plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-0.0
+4.0
 .1
 1
 NIL
@@ -4086,7 +4302,7 @@ plant-maximum-neighbors
 plant-maximum-neighbors
 0
 8
-8.0
+6.0
 .1
 1
 NIL
@@ -4165,7 +4381,7 @@ INPUTBOX
 995
 191
 population
-population
+Chimpanzees
 1
 0
 String
@@ -4176,7 +4392,7 @@ INPUTBOX
 995
 265
 genotype
-NIL
+chimpanzees
 1
 0
 String
@@ -4240,7 +4456,7 @@ CHOOSER
 useful-commands
 useful-commands
 "help-me" "meta-report" "---------------------" " > OPERATIONS   " "---------------------" "parameter-settings" "default-settings" "model-structure" "-- aspatial" "-- free-lunch" "-- ideal-form" "-- no-evolution" "-- no-plants" "-- reaper" "-- stork" "-- uninvadable" "clear-population" "reset-plants" "save-world" "import-world" "output-results" "---------------------" " > VERIFICATION " "---------------------" "dynamic-check" "-- true" "-- false" "runtime-check" "visual-check" "-- attack-pattern" "-- dine-and-dash" "-- life-history-channel" "-- musical-pairs" "-- night-and-day" "-- popularity-context" "-- speed-mating" "-- square-dance" "-- supply-and-demand" "---------------------" " > DISPLAY RESULTS   " "---------------------" "age" "generations" "genotype" "phenotype" "-- survival-chance" "-- body-size" "-- body-shade" "-- fertility-status" "-- hidden-chance" "-- bite-capacity" "-- mutation-chance" "-- sex-ratio" "-- litter-size" "-- conception-chance" "-- visual-angle" "-- visual-range" "-- day-perception" "-- night-perception" "carried-items" "energy-supply" "behaviors" "-- environment" "-- decisions" "-- actions" "-- matings" "-- mating-partners" "-- conceptions" "-- infanticide" "-- group-transfers" "-- travel-distance" "-- foraging-gains" "-- total-energy-gains" "-- total-energy-cost" "show-territories"
-0
+5
 
 BUTTON
 1063
@@ -4319,7 +4535,7 @@ plant-quality
 plant-quality
 .1
 100
-6.0
+4.0
 .1
 1
 NIL
@@ -4332,7 +4548,7 @@ SWITCH
 79
 output-results?
 output-results?
-1
+0
 1
 -1000
 
@@ -4391,7 +4607,7 @@ SWITCH
 639
 adults
 adults
-1
+0
 1
 -1000
 
@@ -4446,7 +4662,7 @@ SWITCH
 639
 females
 females
-1
+0
 1
 -1000
 
@@ -9542,6 +9758,78 @@ set grass? true
 repeat 75 [ go ]
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="experiment" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>count turtles</metric>
+    <enumeratedValueSet variable="observation-notes">
+      <value value="&quot;&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-quality">
+      <value value="5"/>
+      <value value="6"/>
+      <value value="7"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="males">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="infants">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="population">
+      <value value="&quot;ProtoPan&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-seasonality">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype-reader">
+      <value value="&quot;sta2us&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="juveniles">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="selection-on?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="gestatees">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="useful-commands">
+      <value value="&quot;show-territories&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="females">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-annual-cycle">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-minimum-neighbors">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-daily-cycle">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plot-type">
+      <value value="&quot;individuals&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="adults">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="plant-maximum-neighbors">
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="output-results?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="path-to-experiment">
+      <value value="&quot;../data/&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="genotype">
+      <value value="&quot;protopan&quot;"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default

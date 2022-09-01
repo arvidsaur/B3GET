@@ -8,8 +8,8 @@
 ;   dP     dP  88888888P  Y88888P  `Y88888P' 88888888P    dP     Y88888P  
 ;            
 ;                                                
-; This B3GET extension contains all functions related to output results. Data collection 
-; can be turned ON or OFF with the OUTPUT-RESULTS? switch on the user interface. When ON is selected, 
+; This B3GET extension contains all functions related to generating data from a simulation. Data collection 
+; can be turned ON or OFF with the OUTPUT-RESULTS switch on the user interface. When ON is selected, 
 ; the OUTPUT-RESULTS function is applied once every timestep. Agent state variables are accessible 
 ; during data collection to record complete agent histories. This extension uses the IMPORT-EXPORT
 ; extension to record data at the simulation, group, or individual level and the VERIFICATION
@@ -252,7 +252,7 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to individual-summary
-  
+
   let world-name ifelse-value ( behaviorspace-experiment-name = "" ) [ "" ] [ first behaviorspace-experiment-name  ]
   let world-file-name ifelse-value ( world-name = "" ) [ "" ] [ ( word world-name "-" ) ]
   
@@ -395,7 +395,109 @@ to individual-summary
       "adult.blue.chance"
       "mother.initiated.birth"
       "mother.initiated.weaning"
+      
+      ;; ProtoPan
+      
+      "from.ingroup.male.attack.count"
+      "from.ingroup.male.attack.energy.spent"
+      
+      "from.nongroup.male.attack.count"
+      "from.nongroup.male.attack.energy.spent"
+      
+      "from.ingroup.female.attack.count"
+      "from.ingroup.female.attack.energy.spent"
+      
+      "from.nongroup.female.attack.count"
+      "from.nongroup.female.attack.energy.spent"
 
+      "to.ingroup.male.attack.count"
+      "to.ingroup.male.attack.energy.spent"
+      
+      "to.nongroup.male.attack.count"
+      "to.nongroup.male.attack.energy.spent"
+      
+      "to.ingroup.female.attack.count"
+      "to.ingroup.female.attack.energy.spent"
+      
+      "to.nongroup.female.attack.count"      
+      "to.nongroup.female.attack.energy.spent"
+      
+      "from.ingroup.male.help.count"
+      "from.ingroup.male.help.energy.spent"
+      
+      "from.nongroup.male.help.count"
+      "from.nongroup.male.help.energy.spent"
+      
+      "from.ingroup.female.help.count"
+      "from.ingroup.female.help.energy.spent"
+      
+      "from.nongroup.female.help.count"
+      "from.nongroup.female.help.energy.spent"
+      
+      "to.ingroup.male.help.count"
+      "to.ingroup.male.help.energy.spent"
+      
+      "to.nongroup.male.help.count"
+      "to.nongroup.male.help.energy.spent"
+      
+      "to.ingroup.female.help.count"
+      "to.ingroup.female.help.energy.spent"
+      
+      "to.nongroup.female.help.count"
+      "to.nongroup.female.help.energy.spent"
+      
+      "to.ingroup.male.juvenile.attack.count"
+      "to.nongroup.male.juvenile.attack.count"
+      "to.ingroup.female.juvenile.attack.count"
+      "to.nongroup.female.juvenile.attack.count"
+      
+      "to.ingroup.male.juvenile.attack.energy.spent"
+      "to.nongroup.male.juvenile.attack.energy.spent"
+      "to.ingroup.female.juvenile.attack.energy.spent"
+      "to.nongroup.female.juvenile.attack.energy.spent"
+      
+      "to.ingroup.male.infant.attack.count"
+      "to.nongroup.male.infant.attack.count"
+      "to.ingroup.female.infant.attack.count"
+      "to.nongroup.female.infant.attack.count"
+      
+      "to.ingroup.male.infant.attack.energy.spent"
+      "to.nongroup.male.infant.attack.energy.spent"
+      "to.ingroup.female.infant.attack.energy.spent"
+      "to.nongroup.female.infant.attack.energy.spent"
+      
+      "to.ingroup.male.juvenile.help.count"
+      "to.nongroup.male.juvenile.help.count"
+      "to.ingroup.female.juvenile.help.count"
+      "to.nongroup.female.juvenile.help.count"
+      
+      "to.ingroup.male.juvenile.help.energy.spent"
+      "to.nongroup.male.juvenile.help.energy.spent"
+      "to.ingroup.female.juvenile.help.energy.spent"
+      "to.nongroup.female.juvenile.help.energy.spent"
+      
+      "to.ingroup.male.infant.help.count"
+      "to.nongroup.male.infant.help.count"
+      "to.ingroup.female.infant.help.count"
+      "to.nongroup.female.infant.help.count"
+      
+      "to.ingroup.male.infant.help.energy.spent"
+      "to.nongroup.male.infant.help.energy.spent"
+      "to.ingroup.female.infant.help.energy.spent"
+      "to.nongroup.female.infant.help.energy.spent"
+      
+      "timesteps.cycling.with.red.signal"
+      "timesteps.cycling.without.red.signal"
+      "timesteps.pregnant.with.red.signal"
+      "timesteps.pregnant.without.red.signal"
+      "timesteps.lactating.with.red.signal"
+      "timesteps.lactating.without.red.signal"
+      "timesteps.noncycling.with.red.signal"
+      "timesteps.noncycling.without.red.signal"
+      
+      "plant-patchiness-mean"
+      
+      
   )) ]
   
   file-open file-path
@@ -535,11 +637,113 @@ to individual-summary
     mother.initiated.birth
     mother.initiated.weaning
     
+    ;; ProtoPan
+    
+    from.ingroup.male.attack.count
+    from.ingroup.male.attack.energy.spent
+    
+    from.nongroup.male.attack.count
+    from.nongroup.male.attack.energy.spent
+    
+    from.ingroup.female.attack.count
+    from.ingroup.female.attack.energy.spent
+    
+    from.nongroup.female.attack.count
+    from.nongroup.female.attack.energy.spent
+    
+    to.ingroup.male.attack.count
+    to.ingroup.male.attack.energy.spent
+    
+    to.nongroup.male.attack.count
+    to.nongroup.male.attack.energy.spent
+    
+    to.ingroup.female.attack.count
+    to.ingroup.female.attack.energy.spent
+    
+    to.nongroup.female.attack.count      
+    to.nongroup.female.attack.energy.spent
+    
+    from.ingroup.male.help.count
+    from.ingroup.male.help.energy.spent
+    
+    from.nongroup.male.help.count
+    from.nongroup.male.help.energy.spent
+    
+    from.ingroup.female.help.count
+    from.ingroup.female.help.energy.spent
+    
+    from.nongroup.female.help.count
+    from.nongroup.female.help.energy.spent
+    
+    to.ingroup.male.help.count
+    to.ingroup.male.help.energy.spent
+    
+    to.nongroup.male.help.count
+    to.nongroup.male.help.energy.spent
+    
+    to.ingroup.female.help.count
+    to.ingroup.female.help.energy.spent
+    
+    to.nongroup.female.help.count
+    to.nongroup.female.help.energy.spent
+    
+    to.ingroup.male.juvenile.attack.count
+    to.nongroup.male.juvenile.attack.count
+    to.ingroup.female.juvenile.attack.count
+    to.nongroup.female.juvenile.attack.count
+    
+    to.ingroup.male.juvenile.attack.energy.spent
+    to.nongroup.male.juvenile.attack.energy.spent
+    to.ingroup.female.juvenile.attack.energy.spent
+    to.nongroup.female.juvenile.attack.energy.spent
+    
+    to.ingroup.male.infant.attack.count
+    to.nongroup.male.infant.attack.count
+    to.ingroup.female.infant.attack.count
+    to.nongroup.female.infant.attack.count
+    
+    to.ingroup.male.infant.attack.energy.spent
+    to.nongroup.male.infant.attack.energy.spent
+    to.ingroup.female.infant.attack.energy.spent
+    to.nongroup.female.infant.attack.energy.spent
+    
+    to.ingroup.male.juvenile.help.count
+    to.nongroup.male.juvenile.help.count
+    to.ingroup.female.juvenile.help.count
+    to.nongroup.female.juvenile.help.count
+    
+    to.ingroup.male.juvenile.help.energy.spent
+    to.nongroup.male.juvenile.help.energy.spent
+    to.ingroup.female.juvenile.help.energy.spent
+    to.nongroup.female.juvenile.help.energy.spent
+    
+    to.ingroup.male.infant.help.count
+    to.nongroup.male.infant.help.count
+    to.ingroup.female.infant.help.count
+    to.nongroup.female.infant.help.count
+    
+    to.ingroup.male.infant.help.energy.spent
+    to.nongroup.male.infant.help.energy.spent
+    to.ingroup.female.infant.help.energy.spent
+    to.nongroup.female.infant.help.energy.spent
+    
+    timesteps.cycling.with.red.signal
+    timesteps.cycling.without.red.signal
+    timesteps.pregnant.with.red.signal
+    timesteps.pregnant.without.red.signal
+    timesteps.lactating.with.red.signal
+    timesteps.lactating.without.red.signal
+    timesteps.noncycling.with.red.signal
+    timesteps.noncycling.without.red.signal
+    
+    plant-patchiness-mean 
+    
   ))
   
   file-close
-
+  
 end
+
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
@@ -1794,6 +1998,38 @@ to scan-individual
       "eighth.related.attack.cost"
       "not.related.attack.cost"
       
+      "ingroup-adults-in-radius-2"
+      "ingroup-adults-in-radius-5"
+      "ingroup-adults-in-radius-10"
+      
+      "ingroup-adult-males-in-radius-2"
+      "ingroup-adult-males-in-radius-5"
+      "ingroup-adult-males-in-radius-10"
+      
+      "ingroup-adult-females-in-radius-2"
+      "ingroup-adult-females-in-radius-5"
+      "ingroup-adult-females-in-radius-10"
+      
+      "ingroup-all-in-radius-2"
+      "ingroup-all-in-radius-5"
+      "ingroup-all-in-radius-10"
+      
+      "outgroup-adults-in-radius-2"
+      "outgroup-adults-in-radius-5"
+      "outgroup-adults-in-radius-10"
+      
+      "outgroup-adult-males-in-radius-2"
+      "outgroup-adult-males-in-radius-5"
+      "outgroup-adult-males-in-radius-10"
+      
+      "outgroup-adult-females-in-radius-2"
+      "outgroup-adult-females-in-radius-5"
+      "outgroup-adult-females-in-radius-10"
+      
+      "outgroup-all-in-radius-2"
+      "outgroup-all-in-radius-5"
+      "outgroup-all-in-radius-10"
+      
   )) ]
   
   file-open file-path
@@ -1898,6 +2134,38 @@ to scan-individual
     fourth.related.attack.cost
     eighth.related.attack.cost
     not.related.attack.cost
+    
+    count other anima1s with [ group.identity = [group.identity] of myself and is.alive and life.history = "adult" and distance myself < 2 ]
+    count other anima1s with [ group.identity = [group.identity] of myself and is.alive and life.history = "adult" and distance myself < 5 ]
+    count other anima1s with [ group.identity = [group.identity] of myself and is.alive and life.history = "adult" and distance myself < 10 ]
+    
+    count other anima1s with [ group.identity = [group.identity] of myself and is.alive and life.history = "adult" and biological.sex = "male" and distance myself < 2 ]
+    count other anima1s with [ group.identity = [group.identity] of myself and is.alive and life.history = "adult" and biological.sex = "male" and distance myself < 5 ]
+    count other anima1s with [ group.identity = [group.identity] of myself and is.alive and life.history = "adult" and biological.sex = "male" and distance myself < 10 ]
+    
+    count other anima1s with [ group.identity = [group.identity] of myself and is.alive and life.history = "adult" and biological.sex = "female" and distance myself < 2 ]
+    count other anima1s with [ group.identity = [group.identity] of myself and is.alive and life.history = "adult" and biological.sex = "female" and distance myself < 5 ]
+    count other anima1s with [ group.identity = [group.identity] of myself and is.alive and life.history = "adult" and biological.sex = "female" and distance myself < 10 ]
+    
+    count other anima1s with [ group.identity = [group.identity] of myself and is.alive and distance myself < 2 ]
+    count other anima1s with [ group.identity = [group.identity] of myself and is.alive and distance myself < 5 ]
+    count other anima1s with [ group.identity = [group.identity] of myself and is.alive and distance myself < 10 ]
+    
+    count other anima1s with [ group.identity != [group.identity] of myself and is.alive and life.history = "adult" and distance myself < 2 ]
+    count other anima1s with [ group.identity != [group.identity] of myself and is.alive and life.history = "adult" and distance myself < 5 ]
+    count other anima1s with [ group.identity != [group.identity] of myself and is.alive and life.history = "adult" and distance myself < 10 ]
+    
+    count other anima1s with [ group.identity != [group.identity] of myself and is.alive and life.history = "adult" and biological.sex = "male" and distance myself < 2 ]
+    count other anima1s with [ group.identity != [group.identity] of myself and is.alive and life.history = "adult" and biological.sex = "male" and distance myself < 5 ]
+    count other anima1s with [ group.identity != [group.identity] of myself and is.alive and life.history = "adult" and biological.sex = "male" and distance myself < 10 ]
+    
+    count other anima1s with [ group.identity != [group.identity] of myself and is.alive and life.history = "adult" and biological.sex = "female" and distance myself < 2 ]
+    count other anima1s with [ group.identity != [group.identity] of myself and is.alive and life.history = "adult" and biological.sex = "female" and distance myself < 5 ]
+    count other anima1s with [ group.identity != [group.identity] of myself and is.alive and life.history = "adult" and biological.sex = "female" and distance myself < 10 ]
+    
+    count other anima1s with [ group.identity != [group.identity] of myself and is.alive and distance myself < 2 ]
+    count other anima1s with [ group.identity != [group.identity] of myself and is.alive and distance myself < 5 ]
+    count other anima1s with [ group.identity != [group.identity] of myself and is.alive and distance myself < 10 ]
     
   ))
   
