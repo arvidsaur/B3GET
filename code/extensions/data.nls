@@ -39,24 +39,24 @@
 ;
 ;        metafile-notes | Any additional information to be stored with this interaction.
 ;
-;        observation-notes | A text box in the interface containing any information entered by the
+;        simulation-notes | A text box in the interface containing any information entered by the
 ;          user. If null, an identifying message may be inserted.
 ;
 ; EXIT:  The metafile is updated with information on this interaction, collecting all data defined
 ;          by "metafile-contents." If the file was empty upon entry, it is prepended with a heading
 ;          line identifing the data.
 ;
-;        observation-notes are updated with metafile-notes at the beginning.
+;        simulation-notes are updated with metafile-notes at the beginning.
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
 
 to update-metafile [ type-of-interaction name-of-file metafile-notes ]
 
-  set observation-notes                                           ; Prepend any additional information
-  ( word metafile-notes " " observation-notes )                   ; supplied.
+  set simulation-notes                                           ; Prepend any additional information
+  ( word metafile-notes " " simulation-notes )                   ; supplied.
 
-  let filename "../data/metafile.csv"                             ; Select the file.
+  let filename "../results/metafile.csv"                          ; Select the file.
 
   if ( not file-exists? filename )                                ; If filename does not exist, open
   [                                                               ; it and write the heading lines.
@@ -71,7 +71,7 @@ to update-metafile [ type-of-interaction name-of-file metafile-notes ]
       "ticks"
       "file-type"
       "file-name"
-      "observation-notes"
+      "simulation-notes"
       "population-input"
       "genotype-input"
       "plant-annual-cycle"
@@ -83,16 +83,14 @@ to update-metafile [ type-of-interaction name-of-file metafile-notes ]
       "world-width"
       "world-height"
       "deterioration-rate"
-      "output-results?"
-      "selection-on?"
       "useful-commands"
     ))
   ]
 
   file-open filename                                              ; Make sure the file is open.
 
-  if observation-notes = ""                                       ; Provide an explanatory note at
-  [ set observation-notes "Metafile updated." ]                   ; the digression of this subroutine.
+  if simulation-notes = ""                                       ; Provide an explanatory note at
+  [ set simulation-notes "Metafile updated." ]                   ; the digression of this subroutine.
 
   ; Update METAFILE with a new row of FILE information
   file-print csv:to-string (list
@@ -106,7 +104,7 @@ to update-metafile [ type-of-interaction name-of-file metafile-notes ]
       ticks
       type-of-interaction
       name-of-file
-      observation-notes
+      simulation-notes
       population
       genotype
       plant-annual-cycle
@@ -118,12 +116,10 @@ to update-metafile [ type-of-interaction name-of-file metafile-notes ]
       world-width
       world-height
       deterioration-rate
-      output-results?
-      selection-on?
       useful-commands
   ))
 
-  set observation-notes ""
+  set simulation-notes ""
   file-close
 
 end

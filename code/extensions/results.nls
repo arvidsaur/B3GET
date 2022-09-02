@@ -123,7 +123,6 @@ to output-results
       reset-perspective                                         ; Reset the view to be neutral.
       export-view ( word path-to-experiment                     ; Create an image file of the current
         "view-" simulation-id "-" ticks ".png")                 ; simulation view.
-      output-territories                                        ; Display the current territory boundaries.
       export-view ( word path-to-experiment                     ; Create an image gile of the current
         "territories-" simulation-id "-" ticks ".png")          ; simulation view with territories bountaries.
       if ( saved-subject != nobody )                            ; Reset the current focal subject to whomever

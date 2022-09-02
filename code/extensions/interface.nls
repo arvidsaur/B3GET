@@ -28,6 +28,39 @@
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
+; PATH BUTTON HANDLER
+;
+; ENTRY: User has clicked the "path" button.
+;
+; EXIT: The path subroutine is enacted.
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to path-button
+  
+  let path user-directory
+  let current-position position model-name path
+  
+  ifelse ( current-position = false ) [
+    
+    user-message (word "Please choose from within the " model-name " folder.")
+    
+  ][
+    
+    while [ is-number? current-position ] [
+      
+      set path substring path ( current-position + length model-name ) (length path)
+      set current-position position model-name path
+    ]
+    
+    set path-to-experiment (word ".." path )
+    
+  ]
+  
+end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; SETUP BUTTON HANDLER [CL]
 ;
 ; ENTRY: User has clicked the "setup" button.
@@ -60,20 +93,6 @@ to go-button
     ifelse ( user-setup-response ) [ setup ] [ stop ] ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
-; SAVE BUTTON HANDLER
-;
-; ENTRY: User has clicked the "save" button.
-;
-; EXIT: The update-metafile subroutine is enacted.
-;
-; --------------------------------------------------------------------------------------------------------- ;
-
-to save-button
-  if ( simulation-id = 0 ) [ set simulation-id generate-simulation-id ]
-  update-metafile "simulation" simulation-id "SIMULATION SAVED."
-end
 
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
@@ -202,6 +221,7 @@ to command
     ( useful-commands = "-- uninvadable" ) [ set-model-structure ]
     ( useful-commands = "clear-population" ) [ clear-population ]
     ( useful-commands = "reset-plants" ) [ reset-plants ]
+    ( useful-commands = "save-notes" ) [ update-metafile "simulation" simulation-id "NOTES SAVED" ]
     ( useful-commands = "save-world" ) [ record-world-command ]
     ( useful-commands = "import-world" ) [ import-world-command ]
     ( useful-commands = "output-results" ) [ output-results-command ]
@@ -420,7 +440,7 @@ to default-settings
   set path-to-experiment "../results/"
   set output-results? false
   set selection-on? false
-  set observation-notes ""
+  set simulation-notes ""
   set plant-annual-cycle 1000
   set plant-daily-cycle 10
   set plant-seasonality 0.5
@@ -740,7 +760,7 @@ to output-genotype
   let anima1-to-inspect one-of anima1s with [ self = subject ]
   output-header (word " GENOTYPE : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [my.identity ] of anima1-to-inspect ) ] )
   ifelse ( anima1-to-inspect = nobody ) [
-    ;set observation-notes (word "Organism " read-from-string command-input " not found.")
+    ;set simulation-notes (word "Organism " read-from-string command-input " not found.")
     ;output-print (word " Organism " read-from-string command-input " not found.")
   ][
     foreach [chromosome.I] of anima1-to-inspect [ a ->
@@ -748,7 +768,7 @@ to output-genotype
     output-print ""
     foreach [chromosome.II] of anima1-to-inspect [ a ->
       output-print (word " "reduce [ [itm nxt] -> (word itm " " nxt ) ] a ) ]
-    ;set observation-notes (word "View genotype of organism " command-input ". " observation-notes )
+    ;set simulation-notes (word "View genotype of organism " command-input ". " simulation-notes )
   ]
 end
 

@@ -1527,10 +1527,10 @@ to protopan-generate-experiments
         file-print ( word "    <go>go</go>" )
         file-print ( word "    <final>protopan-final</final>" )
         file-print ( word "    <enumeratedValueSet variable=\"plant-quality\">" )
-        file-print ( word "      <value value=\"3\"/>" )
-        file-print ( word "      <value value=\"4\"/>" )
         file-print ( word "      <value value=\"5\"/>" )
         file-print ( word "      <value value=\"6\"/>" )
+        file-print ( word "      <value value=\"7\"/>" )
+        file-print ( word "      <value value=\"8\"/>" )
         file-print ( word "    </enumeratedValueSet>" )
         file-print ( word "  </experiment>" )
         
@@ -1587,7 +1587,7 @@ to protopan-setup
   clear-all                                                    ; Delete all current settings in the simulation.
   reset-ticks                                                  ; Reset the timesteps to zero.
   
-  set path-to-experiment "../results/ProtoPan/b3get-output/"
+  set path-to-experiment "../results/ProtoPan/"
   set genotype-reader "sta2us"
   set output-results? true 
   set selection-on? false
@@ -1632,8 +1632,8 @@ to protopan-setup
  
  ; TO DO FOR PROTOPAN
   
-  if ( first behaviorspace-experiment-name = "P" ) [ set plant-minimum-neighbors 4 set plant-maximum-neighbors 6 ]
-  if ( first behaviorspace-experiment-name = "H" ) [ set plant-minimum-neighbors 2 set plant-maximum-neighbors 4 ]
+  if ( first behaviorspace-experiment-name = "P" ) [ set plant-minimum-neighbors 4 set plant-maximum-neighbors 7 ]
+  if ( first behaviorspace-experiment-name = "H" ) [ set plant-minimum-neighbors 0 set plant-maximum-neighbors 7 ]
   if ( item 1 behaviorspace-experiment-name = "S" ) [ set plant-seasonality 1 ]
   if ( item 1 behaviorspace-experiment-name = "C" ) [ set plant-seasonality 0 ]
   

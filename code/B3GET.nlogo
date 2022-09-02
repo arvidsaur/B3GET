@@ -358,8 +358,10 @@ globals [
   ; SIMULATION INFORMATION
   ; --------------------------------------------------------------------------------------------------------
 
+  model-name
   model-version                    ; Current version of B3GET
   model-structure                  ; User setting for including specialized subroutines
+  genotype-reader
   simulation-id                    ; Randomly generated simulation identity
   simulation-stop-at               ; User setting to define when to end the simulation
 
@@ -380,6 +382,8 @@ globals [
   ; SIMULATION RESULTS
   ; --------------------------------------------------------------------------------------------------------
 
+  selection-on?
+  output-results?
   timestep-interval                ; Period between general simulation records
   simulation-summary-ticks         ; Timestep when summary information about the simulation is recorded
   simulation-scan-ticks            ; Period between scans of the current simulation
@@ -475,7 +479,8 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to setup-parameters
-  set model-version "1.2.0-Beta-2021-07-18"                    ; Model version of B3GET.
+  set model-name "B3GET"
+  set model-version "1.3.0.1"                                  ; Model version of B3GET.
   if ( model-structure = 0 or model-structure = [] ) [
     set model-structure [ "baseline" ] ]                       ; A simulation has a baseline model structure.
   set start-date-and-time date-and-time                        ; by default.
@@ -539,6 +544,14 @@ to setup-parameters
 
   if ( simulation-stop-at = 0 )
   [ set simulation-stop-at 999999999 ]
+
+  if ( selection-on? = 0 )
+  [ set selection-on? false ]
+
+  if ( output-results? = 0 )
+  [ set output-results? false ]
+
+  set genotype-reader "sta2us"
 
   reset-timer                                                  ; Start the simulation timer
 end
@@ -4178,9 +4191,9 @@ timesteps
 30.0
 
 BUTTON
-361
+617
 10
-427
+683
 79
 setup
 setup-button
@@ -4195,9 +4208,9 @@ NIL
 1
 
 BUTTON
-432
+688
 10
-499
+755
 79
 go
 go-button
@@ -4212,20 +4225,20 @@ NIL
 1
 
 INPUTBOX
-7
+81
 10
-354
+609
 79
 path-to-experiment
-../data/virtual-primates/
+../results/ProtoPan/
 1
 0
 String
 
 BUTTON
-505
+761
 10
-580
+836
 79
 go once
 go-button
@@ -4240,11 +4253,11 @@ NIL
 1
 
 INPUTBOX
-849
-10
-1118
-117
-observation-notes
+846
+80
+1115
+200
+simulation-notes
 NIL
 1
 0
@@ -4261,28 +4274,11 @@ simulation
 1
 11
 
-BUTTON
-763
-10
-837
-80
-save
-save-button
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
 SLIDER
 849
-466
+517
 1118
-499
+550
 plant-minimum-neighbors
 plant-minimum-neighbors
 0
@@ -4295,9 +4291,9 @@ HORIZONTAL
 
 SLIDER
 849
-503
+554
 1118
-536
+587
 plant-maximum-neighbors
 plant-maximum-neighbors
 0
@@ -4321,9 +4317,9 @@ season
 
 SLIDER
 849
-393
+444
 1118
-426
+477
 plant-seasonality
 plant-seasonality
 0
@@ -4336,9 +4332,9 @@ HORIZONTAL
 
 SLIDER
 849
-321
+372
 1117
-354
+405
 plant-annual-cycle
 plant-annual-cycle
 10
@@ -4351,9 +4347,9 @@ HORIZONTAL
 
 SLIDER
 849
-357
+408
 1118
-390
+441
 plant-daily-cycle
 plant-daily-cycle
 1
@@ -4376,32 +4372,32 @@ solar-status
 11
 
 INPUTBOX
-849
-122
-995
-191
+910
+223
+1056
+292
 population
-Chimpanzees
+pRHJIQQ
 1
 0
 String
 
 INPUTBOX
-849
-197
-995
-265
+910
+298
+1056
+366
 genotype
-chimpanzees
+gRHJHLX
 1
 0
 String
 
 BUTTON
-1001
-122
-1056
-191
+848
+223
+903
+292
 ⟳
 reset-population-button
 NIL
@@ -4416,9 +4412,9 @@ NIL
 
 BUTTON
 1062
-122
+223
 1117
-155
+256
 ⤒
 export-population-button
 NIL
@@ -4433,9 +4429,9 @@ NIL
 
 BUTTON
 1062
-158
+259
 1117
-191
+292
 ⤓
 import-population-button
 NIL
@@ -4449,20 +4445,20 @@ NIL
 1
 
 CHOOSER
-849
-543
-1057
-588
+846
+29
+1054
+74
 useful-commands
 useful-commands
-"help-me" "meta-report" "---------------------" " > OPERATIONS   " "---------------------" "parameter-settings" "default-settings" "model-structure" "-- aspatial" "-- free-lunch" "-- ideal-form" "-- no-evolution" "-- no-plants" "-- reaper" "-- stork" "-- uninvadable" "clear-population" "reset-plants" "save-world" "import-world" "output-results" "---------------------" " > VERIFICATION " "---------------------" "dynamic-check" "-- true" "-- false" "runtime-check" "visual-check" "-- attack-pattern" "-- dine-and-dash" "-- life-history-channel" "-- musical-pairs" "-- night-and-day" "-- popularity-context" "-- speed-mating" "-- square-dance" "-- supply-and-demand" "---------------------" " > DISPLAY RESULTS   " "---------------------" "age" "generations" "genotype" "phenotype" "-- survival-chance" "-- body-size" "-- body-shade" "-- fertility-status" "-- hidden-chance" "-- bite-capacity" "-- mutation-chance" "-- sex-ratio" "-- litter-size" "-- conception-chance" "-- visual-angle" "-- visual-range" "-- day-perception" "-- night-perception" "carried-items" "energy-supply" "behaviors" "-- environment" "-- decisions" "-- actions" "-- matings" "-- mating-partners" "-- conceptions" "-- infanticide" "-- group-transfers" "-- travel-distance" "-- foraging-gains" "-- total-energy-gains" "-- total-energy-cost" "show-territories"
-5
+"help-me" "meta-report" "---------------------" " > OPERATIONS   " "---------------------" "parameter-settings" "default-settings" "model-structure" "-- aspatial" "-- free-lunch" "-- ideal-form" "-- no-evolution" "-- no-plants" "-- reaper" "-- stork" "-- uninvadable" "clear-population" "reset-plants" "save-notes" "save-world" "import-world" "output-results" "---------------------" " > VERIFICATION " "---------------------" "dynamic-check" "-- true" "-- false" "runtime-check" "visual-check" "-- attack-pattern" "-- dine-and-dash" "-- life-history-channel" "-- musical-pairs" "-- night-and-day" "-- popularity-context" "-- speed-mating" "-- square-dance" "-- supply-and-demand" "---------------------" " > DISPLAY RESULTS   " "---------------------" "age" "generations" "genotype" "phenotype" "-- survival-chance" "-- body-size" "-- body-shade" "-- fertility-status" "-- hidden-chance" "-- bite-capacity" "-- mutation-chance" "-- sex-ratio" "-- litter-size" "-- conception-chance" "-- visual-angle" "-- visual-range" "-- day-perception" "-- night-perception" "carried-items" "energy-supply" "behaviors" "-- environment" "-- decisions" "-- actions" "-- matings" "-- mating-partners" "-- conceptions" "-- infanticide" "-- group-transfers" "-- travel-distance" "-- foraging-gains" "-- total-energy-gains" "-- total-energy-cost" "show-territories"
+18
 
 BUTTON
-1063
-543
-1118
-588
+1060
+29
+1115
+74
 ▷
 command
 NIL
@@ -4476,10 +4472,10 @@ NIL
 1
 
 BUTTON
-1002
-196
-1057
-265
+849
+297
+904
+366
 ⟳
 reset-genotype-button
 NIL
@@ -4494,9 +4490,9 @@ NIL
 
 BUTTON
 1062
-232
+333
 1117
-265
+366
 ⤓
 import-genotype-button
 NIL
@@ -4511,9 +4507,9 @@ NIL
 
 BUTTON
 1062
-196
+297
 1117
-229
+330
 ⤒
 export-genotype-button
 NIL
@@ -4528,44 +4524,22 @@ NIL
 
 SLIDER
 849
-429
+480
 1118
-462
+513
 plant-quality
 plant-quality
 .1
 100
-4.0
+7.0
 .1
 1
 NIL
 HORIZONTAL
 
-SWITCH
-588
-46
-755
-79
-output-results?
-output-results?
-0
-1
--1000
-
-SWITCH
-588
-10
-755
-43
-selection-on?
-selection-on?
-1
-1
--1000
-
 PLOT
 849
-646
+663
 1707
 917
 plot
@@ -4590,21 +4564,11 @@ PENS
 "gestatee female" 1.0 0 -955883 true "" ""
 "gestatee male" 1.0 0 -2674135 true "" ""
 
-CHOOSER
-849
-271
-1118
-316
-genotype-reader
-genotype-reader
-"sta2us"
-0
-
 SWITCH
 1429
-606
+623
 1519
-639
+656
 adults
 adults
 0
@@ -4613,9 +4577,9 @@ adults
 
 SWITCH
 1326
-606
+623
 1424
-639
+656
 juveniles
 juveniles
 1
@@ -4624,9 +4588,9 @@ juveniles
 
 SWITCH
 1232
-606
+623
 1322
-639
+656
 infants
 infants
 1
@@ -4635,9 +4599,9 @@ infants
 
 SWITCH
 1126
-606
+623
 1227
-639
+656
 gestatees
 gestatees
 1
@@ -4646,9 +4610,9 @@ gestatees
 
 SWITCH
 1523
-606
+623
 1613
-639
+656
 males
 males
 1
@@ -4657,9 +4621,9 @@ males
 
 SWITCH
 1617
-606
+623
 1707
-639
+656
 females
 females
 0
@@ -4668,9 +4632,9 @@ females
 
 CHOOSER
 849
-594
+611
 1118
-639
+656
 plot-type
 plot-type
 "individuals" "groups" "generations"
@@ -4679,9 +4643,56 @@ plot-type
 OUTPUT
 1126
 10
-1707
-598
+1704
+587
 12
+
+BUTTON
+7
+10
+74
+79
+path...
+path-button
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+TEXTBOX
+849
+592
+1715
+610
+-- plot ----------------------------------------------------------------------------------------------------------------------------------------
+11
+0.0
+1
+
+TEXTBOX
+849
+204
+1129
+246
+-- parameters -------------------------------
+11
+0.0
+1
+
+TEXTBOX
+847
+10
+1131
+28
+-- commands --------------------------------
+11
+0.0
+1
 
 @#$#@#$#@
 # B3GET 1.2.0 INFORMATION
