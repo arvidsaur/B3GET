@@ -1,7 +1,7 @@
-breed,my.identity,age,color,heading,xcor,ycor,label,label-color,shape,hidden?,size,pen-size,pen-mode,biological.sex,life.history,female.fertility,group.identity,is.alive,yellow.signal,red.signal,blue.signal,living.chance,body.size,body.shade,energy.supply,identity.I,identity.II,carried.items,bite.capacity,mutation.chance,sex.ratio,litter.size,conception.chance,visual.angle,visual.range,day.perception,night.perception,yellow.chance,red.chance,blue.chance,birthing.chance,weaning.chance,infancy.chance,juvenility.chance,adulthood.chance,x.magnitude,y.magnitude,chromosome.I,chromosome.II,my.mother
-anima1s,1477660,,38,0,30,12, ,9.9,triangle323,TRUE,0.6,1,up,male,gestatee, ,60235,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.2,1000000,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.05
+breed,my.identity,age,color,heading,xcor,ycor,label,label-color,shape,hidden?,size,pen-size,pen-mode,biological.sex,life.history,fertility.status,group.identity,is.alive,is.resting,yellow.signal,red.signal,blue.signal,survival.chance,body.size,body.shade,energy.supply,identity.I,identity.II,carried.items,bite.capacity,mutation.chance,sex.ratio,litter.size,conception.chance,visual.angle,visual.range,day.perception,night.perception,yellow.chance,red.chance,blue.chance,birthing.chance,weaning.chance,infancy.chance,juvenility.chance,adulthood.chance,x.magnitude,y.magnitude,chromosome.I,chromosome.II,my.mother,helper-name,helper-value
+anima1s,2800966,0,128,0,90,12," ",9.9,triangle322,true,0.6,1,up,male,gestatee," ",766485,true,false,false,false,false,0.99999,0.6,0.2,1000000,wmxztkagyz,czxlykydku,[],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,survival-chance,0.05
 false,i,e,go-forward,0.1
-false,j,+,squirm-from,0.01
+false,j,¥,squirm-from,0.01
 false,j,e,go-forward,0.1
 false,a,e,turn-right,0.05
 false,a,e,go-forward,0.01","false,g28,e,check-infancy,0.01
@@ -19,10 +19,10 @@ false,i98,e,check-juvenility,0.01
 false,j98,e,check-adulthood,0.01
 false,p125,e,check-birth,0.1
 false,l125,e,check-weaning,0.1
-false,j128,e,check-adulthood,0.01",9244791
-anima1s,5786940,,98,0,80,12, ,9.9,triangle323,TRUE,0.6,1,up,male,gestatee, ,1033995,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.2,1000000,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.05
+false,j128,e,check-adulthood,0.01",8018252,0,0
+anima1s,6703806,0,78,0,60,12," ",9.9,triangle322,true,0.6,1,up,male,gestatee," ",1192735,true,false,false,false,false,0.99999,0.6,0.2,1000000,wmxztkagyz,czxlykydku,[],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,survival-chance,0.05
 false,i,e,go-forward,0.1
-false,j,+,squirm-from,0.01
+false,j,¥,squirm-from,0.01
 false,j,e,go-forward,0.1
 false,a,e,turn-right,0.05
 false,a,e,go-forward,0.01","false,g28,e,check-infancy,0.01
@@ -40,10 +40,10 @@ false,i98,e,check-juvenility,0.01
 false,j98,e,check-adulthood,0.01
 false,p125,e,check-birth,0.1
 false,l125,e,check-weaning,0.1
-false,j128,e,check-adulthood,0.01",4193479
-anima1s,9786116,,48,0,40,12, ,9.9,triangle323,TRUE,0.6,1,up,male,gestatee, ,361525,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.2,1000000,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.05
+false,j128,e,check-adulthood,0.01",3094439,0,0
+anima1s,4380052,0,45,0,40,12," ",9.9,circle322,false,0.99999,1,up,female,adult,pregnant,361525,true,false,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[9786116],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,survival-chance,0.05
 false,i,e,go-forward,0.1
-false,j,+,squirm-from,0.01
+false,j,¥,squirm-from,0.01
 false,j,e,go-forward,0.1
 false,a,e,turn-right,0.05
 false,a,e,go-forward,0.01","false,g28,e,check-infancy,0.01
@@ -61,12 +61,10 @@ false,i98,e,check-juvenility,0.01
 false,j98,e,check-adulthood,0.01
 false,p125,e,check-birth,0.1
 false,l125,e,check-weaning,0.1
-false,j128,e,check-adulthood,0.01",4380052
-turtles,,,45,0,46,3,infancy and wean,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,15,0,11,7,none,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,9488895,,65,0,50,12, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,pregnant,1375565,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[590572],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.05
+false,j128,e,check-adulthood,0.01",nobody,0,0
+anima1s,1477660,0,38,0,30,12," ",9.9,triangle322,true,0.6,1,up,male,gestatee," ",60235,true,false,false,false,false,0.99999,0.6,0.2,1000000,wmxztkagyz,czxlykydku,[],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,survival-chance,0.05
 false,i,e,go-forward,0.1
-false,j,+,squirm-from,0.01
+false,j,¥,squirm-from,0.01
 false,j,e,go-forward,0.1
 false,a,e,turn-right,0.05
 false,a,e,go-forward,0.01","false,g28,e,check-infancy,0.01
@@ -84,12 +82,10 @@ false,i98,e,check-juvenility,0.01
 false,j98,e,check-adulthood,0.01
 false,p125,e,check-birth,0.1
 false,l125,e,check-weaning,0.1
-false,j128,e,check-adulthood,0.01",nobody
-turtles,,,35,0,33,7,birth only,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,85,0,75,7,birth and wean,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,8018252,,125,0,90,12, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,pregnant,766485,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[2800966],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.05
+false,j128,e,check-adulthood,0.01",9244791,0,0
+anima1s,7500698,0,88,0,70,12," ",9.9,triangle322,true,0.6,1,up,male,gestatee," ",1391965,true,false,false,false,false,0.99999,0.6,0.2,1000000,wmxztkagyz,czxlykydku,[],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,survival-chance,0.05
 false,i,e,go-forward,0.1
-false,j,+,squirm-from,0.01
+false,j,¥,squirm-from,0.01
 false,j,e,go-forward,0.1
 false,a,e,turn-right,0.05
 false,a,e,go-forward,0.01","false,g28,e,check-infancy,0.01
@@ -107,10 +103,10 @@ false,i98,e,check-juvenility,0.01
 false,j98,e,check-adulthood,0.01
 false,p125,e,check-birth,0.1
 false,l125,e,check-weaning,0.1
-false,j128,e,check-adulthood,0.01",nobody
-anima1s,7500698,,88,0,70,12, ,9.9,triangle323,TRUE,0.6,1,up,male,gestatee, ,1391965,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.2,1000000,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.05
+false,j128,e,check-adulthood,0.01",7810353,0,0
+anima1s,9786116,0,48,0,40,12," ",9.9,triangle322,true,0.6,1,up,male,gestatee," ",361525,true,false,false,false,false,0.99999,0.6,0.2,1000000,wmxztkagyz,czxlykydku,[],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,survival-chance,0.05
 false,i,e,go-forward,0.1
-false,j,+,squirm-from,0.01
+false,j,¥,squirm-from,0.01
 false,j,e,go-forward,0.1
 false,a,e,turn-right,0.05
 false,a,e,go-forward,0.01","false,g28,e,check-infancy,0.01
@@ -128,10 +124,10 @@ false,i98,e,check-juvenility,0.01
 false,j98,e,check-adulthood,0.01
 false,p125,e,check-birth,0.1
 false,l125,e,check-weaning,0.1
-false,j128,e,check-adulthood,0.01",7810353
-anima1s,3094439,,75,0,60,12, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,pregnant,1192735,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[6703806],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.05
+false,j128,e,check-adulthood,0.01",4380052,0,0
+anima1s,7810353,0,85,0,70,12," ",9.9,circle322,false,0.99999,1,up,female,adult,pregnant,1391965,true,false,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[7500698],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,survival-chance,0.05
 false,i,e,go-forward,0.1
-false,j,+,squirm-from,0.01
+false,j,¥,squirm-from,0.01
 false,j,e,go-forward,0.1
 false,a,e,turn-right,0.05
 false,a,e,go-forward,0.01","false,g28,e,check-infancy,0.01
@@ -149,10 +145,10 @@ false,i98,e,check-juvenility,0.01
 false,j98,e,check-adulthood,0.01
 false,p125,e,check-birth,0.1
 false,l125,e,check-weaning,0.1
-false,j128,e,check-adulthood,0.01",nobody
-anima1s,4380052,,45,0,40,12, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,pregnant,361525,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[9786116],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.05
+false,j128,e,check-adulthood,0.01",nobody,0,0
+anima1s,9488895,0,65,0,50,12," ",9.9,circle322,false,0.99999,1,up,female,adult,pregnant,1375565,true,false,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[590572],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,survival-chance,0.05
 false,i,e,go-forward,0.1
-false,j,+,squirm-from,0.01
+false,j,¥,squirm-from,0.01
 false,j,e,go-forward,0.1
 false,a,e,turn-right,0.05
 false,a,e,go-forward,0.01","false,g28,e,check-infancy,0.01
@@ -170,10 +166,10 @@ false,i98,e,check-juvenility,0.01
 false,j98,e,check-adulthood,0.01
 false,p125,e,check-birth,0.1
 false,l125,e,check-weaning,0.1
-false,j128,e,check-adulthood,0.01",nobody
-anima1s,7810353,,85,0,70,12, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,pregnant,1391965,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[7500698],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.05
+false,j128,e,check-adulthood,0.01",nobody,0,0
+anima1s,8018252,0,125,0,90,12," ",9.9,circle322,false,0.99999,1,up,female,adult,pregnant,766485,true,false,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[2800966],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,survival-chance,0.05
 false,i,e,go-forward,0.1
-false,j,+,squirm-from,0.01
+false,j,¥,squirm-from,0.01
 false,j,e,go-forward,0.1
 false,a,e,turn-right,0.05
 false,a,e,go-forward,0.01","false,g28,e,check-infancy,0.01
@@ -191,10 +187,10 @@ false,i98,e,check-juvenility,0.01
 false,j98,e,check-adulthood,0.01
 false,p125,e,check-birth,0.1
 false,l125,e,check-weaning,0.1
-false,j128,e,check-adulthood,0.01",nobody
-anima1s,4193479,,95,0,80,12, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,pregnant,1033995,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[5786940],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.05
+false,j128,e,check-adulthood,0.01",nobody,0,0
+anima1s,8674045,0,25,0,20,12," ",9.9,circle322,false,0.99999,1,up,female,adult,pregnant,805165,true,false,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[3619135],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,survival-chance,0.05
 false,i,e,go-forward,0.1
-false,j,+,squirm-from,0.01
+false,j,¥,squirm-from,0.01
 false,j,e,go-forward,0.1
 false,a,e,turn-right,0.05
 false,a,e,go-forward,0.01","false,g28,e,check-infancy,0.01
@@ -212,10 +208,10 @@ false,i98,e,check-juvenility,0.01
 false,j98,e,check-adulthood,0.01
 false,p125,e,check-birth,0.1
 false,l125,e,check-weaning,0.1
-false,j128,e,check-adulthood,0.01",nobody
-anima1s,2393041,,18,0,10,12, ,9.9,triangle323,TRUE,0.6,1,up,male,gestatee, ,1194775,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.2,1000000,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.05
+false,j128,e,check-adulthood,0.01",nobody,0,0
+anima1s,3619135,0,28,0,20,12," ",9.9,triangle322,true,0.6,1,up,male,gestatee," ",805165,true,false,false,false,false,0.99999,0.6,0.2,1000000,wmxztkagyz,czxlykydku,[],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,survival-chance,0.05
 false,i,e,go-forward,0.1
-false,j,+,squirm-from,0.01
+false,j,¥,squirm-from,0.01
 false,j,e,go-forward,0.1
 false,a,e,turn-right,0.05
 false,a,e,go-forward,0.01","false,g28,e,check-infancy,0.01
@@ -233,11 +229,10 @@ false,i98,e,check-juvenility,0.01
 false,j98,e,check-adulthood,0.01
 false,p125,e,check-birth,0.1
 false,l125,e,check-weaning,0.1
-false,j128,e,check-adulthood,0.01",9178572
-turtles,,,125,0,97,7,birth & wean & adult,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,8674045,,25,0,20,12, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,pregnant,805165,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[3619135],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.05
+false,j128,e,check-adulthood,0.01",8674045,0,0
+anima1s,590572,0,68,0,50,12," ",9.9,triangle322,true,0.6,1,up,male,gestatee," ",1375565,true,false,false,false,false,0.99999,0.6,0.2,1000000,wmxztkagyz,czxlykydku,[],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,survival-chance,0.05
 false,i,e,go-forward,0.1
-false,j,+,squirm-from,0.01
+false,j,¥,squirm-from,0.01
 false,j,e,go-forward,0.1
 false,a,e,turn-right,0.05
 false,a,e,go-forward,0.01","false,g28,e,check-infancy,0.01
@@ -255,10 +250,10 @@ false,i98,e,check-juvenility,0.01
 false,j98,e,check-adulthood,0.01
 false,p125,e,check-birth,0.1
 false,l125,e,check-weaning,0.1
-false,j128,e,check-adulthood,0.01",nobody
-anima1s,9178572,,15,0,10,12, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,pregnant,1194775,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[2393041],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.05
+false,j128,e,check-adulthood,0.01",9488895,0,0
+anima1s,9244791,0,35,0,30,12," ",9.9,circle322,false,0.99999,1,up,female,adult,pregnant,60235,true,false,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[1477660],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,survival-chance,0.05
 false,i,e,go-forward,0.1
-false,j,+,squirm-from,0.01
+false,j,¥,squirm-from,0.01
 false,j,e,go-forward,0.1
 false,a,e,turn-right,0.05
 false,a,e,go-forward,0.01","false,g28,e,check-infancy,0.01
@@ -276,10 +271,10 @@ false,i98,e,check-juvenility,0.01
 false,j98,e,check-adulthood,0.01
 false,p125,e,check-birth,0.1
 false,l125,e,check-weaning,0.1
-false,j128,e,check-adulthood,0.01",nobody
-anima1s,2800966,,128,0,90,12, ,9.9,triangle323,TRUE,0.6,1,up,male,gestatee, ,766485,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.2,1000000,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.05
+false,j128,e,check-adulthood,0.01",nobody,0,0
+anima1s,5786940,0,98,0,80,12," ",9.9,triangle322,true,0.6,1,up,male,gestatee," ",1033995,true,false,false,false,false,0.99999,0.6,0.2,1000000,wmxztkagyz,czxlykydku,[],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,survival-chance,0.05
 false,i,e,go-forward,0.1
-false,j,+,squirm-from,0.01
+false,j,¥,squirm-from,0.01
 false,j,e,go-forward,0.1
 false,a,e,turn-right,0.05
 false,a,e,go-forward,0.01","false,g28,e,check-infancy,0.01
@@ -297,10 +292,10 @@ false,i98,e,check-juvenility,0.01
 false,j98,e,check-adulthood,0.01
 false,p125,e,check-birth,0.1
 false,l125,e,check-weaning,0.1
-false,j128,e,check-adulthood,0.01",8018252
-anima1s,590572,,68,0,50,12, ,9.9,triangle323,TRUE,0.6,1,up,male,gestatee, ,1375565,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.2,1000000,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.05
+false,j128,e,check-adulthood,0.01",4193479,0,0
+anima1s,9178572,0,15,0,10,12," ",9.9,circle322,false,0.99999,1,up,female,adult,pregnant,1194775,true,false,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[2393041],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,survival-chance,0.05
 false,i,e,go-forward,0.1
-false,j,+,squirm-from,0.01
+false,j,¥,squirm-from,0.01
 false,j,e,go-forward,0.1
 false,a,e,turn-right,0.05
 false,a,e,go-forward,0.01","false,g28,e,check-infancy,0.01
@@ -318,11 +313,10 @@ false,i98,e,check-juvenility,0.01
 false,j98,e,check-adulthood,0.01
 false,p125,e,check-birth,0.1
 false,l125,e,check-weaning,0.1
-false,j128,e,check-adulthood,0.01",9488895
-turtles,,,75,0,67,3,infancy and juvenility,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,6703806,,78,0,60,12, ,9.9,triangle323,TRUE,0.6,1,up,male,gestatee, ,1192735,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.2,1000000,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.05
+false,j128,e,check-adulthood,0.01",nobody,0,0
+anima1s,4193479,0,95,0,80,12," ",9.9,circle322,false,0.99999,1,up,female,adult,pregnant,1033995,true,false,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[5786940],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,survival-chance,0.05
 false,i,e,go-forward,0.1
-false,j,+,squirm-from,0.01
+false,j,¥,squirm-from,0.01
 false,j,e,go-forward,0.1
 false,a,e,turn-right,0.05
 false,a,e,go-forward,0.01","false,g28,e,check-infancy,0.01
@@ -340,10 +334,10 @@ false,i98,e,check-juvenility,0.01
 false,j98,e,check-adulthood,0.01
 false,p125,e,check-birth,0.1
 false,l125,e,check-weaning,0.1
-false,j128,e,check-adulthood,0.01",3094439
-anima1s,9244791,,35,0,30,12, ,9.9,circle323,FALSE,0.99999,1,up,female,adult,pregnant,60235,TRUE,FALSE,FALSE,FALSE,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[1477660],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.05
+false,j128,e,check-adulthood,0.01",nobody,0,0
+anima1s,2393041,0,18,0,10,12," ",9.9,triangle322,true,0.6,1,up,male,gestatee," ",1194775,true,false,false,false,false,0.99999,0.6,0.2,1000000,wmxztkagyz,czxlykydku,[],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,survival-chance,0.05
 false,i,e,go-forward,0.1
-false,j,+,squirm-from,0.01
+false,j,¥,squirm-from,0.01
 false,j,e,go-forward,0.1
 false,a,e,turn-right,0.05
 false,a,e,go-forward,0.01","false,g28,e,check-infancy,0.01
@@ -361,13 +355,10 @@ false,i98,e,check-juvenility,0.01
 false,j98,e,check-adulthood,0.01
 false,p125,e,check-birth,0.1
 false,l125,e,check-weaning,0.1
-false,j128,e,check-adulthood,0.01",nobody
-turtles,,,25,0,24,3,infancy only,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,95,0,89,3,infancy & juvenility & adult,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-turtles,,,65,0,57,7,birth and juvenility,9.9,default,FALSE,1.00E-04,1,up,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-anima1s,3619135,,28,0,20,12, ,9.9,triangle323,TRUE,0.6,1,up,male,gestatee, ,805165,TRUE,FALSE,FALSE,FALSE,0.99999,0.6,0.2,1000000,wmxztkagyz,czxlykydku,,0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,living-chance,0.05
+false,j128,e,check-adulthood,0.01",9178572,0,0
+anima1s,3094439,0,75,0,60,12," ",9.9,circle322,false,0.99999,1,up,female,adult,pregnant,1192735,true,false,false,false,false,0.99999,0.99999,0.7,1000000,wzxzykadyu,amdltbyukz,[6703806],0.2,0.1,0.5,0,0.99999,0.5,0.9,0.9,0.25,0,0,0,0,0,0,0,0,0,0,"false,e,e,survival-chance,0.05
 false,i,e,go-forward,0.1
-false,j,+,squirm-from,0.01
+false,j,¥,squirm-from,0.01
 false,j,e,go-forward,0.1
 false,a,e,turn-right,0.05
 false,a,e,go-forward,0.01","false,g28,e,check-infancy,0.01
@@ -385,4 +376,4 @@ false,i98,e,check-juvenility,0.01
 false,j98,e,check-adulthood,0.01
 false,p125,e,check-birth,0.1
 false,l125,e,check-weaning,0.1
-false,j128,e,check-adulthood,0.01",8674045
+false,j128,e,check-adulthood,0.01",nobody,0,0
