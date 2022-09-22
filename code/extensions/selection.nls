@@ -1,4 +1,5 @@
-; ========================================================================================================= ;
+; =================================================================================================================== ;
+
 ;
 ;  .d88888b   88888888b dP         88888888b  a88888b. d888888P dP  .88888.  888888ba  
 ;  88.    "'  88        88         88        d8'   `88    88    88 d8'   `8b 88    `8b 
@@ -13,9 +14,7 @@
 ; applied once every timestep and artificially selects for a population that can better
 ; persist in its environment.
 ;
-; ========================================================================================================= ;
-
-; --------------------------------------------------------------------------------------------------------- ;
+; =================================================================================================================== ;
 ;
 ; ARTIFICIAL-SELECTION
 ;
@@ -29,111 +28,63 @@
 ;
 ; EXIT: exit 1...
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;   
 
 to artificial-selection ;  memory caps?
   
-  carefully [
-    
-    if ( any? anima1s ) [
-      
-      ; MUTATE GENOTYPES
-      if ( ticks = 0 ) [ ask anima1s [ mutate-chromosomes 0.05 ]] ; increases the genetic variation of the initial population
-      
-      ; SET GENOTYPE TO PROPER STANDARDIZED NAME
-      if ( genotype = "" ) [
-        set genotype generate-genotype-id
-      ]
-      
-      let number-list [ "1" "2" "3" "4" "5" "6" "7" "8" "9" "0" ]
-      if ( not member? "-" genotype or not member? last genotype number-list ) [
-        set genotype ( word genotype "-0" )
-        ask one-of anima1s [ save-genotype ]]
-      
-      impose-selection
-      
-      ; RESET SIMULATION
-      if ( restart-simulation? ) [ ; if criteria met for restarting simulation
-        
-        simulation-summary
-        
-        let selected-anima1 max-one-of anima1s with [ life.history = "adult" ] [ generation.number ]
-        if ( [generation.number] of selected-anima1 > genotype-number ) [
-          set genotype (word (genotype-name) "-" ( genotype-number + 1 ) ) ; set new genotype name up one more number increment
-          ask selected-anima1 [ save-genotype ]]
-        
-        let old-population-name population
-        set population next-population-file-name
-        save-population
-        set population old-population-name
-        
-        setup
-      ]
-    ]
-    
-  ] [ print ( word "ARTIFICIAL SELECTION ERROR: " error-message ) ]    ; If error occurs, print out error message.
+;  carefully [
+;    
+;    if ( any? anima1s ) [
+;      
+;      ; MUTATE GENOTYPES
+;      if ( ticks = 0 ) [ ask anima1s [ mutate-chromosomes 0.05 ]] ; increases the genetic variation of the initial population
+;      
+;      ; SET GENOTYPE TO PROPER STANDARDIZED NAME
+;      if ( genotype = "" ) [
+;        set genotype generate-genotype-id
+;      ]
+;      
+;      let number-list [ "1" "2" "3" "4" "5" "6" "7" "8" "9" "0" ]
+;      if ( not member? "-" genotype or not member? last genotype number-list ) [
+;        set genotype ( word genotype "-0" )
+;        ask one-of anima1s [ save-genotype ]]
+;      
+;      impose-selection
+;      
+;      ; RESET SIMULATION
+;      if ( restart-simulation? ) [ ; if criteria met for restarting simulation
+;        
+;        simulation-summary
+;        
+;        let selected-anima1 max-one-of anima1s with [ life.history = "adult" ] [ generation.number ]
+;        if ( [generation.number] of selected-anima1 > genotype-number ) [
+;          set genotype (word (genotype-name) "-" ( genotype-number + 1 ) ) ; set new genotype name up one more number increment
+;          ask selected-anima1 [ save-genotype ]]
+;        
+;        let old-population-name population
+;        set population next-population-file-name
+;        save-population
+;        set population old-population-name
+;        
+;        setup
+;      ]
+;    ]
+;    
+;  ] [ print ( word "ARTIFICIAL SELECTION ERROR: " error-message ) ]    ; If error occurs, print out error message.
   
 end
-
-; --------------------------------------------------------------------------------------------------------- ;
-;
-; TITLE
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
 
 to-report dash-position 
   report ( position "-" genotype ) 
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
-; TITLE
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
-
 to-report genotype-number
   report read-from-string substring genotype ( dash-position + 1 ) ( length genotype )
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
-; TITLE
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
-
 to-report genotype-name
   report substring genotype 0 ( dash-position )
 end
-
-; --------------------------------------------------------------------------------------------------------- ;
-;
-; TITLE
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
 
 to impose-selection
   
@@ -149,18 +100,6 @@ to impose-selection
   
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
-; TITLE
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
-
 to-report restart-simulation?
   let criteria-met false
   
@@ -173,18 +112,6 @@ to-report restart-simulation?
 
   report criteria-met
 end
-
-; --------------------------------------------------------------------------------------------------------- ;
-;
-; TITLE
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
 
 to-report next-population-file-name
   let the-alphabet [ "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z" ]

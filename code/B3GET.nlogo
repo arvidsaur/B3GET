@@ -1,4 +1,4 @@
-; ========================================================================================================= ;
+; =================================================================================================================== ;
 ;
 ;   888888ba  d8888b.  .88888.   88888888b d888888P
 ;   88    `8b     `88 d8'   `88  88           88
@@ -7,7 +7,7 @@
 ;   88    .88     .88 Y8.   .88  88           88
 ;   88888888P d88888P  `88888'   88888888P    dP
 ;
-; ========================================================================================================= ;
+; =================================================================================================================== ;
 ;
 ; This program is to simulate populations of virtual organisms evolving over generations, whose evolutionary
 ; outcomes reflect the selection pressures of their environment. The program is divided into the following
@@ -64,7 +64,7 @@
 ; added terms like "functions," "methods," and so forth, but this program keeps with the simpler and
 ; sufficient terminology.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 extensions [ csv profiler table time ]
 
@@ -79,7 +79,7 @@ __includes [ ; For more information on local extensions, see the corresponding f
   "extensions/sta2us.nls"
   "extensions/verification.nls" ]
 
-; ========================================================================================================= ;
+; =================================================================================================================== ;
 ;
 ;  dP     dP  .d888888   888888ba  dP  .d888888   888888ba  dP         88888888b .d88888b
 ;  88     88 d8'    88   88    `8b 88 d8'    88   88    `8b 88         88        88.    "'
@@ -88,17 +88,14 @@ __includes [ ; For more information on local extensions, see the corresponding f
 ;  88  .d8P  88     88   88     88 88 88     88   88    .88 88         88        d8'   .8P
 ;  888888'   88     88   dP     dP dP 88     88   88888888P 88888888P  88888888P  Y88888P
 ;
-; ========================================================================================================= ;
-
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; =================================================================================================================== ;
 ; CHARACTERISTICS OF ANIMA1S
 ;
 ; The term "anima1" is used with the digit "1" instead of an "l" to mark these as virtual animals.
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 breed [ anima1s anima1 ]
+breed [ helpers helper ]
 
 anima1s-own [
 
@@ -163,6 +160,7 @@ anima1s-own [
   ; TRACKING VARIABLES FOR USERS ONLY - HIDDEN FROM ALL INDIVIDUALS
   ; --------------------------------------------------------------------------------------------------------
 
+  take.measurements                ; When true, record these individuals
   solitary?                        ; When true, the anima1 is in a group by itself
   age.in.ticks                     ; The number of timesteps since the anima1 was conceived
   generation.number                ; Generation of the individual, which is one more than its mother
@@ -313,13 +311,21 @@ anima1s-own [
 
 ]
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
+; CHARACTERISTICS OF HELPER AGENTS
 ;
+; Helper agents aid to the overall function of the simulation but do not live in the simulation as do anima1s.
+; ------------------------------------------------------------------------------------------------------------------- ;
+
+helpers-own [
+  helper-name                       ; The name of the help operation
+  helper-value ]                    ; The input value for the operation
+
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CHARACTERISTICS OF PLANTS
 ;
 ; Plants are part of the "patch" structure of the NetLogo system and each patch represents a single plant.
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 patches-own [
   pmy.identity                     ; Unique identification number of a plant
@@ -328,7 +334,7 @@ patches-own [
   pgroup.identity                  ; The current group affiliation of the plant
   pgroups.here ]                   ; A record of the most recent groups to visit the plant
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; GLOBAL VARIABLES
 ;
@@ -350,37 +356,50 @@ patches-own [
 ;  - 'uninvadable' means evolution occurs with recombination and other simulated genetic mechanisms but
 ;     without mutation.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 globals [
 
-  ; --------------------------------------------------------------------------------------------------------
-  ; SIMULATION INFORMATION
-  ; --------------------------------------------------------------------------------------------------------
-
+  model-name                       ; Should be B3GET
   model-version                    ; Current version of B3GET
-  model-structure                  ; User setting for including specialized subroutines
   simulation-id                    ; Randomly generated simulation identity
-  simulation-stop-at               ; User setting to define when to end the simulation
 
   ; --------------------------------------------------------------------------------------------------------
-  ; ENVIRONMENT SETTINGS
+  ; PARAMETERS
   ; --------------------------------------------------------------------------------------------------------
 
+  model-structure                  ; User setting for including specialized subroutines
+  genotype-language
   deterioration-rate               ; Rate at which anima1s experience a decrease in survival chance
   maximum-visual-range             ; Maximum possible range for an anima1's cone of perception
-  base-litter-size                 ; Maximum possible litter size of an anima1
+  maximum-litter-size              ; Maximum possible litter size of an anima1
+  simulation-stop-at               ; User setting to define when to end the simulation
   maximum-population-size          ; The maximum population size when the "reaper" code is activated.
   minimum-population-size          ; The minimum population size when the "stork" code is activated.
 
+  ; --------------------------------------------------------------------------------------------------------
+  ; RUNTIME
+  ; --------------------------------------------------------------------------------------------------------
+
   solar-status                     ; Whether it is currently day or night in the simulation
   current-season                   ; Current time of year in the simulation
+  start-date-and-time              ; The date and time when the simulation was first setup
+  plant-abundance-record           ; A periodic record of the plant abundance in the simulation
+  plant-patchiness-record          ; A periodic record of the plant patchiness in the simulation
+  population-size-record           ; A periodic record of the population size in the simulation
+  decisions-made-this-timestep     ; Complete list of decisions made by all anima1s this timestep
+  actions-completed-this-timestep  ; Complete list of actions completed by all anima1s this timestep
+  verification-results             ; Record of verification assessments during this simulation
+  output-index                     ; Current index of output display
+  output-header                    ; List of lists to be displayed in the header
+  output-body                      ; List of lists to be displayed as columns in output window
 
-  ; --------------------------------------------------------------------------------------------------------
-  ; SIMULATION RESULTS
-  ; --------------------------------------------------------------------------------------------------------
-
-  timestep-interval                ; Period between general simulation records
+  ; Keep for compatibility with previous versions:
+  observation-notes                ; Now named "simulation-notes"
+  genotype-reader                  ; Now named "genotype-language"
+  base-litter-size                 ; Now named "maximum-litter-size"
+  selection-on?                    ; No longer exists
+  output-results?                  ; No longer exists
   simulation-summary-ticks         ; Timestep when summary information about the simulation is recorded
   simulation-scan-ticks            ; Period between scans of the current simulation
   group-scan-ticks                 ; Period between scans of all groups in the current simulation
@@ -391,18 +410,11 @@ globals [
   record-individuals               ; When true, records information on all anima1s who die
   verification-rate                ; Rate at which the simulation is assessed
   record-world-ticks               ; Timestep when the NetLogo world is exported
-
-  start-date-and-time              ; The date and time when the simulation was first setup
-  plant-abundance-record           ; A periodic record of the plant abundance in the simulation
-  plant-patchiness-record          ; A periodic record of the plant patchiness in the simulation
-  population-size-record           ; A periodic record of the population size in the simulation
-  decisions-made-this-timestep     ; Complete list of decisions made by all anima1s this timestep
-  actions-completed-this-timestep  ; Complete list of actions completed by all anima1s this timestep
-  verification-results             ; Record of verification assessments during this simulation
+  timestep-interval                ; Period between general simulation records
 
 ]
 
-; ========================================================================================================= ;
+; ==================================================================================================================== ;
 ;
 ;   .d88888b   88888888b d888888P dP     dP  888888ba
 ;   88.    "'  88           88    88     88  88    `8b
@@ -411,9 +423,7 @@ globals [
 ;   d8'   .8P  88           88    Y8.   .8P  88
 ;    Y88888P   88888888P    dP    `Y88888P'  dP
 ;
-; ========================================================================================================= ;
-
-; --------------------------------------------------------------------------------------------------------- ;
+; =================================================================================================================== ;
 ;
 ; SETUP THE ENVIRONMENT OF A NEW SIMULATION
 ;
@@ -438,30 +448,23 @@ globals [
 ;
 ;       import-genotype
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to setup
-  if ( simulation-id != 0 and                                ; If a simulation is currently running
-    behaviorspace-run-number = 0 and                         ; and at least 50000 timesteps have transpired
-    ticks > 50000 and                                        ; and user is currently recording data then
-    output-results? = true ) [ record-world ]                ; completely record the current simulation
-                                                             ; state.
 
   clear-all                                                  ; Delete all current settings in the simulation.
   reset-ticks                                                ; Reset the timesteps to zero.
   if ( simulation-id = 0 )
   [ set simulation-id generate-simulation-id  ]              ; Generate a new simulation identification.
 
-  setup-parameters                                           ; Setup the global parameter settings.
-  setup-patches                                              ; Initialize the plants for a new simulation.
   import-population                                          ; Create an initial population of indiviudals
   import-genotype                                            ; and their genotypes from user files.
-  output-print (word                                         ; Once setup is complete, display the current
-    " Simulation " simulation-id " "                         ; state of the new simulation.
-    " was setup at " date-and-time )
+  setup-parameters                                           ; Setup the global parameter settings.
+  setup-patches                                              ; Initialize the plants for a new simulation.
+
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; SETUP GLOBAL PARAMETERS AT THE START OF A NEW SIMULATION
 ;
@@ -472,13 +475,16 @@ end
 ;
 ; EXIT:   Global variables have been set or initialized.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to setup-parameters
-  set model-version "1.2.0-Beta-2021-07-18"                    ; Model version of B3GET.
+  set model-name "b3get_v1.3.0"
+  set model-version "1.3.0"                                  ; Model version of B3GET.
   if ( model-structure = 0 or model-structure = [] ) [
     set model-structure [ "baseline" ] ]                       ; A simulation has a baseline model structure.
   set start-date-and-time date-and-time                        ; by default.
+
+  set genotype-language "sta2us"
 
   if ( path-to-experiment = "" )                               ; By default, the path-to-experiment is
   [ set path-to-experiment "../results/" ]                     ; set to point to the results folder.
@@ -492,8 +498,9 @@ to setup-parameters
   if ( maximum-visual-range = 0 )                              ; This value must be set to a nonzero positive
   [ set maximum-visual-range 5 ]                               ; integer in order for an anima1 to see.
 
-  if ( base-litter-size = 0 )                                  ; This value must be set to a nonzero positive
-  [ set base-litter-size 10 ]                                  ; integer in order for conception to occur.
+  if ( base-litter-size != 0 ) [ set maximum-litter-size base-litter-size ]
+  if ( maximum-litter-size = 0 )                               ; This value must be set to a nonzero positive
+  [ set maximum-litter-size 10 ]                               ; integer in order for conception to occur.
 
   if ( maximum-population-size = 0 )                           ; Only used for "reaper" code
   [ set maximum-population-size 150 ]
@@ -540,21 +547,45 @@ to setup-parameters
   if ( simulation-stop-at = 0 )
   [ set simulation-stop-at 999999999 ]
 
+  if ( selection-on? = 0 )
+  [ set selection-on? false ]
+
+  if ( output-results? = 0 )
+  [ set output-results? false ]
+
+  helper-parameters
+
   reset-timer                                                  ; Start the simulation timer
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
+; RESET PARAMETERS BASED ON HELPER SETTINGS
+; ------------------------------------------------------------------------------------------------------------------- ;
+
+to helper-parameters
+  ask helpers [
+    (ifelse
+      ( helper-name = "plant-annual-cycle" ) [ set plant-annual-cycle helper-value ]
+      ( helper-name = "plant-daily-cycle" ) [ set plant-daily-cycle helper-value ]
+      ( helper-name = "plant-quality" ) [ set plant-quality helper-value ]
+      ( helper-name = "plant-seasonality" ) [ set plant-seasonality helper-value ]
+      ( helper-name = "plant-minimum-neighbors" ) [ set plant-minimum-neighbors helper-value ]
+      ( helper-name = "plant-maximum-neighbors" ) [ set plant-maximum-neighbors helper-value ]
+      ( helper-name = "deterioration-rate" ) [ set deterioration-rate helper-value ]
+      ( helper-name = "maximum-visual-range" ) [ set maximum-visual-range helper-value ]
+      ( helper-name = "maximum-litter-size" ) [ set maximum-litter-size helper-value ]
+      ( helper-name = "simulation-stop-at" ) [ set simulation-stop-at helper-value ]
+      ( helper-name = "model-structure" ) [ set-model-structure helper-value ]
+      [])]
+end
+
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; CREATE A UNIQUE IDENTITY
 ;
 ; These subroutines return the appropriate codename for the designated item type: simulation, population
 ; or genotype. These codes are used to assign unique names to these items.
-;
-; ENTRY: NA
-;
-; EXIT: generate-timestamp
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to-report generate-simulation-id
   report ( word "s" generate-timestamp )
@@ -568,18 +599,13 @@ to-report generate-population-id
   report ( word "p" generate-timestamp )
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; CREATE A NEW STRING IN HEXADECIMAL CODE
 ;
 ; This subroutine creates a hexadecimal code that is based on the current time. This subroutine is mainly
 ; used to create random but informative file names for the simulations, populations and genotypes.
-;
-; ENTRY: NA
-;
-; EXIT: NA
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to-report generate-timestamp
 
@@ -605,7 +631,7 @@ to-report generate-timestamp
   report string-to-report                                      ; Return this hexadecimal code.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; SETUP PLANTS AT THE START OF A NEW SIMULATION [CL]
 ;
@@ -623,7 +649,7 @@ end
 ;
 ;        update-patch-color
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to setup-patches
   let initial-group-list []                                ; Set up a generic list that contains one
@@ -649,7 +675,7 @@ end
 ;
 ; ========================================================================================================= ;
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; MAIN SUBROUTINE CALLED ONCE EACH TIMESTEP
 ;
@@ -698,7 +724,7 @@ end
 ;
 ;        display-simulation-status
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to go
 
@@ -718,15 +744,15 @@ to go
   ask anima1s with [ is.alive ] [ make-decisions ]           ; make decisions according to their genotype, and
   ask anima1s with [ is.alive ] [ do-actions ]               ; perform those actions if they have enough energy.
 
-  if selection-on? [ artificial-selection ]                  ; Impose artificial selection on animals.
-  if output-results? [ output-results ]                      ; Generate data from current simulation state.
+  artificial-selection                                       ; Impose artificial selection on animals.
+  output-results                                             ; Generate data from current simulation state.
   display-simulation-status                                  ; Display simulation status.
 
   tick                                                       ; Move forward one simulated hour.
 
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; DISPLAY THE CURRENT SIMULATION STATUS FOR USER
 ;
@@ -745,7 +771,7 @@ end
 ;         number of units of plant energy, the number of animals living, and the number of generations
 ;         that have transpired are displayed.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to display-simulation-status
   if ( ticks-on-interval? timestep-interval ) [                ; Determine if periodic condition is met.
@@ -758,15 +784,16 @@ to display-simulation-status
       precision sum [penergy.supply] of patches 3              ; The number of units of plant energy.
       " plant units, "
       precision mean ( sentence
-        [generation.number] of anima1s with [ is.alive ]       ; The number of generations have transpired.
+        [generation.number] of anima1s with [ is.alive
+        and take.measurements ]       ; The number of generations have transpired.
         0 ) 3
       " generations, and contains "
-      count anima1s with [ is.alive ] " living organisms." )   ; The number of living individuals.
+      count anima1s with [ is.alive and take.measurements ] " living organisms." )   ; The number of living individuals.
 
   ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; DETERMINE IF THE CURRENT TIMESTEP LANDS ON A GIVEN INTERVAL
 ;
@@ -777,7 +804,7 @@ end
 ;
 ; EXIT:   This subroutine returns true if the current timestep is on the interval and false otherwise.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to-report ticks-on-interval? [ period ]
   report remainder ticks period = 0
@@ -813,11 +840,11 @@ end
 ;
 ;        plant-annual-cycle is defined above.
 ;
-; EXIT: The variables solar-status and current-season, and tracking variables plant-abundance-record
-;       plant-patchiness-record and population-size record
+; EXIT:  The variables solar-status and current-season, and tracking variables plant-abundance-record
+;        plant-patchiness-record and population-size record
 ;
-;      'decisions-made-this-timestep' and 'actions-completed-this-timestep' are updated
-;       with the most recent events, up to a maximum of 'how-many-ticks?'
+;        decisions-made-this-timestep and actions-completed-this-timestep are updated
+;        with the most recent events, up to a maximum of 'how-many-ticks?'
 ;
 ;--------------------------------------------------------------------------------------------------------- ;
 
@@ -834,7 +861,7 @@ to global-update
     ( cos (( 360 / plant-annual-cycle ) * ticks ))             ; which oscillates sinusoidally with time.
 
     if ( ticks-on-interval? timestep-interval and
-      any? anima1s with [is.alive] ) [
+      any? anima1s with [is.alive and take.measurements ] ) [
 
       set plant-abundance-record lput                          ; Periodically record the total amount
       sum [penergy.supply] of patches                          ; of energy available in all plants.
@@ -845,7 +872,7 @@ to global-update
       plant-patchiness-record
 
       set population-size-record lput                          ; Periodically record the current number
-      count anima1s with [ is.alive ]                          ; of living individuals.
+      count anima1s with [ is.alive and take.measurements]     ; of living individuals.
       population-size-record
     ]
 
@@ -856,7 +883,7 @@ to global-update
 
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; CALCULATE A NEW VALUE BETWEEN ZERO AND ONE
 ;
@@ -865,14 +892,7 @@ end
 ; is positive, then this subroutine returns a number that is closer to one than its current value, and the
 ; degree to which is approaches one is related to the magnitude of the update value. Likewise, if the update
 ; value is a negative number, this subroutine returns a number that is closer to zero than the current value.
-;
-; ENTRY:  current-value
-;
-;         update-value
-;
-; EXIT:   NA
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to-report get-updated-value [ current-value update-value ]
   let report-value ifelse-value ( current-value < 0.00001 )           ; Keep the current value within
@@ -886,7 +906,7 @@ to-report get-updated-value [ current-value update-value ]
   report report-value
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ;           dP                     dP
 ;           88                     88
@@ -897,9 +917,9 @@ end
 ;  88
 ;  dP
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; UPDATE THE ATTRIBUTES OF ALL PLANTS FOR THIS TIMESTEP
 ;
@@ -935,7 +955,7 @@ end
 ;          1 to  0 represents fall   ( 90 degrees to 180 degrees)
 ;          0 to -1 represents winter (180 degrees to -90 degrees)
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to plants-update
 
@@ -965,7 +985,7 @@ to plants-update
   ] [ print ( word "PLANTS UPDATE ERROR: " error-message ) ]   ; If error occurs, print out error message.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; INCREASE OR DECREASE A PLANT'S TERMINAL ENERGY VALUE
 ;
@@ -991,7 +1011,7 @@ end
 ;
 ; EXIT: the plant's terminal energy is adjusted up or down within bounds.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to update-terminal-energy [ plant-season plant-density ]
 
@@ -1032,7 +1052,7 @@ to update-terminal-energy [ plant-season plant-density ]
 
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; UPDATE COLOR OF A PLANT BASED ON ITS CURRENT ENERGY SUPPLY AND TERMINAL ENERGY
 ;
@@ -1044,13 +1064,13 @@ end
 ;
 ; EXIT:   The plant's color is updated
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to update-patch-color
   set pcolor scale-color green (( ( pterminal.energy + penergy.supply ) / 2 ) / plant-quality ) 1.5 -0.25
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ;  oo                dP oo          oo       dP                   dP
 ;                    88                      88                   88
@@ -1059,9 +1079,9 @@ end
 ;  88 88    88 88.  .88 88 88 .88'  88 88.  .88 88.  .88 88.  .88 88       88
 ;  dP dP    dP `88888P8 dP 8888P'   dP `88888P8 `88888P' `88888P8 dP `88888P'
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; PERFORM ALL GLOBAL UPDATES FOR ANIMA1S
 ;
@@ -1087,7 +1107,7 @@ end
 ;
 ;       It is possible that new anima1s were created if "stork"
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to animals-update
 
@@ -1172,7 +1192,7 @@ to animals-update
 
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; CALLER'S HEALTH DECREASES FROM GLOBAL EFFECTS
 ;
@@ -1184,16 +1204,13 @@ end
 ;          can be any value from 0 to 1.
 ;
 ;         deterioration-rate | A global variable set by the user to drive the rate of decay in the environment.
-;
-; EXIT:   NA
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to deteriorate
   set survival.chance get-updated-value survival.chance deterioration-rate
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; DETERMINE WHETHER THE BODY HAS DETERIORATED TO THE POINT OF DEATH OR COMPLETE DECAY
 ;
@@ -1209,7 +1226,7 @@ end
 ;
 ;       remove-from-environment
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to check-mortality
   if ( random-float 1.0 > survival.chance ) [                  ; Determine if they survive this timestep.
@@ -1218,7 +1235,7 @@ to check-mortality
     [ remove-from-environment ]]                               ; If already dead, fully decay body.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; UPDATE CALLER TO BE DEAD
 ;
@@ -1229,7 +1246,7 @@ end
 ;
 ; EXIT:  ticks.at.death death.group.identity
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to set-to-dead
   set is.alive false                                           ; Update the anima1 to be dead.
@@ -1247,7 +1264,7 @@ to set-to-dead
     set cause.of.death ( word "Mother has died." ) ]           ; a mother's offspring.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; UPDATE CALLER TO BE FULLY DECAYED
 ;
@@ -1261,7 +1278,7 @@ end
 ;
 ; EXIT:  Anima1 is completely removed from view.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to remove-from-environment
   if ( ticks.at.death = 0 ) [ set ticks.at.death ticks ]       ; Record when the anima1 died ("reaper" only).
@@ -1275,7 +1292,7 @@ to remove-from-environment
   set label " "                                                ; Remove the label that indicated it was dead.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; UPDATE VISUAL DISPLAY TO MATCH CURRENT ATTRIBUTES
 ;
@@ -1287,7 +1304,7 @@ end
 ;
 ; EXIT: The anima1's size and shape are updated.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to update-appearance
   set size body.size                                           ; Update the size.
@@ -1298,7 +1315,7 @@ to update-appearance
   set shape get-shape                                          ; Udate the shape.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; DETERMINE THE CURRENT SHAPE OF CALLER
 ;
@@ -1316,7 +1333,7 @@ end
 ; EXIT:  'get-shape' returns a string representing the shape, as processed by NetLogo and as defined in the
 ;          Turtle Shapes Editor.  For example, "triangle123" defines a male with ...
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to-report get-shape
   let base_shape ifelse-value                                  ; Determine whether the base shape should be
@@ -1345,7 +1362,7 @@ to-report get-shape
     eye_acuity a_on b_on c_on )                                ; based on the above information.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; UPDATE CALLER'S ENERGY SUPPLY ACCORDING TO INPUT VALUE
 ;
@@ -1359,7 +1376,7 @@ end
 ; EXIT:  The caller's energy supply is increased or decreased by a given ammount.
 ;        This net gain or loss is recorded.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to update-energy [ update ]
   set energy.supply energy.supply + update                     ; Update caller's energy with input value,
@@ -1391,7 +1408,7 @@ end
 ;
 ; ========================================================================================================= ;
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ;                             oo                                                           dP
 ;                                                                                          88
@@ -1400,9 +1417,9 @@ end
 ;  88.  ... 88    88 88 .88'  88 88       88.  .88 88    88 88  88  88 88.  ... 88    88   88
 ;  `88888P' dP    dP 8888P'   dP dP       `88888P' dP    dP dP  dP  dP `88888P' dP    dP   dP
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; SET CURRENT ENVIRONMENT OF ANIMALS AND PLANTS FROM CURRENT FIELD OF VIEW
 ;
@@ -1416,7 +1433,7 @@ end
 ; EXIT:  Each agent has a new set of patches and agents, including itself, that make up its environment.
 ;
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to consider-environment
 
@@ -1485,7 +1502,7 @@ to consider-environment
                                                                                        ; print out error message.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ;        dP                   oo          oo
 ;        88
@@ -1495,19 +1512,19 @@ end
 ;  `88888P8 `88888P' `88888P' dP `88888P' dP `88888P' dP    dP `88888P'
 ;
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; GENERATE LIST OF CALLER DECISIONS FROM CURRENT ENVIRONMENT AND GENOTYPE
 ;
 ; The main purpose of this subroutine is to access the appropriate subroutines to translate a genotype into
 ; decision vectors, based on the current environment. There are two languages that genotypes can be written
 ; in: sta2us and gat3s. The appropriate subrotuines in B3GET vary according to which genotype language is
-; used. The user can manually set which genotype reader to use by selecting the genotype-reader in the
+; used. The user can manually set which genotype reader to use by selecting the genotype-language in the
 ; interface, otherwise B3GET will use the sta2us genotype reader by default.
 ;
-; ENTRY: genotype-reader contains either "sta2us" or "gat3s", based on genotype language used.
+; ENTRY: genotype-language contains either "sta2us" or "gat3s", based on genotype language used.
 ;
 ;        my.environment, as described above, defines the current environment of the caller.
 ;
@@ -1518,16 +1535,16 @@ end
 ;       decisions-made-this-timestep, as described above, defines the global record of decisions is updated with
 ;       caller's decisions.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to make-decisions
 
   carefully [
 
     set decision.vectors ( ifelse-value                          ; Get decisions from selected genotype reader.
-      ( genotype-reader = "sta2us" )                             ; If genotype reader is sta2us,
+      ( genotype-language = "sta2us" )                             ; If genotype reader is sta2us,
       [ sta2us-get-decisions my.environment ]                    ; get decisions based on a sta2us genotype.
-      ( genotype-reader = "gat3s" )                              ; If gentoype reader is gat3s,
+      ( genotype-language = "gat3s" )                              ; If gentoype reader is gat3s,
       [ gat3s-get-decisions my.environment ]                     ; get decisions based on a gat3s genotype.
       [ sta2us-get-decisions my.environment ] )                  ; If not specified, assume current genotype
                                                                  ; reader is sta2us.
@@ -1539,7 +1556,7 @@ to make-decisions
                                                                                     ; out error message.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ;                      dP   oo
 ;                      88
@@ -1549,9 +1566,9 @@ end
 ;  `88888P8 `88888P'   dP   dP `88888P' dP    dP `88888P'
 ;
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; CALLER PERFORMS EACH ACTION LISTED IN ITS DECISION VECTORS IF IT HAS SUFFICIENT ENERGY
 ;
@@ -1573,7 +1590,7 @@ end
 ;       The actions.completed list is updated with the actions that the caller performed during this
 ;       subroutine.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to do-actions
 
@@ -1654,7 +1671,7 @@ to do-actions
 
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; CHECK THAT DISTANCE BETWEEN CALLER AND TARGET IS CLOSE ENOUGH TO INTERACT
 ;
@@ -1673,7 +1690,7 @@ end
 ;
 ; EXIT:  Returns true or false depending on if distance between caller and target is within bounds.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to-report check-distance [ target ]
   let target-radius ifelse-value ( is-patch? target )          ; The radius of the target
@@ -1694,7 +1711,7 @@ to-report check-distance [ target ]
                                                                ; than the sum of caller and target radii.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; CHECK THAT CALLER HAS SUFFICIENT ENERGY TO ACT UPON DECISION
 ;
@@ -1710,7 +1727,7 @@ end
 ;
 ; EXIT:  Returns true or false depending on if distance between caller and target is within bounds.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to-report check-energy [ vector ]
   let cost item 3 vector                                       ; Identify the cost of the decision.
@@ -1734,7 +1751,7 @@ to-report check-energy [ vector ]
                                                                ; therby allowing the decision to be acted upon.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; DETERMINE IF TARGET HAS COUNTERACTED AN ACTION OF CALLER
 ;
@@ -1755,7 +1772,7 @@ end
 ; EXIT:   Subroutine returns the cost that the target paid for all actions that were directed
 ;         at the caller
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to-report get-action-cost-of [ target action-name ]
 
@@ -1783,7 +1800,7 @@ to-report get-action-cost-of [ target action-name ]
   report action-cost                                           ; Report this cost.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; CALLER KEEPS A RECORD FOR EACH ACTION THAT THEY COMPLETE
 ;
@@ -1800,7 +1817,7 @@ end
 ;
 ;        The action is also added to the global record of completed actions.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to complete-action [ target action cost ]
   let completed-action ( list                                  ; Create an action item that
@@ -1836,20 +1853,12 @@ end
 ;
 ; ========================================================================================================= ;
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER UPDATES HIDDEN STATUS
 ;
 ; This subroutine first updates the hidden chance attribute based on the cost. Then, if the caller
 ; is not a gestatee, it determines if it is hidden base on the probability set by hidden cost.
-;
-; ENTRY: cost
-;
-;       hidden chance
-;
-; EXIT: The callers hidden? variable is updated.
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to hide [ cost ]
   complete-action self "hide" cost                           ; Record that this action has started.
@@ -1864,19 +1873,13 @@ to hide [ cost ]
   ]]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER UPDATES RESTING STATUS
 ;
 ; This subroutine determines if the caller is resting based on the cost of the action. The caller is
 ; updated to hiding if the cost is a positive number and to not hiding if the cost is a negative
 ; number.
-;
-; ENTRY: cost
-;
-; EXIT: Update caller status for resting
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to rest [ cost ]
   complete-action self "rest" cost                          ; Record that this action has started.
@@ -1888,7 +1891,7 @@ to rest [ cost ]
     complete-action self "not-resting" 0 ]                  ; Record that this action has been completed.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ;  oo            dP                                         dP   oo
 ;                88                                         88
@@ -1898,225 +1901,166 @@ end
 ;  dP dP    dP   dP   dP       `88888P8 `88888P8 `88888P'   dP   dP `88888P' dP    dP `88888P'
 ;
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
+; CALLER UPDATES SURVIVAL CHANCE
 ;
-; CALLER UPDATES SURVIVAL CHANCE [CL]
-;
-; ENTRY: cost | The amount of energy spent to update this attribute.
-;
-; EXIT: The survival.chance value increases if cost is positive or decreases if cost is negative based
-;       on the get-updated-value subroutine.
-;
-;       This subroutine also calls the complete-action subroutine to keep a record of this action.
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; The survival.chance value increases if cost is positive or decreases if cost is negative based
+; on the get-updated-value subroutine. This subroutine also calls the complete-action subroutine to
+; keep a record of this action.
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to survival-chance [ cost ]
   complete-action self "survival-chance" cost
   set survival.chance get-updated-value survival.chance cost
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER UPDATES BODY SIZE
 ;
-; ENTRY: cost | The amount of energy spent to update this attribute.
-;
-; EXIT: The body.size value increases if cost is positive or decreases if cost is negative based
-;       on the get-updated-value subroutine.
-;
-;       This subroutine also calls the complete-action subroutine to keep a record of this action.
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; The body.size value increases if cost is positive or decreases if cost is negative based
+; on the get-updated-value subroutine. This subroutine also calls the complete-action subroutine to keep a record
+; of this action.
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to body-size [ cost ]
   complete-action self "body-size" cost
   set body.size get-updated-value body.size cost
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER UPDATES BODY SHADE
 ;
-; ENTRY: cost | The amount of energy spent to update this attribute.
-;
-; EXIT: The body.shade value increases if cost is positive or decreases if cost is negative based
-;       on the get-updated-value subroutine.
-;
-;       This subroutine also calls the complete-action subroutine to keep a record of this action.
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; The body.shade value increases if cost is positive or decreases if cost is negative based
+; on the get-updated-value subroutine. This subroutine also calls the complete-action subroutine to keep a record of
+; this action.
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to body-shade [ cost ]
   complete-action self "body-shade" cost
   set body.shade get-updated-value body.shade cost
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER UPDATES VISUAL RANGE
 ;
-; ENTRY: cost | The amount of energy spent to update this attribute.
-;
-; EXIT: The visual.range value increases if cost is positive or decreases if cost is negative based
-;       on the get-updated-value subroutine.
-;
-;       This subroutine also calls the complete-action subroutine to keep a record of this action.
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; The body.shade value increases if cost is positive or decreases if cost is negative based
+; on the get-updated-value subroutine. This subroutine also calls the complete-action subroutine to keep a record of
+; this action.
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to visual-range [ cost ]
   complete-action self "visual-range" cost
   set visual.range get-updated-value visual.range cost
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER UPDATES VISUAL ANGLE
 ;
-; ENTRY: cost | The amount of energy spent to update this attribute.
-;
-; EXIT: The visual.angle value increases if cost is positive or decreases if cost is negative based
-;       on the get-updated-value subroutine.
-;
-;       This subroutine also calls the complete-action subroutine to keep a record of this action.
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; The body.shade value increases if cost is positive or decreases if cost is negative based
+; on the get-updated-value subroutine. This subroutine also calls the complete-action subroutine to keep a record of
+; this action.
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to visual-angle [ cost ]
   complete-action self "visual-angle" cost
   set visual.angle get-updated-value visual.angle cost
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER UPDATES DAY PERCEPTION
 ;
-; ENTRY: cost | The amount of energy spent to update this attribute.
-;
-; EXIT: The day.perception value increases if cost is positive or decreases if cost is negative based
-;       on the get-updated-value subroutine.
-;
-;       This subroutine also calls the complete-action subroutine to keep a record of this action.
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; The body.shade value increases if cost is positive or decreases if cost is negative based
+; on the get-updated-value subroutine. This subroutine also calls the complete-action subroutine to keep a record of
+; this action.
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to day-perception [ cost ]
   complete-action self "day-perception" cost
   set day.perception get-updated-value day.perception cost
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER UPDATES NIGHT PERCEPTION
 ;
-; ENTRY: cost | The amount of energy spent to update this attribute.
-;
-; EXIT: The night.perception value increases if cost is positive or decreases if cost is negative based
-;       on the get-updated-value subroutine.
-;
-;       This subroutine also calls the complete-action subroutine to keep a record of this action.
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; The body.shade value increases if cost is positive or decreases if cost is negative based
+; on the get-updated-value subroutine. This subroutine also calls the complete-action subroutine to keep a record of
+; this action.
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to night-perception [ cost ]
   complete-action self "night-perception" cost
   set night.perception get-updated-value night.perception cost
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER UPDATES CONCEPTION CHANCE
 ;
-; ENTRY: cost | The amount of energy spent to update this attribute.
 ;
-; EXIT: The conception.chance value increases if cost is positive or decreases if cost is negative based
-;       on the get-updated-value subroutine.
-;
-;       This subroutine also calls the complete-action subroutine to keep a record of this action.
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; The body.shade value increases if cost is positive or decreases if cost is negative based
+; on the get-updated-value subroutine. This subroutine also calls the complete-action subroutine to keep a record of
+; this action.
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to conception-chance [ cost ]
   complete-action self "conception-chance" cost
   set conception.chance get-updated-value conception.chance cost
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER UPDATES BITE CAPACITY
 ;
-; ENTRY: cost | The amount of energy spent to update this attribute.
-;
-; EXIT: The bite.capacity value increases if cost is positive or decreases if cost is negative based
-;       on the get-updated-value subroutine.
-;
-;       This subroutine also calls the complete-action subroutine to keep a record of this action.
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; The body.shade value increases if cost is positive or decreases if cost is negative based
+; on the get-updated-value subroutine. This subroutine also calls the complete-action subroutine to keep a record of
+; this action.
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to bite-capacity [ cost ]
   complete-action self "bite-capacity" cost
   set bite.capacity get-updated-value bite.capacity cost
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER UPDATES MUTATION CHANCE
 ;
-; ENTRY: cost | The amount of energy spent to update this attribute.
-;
-; EXIT: The mutation.chance value increases if cost is positive or decreases if cost is negative based
-;       on the get-updated-value subroutine.
-;
-;       This subroutine also calls the complete-action subroutine to keep a record of this action.
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; The body.shade value increases if cost is positive or decreases if cost is negative based
+; on the get-updated-value subroutine. This subroutine also calls the complete-action subroutine to keep a record of
+; this action.
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to mutation-chance [ cost ]
   complete-action self "mutation-chance" cost
   set mutation.chance get-updated-value mutation.chance cost
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER UPDATES SEX RATIO
 ;
-; ENTRY: cost | The amount of energy spent to update this attribute.
-;
-; EXIT: The sex.ratio value increases if cost is positive or decreases if cost is negative based
-;       on the get-updated-value subroutine.
-;
-;       This subroutine also calls the complete-action subroutine to keep a record of this action.
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; The body.shade value increases if cost is positive or decreases if cost is negative based
+; on the get-updated-value subroutine. This subroutine also calls the complete-action subroutine to keep a record of
+; this action.
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to sex-ratio [ cost ]
   complete-action self "sex-ratio" cost
   set sex.ratio get-updated-value sex.ratio cost
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER UPDATES LITTER SIZE
 ;
-; ENTRY: cost | The amount of energy spent to update this attribute.
-;
-; EXIT: The litter.size value increases if cost is positive or decreases if cost is negative based
-;       on the get-updated-value subroutine.
-;
-;       This subroutine also calls the complete-action subroutine to keep a record of this action.
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; The body.shade value increases if cost is positive or decreases if cost is negative based
+; on the get-updated-value subroutine. This subroutine also calls the complete-action subroutine to keep a record of
+; this action.
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to litter-size [ cost ]
   complete-action self "litter-size" cost
   set litter.size get-updated-value litter.size cost
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ;                                                                       dP
 ;                                                                       88
@@ -2126,9 +2070,9 @@ end
 ;  dP  dP  dP `88888P' 8888P'   `88888P' dP  dP  dP `88888P' dP    dP   dP
 ;
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; CALLER UPDATES HEADING WITH RESPECT TO TARGET
 ;
@@ -2145,7 +2089,7 @@ end
 ;
 ; EXIT:  Caller magnitude preferrences and heading are updated
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to move-toward [ target cost ]
   complete-action target "move-toward" cost                    ; Record that this action has started.
@@ -2190,19 +2134,14 @@ to move-toward [ target cost ]
   ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; CALLER UPDATES HEADING BASED ON CURRENT HEADING
 ;
 ; This subroutine allows the caller wants to turn right or left by a specific amount. The cost
 ; of this subroutine is exponentially higher than most other actions. Thus, it is not expected to
 ; evolve in a population naturally. Instead, this subroutine is used for visual testing purposes.
-;
-; ENTRY: cost
-;
-; EXIT: right and left
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to turn-right [ cost ]
   complete-action self "turn" cost                             ; Record that this action has started.
@@ -2212,7 +2151,7 @@ to turn-right [ cost ]
     complete-action self "turn-left" 0 ]                       ; Record that this action has been completed.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; CALLER MOVES FORWARD OR BACKWARD
 ;
@@ -2229,7 +2168,7 @@ end
 ;
 ;       Records for distance traveled are updated.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to go-forward [ cost ]
   complete-action self "go-forward" cost                       ; Record that this action has started.
@@ -2256,7 +2195,7 @@ to go-forward [ cost ]
   ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; CALLER UPDATES HEADING TO SPECIFIED VALUE
 ;
@@ -2269,14 +2208,14 @@ end
 ;
 ; EXIT: Caller updates its heading according to the cost.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to set-heading [ cost ]
   complete-action self "set-heading" cost                     ; Record that this action has started.
   set heading cost * 360
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; CALLER UPDATES HEADING WITH A RANDOM DEVIATION
 ;
@@ -2289,7 +2228,7 @@ end
 ;
 ; EXIT: Heading updated
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to set-heading-random [ cost ]
   complete-action self "set-heading-random" cost               ; Record that this action has started.
@@ -2311,7 +2250,7 @@ to set-heading-random [ cost ]
   [ ( atan x.magnitude y.magnitude ) ]                         ; on these calculations.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ;           oo                            dP oo
 ;                                         88
@@ -2322,9 +2261,9 @@ end
 ;                   .88                                       .88
 ;               d8888P                                    d8888P
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; CALLER UPDATES YELLOW SIGNAL STATUS
 ;
@@ -2337,7 +2276,7 @@ end
 ;
 ; EXIT: Signal status is updated.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to yellow-signal [ cost ]
   complete-action self "yellow-signal" cost                    ; Record that this action has started.
@@ -2351,7 +2290,7 @@ to yellow-signal [ cost ]
   ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; CALLER UPDATES RED SIGNAL STATUS
 ;
@@ -2364,7 +2303,7 @@ end
 ;
 ; EXIT: Signal status is updated.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to red-signal [ cost ]
   complete-action self "red-signal" cost                       ; Record that this action has started.
@@ -2378,7 +2317,7 @@ to red-signal [ cost ]
   ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; CALLER UPDATES BLUE SIGNAL STATUS
 ;
@@ -2391,7 +2330,7 @@ end
 ;
 ; EXIT: Signal status is updated.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to blue-signal [ cost ]
   complete-action self "blue-signal" cost                      ; Record that this action has started.
@@ -2405,7 +2344,7 @@ to blue-signal [ cost ]
   ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ;        dP                            dP                                                  dP
 ;        88                            88                                                  88
@@ -2415,9 +2354,9 @@ end
 ;  `88888P8 `88888P' 8888P'   `88888P' dP `88888P' 88Y888P' dP  dP  dP `88888P' dP    dP   dP
 ;                                                  88
 ;                                                  dP
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; CALLER DEVELOPS INTO INFANT
 ;
@@ -2431,7 +2370,7 @@ end
 ;
 ; EXIT: give-birth
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to check-infancy [ cost ]
   complete-action self "check-infancy" cost                    ; Record that this action has started.
@@ -2446,17 +2385,9 @@ to check-infancy [ cost ]
   ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER DETERMINES IF THEY SHOULD GIVE BIRTH
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to check-birth [ cost ]
   complete-action self "check-birth" cost                      ; Record that this action has started.
@@ -2470,17 +2401,9 @@ to check-birth [ cost ]
   ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER GIVES BIRTH
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: Caller updates status from pregnant to lactating.
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to give-birth
   complete-action self "give-birth" 0                          ; Record that this action has started.
@@ -2493,17 +2416,9 @@ to give-birth
   ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; GENERATE A LIST OF CALLER'S OFFSPRING
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to-report my-offspring
   report ifelse-value ( biological.sex = "female" )            ; Determine caller's offspring
@@ -2512,17 +2427,9 @@ to-report my-offspring
     father.identity = [my.identity] of myself ]]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER BECOMES AN INFANT
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to update-to-infant
   complete-action self "update-to-infant" 0                    ; Record that this action has started.
@@ -2536,17 +2443,9 @@ to update-to-infant
   ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER DEVELOPS INTO JUVENILE
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to check-juvenility [ cost ]
   complete-action self "check-juvenility" cost                 ; Record that this action has started.
@@ -2561,17 +2460,9 @@ to check-juvenility [ cost ]
   ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER DETERMINES IF THEY SHOULD STOP LACTATING
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to check-weaning [ cost ]
   complete-action self "check-weaning" cost                    ; Record that this action has started.
@@ -2585,17 +2476,9 @@ to check-weaning [ cost ]
   complete-action self "update-weaning-chance" 0               ; Record that this action has been completed.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER WEANS OFFSPRING
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to wean-offspring
   complete-action self "wean-offspring" 0                      ; Record that this action has started.
@@ -2608,17 +2491,9 @@ to wean-offspring
   ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER BECOMES A JUVENILE
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to update-to-juvenile
   complete-action self "update-to-juvenile" 0                  ; Record that this action has started.
@@ -2635,17 +2510,9 @@ to update-to-juvenile
   ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER DEVELOPS INTO ADULT
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to check-adulthood [ cost ]
   complete-action self "check-adulthood" cost                  ; Record that this action has started.
@@ -2657,17 +2524,9 @@ to check-adulthood [ cost ]
   ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER BECOMES AN ADULT
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to update-to-adult
   complete-action self "update-to-adult" 0                     ; Record that this action has started.
@@ -2697,7 +2556,7 @@ to update-to-adult
   ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ;
 ;  .d8888b. 88d888b. .d8888b. 88d888b. .d8888b. dP    dP
@@ -2707,19 +2566,11 @@ end
 ;                                           .88      .88
 ;                                       d8888P   d8888P
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER INITIATES CONSUMPTION OF TARGET
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to eat [ target cost ]
   complete-action target "eat" cost                            ; Record that this action has started.
@@ -2730,17 +2581,9 @@ to eat [ target cost ]
   ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER TAKES ENERGY FROM TARGET
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to receive-from [ target cost ]
   complete-action target "receive-from" cost                   ; Record that this action has started.
@@ -2780,7 +2623,7 @@ to receive-from [ target cost ]
   ]]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ;  oo            dP                                         dP   oo
 ;                88                                         88
@@ -2789,20 +2632,12 @@ end
 ;  88 88    88   88   88.  ... 88       88.  .88 88.  ...   88   88 88.  .88 88    88       88
 ;  dP dP    dP   dP   `88888P' dP       `88888P8 `88888P'   dP   dP `88888P' dP    dP `88888P'
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER PROVIDES ENERGY TO TARGET
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to supply-to [ target cost ]
   complete-action target "supply-to" cost                      ; Record that this action has started.
@@ -2823,17 +2658,9 @@ to supply-to [ target cost ]
 
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER REQUESTS ENERGY FROM TARGET
-;
-; This subroutine...
-;
-; ENTRY: entry 1...
-;
-; EXIT: exit 1...
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to demand-from [ target cost ]
   complete-action target "demand-from" cost                    ; Record that this action has started.
@@ -2855,19 +2682,9 @@ to demand-from [ target cost ]
 
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER APPLIES TO JOIN THE SAME GROUP AS THE TARGET
-;
-; This routine
-;
-; ENTRY: 'target' defines the individual that the caller is interacting with.
-;
-;        'cost' defines the amount of energy that the caller paid for this interaction.
-;
-; EXIT:
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to join [ target cost ]
   complete-action target "join" cost                            ; Record that this action has started.
@@ -2888,19 +2705,11 @@ to join [ target cost ]
   ]                                                             ; caller joins group.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER APPLIES TO LEAVE CURRENT GROUP THAT IS SHARED BY TARGET
 ;
 ; This routine only works if target and caller are part of the same group.
-;
-; ENTRY: 'target' defines the individual that the caller is interacting with.
-;
-;        'cost' defines the amount of energy that the caller paid for this interaction.
-;
-; EXIT:
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to leave [ target cost ]
   complete-action target "leave" cost                           ; Record that this action has started.
@@ -2922,19 +2731,9 @@ to leave [ target cost ]
   ]                                                             ; group.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER APPLIES TO RECRUIT THE TARGET TO ITS CURRENT GROUP
-;
-; This routine
-;
-; ENTRY: 'target' defines the individual that the caller is interacting with.
-;
-;        'cost' defines the amount of energy that the caller paid for this interaction.
-;
-; EXIT:
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to recruit [ target cost ]
   complete-action target "recruit" cost                           ; Record that this action has started.
@@ -2956,19 +2755,11 @@ to recruit [ target cost ]
   ]                                                               ; joins group.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER APPLIES TO EXPEL THE TARGET FROM ITS CURRENT GROUP
 ;
-; This routine...strangers cannot do this to non-group members to get them to leave their group (Change)
-;
-; ENTRY: 'target' defines the individual that the caller is interacting with.
-;
-;        'cost' defines the amount of energy that the caller paid for this interaction.
-;
-; EXIT:
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; Strangers cannot do this to non-group members to get them to leave their group (Change)
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to expel [ target cost ]
   complete-action target "expel" cost                             ; Record that this action has started.
@@ -2990,20 +2781,14 @@ to expel [ target cost ]
   ]                                                               ; leaves group.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER JOINS THE DESIGNATED GROUP
 ;
 ; This subroutine is called when the caller decides to join an established group. When this happens, a
 ; record is made of this action, the caller updates its group.identity with the identity of the designated
 ; group, and the caller's label is '='. These effects only occur if the caller is not already in the
 ; desingated group.
-;
-; ENTRY:  group-id | The identity of the designated group that the caller wants to join.
-;
-; EXIT:   Caller is not part of the designated group.
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to join-group [ group-id ]
   complete-action self "join-group" 0                          ; Record that this action has started.
@@ -3026,20 +2811,14 @@ to join-group [ group-id ]
   ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER LEAVES ITS CURRENT GROUP
 ;
 ; This subroutine is called when the caller decides to leave its current group. When this happens,
 ; the caller updates its group.identity with a new random identity, which identifies the caller
 ; as being the only member of a newly created group. The caller's label is set to '~' to visually indicate
 ; that the caller has left its group.
-;
-; ENTRY:
-;
-; EXIT:   Caller is now the singular member of a newly created group.
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to leave-group
   complete-action self "leave-group" 0                         ; Record that this action is completed.
@@ -3050,19 +2829,9 @@ to leave-group
   complete-action self "left-group" 0
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER ATTEMPTS TO PICK UP THE TARGET
-;
-; This subroutine
-;
-; ENTRY: 'target' defines the individual that the caller is interacting with.
-;
-;        'cost' defines the amount of energy that the caller paid for this interaction.
-;
-; EXIT:
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to pick-up [ target cost ]
   complete-action target "pick-up" cost                        ; Record that this action has started.
@@ -3075,19 +2844,9 @@ to pick-up [ target cost ]
     [ carry target ]]                                          ; caller picks up target.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER ATTEMPTS TO PUT DOWN TARGET
-;
-; This subroutine
-;
-; ENTRY: 'target' defines the individual that the caller is interacting with.
-;
-;        'cost' defines the amount of energy that the caller paid for this interaction.
-;
-; EXIT:
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to put-down [ target cost ]
   complete-action target "put-down" cost                       ; Record that this action has started.
@@ -3101,19 +2860,9 @@ to put-down [ target cost ]
     [ drop target ]]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER ATTEMPTS TO CLING TO TARGET
-;
-; This subroutine
-;
-; ENTRY: 'target' defines the individual that the caller is interacting with.
-;
-;        'cost' defines the amount of energy that the caller paid for this interaction.
-;
-; EXIT:
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to cling-to [ target cost ]
   complete-action target "cling-to" cost                       ; Record that this action has started.
@@ -3126,19 +2875,9 @@ to cling-to [ target cost ]
     [ ask target [ carry myself ] ]]                           ; target carries caller.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER ATTEMPTS TO SQUIRM FROM TARGET
-;
-; This subroutine
-;
-; ENTRY: 'target' defines the individual that the caller is interacting with.
-;
-;        'cost' defines the amount of energy that the caller paid for this interaction.
-;
-; EXIT:
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to squirm-from [ target cost ]
   complete-action target "squirm-from" cost                    ; Record that this action has started.
@@ -3151,18 +2890,9 @@ to squirm-from [ target cost ]
     [ ask target [ drop myself ] ]]                            ; drops caller.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER ATTEMPTS TO CARRY TARGET
-;
-; This subroutine
-;
-; ENTRY: 'target' defines the individual that the caller is interacting with.
-;
-;
-; EXIT:
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to carry [ target ]
   complete-action target "carry" 0                             ; Record that this action has started.
@@ -3183,17 +2913,11 @@ end
 
 to-report is-not-carried? report not any? anima1s with [ member? myself carried.items ] end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER ATTEMPTS TO DROP TARGET
 ;
-; This subroutine
-;
-; ENTRY: 'target' defines the individual that the caller is interacting with.
-;
-; EXIT: Target is not or no longer in the carried.items inventory of caller.
-;
-; --------------------------------------------------------------------------------------------------------- ;
+;  Target is not or no longer in the carried.items inventory of caller.
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to drop [ target ]
   complete-action target "drop" 0                              ; Record that this action has started.
@@ -3205,19 +2929,9 @@ to drop [ target ]
   ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER ATTEMPTS TO HELP TARGET
-;
-; This subroutine
-;
-; ENTRY: 'target' defines the individual that the caller is interacting with.
-;
-;        'cost' defines the amount of energy that the caller paid for this interaction.
-;
-; EXIT:
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to help [ target cost ]
   complete-action target "help" cost                           ; Record that this action has started.
@@ -3235,19 +2949,9 @@ to help [ target cost ]
   ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER AIDS THE TARGET
-;
-; This subroutine
-;
-; ENTRY: 'target' defines the individual that the caller is interacting with.
-;
-;        'cost' defines the amount of energy that the caller paid for this interaction.
-;
-; EXIT:
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to aid [ target cost ]
   complete-action target "aid" 0                               ; Record that this action has started.
@@ -3343,19 +3047,9 @@ to aid [ target cost ]
     complete-action target "aid-complete" 0   ]                ; Record that this action has been completed.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER ATTEMPTS TO ATTACK THE TARGET
-;
-; This subroutine
-;
-; ENTRY: 'target' defines the individual that the caller is interacting with.
-;
-;        'cost' defines the amount of energy that the caller paid for this interaction.
-;
-; EXIT:
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to attack [ target cost ]
   complete-action target "attack" cost                         ; Record that this action has started.
@@ -3378,19 +3072,9 @@ to attack [ target cost ]
   ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER HARMS THE TARGET
-;
-; This subroutine
-;
-; ENTRY: 'target' defines the individual that the caller is interacting with.
-;
-;        'cost' defines the amount of energy that the caller paid for this interaction.
-;
-; EXIT:
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to harm [ target cost ]
   complete-action target "harm" 0                              ; Record that this action has started.
@@ -3495,7 +3179,7 @@ to harm [ target cost ]
   ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; DETERMINE GENETIC RELATEDNESS BETWEEN CALLER AND TARGET
 ;
@@ -3520,7 +3204,7 @@ end
 ;
 ; EXIT:   'relatedness-with' returns an estimate of the degree of relatedness, as fraction between 0 and 1.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to-report relatedness-with [ target ]
   let matching 0                                               ; Set up variables to track the number
@@ -3548,7 +3232,7 @@ to-report relatedness-with [ target ]
   report matching / ( matching + not-matching )                ; Return the percent of matching alleles.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; CALLER INITIATES MATING WITH TARGET
 ;
@@ -3567,7 +3251,7 @@ end
 ;
 ;        copulations.history | A record of all mating partners and frequency of matings.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to mate-with [ target cost ]
   complete-action target "mate-with" cost                      ; Record that this action has started.
@@ -3623,18 +3307,11 @@ to mate-with [ target cost ]
   ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; FEMALE CALLER CONCEIVES WITH TARGET
 ;
 ; This subroutine can only be performed by a female caller.
-;
-; ENTRY: 'target' defines the individual that the caller is interacting with.
-;
-;
-; EXIT:
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to conceive-with [ target ]
   complete-action target "conceive-with" 0                     ; Record that this action has started.
@@ -3648,7 +3325,7 @@ to conceive-with [ target ]
     and is.alive = true
     and [ is.alive ] of target = true )
   [                                                            ; If all of these criteria are met...
-    let preferred-litter base-litter-size ^ litter.size        ; Determine how many offspring to produce
+    let preferred-litter maximum-litter-size ^ litter.size        ; Determine how many offspring to produce
     let floor-litter floor preferred-litter                    ; based on caller's litter.size attribute,
     let percent-litter preferred-litter - floor-litter         ; which results in a number of offspring
     let my-litter-size ifelse-value                            ; between 1 and 10.
@@ -3672,7 +3349,7 @@ to conceive-with [ target ]
   ]
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ;  oo          oo   dP   oo          dP oo                     dP   oo
 ;                   88               88                        88
@@ -3681,18 +3358,11 @@ end
 ;  88 88    88 88   88   88 88.  .88 88 88  .Y8P    88.  .88   88   88 88.  .88 88    88
 ;  dP dP    dP dP   dP   dP `88888P8 dP dP d888888P `88888P8   dP   dP `88888P' dP    dP
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER IS INITIALIZED
-;
-;
-; ENTRY:
-;
-; EXIT:
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to initialize-from-parents [ m f ]
   set label-color white                                        ; The label color is white to be more visible.
@@ -3787,16 +3457,9 @@ to initialize-from-parents [ m f ]
                                                                ; initialized with default attributes.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER'S PHENOTYPE IS SET TO STARTING CONDITIONS
-;
-;
-; ENTRY:
-;
-; EXIT:
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to set-phenotype-to-initialized-form
   ask my.mother [ set carried.items                             ; Mother has just conceived the caller
@@ -3829,16 +3492,9 @@ to set-phenotype-to-initialized-form
   set night.perception 0
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
-;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ; CALLER'S PHENOTYPE IS INITIALIZED FOR 'IDEAL-FORM' MODEL-STRUCTURE
-;
-;
-; ENTRY:
-;
-; EXIT:
-;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to set-phenotype-to-ideal-form
   ask my.mother [                                              ; Set the mother's energy to half its
@@ -3874,7 +3530,7 @@ to set-phenotype-to-ideal-form
   update-to-adult                                               ; Update caller to adult status.
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; VIRTUAL CHROMOSOMAL RECOMBINATION
 ;
@@ -3889,7 +3545,7 @@ end
 ; EXIT:   When this subroutine is complete, both chromosome.I and chromosome.II have been updated with
 ;         any modifications.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to setup-chromosomes-from [ m f ]
                                                                ; BEHAVIOR CHROMOSOMES
@@ -3973,7 +3629,7 @@ to setup-chromosomes-from [ m f ]
 
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; VIRTUAL CHROMOSOMAL MUTATION
 ;
@@ -3988,7 +3644,7 @@ end
 ; EXIT:   When this subroutine is complete, both chromosome.I and chromosome.II have been updated with
 ;         any modifications.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to mutate-chromosomes [ mutation-chance-per-locus ]
   set chromosome.I mutate-chromosome                           ; Apply mutations to the alleles in
@@ -4020,7 +3676,7 @@ to mutate-chromosomes [ mutation-chance-per-locus ]
 
 end
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; MODIFY CHROMOSOME WITH NOVEL MUTATIONS AT RANDOM ALLELE LOCI
 ;
@@ -4041,7 +3697,7 @@ end
 ; EXIT:   This subroutine returns a copy of the chromosome with
 ;           modifications to a subset of the alleles.
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to-report mutate-chromosome [ input-chromosome mutation-chance-per-locus ]
 
@@ -4122,7 +3778,7 @@ to-report mutate-chromosome [ input-chromosome mutation-chance-per-locus ]
 end
 
 
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 ;
 ; GET A MODIFIED VERSION OF A GIVEN CODON
 ;
@@ -4135,16 +3791,16 @@ end
 ;
 ; EXIT:   THis subroutine returns a mutant verion of the unmutated-codon
 ;
-; --------------------------------------------------------------------------------------------------------- ;
+; ------------------------------------------------------------------------------------------------------------------- ;
 
 to-report get-mutation [ unmutated-codon type-of-mutation ]
 
   report ( ifelse-value                                        ; Return the mutation based on:
 
-    ( genotype-reader = "sta2us" )                             ; If genotype-reader is sta2us..
+    ( genotype-language = "sta2us" )                             ; If genotype-language is sta2us..
     [ sta2us-get-mutation unmutated-codon type-of-mutation]    ; then get mutation from sta2us extension
 
-    ( genotype-reader = "gat3s" )                              ; If genotype-reader is gat3s..
+    ( genotype-language = "gat3s" )                              ; If genotype-language is gat3s..
     [ g8tes-get-mutation unmutated-codon type-of-mutation]     ; then get mutation from gat3s extension
 
     [ sta2us-get-mutation unmutated-codon type-of-mutation ] ) ; default mutation if gentoype-reader not indicated
@@ -4178,9 +3834,9 @@ timesteps
 30.0
 
 BUTTON
-361
+617
 10
-427
+683
 79
 setup
 setup-button
@@ -4195,9 +3851,9 @@ NIL
 1
 
 BUTTON
-432
+688
 10
-499
+755
 79
 go
 go-button
@@ -4212,20 +3868,20 @@ NIL
 1
 
 INPUTBOX
-7
+81
 10
-354
+609
 79
 path-to-experiment
-../data/virtual-primates/
+../results/
 1
 0
 String
 
 BUTTON
-505
+761
 10
-580
+836
 79
 go once
 go-button
@@ -4240,11 +3896,11 @@ NIL
 1
 
 INPUTBOX
-849
-10
-1118
-117
-observation-notes
+847
+415
+1116
+535
+simulation-notes
 NIL
 1
 0
@@ -4261,48 +3917,31 @@ simulation
 1
 11
 
-BUTTON
-763
-10
-837
-80
-save
-save-button
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
 SLIDER
-849
-466
-1118
-499
+848
+173
+1117
+206
 plant-minimum-neighbors
 plant-minimum-neighbors
 0
 8
-4.0
+0.0
 .1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-849
-503
-1118
-536
+848
+210
+1117
+243
 plant-maximum-neighbors
 plant-maximum-neighbors
 0
 8
-6.0
+8.0
 .1
 1
 NIL
@@ -4320,10 +3959,10 @@ season
 11
 
 SLIDER
-849
-393
-1118
-426
+848
+100
+1117
+133
 plant-seasonality
 plant-seasonality
 0
@@ -4335,10 +3974,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-849
-321
-1117
-354
+848
+28
+1116
+61
 plant-annual-cycle
 plant-annual-cycle
 10
@@ -4350,10 +3989,10 @@ ticks
 HORIZONTAL
 
 SLIDER
-849
-357
-1118
-390
+848
+64
+1117
+97
 plant-daily-cycle
 plant-daily-cycle
 1
@@ -4376,32 +4015,32 @@ solar-status
 11
 
 INPUTBOX
-849
-122
-995
-191
+910
+249
+1056
+318
 population
-Chimpanzees
+population
 1
 0
 String
 
 INPUTBOX
-849
-197
-995
-265
+910
+324
+1056
+392
 genotype
-chimpanzees
+genotype
 1
 0
 String
 
 BUTTON
-1001
-122
-1056
-191
+848
+249
+903
+318
 ⟳
 reset-population-button
 NIL
@@ -4416,9 +4055,9 @@ NIL
 
 BUTTON
 1062
-122
+249
 1117
-155
+282
 ⤒
 export-population-button
 NIL
@@ -4433,9 +4072,9 @@ NIL
 
 BUTTON
 1062
-158
+285
 1117
-191
+318
 ⤓
 import-population-button
 NIL
@@ -4449,20 +4088,20 @@ NIL
 1
 
 CHOOSER
-849
-543
-1057
-588
+847
+542
+1055
+587
 useful-commands
 useful-commands
-"help-me" "meta-report" "---------------------" " > OPERATIONS   " "---------------------" "parameter-settings" "default-settings" "model-structure" "-- aspatial" "-- free-lunch" "-- ideal-form" "-- no-evolution" "-- no-plants" "-- reaper" "-- stork" "-- uninvadable" "clear-population" "reset-plants" "save-world" "import-world" "output-results" "---------------------" " > VERIFICATION " "---------------------" "dynamic-check" "-- true" "-- false" "runtime-check" "visual-check" "-- attack-pattern" "-- dine-and-dash" "-- life-history-channel" "-- musical-pairs" "-- night-and-day" "-- popularity-context" "-- speed-mating" "-- square-dance" "-- supply-and-demand" "---------------------" " > DISPLAY RESULTS   " "---------------------" "age" "generations" "genotype" "phenotype" "-- survival-chance" "-- body-size" "-- body-shade" "-- fertility-status" "-- hidden-chance" "-- bite-capacity" "-- mutation-chance" "-- sex-ratio" "-- litter-size" "-- conception-chance" "-- visual-angle" "-- visual-range" "-- day-perception" "-- night-perception" "carried-items" "energy-supply" "behaviors" "-- environment" "-- decisions" "-- actions" "-- matings" "-- mating-partners" "-- conceptions" "-- infanticide" "-- group-transfers" "-- travel-distance" "-- foraging-gains" "-- total-energy-gains" "-- total-energy-cost" "show-territories"
-5
+"simulation-log" "---------------------" " > OPERATIONS   " "---------------------" "save-notes" "parameter-settings" "default-settings" "model-structure" "-- aspatial" "-- free-lunch" "-- ideal-form" "-- no-evolution" "-- no-plants" "-- reaper" "-- stork" "-- uninvadable" "clear-population" "reset-plants" "import-world" "save-world" "---------------------" " > VERIFICATION " "---------------------" "dynamic-check" "-- true" "-- false" "runtime-check" "visual-check" "-- attack-pattern" "-- dine-and-dash" "-- life-history-channel" "-- musical-pairs" "-- night-and-day" "-- popularity-context" "-- speed-mating" "-- square-dance" "-- supply-and-demand" "---------------------" " > MEASUREMENTS   " "---------------------" "territory-sizes" "plant-patchiness" "inspect-genotype" "demographics" "activity-budget" "---------------------" " > PLOT   " "---------------------" "age" "individuals" "generations" "phenotype" "-- survival-chance" "-- body-size" "-- body-shade" "-- fertility-status" "-- hidden-chance" "-- bite-capacity" "-- mutation-chance" "-- sex-ratio" "-- litter-size" "-- conception-chance" "-- visual-angle" "-- visual-range" "-- day-perception" "-- night-perception" "carried-items" "energy-supply" "behaviors" "-- matings" "-- mating-partners" "-- conceptions" "-- help-to" "-- help-from" "-- attacks-to" "-- attacks-from" "-- infanticide" "-- group-transfers" "-- travel-distance" "-- foraging-gains" "-- energy-cost"
+0
 
 BUTTON
-1063
-543
-1118
-588
+1061
+542
+1116
+587
 ▷
 command
 NIL
@@ -4476,10 +4115,10 @@ NIL
 1
 
 BUTTON
-1002
-196
-1057
-265
+849
+323
+904
+392
 ⟳
 reset-genotype-button
 NIL
@@ -4494,9 +4133,9 @@ NIL
 
 BUTTON
 1062
-232
+359
 1117
-265
+392
 ⤓
 import-genotype-button
 NIL
@@ -4511,9 +4150,9 @@ NIL
 
 BUTTON
 1062
-196
+323
 1117
-229
+356
 ⤒
 export-genotype-button
 NIL
@@ -4527,45 +4166,23 @@ NIL
 1
 
 SLIDER
-849
-429
-1118
-462
+848
+136
+1117
+169
 plant-quality
 plant-quality
 .1
 100
-4.0
+5.0
 .1
 1
 NIL
 HORIZONTAL
 
-SWITCH
-588
-46
-755
-79
-output-results?
-output-results?
-0
-1
--1000
-
-SWITCH
-588
-10
-755
-43
-selection-on?
-selection-on?
-1
-1
--1000
-
 PLOT
 849
-646
+663
 1707
 917
 plot
@@ -4590,32 +4207,22 @@ PENS
 "gestatee female" 1.0 0 -955883 true "" ""
 "gestatee male" 1.0 0 -2674135 true "" ""
 
-CHOOSER
-849
-271
-1118
-316
-genotype-reader
-genotype-reader
-"sta2us"
-0
-
 SWITCH
 1429
-606
+623
 1519
-639
+656
 adults
 adults
-0
+1
 1
 -1000
 
 SWITCH
 1326
-606
+623
 1424
-639
+656
 juveniles
 juveniles
 1
@@ -4624,9 +4231,9 @@ juveniles
 
 SWITCH
 1232
-606
+623
 1322
-639
+656
 infants
 infants
 1
@@ -4635,9 +4242,9 @@ infants
 
 SWITCH
 1126
-606
+623
 1227
-639
+656
 gestatees
 gestatees
 1
@@ -4646,9 +4253,9 @@ gestatees
 
 SWITCH
 1523
-606
+623
 1613
-639
+656
 males
 males
 1
@@ -4657,34 +4264,115 @@ males
 
 SWITCH
 1617
-606
+623
 1707
-639
+656
 females
 females
-0
+1
 1
 -1000
 
 CHOOSER
 849
-594
+611
 1118
-639
+656
 plot-type
 plot-type
-"individuals" "groups" "generations"
+"individuals" "groups" "generations" "population"
 0
 
 OUTPUT
 1126
 10
-1707
-598
+1708
+591
 12
 
+BUTTON
+7
+10
+74
+79
+path...
+path-button
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+TEXTBOX
+849
+592
+1715
+610
+-- plot ----------------------------------------------------------------------------------------------------------------------------------------
+11
+0.0
+1
+
+TEXTBOX
+850
+10
+1130
+52
+-- parameters -------------------------------
+11
+0.0
+1
+
+TEXTBOX
+848
+397
+1132
+415
+-- tools -------------------------------------
+11
+0.0
+1
+
+BUTTON
+1626
+20
+1681
+53
+⬆︎
+up-button
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+1625
+544
+1680
+577
+⬇︎
+down-button
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
 @#$#@#$#@
-# B3GET 1.2.0 INFORMATION
+# B3GET 1.3.0 INFORMATION
 
 ## WHAT IS IT?
 
@@ -4706,11 +4394,13 @@ B3GET should come with the following file and [folder] structure:
 --- [code]
 ------ B3GET.nlogo
 ------ [ extensions ]
---------- commands.nls
+--------- analysis.nls
 --------- data.nls
---------- sta7us.nls
---------- import-export.nls
+--------- gat3s.nls
+--------- interface.nls
+--------- results.nls
 --------- selection.nls
+--------- sta2us.nls
 --------- verification.nls
 --- [data]
 ------ genotype.txt
@@ -4727,14 +4417,11 @@ PATH-TO-EXPERIMENT: the path indicating where to store data for the current expe
 SETUP: returns the model to the starting state.
 GO: runs the simulation.
 GO ONCE: runs exactly one tick, or timestep, of the simulation.
-COLLECT-DATA?: 'ON' collects data on the animals (see "data" extension).
-SELECTION-ON?: 'ON' artificially culls the animal population (see "selection" extension).
-SAVE: records the current simulation state and documentation-notes in an external file.
-OBSERVATION-NOTES: write notes to yourself here and click 'save' to save them.
+SIMULATION-NOTES: write notes to yourself here and choose 'save-notes' to save them.
 
 ### VIEW INFORMATION
 
-The main view screen allows us to visually see emergent behaviors.
+The main view screen allows us to visually see the emergence of the simulation.
 
 SIMULATION: the unique identification code of the current simulation.
 SEASON: cycles between 1.0 (summer) and -1.0 (winter) according to the plant-annual-cycle.
@@ -4808,7 +4495,7 @@ The file system of B3GET allows the user to directly modify genotype and populat
 
 Cite this model:
 
-Crouse, Kristin (2021). “B3GET” (Version 1.2.0). CoMSES Computational Model Library. Retrieved from: https://www.comses.net/codebases/6b10f629-7958-4b31-b489-d51c17d0f5b8/releases/1.2.0/
+Crouse, Kristin (2022). “B3GET” (Version 1.3.0). CoMSES Computational Model Library. Retrieved from: https://www.comses.net/codebases/6b10f629-7958-4b31-b489-d51c17d0f5b8/releases/1.3.0/
 
 Peer-reviewed publication on an earlier version of this model:
 
@@ -4859,7 +4546,7 @@ The actions listed above are the range of possible actions that an agent can tak
 
 When agents perform actions, for the most part this results in changes in the state variables of themselves or others. These states can be thought of as an organism's phenotype, the set of virtual 'organs' which emerges from a combination of an organism's genotype and its life experiences interacting with its environment.
 
-### VISIBLE 'ORGANS'
+### VISIBLE ATTRIBUTES
 
 SIZE: the overall body size or mass of an individual.
 COLOR: color represents group identity and shade correlates with age.
@@ -4874,7 +4561,7 @@ GROUP: agents can tell whether or not they have the same group identity.
 KINSHIP: check the chromosomes to deteremine degree of relatedness to that individual.
 INVENTORY: a list of other agents that are being carried.
 
-### LIFE HISTORY 'ORGAN' CONSTRAINTS
+### LIFE HISTORY TRAITS
 
 Like real organs, virtual organisms also have constraints to their biology that are tied to their life history and reproductive states:
 
@@ -4886,7 +4573,7 @@ CYCLING: females are able to conceive
 PREGNANT: females enter this state upon conception, now able to nurse
 LACTATING: females enter this state upon weaning, and are able to nurse
 
-### HIDDEN 'ORGANS'
+### HIDDEN ATTRIBUTES
 
 REPRODUCTION: determines the ability to conceive and create offspring.
 PERCEPTION: determines the ability to perceive the environment.
