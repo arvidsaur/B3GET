@@ -1,4 +1,4 @@
-; =================================================================================================================== ;
+; ========================================================================================================= ;
 ;
 ;  888888ba   .d888888  d888888P  .d888888
 ;  88    `8b d8'    88     88    d8'    88
@@ -17,7 +17,9 @@
 ;
 ; © 2021 K N Crouse
 ;
-; =================================================================================================================== ;
+; ========================================================================================================= ;
+
+; --------------------------------------------------------------------------------------------------------- ;
 ;
 ; CREATE OR UPDATE METAFILE WHEN USER INTERACTS WITH B3GET
 ;
@@ -28,7 +30,8 @@
 ; the type of interaction currently underway, and current simulation parameter settings. This
 ; information is located in B3GET > data > metafile.csv.
 ;
-; ENTRY: type-of-interaction | The type of interaction or button click that called this subroutine
+; ENTRY: type-of-interaction | The type of interaction or button click that called this subroutine,
+;          described in ....
 ;
 ;        name-of-file | The name of the data file related to the interaction.
 ;
@@ -37,34 +40,35 @@
 ;        metafile-notes | Any additional information to be stored with this interaction.
 ;
 ;        simulation-notes | A text box in the interface containing any information entered by the
-;        user. If null, an identifying message may be inserted.
+;          user. If null, an identifying message may be inserted.
 ;
 ; EXIT:  The metafile is updated with information on this interaction, collecting all data defined
-;        by "metafile-contents." If the file was empty upon entry, it is prepended with a heading
-;        line identifing the data.
+;          by "metafile-contents." If the file was empty upon entry, it is prepended with a heading
+;          line identifing the data.
 ;
 ;        simulation-notes are updated with metafile-notes at the beginning.
 ;
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+
 
 to update-metafile [ type-of-interaction name-of-file metafile-notes ]
 
-  set simulation-notes                                            ; Prepend any additional information
-  ( word metafile-notes " " simulation-notes )                    ; supplied to this subroutine.
+  set simulation-notes                                           ; Prepend any additional information
+  ( word metafile-notes " " simulation-notes )                   ; supplied.
 
   let filename "../results/metafile.csv"                          ; Select the file.
 
-  if ( not file-exists? filename )                                ; If filename does not exist then create a new
-  [                                                               ; file and write the heading lines.
+  if ( not file-exists? filename )                                ; If filename does not exist, open
+  [                                                               ; it and write the heading lines.
     file-open filename
     csv:to-file filename (list (list
       "date-and-time"
       "path-to-experiment"
       "model-version"
       "model-structure"
-      "genotype-language"
+      "genotype-reader"
       "simulation-id"
-      "timesteps"
+      "ticks"
       "file-type"
       "file-name"
       "simulation-notes"
@@ -85,16 +89,17 @@ to update-metafile [ type-of-interaction name-of-file metafile-notes ]
 
   file-open filename                                              ; Make sure the file is open.
 
-  if simulation-notes = ""                                        ; Provide an explanatory note at
-  [ set simulation-notes "Metafile updated." ]                    ; the digression of this subroutine.
+  if simulation-notes = ""                                       ; Provide an explanatory note at
+  [ set simulation-notes "Metafile updated." ]                   ; the digression of this subroutine.
 
-  file-print csv:to-string (list                                  ; Update METAFILE with a new row of information
+  ; Update METAFILE with a new row of FILE information
+  file-print csv:to-string (list
     (list
       date-and-time
       path-to-experiment
       model-version
       model-structure
-      genotype-language
+      genotype-reader
       simulation-id
       ticks
       type-of-interaction
@@ -114,13 +119,12 @@ to update-metafile [ type-of-interaction name-of-file metafile-notes ]
       useful-commands
   ))
 
-  set simulation-notes ""                                        ; Clear the simulation notes textbox.
-  file-close                                                     ; Close the metafile
-  simulation-log                                                 ; Display simulation log in the output.
+  set simulation-notes ""
+  file-close
 
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
 ;
 ;                                      dP            dP   oo
 ;                                      88            88
@@ -131,21 +135,30 @@ end
 ;  88                88
 ;  dP                dP
 ;
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; CREATE A SET OF AGENTS FROM INFORMATION STORED IN A POPULATION FILE
 ;
 ; This subroutine creates a new set of agents and for each agent sets their attributes according
 ; to the values stored in a csv population file. Each row in the file stores the unique attribute
 ; settings for one agent and each column represents one kind of attribute that each member in the
 ; population has.
-; ------------------------------------------------------------------------------------------------------------------- ;   
+;
+; ENTRY: PATH-TO-EXPERIMENT
+;        POPULATION
+;
+; EXIT: SET OF AGENTS WHOSE COMPOSITION AND ATTRBUUTES MATCH THOSE IN THE population file
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to import-population
 
   let file-to-import ( word path-to-experiment population ".csv" ) ; first try accessing file in designated file path
   if not file-exists? file-to-import [ set file-to-import ( word "../data/" population ".csv" ) ] ; then try the data folder
 
-  ifelse ( is-string? file-to-import and file-exists? file-to-import ) [ ; check both locations
+  ifelse  ( is-string? file-to-import and file-exists? file-to-import ) [ ; check both locations
 
     file-open file-to-import
     let data-from-filename csv:from-file file-to-import
@@ -181,7 +194,6 @@ to import-population
             ( header = "pen-mode" ) [ set pen-mode value ]
 
             ( breed = anima1s and ( header = "my.identity" or header = "meta.id" ) ) [ set my.identity value ]
-            ( breed = anima1s and ( header = "age" or header = "age.in.ticks" ) ) [ set age.in.ticks value ]
             ( breed = anima1s and header = "biological.sex" ) [ set biological.sex value ]
             ( breed = anima1s and header = "life.history" ) [ set life.history value ]
             ( breed = anima1s and ( header = "fertility.status" or header = "female.fertility" ) ) [ set fertility.status value ]
@@ -277,60 +289,41 @@ to import-population
             ( breed = anima1s and header = "conceptions.history" ) [ set conceptions.history value ]
             ( breed = anima1s and header = "group.transfers.history" ) [ set group.transfers.history value ]
             ( breed = anima1s and header = "infanticide.history" ) [ set infanticide.history value ]
-            ( breed = anima1s and header = "take.measurements" ) [ set take.measurements value ]
-            
-            ( breed = helpers and header = "helper-name" ) [ set helper-name value ]
-            ( breed = helpers and header = "helper-value" ) [ set helper-value ifelse-value ( is-string? value ) [ read-from-string value ] [ value ] ]
 
             [ ])
 
           set j j + 1 ]
         set i i + 1 ] ]
-    
-    
-    ; Helper initialize
-    ask helpers [ set hidden? true ]
-    
+
     ; create new my.identitys for everyone
     let table-of-ids table:make
     ask anima1s [
-      
+
       ifelse ( table:has-key? table-of-ids my.identity or my.identity = 9999999 )
       [ let new-id random 9999999
         table:put table-of-ids my.identity new-id
         set my.identity new-id ]
-      
+
       [ table:put table-of-ids my.identity my.identity ]]
-    
+
     ; update carried items list
     ask anima1s [
       if ( is-string? carried.items and length carried.items > 0 ) [ set carried.items run-result carried.items ]
-      let new-carried-items []
-      ifelse ( not is-list? carried.items ) 
-      [ set carried.items [] ]
-      [ foreach carried.items [ itm ->
-        if ( is-number? itm ) [
-          let object nobody
-          if ( table:has-key? table-of-ids itm ) [ set object one-of anima1s with [ my.identity  = ( table:get table-of-ids itm ) ]]
-          if ( object != nobody ) [ set new-carried-items lput object new-carried-items ]]
-      ]]
-      if ( new-carried-items != [] ) [ set carried.items new-carried-items ]
-    ]
-    
+      if ( not is-list? carried.items ) [ set carried.items [] ]
+      foreach carried.items [ itm -> set carried.items remove itm ( lput one-of anima1s with [ my.identity  = ( table:get table-of-ids itm ) ] carried.items ) ] ]
+
     ; update mother identity
     ask anima1s [
       if ( my.mother = 0 or my.mother = "nobody" ) [ set my.mother nobody ]
       ifelse ( member? my.mother table:keys table-of-ids ) [
         set my.mother one-of anima1s with [ table:get table-of-ids [my.mother] of myself = my.identity  ] ]
       [ set my.mother nobody ]
+
     ]
-    
+
     ; general initialization of variables
     ask anima1s [
-      
-      if ( take.measurements != FALSE ) [ set take.measurements TRUE ]
-      if ( not is-number? age.in.ticks or age.in.ticks < 0 ) [ set age.in.ticks 0 ]
-      
+
       ; initialize lists
       set help.from.history []
       set attack.from.history []
@@ -364,13 +357,14 @@ to import-population
       update-appearance ; One the agent is updated with its attributes, update its appearance to match
     ]
 
-    update-metafile "population" population (word "POPULATION IMPORTED " population )
+    update-metafile "population" population (word "POPULATION IMPORTED: " population )
+    output-print " Population import successful."
 
   ][ set population "" ] ; If the population file cannot be found, set the population textbox to blank
 
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
 ;
 ; STORE COMPLETE INFORMATION ABOUT AN AGENT POPULATION INTO A FILE
 ;
@@ -382,16 +376,20 @@ end
 ; FILNAME: includes the full directory path to appropriate CSV file (if one does not exist, it will be created here).
 ; VARIABLES-TO-RECORD: is a list of string names that the caller-turtle has access to, including global variables,
 ; function outputs, and its own state variables.
-
+;
+; ENTRY
+;
+; EXIT
+;
 ; THINGS TO KEEP IN MIND:
 ;  - You should save ids rather than direct turtle references and fix with code after because who cannot be modified.
 ;  - You CAN save multiple different turtles breeds to the same file
 ;  - can handle booleans, numbers, strings, and lists of turtles, numbers, strings, or booleans, and csv-formatted list
 ;
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
 
 to save-population ; create popup window if can't find file location (maybe folder missing or something)
-  set output-header (word " SAVE POPULATION : " population )
+  output-header (word " SAVE POPULATION : " population )
 
   let filename (word path-to-experiment population ".csv")
 
@@ -422,7 +420,6 @@ to save-population ; create popup window if can't find file location (maybe fold
       "breed"
       "my.identity"
       "age"
-      "generation.number"
       "color"
       "heading"
       "xcor"
@@ -472,9 +469,6 @@ to save-population ; create popup window if can't find file location (maybe fold
       "chromosome.I"
       "chromosome.II"
       "my.mother"
-      "take.measurements"
-      "helper-name"
-      "helper-value"
     )
 
     ask anima1s with [ is.alive ] [
@@ -488,7 +482,6 @@ to save-population ; create popup window if can't find file location (maybe fold
           ( text = "breed" ) [ breed ]
           ( text = "my.identity" ) [ my.identity ]
           ( text = "age" ) [ age.in.ticks ]
-          ( text = "generation.number" ) [ generation.number ]
           ( text = "color" ) [ color ]
           ( text = "heading" ) [ heading ]
           ( text = "xcor" ) [ xcor ]
@@ -537,12 +530,8 @@ to save-population ; create popup window if can't find file location (maybe fold
           ( text = "y.magnitude" ) [ y.magnitude ]
           ( text = "chromosome.I" ) [ csv:to-string chromosome.I ]
           ( text = "chromosome.II" ) [ csv:to-string chromosome.II ]
-          ( text = "my.mother" ) [ ifelse-value ( my.mother != nobody ) [ [my.identity] of my.mother ] [ nobody ] ] 
-          ( text = "take.measurements" ) [ take.measurements ]
-          ;( text = "helper-name" ) [ helper-name ]
-          ;( text = "helper-value" ) [ helper-value ]
-          [ 0 ])
-        
+          ( text = "my.mother" ) [ ifelse-value ( my.mother != nobody ) [ [my.identity] of my.mother ] [ nobody ] ] )
+
         set data-list lput value data-list ]
 
       set body lput data-list body
@@ -554,12 +543,13 @@ to save-population ; create popup window if can't find file location (maybe fold
     file-open filename
     csv:to-file filename ( sentence (list header ) body )
     file-close
-    update-metafile "population" population (word "POPULATION SAVED " population)
+    update-metafile "population" population (word "POPULATION SAVED: " population)
+    output-print " Population successfully saved."
   ]
 
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
 ;
 ;                                        dP
 ;                                        88
@@ -570,14 +560,23 @@ end
 ;       .88                                        .88 88
 ;   d8888P                                     d8888P  dP
 ;
-; ------------------------------------------------------------------------------------------------------------------- ;     
+; --------------------------------------------------------------------------------------------------------- ;
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; IMPORT INFORMATION FROM GENOTYPE FILE AND REPLACE AGENT GENOTYPES WITH INFORMATION
 ;
 ; This subroutine reads genotype information from an extrnal file and makes copies of that information
 ; to store in the chromosomes of all agents in the population.
-; ------------------------------------------------------------------------------------------------------------------- ;   
+;
+; ENTRY
+;
+; EXIT
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to import-genotype
+  output-header (word " IMPORT GENOTYPE : " genotype )
 
   let first-codon-list [ "0|" "1|" "2|" "3|" "4|" "5|" ]
 
@@ -610,9 +609,9 @@ to import-genotype
             if ( subject = self ) [ print itm ]
 
             let codon-exists ( ifelse-value                         ; ...Check if the codon exists in the current genotype reader lexicon
-              ( genotype-language = "sta2us" )
+              ( genotype-reader = "sta2us" )
               [ sta2us-codon-exists itm ]                           ; - sta2us genotype reader check
-              ( genotype-language = "gat3s" )
+              ( genotype-reader = "gat3s" )
               [ gat3s-codon-exists itm ]                            ; - gat3s genotype reader check
               [ sta2us-codon-exists itm ])                          ; - or sta2us by default
 
@@ -647,24 +646,32 @@ to import-genotype
       file-close
     ]
 
-    update-metafile "genotype" genotype (word "GENOTYPE IMPORTED " genotype)
+    update-metafile "genotype" genotype (word "GENOTYPE IMPORTED: " genotype)
+    output-print " Genotype import successful."
 
   ] [ set genotype "" ]
 
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; SAVE GENOTYPE OF SELECTED INDIVIDUAL AND STORE IN EXTERNAL TXT FILE
 ;
 ; This subroutine creates an external file with complete information from a single agent. This
 ; information can then be used to later import this information into a new simulation.
-; ------------------------------------------------------------------------------------------------------------------- ;   
+;
+; ENTRY
+;
+; EXIT
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to save-genotype
   let combined-chromosomes (sentence chromosome.I [[]] chromosome.II )
-  set output-header  (word " SAVE GENOTYPE : organism " my.identity  )
+  output-header (word " SAVE GENOTYPE : organism " my.identity  )
   if ( genotype = "" ) [ if ( subject != nobody ) [ set genotype (word [my.identity] of subject ) ]]
   ( csv:to-file ( word path-to-experiment genotype ".txt" ) combined-chromosomes " " )
-  update-metafile "genotype" genotype (word "GENOTYPE SAVED " genotype )
+  update-metafile "genotype" genotype (word "GENOTYPE SAVED: " genotype )
+  output-print " Genotype successfully saved."
 end
 

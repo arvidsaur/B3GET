@@ -1,4 +1,4 @@
-; =================================================================================================================== ;
+; ========================================================================================================= ;
 ;                                                                 
 ;  dP     dP  88888888b  888888ba  dP  88888888b dP  a88888b.  .d888888  d888888P dP  .88888.  888888ba  
 ;  88     88  88         88    `8b 88  88        88 d8'   `88 d8'    88     88    88 d8'   `8b 88    `8b 
@@ -10,8 +10,11 @@
 ;
 ; This extension contains all functions related to verifying B3GET's code during simulations.    
 ;
-; © 2022 K N Crouse  
-; =================================================================================================================== ;
+; © 2021 K N Crouse  
+;
+; ========================================================================================================= ;
+
+; --------------------------------------------------------------------------------------------------------- ;
 ;
 ; GENERATE RECORD OF MOST RECENT DYNAMIC VERIFICATION ASSESSMENT
 ;
@@ -40,7 +43,7 @@
 ;
 ; EXIT: Reports the summary information about the recent dynamic verification assessment.
 ;
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report generate-verification-tape
 
@@ -52,9 +55,9 @@ to-report generate-verification-tape
   ;---------------------------------------------------------------------------------------------------------
   ; GO
   ;---------------------------------------------------------------------------------------------------------
-  
-  set header lput "All individuals are either a gestatee, infant, juvenile or adult?" header
-  set verification lput "2022-09-15" verification
+
+  set header lput "All individuals are designated as one of the life history options?" header
+  set verification lput "2021-06-06" verification
   set function lput "go" function
   set boolean lput ( not any? anima1z with [ life.history != "gestatee" and 
     life.history != "infant" and life.history != "juvenile" and life.history != "adult" ] ) boolean
@@ -63,33 +66,62 @@ to-report generate-verification-tape
   ; --- MODEL STRUCTURE
   ;---------------------------------------------------------------------------------------------------------
   
-;  set header lput "No individuals can see beyond the maximum visual range?" header 
-;  set verification lput "2022-09-15" verification 
-;  set function lput "go" function
-;  set boolean lput ( not any? anima1z with [ ( max [distance myself] of my.environment ) > visual.range ]) boolean
-  
-  set header lput "Not any individuals with a negative energy supply?" header 
-  set verification lput "2022-09-15" verification 
+  set header lput "An aspatial model-structure allows individuals to see beyond their perception abilities?" header 
+  set verification lput "2021-06-06" verification 
   set function lput "go" function
-  set boolean lput ( not any? anima1z with [ energy.supply < 0 ] ) boolean 
+  set boolean lput ( ifelse-value ( model-structure = "aspatial" ) 
+    [ any? anima1z with [ max [distance myself] of my.environment > visual.range ] ] 
+    [ true ] ) boolean
   
-  set header lput "There is population level variation in body size?" header 
-  set verification lput "2022-09-15" verification 
+  set header lput "Individuals not in the same location can interact with each other in an aspatial model-structure?" header 
+  set verification lput "2021-06-06" verification 
   set function lput "go" function
-  set boolean lput ( standard-deviation [body.size] of anima1z > 0 ) boolean 
+  set boolean lput ( ifelse-value ( model-structure = "aspatial" ) [ any? anima1z with [ max [ distance myself ] of my.environment > 1 ] ] [ true ] ) boolean 
+  
+  set header lput "Individuals can have a negative emergy supply in a free-lunch model-structure?" header 
+  set verification lput "2021-06-06" verification 
+  set function lput "go" function
+  set boolean lput ( ifelse-value ( model-structure = "free-lunch" ) [ any? anima1z with [ energy.supply < 0 ]] [ true ] ) boolean 
+  
+  set header lput "Individuals cannot have a negative emergy supply if the model-structure is not free-lunch?" header 
+  set verification lput "2021-06-06" verification
+  set function lput "go" function
+  set boolean lput ( ifelse-value ( model-structure != "free-lunch" ) [ not any? anima1z with [ energy.supply < 0 ]] [ true ] ) boolean 
+  
+  set header lput "Population size is equal to 200 individuals for reaper model structure?" header
+  set verification lput "2021-06-06" verification 
+  set function lput "go" function
+  set boolean lput ( ifelse-value ( model-structure = "reaper" ) [ count anima1z with [ is.alive ] = 200 ] [ true ] ) boolean 
+  ; Could be less than 200 if starting population has fewer than 100 individuals
+  
+  set header lput "Population size is equal to 200 individuals for stork model structure?" header 
+  set verification lput "2021-06-06" verification 
+  set function lput "go" function
+  set boolean lput ( ifelse-value ( model-structure = "stork" ) [ count anima1z with [ is.alive ] = 200 ] [ true ] ) boolean 
+  ; Could be less than 200 if no males or females available in mating pool
+  
+  set header lput "There are no mating events signaled by a '!' in stork model structure?" header
+  set verification lput "2021-06-06" verification 
+  set function lput "go" function
+  set boolean lput ( ifelse-value ( model-structure = "stork" ) [ not any? anima1z with [ label = "!" ] ] [ true ] ) boolean 
+  
+  set header lput "An ideal-form model-structure has no standard deviation for body size in population?" header 
+  set verification lput "2021-06-06" verification 
+  set function lput "go" function
+  set boolean lput ( ifelse-value ( model-structure = "ideal-form" ) [ standard-deviation [body.size] of anima1z = 0 ] [ true ] ) boolean 
   
   ;---------------------------------------------------------------------------------------------------------
-  ; PLANTS-UPDATE
+  ; UPDATE-PATCHES
   ;---------------------------------------------------------------------------------------------------------
   
-  set header lput "Plants are only updated once a timestep?" header 
-  set verification lput "2022-09-15" verification 
-  set function lput "plants-update" function
-  set boolean lput ( profiler:calls "plants-update" = 1 ) boolean   
+  set header lput "Calls to update-patches is one?" header 
+  set verification lput "2021-06-06" verification 
+  set function lput "update-patches" function
+  set boolean lput ( profiler:calls "update-patches" = 1 ) boolean   
   
-  set header lput "No plants have an energy supply that exceeds the maximum allowed?" header 
-  set verification lput "2022-09-15" verification 
-  set function lput "plants-update" function
+  set header lput "No plants have an energy supply that exceeds their terminal energy?" header 
+  set verification lput "2021-06-06" verification 
+  set function lput "update-patches" function
   set boolean lput ( not any? patches with [ penergy.supply > pterminal.energy ] ) boolean   
   
   ;---------------------------------------------------------------------------------------------------------
@@ -100,12 +132,27 @@ to-report generate-verification-tape
   set verification lput "2021-06-06" verification 
   set function lput "deteriorate" function
   set boolean lput ( profiler:calls "deteriorate" = ( count anima1s with [ not fully.decayed ] + count anima1s with [ ticks.at.death = ticks ] ) ) boolean
-
+  
+  ;---------------------------------------------------------------------------------------------------------
+  ; CHECK-MORTALITY
+  ;---------------------------------------------------------------------------------------------------------
+  
+  set header lput "Calls to check-mortality are the same as non-decayed individuals?" header
+  set verification lput "2021-06-06" verification 
+  set function lput "check-mortality" function
+  set boolean lput ( profiler:calls "check-mortality" = ( count anima1s with [ not fully.decayed ] + count anima1s with [ ticks.at.death = ticks ] ) ) boolean 
+  ; This subroutine sometimes returns one greater than population size
+  
   ;---------------------------------------------------------------------------------------------------------
   ; UPDATE-APPEARANCE
   ;---------------------------------------------------------------------------------------------------------
-
-  set header lput "All individuals have a body size between 0 and 1?" header 
+  
+  set header lput "Calls to update-appearance are the same as non-decayed individuals?" header 
+  set verification lput "2021-06-06" verification 
+  set function lput "update-appearance" function
+  set boolean lput ( profiler:calls "update-appearance" = ( count anima1s with [ not fully.decayed ] + count anima1s with [ ticks.at.death = ticks ] ) ) boolean   
+  
+  set header lput "All individuals have a size between 0 and 1?" header 
   set verification lput "2021-06-06" verification 
   set function lput "update-appearance" function
   set boolean lput ( not any? anima1z with [ size > 1 or size < 0 ] ) boolean  
@@ -117,7 +164,7 @@ to-report generate-verification-tape
   set header lput "All female individuals are circle shaped?" header 
   set verification lput "2021-06-06" verification 
   set function lput "get-shape" function
-  set boolean lput ( not any? anima1z with [ age.in.ticks > 0 and biological.sex = "female" and not member? "circle" shape ] ) boolean   
+  set boolean lput ( not any? anima1z with [ biological.sex = "female" and not member? "circle" shape ] ) boolean   
   
   set header lput "All male individuals are triangle shaped?" header 
   set verification lput "2021-06-06" verification 
@@ -1613,41 +1660,81 @@ to-report generate-verification-tape
 
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; DETERMINE IF ACTIONS INCLUDE SPECIFIED TYPE
-; ------------------------------------------------------------------------------------------------------------------- ;   
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report my-actions-include [ input ]
   report length filter [ vector -> item 0 vector = self and item 2 vector = input ] (reduce sentence [actions.completed] of anima1z) > 0 
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; DETERMINE IF MOST RECENTLY COMPLETED ACTIONS INCLUDE INPUT
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; DETERMINE IF 
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report last-actions-include [ input ]
   report length filter [ vector -> item 2 vector = input ] actions.completed > 0 
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; RETURNS NUMBER OF DECISIONS FROM INPUT TYPE
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report decision-count-for [ input ]
   report length filter [ vector -> item 2 vector = input ] (reduce sentence [decision.vectors] of anima1z)
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; RETURNS NUMBER OF ACTIONS FROM INPUT TYPE
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report action-count-for [ input ]
   report length filter [ vector -> item 2 vector = input ] (reduce sentence [actions.completed] of anima1z)
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; RETURNS A LIST OF CURRENT TARGETS OF AN INDIVIDUAL
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report my-targets
   let my-targets-list remove-duplicates map [ i -> item 1 i ] decision.vectors
@@ -1655,9 +1742,17 @@ to-report my-targets
   report targets
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; RETURN AN AGENTSET OF LIVING ANIMA1S
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; RETURN A SET OF LIVING ANIMA1S
+;
+; This subroutine returns a NetLogo agentset of living anima1s.
+;
+; ENTRY: The simulation is currently in operation with anima1s present.
+;
+; EXIT: This subroutine returns a set of living anima1s.
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report anima1z 
   report anima1s with [ is.alive ]

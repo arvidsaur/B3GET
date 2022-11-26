@@ -1,4 +1,5 @@
-; =================================================================================================================== ;  
+; ========================================================================================================= ;  
+;
 ;
 ;  dP 888888ba  d888888P  88888888b  888888ba   88888888b  .d888888   a88888b.  88888888b 
 ;  88 88    `8b    88     88         88    `8b  88        d8'    88  d8'   `88  88        
@@ -7,11 +8,14 @@
 ;  88 88     88    88     88         88     88  88        88     88  Y8.   .88  88        
 ;  dP dP     dP    dP     88888888P  dP     dP  dP        88     88   Y88888P'  88888888P 
 ;  
-; This extension handles operations that relate to user interactions with the interface, including parameter 
-; settings, commands, and button clicks. 
+; This extension handles operations that relate to user interactions with the interface, including
+; parameter settings, commands, and button clicks. 
 ;
-; © 2022 K N Crouse   
-; =================================================================================================================== ;                                                                                         
+; © 2021 K N Crouse   
+;
+; ========================================================================================================= ;
+
+; --------------------------------------------------------------------------------------------------------- ;                                                                                         
 ;                                                                                        
 ;  dP                  dP     dP                              
 ;  88                  88     88                              
@@ -20,286 +24,174 @@
 ;  88.  .88 88.  .88   88     88   88.  .88 88    88       88 
 ;  88Y8888' `88888P'   dP     dP   `88888P' dP    dP `88888P' 
 ;                                                             
-; ------------------------------------------------------------------------------------------------------------------- ;      
-; PATH CHOOSER BUTTON HANDLER
-;
-; Prompts user to choose a folder to store simulation experiment data and updates B3GET with path to the folder.
-; ------------------------------------------------------------------------------------------------------------------- ;  
+; --------------------------------------------------------------------------------------------------------- ;  
 
-to path-button 
+
+to update-local-records [ input-text ]
   
-  let path user-directory                                    ; Prompt user to select folder in directory
+;  set local-updates-record lput (word date-and-time " " (input-text)) local-updates-record
+;  
+;  output-header "RECENT UPDATES"
+;  
+;  foreach local-updates-record [ r ->
+;    output-print (word "  " r)
+;  ]
   
-  if ( path != false ) [                                     ; Check that user selected a folder
-    let current-position position model-name path            ; Find the position of the base model folder in path
-    ifelse ( current-position = false ) [                    ; If no position exists then ask user to choose again.
-      
-      user-message (word 
-        "Please choose from within the " 
-        model-name " folder.")
-      
-    ][
-      
-      while [ is-number? current-position ] [                 
-        set path substring path                              ; Determine substring in path that does not  
-        ( current-position + length model-name )             ; include B3GEt folder and any parent folders 
-        (length path)                                         
-        set current-position position model-name path        ; Continue searching for substring 
-      ]
-      
-      set path-to-experiment (word ".." path ) ]]            ; Update current path-to-experiment
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; SETUP BUTTON HANDLER
+; --------------------------------------------------------------------------------------------------------- ;
 ;
-; User click creates a new simulation.
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; PATH BUTTON HANDLER
+;
+; ENTRY: User has clicked the "path" button.
+;
+; EXIT: The path subroutine is enacted.
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
-to setup-button
+to path-button
+  
+  let path user-directory
+  let current-position position model-name path
+  
+  ifelse ( current-position = false ) [
+    
+    user-message (word "Please choose from within the " model-name " folder.")
+    
+  ][
+    
+    while [ is-number? current-position ] [
+      
+      set path substring path ( current-position + length model-name ) (length path)
+      set current-position position model-name path
+    ]
+    
+    set path-to-experiment (word ".." path )
+    
+  ]
+  
+end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; SETUP BUTTON HANDLER [CL]
+;
+; ENTRY: User has clicked the "setup" button.
+;
+; EXIT: The setup subroutine is enacted.
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to setup-button  
   if ( simulation-id != 0 and ticks > 100000 )    ; If there is a current simulation that has already been
-  [ record-world ]                                ; running for a while then first record the simulation world.
-  setup                                           ; Setup the simulation.
+  [ record-world ]                                ; running for a while then first record the simulation world
+  setup                                              
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; GO BUTTON HANDLER
 ;
-; User click starts pr stops the simulation.
-; Checks first that user has created a new simulation.
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; ENTRY: User has clicked the "go" button.
+;
+; EXIT: The go subroutine is enacted.
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to go-button
-  ifelse ( simulation-id != 0 )                                   ; If a simulation has already been created
-  [ go ]                                                          ; start or stop the simulation.
-  [ let user-setup-response false                                  
-    set user-setup-response                                       ; Otherwise ask user if they want to create a 
-    user-yes-or-no? "Would you like to start a new simulation?"   ; new simulation.
-    ifelse ( user-setup-response ) [ setup ] [ stop ] ]          
+  ifelse ( simulation-id != 0 )
+  [ go ]
+  [ let user-setup-response false
+    set user-setup-response user-yes-or-no? "Would you like to start a new simulation?"
+    ifelse ( user-setup-response ) [ setup ] [ stop ] ]
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; RESET POPULATION BUTTON HANDLER
 ;
-; Change the population name to a randomly generated ID.
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; ENTRY: User has clicked the population "⟳" button.
+;
+; EXIT: The setup subroutine is enacted.
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to reset-population-button
-  set population generate-population-id    ; Assign population a new population ID based on current date and time.
+  set population generate-population-id
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; EXPORT POPULATION BUTTON HANDLER
 ;
-; Save a record of the current population of organisms in an external file.
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; ENTRY: User has clicked the "setup" button.
+;
+; EXIT: The setup subroutine is enacted.
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to export-population-button
-  if ( any? anima1s with [ is.alive ] ) [    ; If there are any living organisms
-    save-population ]                        ; Save them into an external file.
+  if ( any? anima1s ) [ save-population ]
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; IMPORT POPULATION BUTTON HANDLER
 ;
-; Create a new population based on specified file.
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; ENTRY: User has clicked the "setup" button.
+;
+; EXIT: The setup subroutine is enacted.
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to import-population-button
   import-population
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; RESET GENOTYPE BUTTON HANDLER
 ;
-; Create a new genotype name based on the current date and time.
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; ENTRY: User has clicked the genotype "⟳" button.
+;
+; EXIT: The setup subroutine is enacted.
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to reset-genotype-button
   set genotype generate-genotype-id
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; EXPORT GENOTYPE BUTTON HANDLER
 ;
-; Save the current genotype of selected individual or random individual if none selected. 
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; ENTRY: User has clicked the "setup" button.
+;
+; EXIT: The setup subroutine is enacted.
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to export-genotype-button
-  ifelse ( subject != nobody )                                        ; If subject is selected
-  [ ask one-of anima1s with [ subject = self ] [ save-genotype ]]     ; save genotype of subject
-  [ ask one-of anima1s with [ is.alive ] [ save-genotype ]]           ; otherwise save genotype of random individual.
-    
+  if ( subject != nobody ) [ ask one-of anima1s with [ subject = self ] [ save-genotype ]]
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; IMPORT GENOTYPE FROM FILE
+; --------------------------------------------------------------------------------------------------------- ;
 ;
-; Overwite genotype of all individuals in population with new genotype information from file.
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; IMPORT GENOTYPE BUTTON HANDLER
+;
+; ENTRY: User has clicked the "setup" button.
+;
+; EXIT: The setup subroutine is enacted.
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to import-genotype-button
   import-genotype
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; UP BUTTON HANDLER
-;
-; Scroll up in the output window display.
-; ------------------------------------------------------------------------------------------------------------------- ;   
-
-to up-button
-  set output-index output-index - 5                    ; Decrease the output index
-  if output-index < 0 [ set output-index 0 ]           ; If index is below zero then reset to zero
-  update-output                                        ; Refresh the output display
-end
-
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; DOWN BUTTON HANDLER
-;
-; Scroll down in the output window display.
-; ------------------------------------------------------------------------------------------------------------------- ;   
-
-to down-button
-  set output-index output-index + 5                    ; Increase the output index
-  if (output-index > ( length output-body - 15 ))      ; If index is to great
-  [ set output-index length output-body - 15 ]         ; then reset the index
-  update-output                                        ; Refresh the output display
-end
-
-; ------------------------------------------------------------------------------------------------------------------- ;  
-;
-;                      dP                       dP   
-;                      88                       88   
-;  .d8888b. dP    dP d8888P 88d888b. dP    dP d8888P 
-;  88'  `88 88    88   88   88'  `88 88    88   88   
-;  88.  .88 88.  .88   88   88.  .88 88.  .88   88   
-;  `88888P' `88888P'   dP   88Y888P' `88888P'   dP   
-;                           88                       
-;                           dP                       
-;
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; PRINT OUT DISPLAY TO OUTPUT WINDOW
-; ------------------------------------------------------------------------------------------------------------------- ;   
-
-to update-output
-  if ( behaviorspace-run-number = 0 ) [  ; If a BehaviorSpace run is not occurring
-    clear-output                             ; Clear the current output display.
-    update-output-header
-    update-output-body
-  ]
-end
-
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; PRINT OUT A HEADER TO THE OUTPUT WINDOW
-; ------------------------------------------------------------------------------------------------------------------- ;   
-
-to update-output-header
-  output-print " --------------------------------------------------------------------"
-  output-print ( word "  " output-header )
-  output-print " --------------------------------------------------------------------"
-end
-
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; PRINT OUT A BODY TO THE OUTPUT WINDOW
-; ------------------------------------------------------------------------------------------------------------------- ;   
-
-to update-output-body
-  let current-output-text output-body 
-  
-  let left-indent "  "                                           ; The width of the left indent of the printed output
-  let right-indent "  "                                          ; The width of the right indent of the printed output
-  let column-space "  "                                          ; The width in between columns of the printed output
-  let max-column-width 40
-  let max-rows 37
-  let max-width 80
-  
-  ; DETERMINE MAXIMUM LENGTH OF EACH COLUMN
-  let max-column-length table:make 
-  foreach output-body [ row ->
-    let column-index 0
-    foreach row [ column-item ->
-      
-      let new-column-item column-item
-      if ( not is-string? column-item ) [ set new-column-item (word column-item ) ]
-      
-      if ( not table:has-key? max-column-length column-index ) [     ; If table does not contain information on column
-        table:put max-column-length column-index 0 ]                 ; Initialize the table with a value of 0
-      
-      if ( length new-column-item > table:get max-column-length column-index ) [    
-                                                                     ; Check that current item is longer than in table
-        
-        let new-column-length length new-column-item                 ; If so, record the new lenght unless it is greater 
-                                                                     ; than the max column size allowed
-        if ( new-column-length > max-column-width ) [ set new-column-length max-column-width ]
-        table:put max-column-length column-index new-column-length ]
-      
-      set column-index column-index + 1
-    ]
-  ]
-  
-  ; FILTER OUT INFORMATION TO DISPLAY IN OUTPUT
-  let new-output-body []
-  let row-index 0
-  foreach output-body [ row ->
-    let new-row []
-    let column-index 0
-    let new-output-body-length 2
-    
-    if ( row-index >= output-index and length new-output-body < max-rows ) [ ;
-      
-      foreach row [ column-item ->
-        
-        let new-column-item column-item
-        if ( not is-string? column-item ) [ set new-column-item (word column-item) ]
-        let column-item-length length new-column-item
-        let current-max-length table:get max-column-length column-index
- 
-        ifelse ( column-item-length <= current-max-length )[ 
-          repeat ( current-max-length - column-item-length ) [ set new-column-item (word new-column-item " ") ]
-        ][
-          set new-column-item substring new-column-item 0 current-max-length
-        ]
-        
-        ifelse ( (new-output-body-length + current-max-length + 2 ) < max-width ) [
-          set new-output-body-length new-output-body-length + current-max-length + 2
-          set new-row lput new-column-item new-row
-          set column-index column-index + 1
-        ][
-          set new-output-body-length new-output-body-length + max-width 
-        ]
-      ]
-    ]
-    
-    if ( new-row != [] ) [
-      set new-output-body lput new-row new-output-body ]    ; Only print out rows with items
-    set row-index row-index + 1
-  ]
-  
-  ;print new-output-body
-  ;print (word "length " length new-output-body)
-  
-  ; PRINT BODY TO OUTPUT
-  foreach new-output-body [ row ->
-    let new-string left-indent
-    foreach row [ column-item ->
-      set new-string (word new-string column-item column-space)]
-    output-print new-string ]
-  
-end
-
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; GET CURRENTLY SELECTED USERFUL COMMAND as STRING
-; ------------------------------------------------------------------------------------------------------------------- ;   
-
-to-report get-selected-command
-  let string-to-report useful-commands
-  if ( member? "-- " useful-commands ) [
-    set string-to-report substring useful-commands 3 length useful-commands ] 
-  report string-to-report
-end
-
-; ------------------------------------------------------------------------------------------------------------------- ;     
+; --------------------------------------------------------------------------------------------------------- ;  
 ;
 ;                                                                  dP          
 ;                                                                  88          
@@ -308,34 +200,44 @@ end
 ;  88.  ... 88.  .88 88  88  88 88  88  88 88.  .88 88    88 88.  .88       88 
 ;  `88888P' `88888P' dP  dP  dP dP  dP  dP `88888P8 dP    dP `88888P8 `88888P' 
 ;                                                                              
-; ------------------------------------------------------------------------------------------------------------------- ;    
+; --------------------------------------------------------------------------------------------------------- ;
+
+; --------------------------------------------------------------------------------------------------------- ;
 ;
-; TRIGGER OPERATION FROM USEFUL-COMMANDS
+; TRIGGER OPERATION BASED ON USEFUL-COMMANDS SETTING [CL]
 ;
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; ENTRY: User has clicked the "▷" button.
+;
+;        Useful-commands contains a value.
+;
+; EXIT: The operation selected by useful-commands is enacted.
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to command
   
   ( ifelse 
     
     ( useful-commands = "help-me" ) [ help-me ]
-    ( useful-commands = "simulation-log" ) [ simulation-log ]
-    ( useful-commands = "save-notes" ) [ save-notes ]
-    ( useful-commands = "parameter-settings" ) [ parameter-settings ]
+    ( useful-commands = "meta-report" ) [ meta-report ]
+    
+    ( useful-commands = "parameter-settings" ) [ parameter-report ]
     ( useful-commands = "default-settings" ) [ default-settings ]
-    ( useful-commands = "model-structure" ) [ set-model-structure "" ]
-    ( useful-commands = "-- aspatial" ) [ set-model-structure "" ]
-    ( useful-commands = "-- free-lunch" ) [ set-model-structure "" ]
-    ( useful-commands = "-- ideal-form" ) [ set-model-structure "" ]
-    ( useful-commands = "-- no-evolution" ) [ set-model-structure "" ]
-    ( useful-commands = "-- no-plants" ) [ set-model-structure ""  ]
-    ( useful-commands = "-- reaper" ) [ set-model-structure "" ]
-    ( useful-commands = "-- stork" ) [ set-model-structure "" ]
-    ( useful-commands = "-- uninvadable" ) [ set-model-structure "" ]
+    ( useful-commands = "model-structure" ) [ set-model-structure ]
+    ( useful-commands = "-- aspatial" ) [ set-model-structure ]
+    ( useful-commands = "-- free-lunch" ) [ set-model-structure ]
+    ( useful-commands = "-- ideal-form" ) [ set-model-structure ]
+    ( useful-commands = "-- no-evolution" ) [ set-model-structure ]
+    ( useful-commands = "-- no-plants" ) [ set-model-structure  ]
+    ( useful-commands = "-- reaper" ) [ set-model-structure ]
+    ( useful-commands = "-- stork" ) [ set-model-structure ]
+    ( useful-commands = "-- uninvadable" ) [ set-model-structure ]
     ( useful-commands = "clear-population" ) [ clear-population ]
     ( useful-commands = "reset-plants" ) [ reset-plants ]
+    ( useful-commands = "save-notes" ) [ update-metafile "simulation" simulation-id "NOTES SAVED" ]
     ( useful-commands = "save-world" ) [ record-world-command ]
     ( useful-commands = "import-world" ) [ import-world-command ]
+    ( useful-commands = "output-results" ) [ output-results-command ]
     ( useful-commands = "dynamic-check" ) [ dynamic-verification ]
     ( useful-commands = "-- true" ) [ dynamic-verification ]
     ( useful-commands = "-- false" ) [ dynamic-verification ]
@@ -350,349 +252,394 @@ to command
     ( useful-commands = "-- speed-mating" ) [ visual-verification ]
     ( useful-commands = "-- square-dance" ) [ visual-verification ]
     ( useful-commands = "-- supply-and-demand" ) [ visual-verification ]
-    ( useful-commands = "territory-sizes" ) [ display-territories  ]
-    ( useful-commands = "plant-patchiness" ) [ display-plant-patchiness ]
-    ( useful-commands = "inspect-genotype" ) [ output-genotype ]
-    ( useful-commands = "demographics" ) [ output-demography ]
-    ( useful-commands = "activity-budget" ) [ output-activity-budget ]
-    ( useful-commands = "individuals" ) [ display-plot-of-individuals ]
-
-    [ display-plot ]) 
+    ( useful-commands = "genotype" ) [ display-results output-genotype  ]
+    ( useful-commands = "-- environment" ) [ display-results environment-check ]
+    ( useful-commands = "-- decisions" ) [ display-results output-decisions ] 
+    ( useful-commands = "-- actions" ) [ display-results output-actions ] 
+    ( useful-commands = "show-territories" ) [ output-territories  ]
+    
+    [ display-results  ]) 
 
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; DISPLAY ALL USEFUL-COMMANDS AND THEIR FUNCTIONS
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; 
-; Print out a directory of all useful-commands and a brief description of what operation is performed.
-; ------------------------------------------------------------------------------------------------------------------- ;   
+;
+; ENTRY: 
+;
+; EXIT: 
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to output-header [ header-title ]
+  if ( behaviorspace-run-number = 0 ) [  ; If a BehaviorSpace run is not occurring
+      clear-output                       ; Clear current text in output window, and print header with HEADER-TITLE
+      output-print " --------------------------------------------------------------------"
+      output-print ( word " " header-title )
+      output-print " --------------------------------------------------------------------"
+  ]
+end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; DISPLAY ALL USEFUL-COMMANDS AND THEIR FUNCTIONS [CL]
+; 
+; This subroutine serves as a directory to display all useful-commands and a brief description of 
+; what operation is performed.
+;
+; ENTRY: User has triggered the help-me command.
+;
+; EXIT: The help-me subroutine is enacted.
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to help-me
   
-  set output-header "HELP ME: a user guide for commands"
-  set output-index 0
-  set output-body (list
-    ( list "Select a command option from the useful-commands dropdown menu and" )
-    ( list "click ▷ to activate the command. A description of each command is listed" )
-    ( list "below." )
-    ( list "" )
-    ( list "help-me : displays this directory" )
-    ( list "simulation-log : displays a summary of recent user activities" )
-    ( list "" )
-    ( list "> OPERATIONS" )
-    ( list "" )
-    ( list "parameter-settings : displays the current parameter settings" )
-    ( list "default-settings : resets all parameters to default settings" )
-    ( list "model-structure : displays the current model-structure settings" )
-    ( list "-- aspatial : allows interactions among non-local individuals" )
-    ( list "-- free-lunch : allows individuals to act even if they are depleted of energy" )
-    ( list "-- ideal-form : newly conceived individuals acquire traits representing the population average" )  
-    ( list "-- no-evolution : the evolutionary mechanisms are disabled" )
-    ( list "-- no-plants : plant growth is inhibited" )
-    ( list "-- reaper : individuals are randomly selected to die" )
-    ( list "-- stork : individuals are randomly selected to reproduce" )
-    ( list "-- uninvadable : evolution occurs with recombination but without mutation" )
-    ( list "clear-population : removes all individuals from the current simulation" )
-    ( list "reset-plants : replenishes the world with plants" )
-    ( list "save-world : saves a NetLogo “World” file" )
-    ( list "import-world : opens a previously saved NetLogo “World” file" )
-    ( list "" )
-    ( list "> VERIFICATION" )
-    ( list "" )
-    ( list "dynamic-check : checks that simulation is performing within expected bounds" )
-    ( list "-- true : only displays checks that return true" )
-    ( list "-- false : only displays checks that return false" )
-    ( list "runtime-check : checks the current runtime performance of the simulation" )
-    ( list "visual-check : lists available test populations" )
-    ( list "-- attack-pattern : tests the moving and attacking actions" )
-    ( list "-- dine-and-dash : tests the moving, turning, and eating actions" )
-    ( list "-- life-history-channel : tests the development actions" )
-    ( list "-- musical-pairs : tests the complex moving actions" )
-    ( list "-- night-and-day : tests the basic actions for increasing and decreasing attributes" )
-    ( list "-- popularity-context : tests the actions for joining and leaving groups" )
-    ( list "-- speed-mating : tests the actions for mating" )
-    ( list "-- square-dance : tests the actions for picking up and putting down objects" )
-    ( list "-- supply-and-demand : tests the supply and demand actions" ))
-  update-output
-
+  output-header " HELP ME: a user guide for commands"
+  
+  output-print " Select a command option from the useful-commands dropdown menu and"
+  output-print " click ▷ to activate the command. A description of each command is listed "
+  output-print " below. "
+  output-print ""
+  output-print "  help-me : displays this directory"
+  output-print "  meta-report : displays a summary of recent user activities"
+  output-print "" 
+  output-print "  > OPERATIONS"
+  output-print ""
+  output-print "  parameter-settings : displays the current parameter settings"
+  output-print "  default-settings : resets all parameters to default settings"
+  output-print "  model-structure : displays the current model-structure settings"
+  output-print "  -- aspatial : allows interactions among non-local individuals"
+  output-print "  -- free-lunch : allows individuals to act even if they are depleted of energy "
+  output-print "  -- ideal-form : newly conceived individuals acquire traits representing the population average"
+  output-print "  -- no-evolution : the evolutionary mechanisms are disabled"
+  output-print "  -- no-plants : plant growth is inhibited"
+  output-print "  -- reaper : individuals are randomly selected to die"
+  output-print "  -- stork : individuals are randomly selected to reproduce"
+  output-print "  -- uninvadable : evolution occurs with recombination but without mutation"
+  output-print "  clear-population : removes all individuals from the current simulation"
+  output-print "  reset-plants : replenishes the world with plants"
+  output-print "  save-world : saves a NetLogo “World” file"
+  output-print "  import-world : opens a previously saved NetLogo “World” file"
+  output-print "  results-settings : enables user to update results settings"
+  output-print ""
+  output-print "  > VERIFICATION "
+  output-print ""
+  output-print "  dynamic-check : checks that simulation is performing within expected bounds"
+  output-print "  -- true : only displays checks that return true"
+  output-print "  -- false : only displays checks that return false"
+  output-print "  runtime-check : checks the current runtime performance of the simulation"
+  output-print "  visual-check : lists available test populations"
+  output-print "  -- attack-pattern : tests the moving and attacking actions."
+  output-print "  -- dine-and-dash : tests the moving, turning, and eating actions"
+  output-print "  -- life-history-channel : tests the development actions"
+  output-print "  -- musical-pairs : tests the complex moving actions"
+  output-print "  -- night-and-day : tests the basic actions for increasing and decreasing attributes"
+  output-print "  -- popularity-context : tests the actions for joining and leaving groups"
+  output-print "  -- speed-mating : tests the actions for mating."
+  output-print "  -- square-dance : tests the actions for picking up and putting down objects"
+  output-print "  -- supply-and-demand : tests the supply and demand actions"
+  output-print ""
+  output-print "  > DISPLAY RESULTS   "
+  output-print ""
+  output-print "  age"
+  output-print "  generations"
+  output-print "  genotype : "
+  output-print "  phenotype"
+  output-print "  -- survival-chance"
+  output-print "  -- body-size"
+  output-print "  -- body-shade"
+  output-print "  -- fertility-status"
+  output-print "  -- hidden-chance"
+  output-print "  -- bite-capacity"
+  output-print "  -- mutation-chance"
+  output-print "  -- sex-ratio"
+  output-print "  -- litter-size"
+  output-print "  -- conception-chance"
+  output-print "  -- visual-angle"
+  output-print "  -- visual-range"
+  output-print "  -- day-perception"
+  output-print "  -- night-perception"
+  output-print "  carried-items"
+  output-print "  energy-supply"
+  output-print "  behaviors"
+  output-print "  -- environment : "
+  output-print "  -- decisions : "
+  output-print "  -- actions : "
+  output-print "  -- matings"
+  output-print "  -- mating-partners"
+  output-print "  -- conceptions"
+  output-print "  -- infanticide"
+  output-print "  -- group-transfers"
+  output-print "  -- travel-distance"
+  output-print "  -- foraging-gains"
+  output-print "  -- total-energy-gains"
+  output-print "  -- total-energy-cost"
+  output-print "  show-territories : "
+  
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; DISPLAY THE THE SIMULATION LOG IN THE OUTPUT WINDOW
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; DISPLAY
+;  ; Fix cutting off letters at beginning
+;
+; ENTRY: User has triggered the command.
+;
+; EXIT: Display is updated
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
-to simulation-log
-
-  ifelse ( file-exists? "../results/metafile.csv" ) [                    ; Check that metafile exists
+to meta-report
+  output-header ( word "META REPORT " )
+  
+  ifelse ( file-exists? "../results/metafile.csv" ) [
     
-    let metafile but-first csv:from-file "../results/metafile.csv"       ; Get contents from metafile as list
+    let metafile but-first csv:from-file "../results/metafile.csv"
+    let how-many-rows length metafile
+    let up-to-40-rows ifelse-value ( how-many-rows > 30 ) 
+    [ sublist metafile ( how-many-rows - 30 ) ( how-many-rows ) ] [ metafile ]
     
-    let date-of-current-row ""
-    let simulation-of-current-row ""
-    let output-body-text-list []
+    foreach up-to-40-rows [ x -> 
+      let data-string item 0 x
+      let sim-id item 5 x
+      let notes item 9 x 
+      let how-many-chars length notes
+      let up-to-35-chars ifelse-value ( how-many-chars > 35 ) 
+      [ substring notes ( how-many-chars - 35 ) ( how-many-chars ) ] [ notes ]
+      output-print (word " " data-string "  " sim-id "  " up-to-35-chars ) ]
     
-    foreach metafile [ metafile-row ->
-      
-      ; DATE AND TIME
-      let date-and-time-column 0                       
-      let date-and-time-string item date-and-time-column metafile-row   ; Retrieve date and time information from row.
-      let date-string substring date-and-time-string 16 27              ; Extract the date part of the string.
-      let time-string ( word                                            ; Extract the time part of the string.
-        substring date-and-time-string 0 8 
-        substring date-and-time-string 13 15 )
-      
-      if ( date-string != date-of-current-row ) [                       ; If date is different from the previous row
-        set date-of-current-row date-string                             ; Update the date information
-        set output-body-text-list lput [ "" ] output-body-text-list     ; Save new date information into the output body 
-        set output-body-text-list lput (list date-string) output-body-text-list
-        set output-body-text-list lput [ "" ] output-body-text-list ]
-      
-      ; SIMULATION ID
-      let simulation-id-column 5                                        
-      let simulation-string item simulation-id-column metafile-row      ; Retrieve simulation id from row
-      if ( simulation-string != simulation-of-current-row ) [           ; If simulation id is different from previous row
-        set simulation-of-current-row simulation-string ]               ; Update the simulation information
-      
-      let timesteps-column 6
-      let timesteps-string ( word item timesteps-column metafile-row )  ; Retrieve timesteps from row
-      
-      ; SIMULATION NOTES             
-      let simulation-notes-column 9
-      let notes-string item simulation-notes-column metafile-row        ; Retrieve simulation notes from row
-      
-      ; SAVE IN OUTPUT BODY
-      set output-body-text-list lput (list                              ; Store time, simulation, notes into output body
-        time-string 
-        simulation-string
-        timesteps-string
-        notes-string ) output-body-text-list ]
-
-    ; SAVE OUTPUT INFORMATION
-    set output-index length output-body-text-list - 25                  ; Set the output index
-    set output-header ( word "SIMULATION LOG " )                        ; Set the output header
-    set output-body output-body-text-list                               ; Set the output body
-    update-output                                                       ; Update the output window
-    
-  ][ user-message "Nothing yet to display. You must first start a simulation." ] ; Print this message if metafile 
-                                                                                 ; does not exist.
+  ][ output-print " Metafile is currently empty." ]
+  
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; SAVE SIMULATION DATA AND NOTES TO THE SIMULATION LOG
-; ------------------------------------------------------------------------------------------------------------------- ;   
-
-to save-notes
-  update-metafile "simulation" simulation-id "NOTES SAVED"  ; Update simulation log with new simulation notes.
-end
-
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; DISPLAY THE CURRENT PARAMETER SETTINGS OF THE SIMULATION
 ; 
-; Print in output window all parameters and their current values.
-; ------------------------------------------------------------------------------------------------------------------- ;   
+;
+; ENTRY: User has triggered the parameter-settings command.
+;
+; EXIT: Display is updated
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
-to parameter-settings
+to parameter-report
+  output-header ( word " CURRENT PARAMETER SETTINGS : " )
   
-  ; PARAMETERS HEADER
-  set output-header ( word "CURRENT PARAMETER SETTINGS for SIMULATION " simulation-id )
-  set output-index 0
-
-  ; LIST OF PARAMETERS GO IN BODY
-  set output-body (list
-    ( list "" )
-    ( list "population:" ( word population) )
-    ( list "genotype:" ( word genotype) )
-    ( list "genotype-language:" ( word genotype-language) )
-    ( list "" )
-    ( list "plant-annual-cycle:" ( word plant-annual-cycle " timesteps") )
-    ( list "plant-daily-cycle:" ( word plant-daily-cycle " timesteps") )
-    ( list "plant-quality:" ( word plant-quality " energy / plant") )
-    ( list "plant-seasonality:" ( word plant-seasonality ) )
-    ( list "plant-minimum-neighbors:" ( word plant-minimum-neighbors " neighbors") )
-    ( list "plant-maximum-neighbors:" ( word plant-maximum-neighbors " neighbors") )
-    ( list "" )
-    ( list "deterioration-rate:" ( word deterioration-rate) )
-    ( list "maximum-visual-range:" ( word maximum-visual-range " cells") )
-    ( list "maximum-litter-size:" ( word maximum-litter-size " offspring") )
-    ( list "model-structure:" ( word first model-structure ) ))
-  foreach but-first model-structure [ model-structure-item ->
-    set output-body lput ( list " " ( word model-structure-item) ) output-body ]
-  set output-body lput ( list "" ) output-body
-  set output-body lput ( list "simulation-stop-at:" ( word simulation-stop-at " timesteps") ) output-body
-  
-  update-output
+  output-print ( word "  simulation-id:  " simulation-id )
+  output-print ( word "  model-version:  " model-version )
+  output-print ( word "  model-structure:  " model-structure )
+  output-print ( word "  genotype-reader:  " genotype-reader )
+  output-print ( word "  deterioration-rate:  " deterioration-rate )
+  output-print ( word "  maximum-visual-range:  " maximum-visual-range )
+  output-print ( word "  base-litter-size:  " base-litter-size )
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; RESTORE ALL PARAMETERS TO THEIR DEFAULT VALUES
+; --------------------------------------------------------------------------------------------------------- ;
+;  
+; DEFAULT SETTINGS
+; 
 ;
-; Reset all parameters to settings defined by "parameter" agents or to default settings if no agents exist.
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; ENTRY: User has triggered the parameter-settings command.
+;
+; EXIT: Display is updated
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to default-settings
   
-  set path-to-experiment "../results/"        ; Reset path to store data to the main results folder.
-  set simulation-notes ""                     ; Remove any text from the simulation-notes textbox.
-  set plant-annual-cycle 1000                 ; Set parameter settings to best documented values
-  set plant-daily-cycle 10                    ; for keeping the agents alive.
+  set path-to-experiment "../results/"
+  set output-results? false
+  set selection-on? false
+  set simulation-notes ""
+  set plant-annual-cycle 1000
+  set plant-daily-cycle 10
   set plant-seasonality 0.5
   set plant-quality 5.0
   set plant-minimum-neighbors 0
   set plant-maximum-neighbors 8
-  set population "population"                 ; Reset to default population and genotype files.
+  set population "population"
   set genotype "genotype"
+  clear-plot
+  clear-output
 
-  helper-parameters                           ; Reset parameters based on helper settings.
-  clear-plot                                  ; Clear any currently displayed plot.
-  
-  update-metafile                             ; Note in simulation log that the parameters
-  "simulation" simulation-id                  ; have been reset.
-  "PARAMETERS RESET TO DEFAULT VALUES"
+  parameter-report
   
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; UPDATE THE MODEL STRUCTURE ACCORDING TO USER INPUT
-; ------------------------------------------------------------------------------------------------------------------- ;   
-
-to set-model-structure [ input ]
-  set output-header ( word "MODEL STRUCTURE" )
-  
-  let structure-list [                                               ; Current list of all structural code  
-    "aspatial"                                                       ; choices in B3GET.
-    "free-lunch" 
-    "ideal-form" 
-    "no-evolution" 
-    "no-plants" 
-    "reaper" 
-    "stork" 
-    "uninvadable" ]
-  
-  let structure-choice ifelse-value 
-  ( input = "" or not is-string? input ) 
-  [ get-selected-command ]                                               ; Chosen item in useful-commands list
-  [ input ]
-  
-  ifelse ( member? structure-choice structure-list ) [                   ; If chosen item in useful-commants list is
-    ifelse ( not member? structure-choice model-structure )              ; one of the model-structure settings then
-    [                                                                    ; if it is on, turn it off
-      set model-structure lput structure-choice model-structure          ; and if it is off, turn it on.
-      update-metafile                                                    ; Note in simulation log that
-      "simulation" simulation-id                                         ; model-structure has been updated.
-      (word "MODEL-STRUCTURE UPDATED " structure-choice " added" )
-    ][ 
-      set model-structure remove structure-choice model-structure 
-      update-metafile                                                    ; Note in simulation log that
-      "simulation" simulation-id                                         ; model-structure has been updated.
-      (word "MODEL-STRUCTURE UPDATED " structure-choice " removed" )
-    ]
-  ][
-    
-    ; PRINT OUT LIST OF TURNED ON MODEL STRUCTURE ITEMS
-    set output-body []
-    set output-body lput (list "" ) output-body
-    set output-body lput (list "TURNED ON" ) output-body
-    set output-body lput (list "" ) output-body
-    foreach model-structure [ model-structure-item -> 
-      set output-body lput (list model-structure-item ) output-body ]
-
-    ; PRINT OUT LIST OF TURNED OFF MODEL STRUCTURE ITEMS
-    set output-body lput (list "" ) output-body
-    set output-body lput (list "TURNED OFF" ) output-body
-    set output-body lput (list "" ) output-body
-    foreach structure-list [ l -> if ( not member? l model-structure ) 
-      [ set output-body lput ( list l ) output-body ]]
-
-    update-output                                                     ; Print out current model-structure settings
-                                                                      ; separated by which are turned on and off.
-  ] 
-end
-
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; DELETE THE CURRENT POPULATION OF AGENTS
+; --------------------------------------------------------------------------------------------------------- ;
+;  
+; MODEL STRUCTURE
 ; 
-; Enforce each individual to die such that no agents remain.
-; ------------------------------------------------------------------------------------------------------------------- ;   
+;
+; ENTRY: User has triggered the parameter-settings command.
+;
+; EXIT: Display is updated
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to set-model-structure
+  output-header ( word " MODEL STRUCTURE " )
+  let structure-list [ "aspatial" "free-lunch" "ideal-form" "no-evolution" "no-plants" "reaper" "stork" "uninvadable" ]
+  let structure-choice substring useful-commands 3 length useful-commands
+  
+  if ( member? structure-choice structure-list ) [
+    ifelse ( not member? structure-choice model-structure )
+    [ set model-structure lput structure-choice model-structure ]
+    [ set model-structure remove structure-choice model-structure ]
+  ]
+  
+  output-print " "
+  output-print "  Current rules:"
+  output-print " "
+  foreach model-structure [ s -> output-print (word "  " s ) ]
+  output-print " "
+  output-print "  Unused rules:"
+  output-print " "
+  foreach structure-list [ l -> if ( not member? l model-structure ) [ output-print (word "  " l )]]
+  
+end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;  
+; CLEAR POPULATION
+; 
+;
+; ENTRY: User has triggered the parameter-settings command.
+;
+; EXIT: Display is updated
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to clear-population
-  set output-header "CLEAR POPULATION"
+  output-header "CLEAR POPULATION "
   ask turtles [ die ]
   ask patches [ set pgroup.identity 0 ]
   ask patches [ set pgroups.here [] ]
-  update-metafile                               ; Note in simulation log that the population
-  "simulation" simulation-id                    ; has been destroyed.
-  "POPULATION VIRTUALLY INCINERATED"
+  update-local-records " All organisms have been virtually incinerated and no longer exist."
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; RESET PLANT CURRENT ENERGY STORES BASED ON PLANT PARAMETER SETTINGS
+; --------------------------------------------------------------------------------------------------------- ;
+;  
+; RESET PLANTS
+; 
 ;
-; Reset the current.penergy of plants to a random value between 0 and plant-quality parameter value.
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; ENTRY: User has triggered the parameter-settings command.
+;
+; EXIT: Display is updated
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to reset-plants
-  set output-header "RESET PLANTS"
+  output-header " RESET PLANTS :   "
   setup-patches
-  update-metafile                           ; Note in simulation log that the plant
-  "simulation" simulation-id                ; energy values have been reset.
-  "PLANT ENERGY RESET"
+  update-local-records " Plants reset."
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; IMPORT A PREVIOUSLY SAVED NETLOGO WORLD FILE
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+;  
+; RESET PLANTS
+; 
+;
+; ENTRY: User has triggered the parameter-settings command.
+;
+; EXIT: Display is updated
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to record-world-command
+  record-world
+end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;  
+; RESET PLANTS
+; 
+;
+; ENTRY: User has triggered the parameter-settings command.
+;
+; EXIT: Display is updated
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to import-world-command
-  let file-name user-file                                             ; Prompt user to select a file from directory.
-  if ( is-string? file-name and file-exists? file-name ) [            ; If the file does exist
-    
-    import-world file-name                                            ; try to import file as a NetLogo world.
-    
-    update-metafile                                                   ; Note in simulation log that world was imported.
-    "world" file-name 
-    (word "WORLD IMPORTED" )
-    setup-parameters
+  ;set-current-directory path-to-experiment  - only uncomment if you have figured out how to get back to original directory at the end of this subroutine
+  let file-name user-file
+  if ( is-string? file-name and file-exists? file-name ) [ 
+    print file-name
+    import-world file-name 
+    let file-short-name substring file-name 
+    ( ( position but-first but-first path-to-experiment file-name ) + 
+      ( length but-first but-first path-to-experiment ) ) ( length file-name )
+    update-metafile "world" file-name (word "WORLD " file-short-name " IMPORTED" )
   ] 
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; CREATE A NEW NETLOGO WORLD FILE FROM THE CURRENT SIMULATION
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+;  
+; OUTPUT RESULTS
+; 
+;
+; ENTRY: User has triggered the parameter-settings command.
+;
+; EXIT: Display is updated
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
-to record-world-command
-  record-world                                   ; Save a NetLogo world file from the current simulation state.
+to output-results-command
+  output-header " OUTPUT RESULTS :   " 
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; PRINT OUT RESULTS OF DYNAMIC VERICATION CHECK
-; ------------------------------------------------------------------------------------------------------------------- ;      
+; --------------------------------------------------------------------------------------------------------- ;
+;  
+; OUTPUT RESULTS
+; 
+;
+; ENTRY: User has triggered the parameter-settings command.
+;
+; EXIT: Display is updated
+;
+; --------------------------------------------------------------------------------------------------------- ;   
 
 to dynamic-verification
-  let user-choice get-selected-command
+  let user-choice substring useful-commands 5 length useful-commands
   
   profiler:start
   profiler:reset
 
+  
   go
   
   ( ifelse
     
     ( user-choice = "true" ) [
-      set output-header " CODE VERIFICATION : TRUE ONLY  "
+      output-header " CODE VERIFICATION : TRUE ONLY  "
       output-true-verification ]
     
     ( user-choice = "false" ) [
-      set output-header " CODE VERIFICATION : FALSE ONLY   "
+      output-header " CODE VERIFICATION : FALSE ONLY   "
       output-false-verification ]
     
-    [ set output-header " CODE VERIFICATION :  ALL  "
+    [ output-header " CODE VERIFICATION :  ALL  "
       output-all-verification ])
+  
+  ;profiler:stop
   
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; HELPER FUNCTIONS FOR VERIFICATION
-; ------------------------------------------------------------------------------------------------------------------- ;     
+; --------------------------------------------------------------------------------------------------------- ;
+;  
+; OUTPUT RESULTS
+; 
+;
+; ENTRY: User has triggered the parameter-settings command.
+;
+; EXIT: Display is updated
+;
+; --------------------------------------------------------------------------------------------------------- ;  
+
 
 to output-all-verification
   clear-output
@@ -703,12 +650,8 @@ to output-all-verification
   while [ i < length-of-tape ]
   [
     (ifelse 
-      ( i < 4 ) [ output-print (word 
-        " "  item i item 0 new-tape 
-        " " item i item 3 new-tape ) if ( i = 3 ) [ output-print ( "     " ) ] ]
-      [ output-print (word 
-        " " (i - 3) ". " item i item 3 new-tape 
-        "  " item i item 2 new-tape "  " item i item 1 new-tape "  :  " item i item 0 new-tape )])
+      ( i < 4 ) [output-print (word " "  item i item 0 new-tape " " item i item 3 new-tape ) if ( i = 3 ) [ output-print ( "     " ) ] ]
+      [ output-print (word " " (i - 3) ". " item i item 3 new-tape "  " item i item 2 new-tape "  " item i item 1 new-tape "  :  " item i item 0 new-tape )])
     set i i + 1
   ]  
 end
@@ -722,14 +665,8 @@ to output-true-verification
   while [ i < length-of-tape ]
   [
     (ifelse 
-      ( i < 4 ) [ output-print (word 
-        " "  item i item 0 new-tape 
-        " " item i item 3 new-tape ) if ( i = 3 ) [ output-print ( "     " ) ] ]
-      [ if (item i item 3 new-tape = true ) [ set j j + 1 output-print (word 
-        " " j ". " item i item 3 new-tape 
-        " " item i item 2 new-tape 
-        " " item i item 1 new-tape 
-        " : " item i item 0 new-tape ) ]])
+      ( i < 4 ) [output-print (word " "  item i item 0 new-tape " " item i item 3 new-tape ) if ( i = 3 ) [ output-print ( "     " ) ] ]
+      [ if (item i item 3 new-tape = true ) [ set j j + 1 output-print (word " " j ". " item i item 3 new-tape " " item i item 2 new-tape " " item i item 1 new-tape " : " item i item 0 new-tape ) ]])
     set i i + 1
   ]
 end
@@ -743,58 +680,71 @@ to output-false-verification
   while [ i < length-of-tape ]
   [
     (ifelse 
-      ( i < 4 ) [ output-print (word 
-        " " item i item 0 new-tape 
-        " " item i item 3 new-tape ) if ( i = 3 ) [ output-print ( "     " ) ] ]
-      [ if (item i item 3 new-tape = false) [ set j j + 1 output-print (word 
-        " " j ". " item i item 3 new-tape 
-        " " item i item 2 new-tape " " item i item 1 new-tape " : " item i item 0 new-tape ) ]])
+      ( i < 4 ) [output-print (word " " item i item 0 new-tape " " item i item 3 new-tape ) if ( i = 3 ) [ output-print ( "     " ) ] ]
+      [ if (item i item 3 new-tape = false) [ set j j + 1 output-print (word " " j ". " item i item 3 new-tape " " item i item 2 new-tape " " item i item 1 new-tape " : " item i item 0 new-tape ) ]])
     set i i + 1
   ]
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; PRINT OUT THE RUNTIME PROFILER RESULTS FOR 1 TIMESTEP
-; ------------------------------------------------------------------------------------------------------------------- ;     
-
-to runtime-verification
-  set output-header (word "RUNTIME FOR ONE TIMESTEP")
-  profiler:reset
-  profiler:start
-  repeat 1 [ go ]
-  let profiler-results profiler:report
-  set output-body csv:from-string profiler-results 
-  set output-index 0
-  update-output
-  profiler:stop
+to output-verification [ input ]
+  clear-output
+  let new-tape generate-verification-tape
+  let length-of-tape length first new-tape
+  let i 0
+  
+  while [ i < length-of-tape ]
+  [
+    (ifelse 
+      ( i < 4 ) [output-print (word " "  item i item 0 new-tape " " item i item 3 new-tape ) if ( i = 3 ) [ output-print ( "     " ) ] ]
+      [ output-print (word " " (i - 3) ". " item i item 3 new-tape "  " item i item 2 new-tape "  " item i item 1 new-tape "  :  " item i item 0 new-tape )])
+    set i i + 1
+  ]  
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; SETUP NEW SIMULATION FROM USER INPUT FOR VISUAL VERIFICATION
-; ------------------------------------------------------------------------------------------------------------------- ;      
+; --------------------------------------------------------------------------------------------------------- ;
+;  
+; OUTPUT RESULTS
+; 
+;
+; ENTRY: User has triggered the parameter-settings command.
+;
+; EXIT: Display is updated
+;
+; --------------------------------------------------------------------------------------------------------- ;  
+
+to runtime-verification
+    output-header (word "CHECK RUNTIME : 1 timesteps")
+    profiler:reset
+    profiler:start
+    repeat 1 [ go ]
+    output-print profiler:report 
+    profiler:stop
+end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;  
+; OUTPUT RESULTS
+; 
+;
+; ENTRY: User has triggered the parameter-settings command.
+;
+; EXIT: Display is updated
+;
+; --------------------------------------------------------------------------------------------------------- ;   
 
 to visual-verification
-  let user-choice get-selected-command
-  
-  let visual-list [ 
-    "dine-and-dash" 
-    "life-history-channel" 
-    "musical-pairs" 
-    "night-and-day" 
-    "popularity-context" 
-    "speed-mating" 
-    "square-dance" 
-    "supply-and-demand" 
-    "attack-pattern" ]
+  let user-choice substring useful-commands 3 length useful-commands
+  let visual-list [ "dine-and-dash" "life-history-channel" "musical-pairs" "night-and-day" "popularity-context" "speed-mating" "square-dance" "supply-and-demand" "attack-pattern" ]
   
   if ( member? user-choice visual-list ) [
     
-    let visual-verification-file 
-    ( word "../data/visual-verification/" user-choice ".csv" )
+    let visual-verification-file ( word "../data/visual-verification/" user-choice ".csv" )
     
     ifelse ( file-exists? visual-verification-file )
     
-    [ clear-turtles
+    [ set output-results? false
+      set selection-on? false
+      clear-turtles
       set path-to-experiment "../data/visual-verification/"
       set population user-choice 
       set genotype user-choice 
@@ -802,244 +752,189 @@ to visual-verification
       import-genotype
     ]
     
-    [ user-message (word "File " user-choice " not found." ) ]
+    [ user-message "File not found." ]
     
   ]
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; SHOW INFORMATION ON CURRENT TERRITORIES
-; ------------------------------------------------------------------------------------------------------------------- ;   
-
-to display-territories
-  set output-header "TERRITORY SIZES for ALL GROUPS"
-  set output-index 0
-  ask patches [ if ( pgroup.identity != 0 ) [ set pcolor pgroup.identity + 3 ]]
-  
-  set output-body []
-  foreach remove-duplicates [ group.identity ] of anima1s with [ is.alive and take.measurements ] [ grp ->
-    set output-body lput ( list 
-      ( word "Group " grp ":" ) 
-      ( word count patches with [ pgroup.identity = grp ] " cells" ) ) output-body ]
-  
-  update-output
-end
-
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; DISPLAY PLANT PATCHINESS CALCULATION
-; ------------------------------------------------------------------------------------------------------------------- ;
-
-to display-plant-patchiness
-  set output-header "CURRENT PLANT PATCHINESS in SIMULATION"
-  set output-index 0
-  set output-body (list (list (word "Current plant patchiness is " precision plant-patchiness 3 ) ))
-  update-output
-end
-
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; DISPLAY INFORMATION ON A GENOTYPE OF AN INDIVIDUAL
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; SUBROUTINE
+; 
+; THis subroutine...
+;
+; ENTRY: 
+;
+; EXIT: The operation is enacted.
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to output-genotype
   let anima1-to-inspect one-of anima1s with [ self = subject ]
-  if ( anima1-to-inspect = nobody ) [ 
-    set anima1-to-inspect one-of anima1z with [ take.measurements ] ]
-  inspect anima1-to-inspect
-
-  if ( anima1-to-inspect != nobody ) [
-    set output-header (word "GENOTYPE of INDIVIDUAL " [my.identity ] of anima1-to-inspect )
-    set output-index 0
-    set output-body (sentence 
-      [[ "" ]]
-      [[ "CHROMOSOME I" ]]
-      [[ "" ]]
-      [chromosome.I] of anima1-to-inspect 
-      [[ "" ]]
-      [[ "CHROMOSOME II" ]]
-      [[ "" ]]
-      [chromosome.II] of anima1-to-inspect )]
-  
-  update-output
+  output-header (word " GENOTYPE : " ifelse-value ( anima1-to-inspect = nobody ) [ "" ] [ (word "organism " [my.identity ] of anima1-to-inspect ) ] )
+  ifelse ( anima1-to-inspect = nobody ) [
+    ;set simulation-notes (word "Organism " read-from-string command-input " not found.")
+    ;output-print (word " Organism " read-from-string command-input " not found.")
+  ][
+    foreach [chromosome.I] of anima1-to-inspect [ a ->
+      output-print (word " "reduce [ [itm nxt] -> (word itm " " nxt ) ] a ) ]
+    output-print ""
+    foreach [chromosome.II] of anima1-to-inspect [ a ->
+      output-print (word " "reduce [ [itm nxt] -> (word itm " " nxt ) ] a ) ]
+    ;set simulation-notes (word "View genotype of organism " command-input ". " simulation-notes )
+  ]
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; DISPLAY INFORMATION ON DEMOGRAPHY OF POPULATION
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; SUBROUTINE
+; 
+; THis subroutine...
+;
+; ENTRY: 
+;
+; EXIT: The operation is enacted.
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
-to output-demography
-  set output-header "CURRENT POPULATION DEMOGRAPHICS"
-  set output-index 0
-  let anima1s-to-observe anima1s with [ is.alive and take.measurements ]
-  
-  let list-of-groups get-sorted-groups
-  let mean-group-size 0
-  let min-group-size 9999
-  let max-group-size 0
-  let mean-adult-males 0
-  let mean-adult-females 0
-  let mean-juv-males 0
-  let mean-juv-females 0
-  let mean-infants 0
-  let mean-gestatees 0
-  
-  foreach list-of-groups [ group ->
-    let group-size ( count anima1s-to-observe with [ group.identity = group ] )
+to environment-check
+  let anima1-to-inspect one-of anima1s with [ self = subject ]
+  output-header ( word " ENVIRONMENT : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [my.identity ] of anima1-to-inspect ) ] )
+  ifelse ( subject != nobody ) [
+    output-print ( word "  NetLogo ID    B3GET ID    status     " )
+    output-print " ------------------------------------"
+    ask subject [
+      foreach my.environment [ envir -> 
+        let indiv-name but-first but-last (word envir )
+        let their-id ifelse-value ( is-patch? envir ) [ pmy.identity ] [ my.identity ]
+        output-print ( word "  " indiv-name "    " their-id "    " status-of envir )
+    ]]
     
-    set mean-group-size mean-group-size + group-size 
-    if ( group-size < min-group-size ) [ set min-group-size group-size ]
-    if ( group-size > max-group-size ) [ set max-group-size group-size ]
+  ][
     
-    let adult-male-group-size ( count anima1s-to-observe with [ group.identity = group 
-      and biological.sex = "male" and life.history = "adult" ] )
-    set mean-adult-males mean-adult-males + adult-male-group-size
-    let adult-female-group-size ( count anima1s-to-observe with [ group.identity = group 
-      and biological.sex = "female" and life.history = "adult" ] )
-    set mean-adult-females mean-adult-females + adult-female-group-size
-    let juv-male-group-size ( count anima1s-to-observe with [ group.identity = group 
-      and biological.sex = "male" and life.history = "juvenile" ] )
-    set mean-juv-males mean-juv-males + juv-male-group-size
-    let juv-female-group-size ( count anima1s-to-observe with [ group.identity = group 
-      and biological.sex = "female" and life.history = "juvenile" ] )
-    set mean-juv-females mean-juv-females + juv-female-group-size
-    let infant-group-size ( count anima1s-to-observe with [ group.identity = group 
-      and life.history = "infant" ] )    
-    set mean-infants mean-infants + infant-group-size
-    let gestatee-group-size ( count anima1s-to-observe with [ group.identity = group 
-      and life.history = "gestatee" ] )    
-    set mean-gestatees mean-gestatees + gestatee-group-size  ]
-  
-  set mean-group-size mean-group-size / length list-of-groups
-  set mean-adult-males mean-adult-males / length list-of-groups
-  set mean-adult-females mean-adult-females / length list-of-groups
-  set mean-juv-males mean-juv-males / length list-of-groups
-  set mean-juv-females mean-juv-females / length list-of-groups
-  set mean-infants mean-infants / length list-of-groups
-  set mean-gestatees mean-gestatees / length list-of-groups
-  
-  set output-body ( list 
-    ( list "" )
-    ( list "POPULATION" )
-    ( list "" )
-    ( list "Population size:" ( count anima1s-to-observe ) )
-    ( list "Number of females:" ( count anima1s-to-observe with [ biological.sex = "female" ] ) )
-    ( list "Number of males:" ( count anima1s-to-observe with [ biological.sex = "male" ] ) )
-    ( list "Number of adults:" ( count anima1s-to-observe with [ life.history = "adult" ] ) )
-    ( list "Number of juveniles:" ( count anima1s-to-observe with [ life.history = "juvenile" ] ) )
-    ( list "Number of infants:" ( count anima1s-to-observe with [ life.history = "infant" ] ) )
-    ( list "Number of gestatees:" ( count anima1s-to-observe with [ life.history = "gestatee" ] ) )
-    ( list "Number of groups:" ( length list-of-groups ) )
-    ( list "" )
-    ( list "GROUPS" )
-    ( list "" )
-    ( list "Mean group size:" (precision mean-group-size 3 ) )
-    ( list "Minimum group size:" (precision min-group-size 3 ) )
-    ( list "Maximum group size:" (precision max-group-size 3 ) )
-    ( list "Mean adult males per group:" (precision mean-adult-males 3 ) )
-    ( list "Mean adult females per group:" (precision mean-adult-females 3 ) )
-    ( list "Mean juvniles males per group:" (precision mean-juv-males 3 ) )
-    ( list "Mean juveniles females per group:" (precision mean-juv-females 3 ) )
-    ( list "Mean infants per group:" (precision mean-infants 3 ) )
-    ( list "Mean gestatees per group:" (precision mean-gestatees 3 ) ))
-  
-  update-output
+    
+    
+    
+  ]
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; DISPLAY INFORMATION ON ACTIVITY BUDGET OF POPULATION OR INDIVIDUAL
-; ------------------------------------------------------------------------------------------------------------------- ;   
-
-to output-activity-budget
-  set output-header (word "ACTIVITY BUDGET of " ifelse-value ( subject = nobody ) 
-    [ "POPULATION" ] [ (word "INDIVIDUAL " [my.identity] of subject )])
-  let current-individuals get-sorted-individuals
-  let individual-set anima1s with [ member? self current-individuals and is.alive and take.measurements]
-  if ( subject != nobody ) [ set individual-set anima1s with [ self = subject ] ]
-  set output-index 0
-  set output-body ( list 
-    ( list "" )
-    ( list "ACTIVITY" "COUNT" )
-    ( list "" )
-    ( list "Matings" ( sum [length copulations.history] of individual-set ) )
-    ( list "Mating partners" ( sum [ length remove-duplicates copulations.history ] of individual-set ) )
-    ( list "Conceptions" ( sum [ length conceptions.history ] of individual-set ) )
-    ( list "Infanticides" ( sum [ length infanticide.history ] of individual-set ) )
-    ( list "Group transfers" ( sum [ length group.transfers.history ] of individual-set ) )
-    ( list "Travel distance" ( precision ( sum [ distance.traveled ] of individual-set ) 3 ))
-    ( list "Help from" ( sum [ length help.from.history ] of individual-set ) )
-    ( list "Help to" ( sum [ length ( filter [ itm -> itm = my.identity ] ( 
-      reduce sentence [help.from.history] of anima1s )) ] of individual-set ) )
-    ( list "Attacks from" ( sum [ length attack.from.history ] of individual-set ) )
-    ( list "Attacks to" ( sum [ length ( filter [ itm -> itm = my.identity ] ( 
-      reduce sentence [attack.from.history] of anima1s )) ] of individual-set ) )
-  )
-  update-output
-end
-
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; PRINT OUT DECISIONS MADE THIS TIMESTEP
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; SUBROUTINE
+; 
+; THis subroutine...
+;
+; ENTRY: 
+;
+; EXIT: The operation is enacted.
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to output-decisions
-;  let anima1-to-inspect one-of anima1s with [ self = subject ]
-;  update-output-header (word " DECISIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [my.identity ] of anima1-to-inspect ) ] )
-;  output-print ( word "  caller      target      action       cost     " )
-;  output-print " ------------------------------------------"
-;  
-;  ifelse ( anima1-to-inspect != nobody ) [ 
-;  
-;    ask anima1-to-inspect [
-;      foreach decision.vectors [ decision ->
-;        let caller-name but-first but-last (word item 0 decision )
-;        let target-name but-first but-last (word item 1 decision )
-;        let action-name item 2 decision
-;        let cost-name precision item 3 decision 10
-;        output-print ( word " " caller-name "   " target-name "   " action-name "   " cost-name  )]]
-;    
-;    
-;  ][ 
-;    foreach decisions-made-this-timestep [ decision -> 
-;        let caller-name but-first but-last (word item 0 decision )
-;        let target-name but-first but-last (word item 1 decision )
-;        let action-name item 2 decision
-;        let cost-name precision item 3 decision 10
-;        output-print ( word " " caller-name "   " target-name "   " action-name "   " cost-name  )]]
+  let anima1-to-inspect one-of anima1s with [ self = subject ]
+  output-header (word " DECISIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [my.identity ] of anima1-to-inspect ) ] )
+  output-print ( word "  caller      target      action       cost     " )
+  output-print " ------------------------------------------"
+  
+  ifelse ( anima1-to-inspect != nobody ) [ 
+  
+    ask anima1-to-inspect [
+      foreach decision.vectors [ decision ->
+        let caller-name but-first but-last (word item 0 decision )
+        let target-name but-first but-last (word item 1 decision )
+        let action-name item 2 decision
+        let cost-name precision item 3 decision 10
+        output-print ( word " " caller-name "   " target-name "   " action-name "   " cost-name  )]]
+    
+    
+  ][ 
+    foreach decisions-made-this-timestep [ decision -> 
+        let caller-name but-first but-last (word item 0 decision )
+        let target-name but-first but-last (word item 1 decision )
+        let action-name item 2 decision
+        let cost-name precision item 3 decision 10
+        output-print ( word " " caller-name "   " target-name "   " action-name "   " cost-name  )]]
 end
 
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; PRINT OUT ACTIONS TAKEN THIS TIMESTEP
-; ------------------------------------------------------------------------------------------------------------------- ;    
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; SUBROUTINE
+; 
+; THis subroutine...
+;
+; ENTRY: 
+;
+; EXIT: The operation is enacted.
+;
+; --------------------------------------------------------------------------------------------------------- ; 
 
 to output-actions
-;  let anima1-to-inspect one-of anima1s with [ self = subject ]
-;  update-output-header (word " ACTIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [my.identity ] of anima1-to-inspect ) ] )
-;  output-print ( word "  caller      action      target       cost     " )
-;  output-print " ------------------------------------------"
-;  
-;  ifelse ( anima1-to-inspect != nobody ) [ 
-;    
-;    ask anima1-to-inspect [
-;      foreach actions.completed [ action -> 
-;        let caller-name but-first but-last (word item 0 action )
-;        let target-name but-first but-last (word item 1 action )
-;        let action-name item 2 action
-;        let cost-name precision item 3 action 10
-;        output-print ( word " " caller-name "   " target-name "   " action-name "   " cost-name  )]]
-;    
-;  ][ 
-;    foreach actions-completed-this-timestep [ action -> 
-;      let caller-name but-first but-last (word item 0 action )
-;      let target-name but-first but-last (word item 1 action )
-;      let action-name item 2 action
-;      let cost-name precision item 3 action 10
-;      output-print ( word " " caller-name "   " action-name "   " target-name "   " cost-name  )]
-;    ;output-print get-spaced-words ( list caller-name action-name target-name cost-name ) 20 ]
-;  ]
-;  
-
+  let anima1-to-inspect one-of anima1s with [ self = subject ]
+  output-header (word " ACTIONS : " ifelse-value ( anima1-to-inspect = nobody ) [ "all individuals" ] [ (word "individual " [my.identity ] of anima1-to-inspect ) ] )
+  output-print ( word "  caller      action      target       cost     " )
+  output-print " ------------------------------------------"
+  
+  ifelse ( anima1-to-inspect != nobody ) [ 
+    
+    ask anima1-to-inspect [
+      foreach actions.completed [ action -> 
+        let caller-name but-first but-last (word item 0 action )
+        let target-name but-first but-last (word item 1 action )
+        let action-name item 2 action
+        let cost-name precision item 3 action 10
+        output-print ( word " " caller-name "   " target-name "   " action-name "   " cost-name  )]]
+    
+  ][ 
+    foreach actions-completed-this-timestep [ action -> 
+      let caller-name but-first but-last (word item 0 action )
+      let target-name but-first but-last (word item 1 action )
+      let action-name item 2 action
+      let cost-name precision item 3 action 10
+      output-print ( word " " caller-name "   " action-name "   " target-name "   " cost-name  )]
+    ;output-print get-spaced-words ( list caller-name action-name target-name cost-name ) 20 ]
+  ]
+  
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;     
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; SUBROUTINE
+; 
+; THis subroutine...
+;
+; ENTRY: 
+;
+; EXIT: The operation is enacted.
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to output-print-action [ action ]
+  output-print ( word " At " item 0 action " timesteps " item 1 action " performed " item 3 action " on " item 2 action " for " item 4 action " energy." )
+end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; SUBROUTINE
+; 
+; THis subroutine...
+;
+; ENTRY: 
+;
+; EXIT: The operation is enacted.
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to output-territories
+  ask patches [ if ( pgroup.identity != 0 ) [ set pcolor pgroup.identity + 3 ]]
+  
+  foreach remove-duplicates [ group.identity ] of anima1s [ grp ->
+    print ( word grp " " count patches with [ pgroup.identity = grp ] ) 
+    
+  ]
+end
+
+; --------------------------------------------------------------------------------------------------------- ;  
 ;
 ;           dP            dP            
 ;           88            88            
@@ -1050,321 +945,80 @@ end
 ;  88                                   
 ;  dP                                  
 ;
-; ------------------------------------------------------------------------------------------------------------------- ;
-; DISPLAY CURRENT PLOT FROM USER SETTINGS
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;  
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; DISPLAY PLOT FROM USER SETTINGS
+; 
+; THis subroutine...
+;
+; ENTRY:  User 
+;
+; EXIT: The operation is enacted.
+;
+; --------------------------------------------------------------------------------------------------------- ;
  
-to display-plot 
+to display-results 
   
-  if ( simulation-id != 0 ) [                                         ; Plot is only displayed when 
-                                                                      ; a simulation has been setup
+  if ( simulation-id != 0 ) [ ; commands only work when a simulation is active
+    
     (ifelse 
-      ( plot-type = "individuals" ) [ plot-individuals-columns ]      ; Display "individuals" plot
-      ( plot-type = "groups" )      [ plot-groups-columns ]           ; Display "groups" plot
-      ( plot-type = "generations" ) [ plot-generations-columns ]      ; Display "generations" plot
-      ( plot-type = "population" ) [ plot-population-columns ]        ; Display "population" plot
+      ( plot-type = "individuals" ) [ plot-individuals-columns ]
+      ( plot-type = "groups" )      [ plot-groups-columns ]
+      ( plot-type = "generations" ) [ plot-evolution-generations ]
      
       [])] 
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;        
+; --------------------------------------------------------------------------------------------------------- ;     
+;
 ; PLOT INDIVIDUALS ACCORDING TO THE SPECIFIED SETTINGS
 ;
-; This subroutine gets a sorted list of individuals by age then determines the value for each according to user
-; selection, producing a list of lists, wherein the items in the main list represent each individual, and each 
-; individual has a list that contains their value and otherwise 0s to record their current life history status.
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; ENTRY
+;
+; EXIT     get-sorted-individuals
+;
+;          plot-colored-histogram
+;
+;          life-history-color-list
+;
+;          get-column-list
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to plot-individuals-columns
   let individual-list get-sorted-individuals                        ; Get sorted list of living agents
   let plot-list []                                                  ; Initialize list of values to be plotted
   let row-list []
-  let user-choice get-selected-command
-  let body-list (list 
-    (list "" ) 
-    (list "index" "" user-choice ) 
-    (list "(x axis)" "ID" "(y axis)" ) 
-    (list "" ))
-  let individual-index 0
-  
-  foreach individual-list [ i ->                                    ; Inspect each individual                
-    set plot-list lput (                                            ; Record the value of the individual into 
-      [ get-column-list ] of i ) plot-list                          ; a separate list.
-    set body-list lput ( list 
-      (word "[" individual-index "]" )
-      ([my.identity] of i)
-      (precision (max [ get-column-list ] of i) 3) ) body-list
-    set individual-index individual-index + 1
-  ]
-  plot-colored-histogram plot-list life-history-color-list          ; Update plot based on plot list
-  
-  set output-header ( word "PLOT: " user-choice " of each individual" )
-  set output-index 0
-  set output-body body-list
-  update-output
+  foreach individual-list [ i ->
+    set row-list lput [my.identity] of i row-list
+    set plot-list lput ( 
+      [ get-column-list ] of i ) 
+    plot-list ]
+  plot-colored-histogram 1 plot-list life-history-color-list 1      ; Update plot based on plot list
+ 
+  output-window plot-type "" (list "column" "my.identity" plot-type ) row-list plot-list 0 0 0
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;        
-; PLOT INDIVIDUALS WITHIN THE OTHER CATEGORIES
-; ------------------------------------------------------------------------------------------------------------------- ;   
-
-to display-plot-of-individuals
-  let body-list []
-  
-  ; GROUPS
-  if ( plot-type = "groups" ) [
-    let sorted-groups get-sorted-groups
-    let selected-individuals get-sorted-individuals
-    let user-choice get-selected-command
-    set body-list (list 
-      (list "" ) 
-      (list "" "" "Number of" ) 
-      (list "index" "" "individuals" ) 
-      (list "(x axis)" "group ID" "(y axis)" ) 
-      (list "" ))
-    let group-index 0
-    let plot-list []
-    foreach sorted-groups [ g ->
-      
-      let group-list []
-      let all-group-members anima1s with [ 
-        is.alive and
-        group.identity = g and 
-        member? self selected-individuals and 
-        take.measurements]
-      let current-count count all-group-members
-      set body-list lput (list (word "[" group-index "]") g current-count ) body-list
-      
-      ; GESTATEE FEMALE
-      set group-list lput current-count group-list
-      let gestatee-females-count count all-group-members with [ life.history = "gestatee" and biological.sex = "female" ]
-      set current-count current-count - gestatee-females-count
-      
-      ; GESTATEE MALE
-      set group-list lput current-count group-list
-      let gestatee-males-count count all-group-members with [ life.history = "gestatee" and biological.sex = "male" ]
-      set current-count current-count - gestatee-males-count
-      
-      ; INFANT FEMALE
-      set group-list lput current-count group-list
-      let infant-females-count count all-group-members with [ life.history = "infant" and biological.sex = "female" ]
-      set current-count current-count - infant-females-count
-      
-      ; INFANT MALE
-      set group-list lput current-count group-list
-      let infant-males-count count all-group-members with [ life.history = "infant" and biological.sex = "male" ]
-      set current-count current-count - infant-males-count
-      
-      ; JUVENILE FEMALE
-      set group-list lput current-count group-list
-      let juvenile-females-count count all-group-members with [ life.history = "juvenile" and biological.sex = "female" ]
-      set current-count current-count - juvenile-females-count
-      
-      ; JUVENILE MALE
-      set group-list lput current-count group-list
-      let juvenile-males-count count all-group-members with [ life.history = "juvenile" and biological.sex = "male" ]
-      set current-count current-count - juvenile-males-count
-      
-      ; CYCLING FEMALE  
-      set group-list lput current-count group-list
-      let cycling-females-count count all-group-members with [ fertility.status = "cycling" ]
-      set current-count current-count - cycling-females-count
-      
-      ; PREGNANT FEMALE
-      set group-list lput current-count group-list
-      let pregnant-females-count count all-group-members with [ fertility.status = "pregnant" ]
-      set current-count current-count - pregnant-females-count
-      
-      ; LACTATING FEMALE  
-      set group-list lput current-count group-list
-      let lactating-females-count count all-group-members with [ fertility.status = "lactating" ]
-      set current-count current-count - lactating-females-count
-      
-      ; ADULT MALE
-      set group-list lput current-count group-list
-      let adult-males-count count all-group-members with [ life.history = "adult" and biological.sex = "male" ]
-      set current-count current-count - adult-males-count
-      
-      set plot-list lput group-list plot-list
-      set group-index group-index + 1 ]
-
-    plot-colored-histogram plot-list life-history-color-list ]
-  
-  ; GENERATIONS
-  if ( plot-type = "generations" ) [
-    let selected-individuals get-sorted-individuals
-    let max-generation max [generation.number] of anima1s with [member? self selected-individuals and take.measurements]
-    let plot-list []
-    let generation 0
-    let user-choice get-selected-command
-    set body-list (list 
-      (list "" ) 
-      (list "" "Number of" )
-      (list "generation" "individuals" ) 
-      (list "(x axis)" "(y axis)" ) 
-      (list "" ))
-    repeat ( max-generation + 1 ) [
-      let measurement count anima1s with [ 
-        generation.number = generation and member? self selected-individuals and take.measurements]
-      set plot-list lput ( list measurement ) plot-list
-      set body-list lput (list generation measurement ) body-list
-      set generation generation + 1 ]
-    plot-colored-histogram  plot-list [ black ]]
-  
-  ; POPULATION
-  if ( plot-type = "population" ) [
-    let selected-individuals get-sorted-individuals
-    let plot-list []
-    let user-choice get-selected-command
-    set body-list (list 
-      (list "" ) 
-      (list "demographic" "Number of" )
-      (list "category" "individuals" ) 
-      (list "(x axis)" "(y axis)" ) 
-      (list "" ))
-    
-    ; TOTAL POPULATION
-    let measurement count anima1s with [ member? self selected-individuals and take.measurements]
-    set plot-list lput ( list 0 0 0 0 0 0 0 0 0 0 0 measurement ) plot-list
-    set body-list lput (list "Total population" measurement ) body-list
-    
-    ; ADULT FEMALE
-    let adult-females anima1s with [ 
-      member? self selected-individuals and 
-      life.history = "adult" and 
-      biological.sex = "female" and take.measurements]
-    set measurement count adult-females
-    set plot-list lput ( list 0 0 0 0 0 0 0 0 0 0 measurement 0) plot-list
-    set body-list lput (list "Adult females" measurement ) body-list
-    
-    ; CYCLING FEMALE
-    let cycling-females anima1s with [ 
-      member? self selected-individuals and 
-      life.history = "adult" and 
-      biological.sex = "female" and 
-      fertility.status = "cycling" and take.measurements]
-    set measurement count cycling-females
-    set plot-list lput ( list 0 0 0 0 0 0 measurement 0 0 0 0 0) plot-list
-    set body-list lput (list "Cycling females" measurement ) body-list
-    
-    ; PREGNANT FEMALE
-    let pregnant-females anima1s with [ 
-      member? self selected-individuals and 
-      life.history = "adult" and 
-      biological.sex = "female" and 
-      fertility.status = "pregnant" and take.measurements]
-    set measurement count pregnant-females
-    set plot-list lput ( list 0 0 0 0 0 0 0 measurement 0 0 0 0) plot-list
-    set body-list lput (list "Pregnant females" measurement ) body-list
-    
-    ; LACTATING FEMALE
-    let lactating-females anima1s with [ 
-      member? self selected-individuals and 
-      life.history = "adult" and 
-      biological.sex = "female" and 
-      fertility.status = "lactating" and take.measurements]
-    set measurement count lactating-females
-    set plot-list lput ( list 0 0 0 0 0 0 0 0 measurement 0 0 0) plot-list
-    set body-list lput (list "Lactating females" measurement ) body-list
-    
-    ; ADULT MALE
-    let adult-males anima1s with [ 
-      member? self selected-individuals and 
-      life.history = "adult" and 
-      biological.sex = "male" and take.measurements]
-    set measurement count adult-males
-    set plot-list lput ( list 0 0 0 0 0 0 0 0 0 measurement 0 0) plot-list
-    set body-list lput (list "Adult males" measurement ) body-list
-    
-    ; JUVENILE FEMALE
-    let juvenile-females anima1s with [ 
-      member? self selected-individuals and 
-      life.history = "juvenile" and 
-      biological.sex = "female" and take.measurements]
-    set measurement count juvenile-females
-    set plot-list lput ( list 0 0 0 0 measurement 0 0 0 0 0 0 0) plot-list
-    set body-list lput (list "Juvenile females" measurement ) body-list
-    
-    ; JUVENILE MALE
-    let juvenile-males anima1s with [ 
-      member? self selected-individuals and 
-      life.history = "juvenile" and 
-      biological.sex = "male" and take.measurements]
-    set measurement count juvenile-males
-    set plot-list lput ( list 0 0 0 0 0 measurement 0 0 0 0 0 0) plot-list
-    set body-list lput (list "Juvenile males" measurement ) body-list
-    
-    ; INFANT FEMALE
-    let infant-females anima1s with [ 
-      member? self selected-individuals and 
-      life.history = "infant" and 
-      biological.sex = "female" and take.measurements]
-    set measurement count infant-females
-    set plot-list lput ( list 0 0 measurement 0 0 0 0 0 0 0 0 0) plot-list
-    set body-list lput (list "Infant females" measurement ) body-list
-    
-    ; INFANT MALE
-    let infant-males anima1s with [ 
-      member? self selected-individuals and 
-      life.history = "infant" and 
-      biological.sex = "male" and take.measurements]
-    set measurement count infant-males
-    set plot-list lput ( list 0 0 0 measurement 0 0 0 0 0 0 0 0) plot-list
-    set body-list lput (list "Infant males" measurement ) body-list
-    
-    ; GESTATEE FEMALE
-    let gestatee-females anima1s with [ 
-      member? self selected-individuals and 
-      life.history = "gestatee" and 
-      biological.sex = "female" and take.measurements]
-    set measurement count gestatee-females
-    set plot-list lput ( list measurement 0 0 0 0 0 0 0 0 0 0) plot-list
-    set body-list lput (list "Gestatee females" measurement ) body-list
-    
-    ; GESTATEE MALE
-    let gestatee-males anima1s with [ 
-      member? self selected-individuals and 
-      life.history = "gestatee" and 
-      biological.sex = "male" and take.measurements]
-    set measurement count gestatee-males
-    set plot-list lput ( list 0 measurement 0 0 0 0 0 0 0 0 0 0) plot-list
-    set body-list lput (list "Gestatee males" measurement ) body-list
-    
-    plot-colored-histogram plot-list ( lput black lput 5 life-history-color-list )  ; Update plot based on plot list
-  ]
-  
-  ; OUTPUT WINDOW
-  set output-header ( word "PLOT: individuals per " plot-type )
-  set output-index 0
-  set output-body body-list
-  update-output
-  
-end
-
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; GET LIST OF FILTERED AND SORTED INDIVIDUALS
 ;
-; This subroutine is used to obtain a sorted and filtered list of agents, sorted by the switch settings  
-; located above the plot in the interface. If one switch is turned on, the collection only contains individuals
-; of the selected type. For example, turning on the "females" results in only female information 
-; displayed in the plot. If multiple switches of the same type are turned on (i.e. both "males" AND "females"), the 
-; collection is sorted by those attributes.
+; This subroutine is used to obtain a sorted and filtered list of agents, sorted by the button settings  
+; located above the plot in the interface. If one button is selected, the collection only contains individuals
+; of the selected type. For example, turning on the "females" which results in only female information 
+; displayed in the plot. If multiple buttons of the same type are selected, the collection is sorted by those
+; attributes.
 ; 
 ; ENTRY: The switches for 'gestatees,' 'infants,' 'juveniles,' 'adults,' 'females,' 'males' may be selected.
 ;
 ; EXIT: Returns a list of agents, sorted and filtered by parameter specifications.
-; ------------------------------------------------------------------------------------------------------------------- ;   
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
-to-report get-sorted-individuals
-  let sorted-filtered-list []
-  
-  ifelse ( plot-type = "individuals" or plot-type = "groups" or plot-type = "population"  ) [
-    set sorted-filtered-list sort-on [ 
-      read-from-string (word age.in.ticks "." my.identity) ]        ; Create a unique number from age and ID
-    anima1s with [ is.alive and take.measurements] ][               ; Filters out dead individuals
-    set sorted-filtered-list sort-on [ 
-      read-from-string (word age.in.ticks "." my.identity) ]        ; Create a unique number from age and ID
-    anima1s with [ take.measurements ] ]
+to-report get-sorted-individuals 
+  let sorted-filtered-list sort-on [ age.in.ticks ] anima1s with [ is.alive ]
 
   set sorted-filtered-list filter [ i -> ( gestatees and infants and juveniles and adults ) or
     ( not gestatees and not infants and not juveniles and not adults ) or
@@ -1379,55 +1033,63 @@ to-report get-sorted-individuals
   report sorted-filtered-list
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;        
-; GET COLUMN LIST TO PLOT
+; --------------------------------------------------------------------------------------------------------- ;     
+;
+; COLUMN LIST
 ;
 ; This subroutine is called by the anima1s class. It creates a list of zeros and a single non-zero number.
 ; The placement of the non-zero number with respect to the other zeros signifies the kind of anima1 by
 ; sex, life history stage and fertility status. For example, if this subroutine returned [ 0 0 0 0 1 0 0 0 0 0 ] 
 ; then the individual is a juvenile female. The non-zero value is determined by user settings and handled by 
 ; the 'get-data-from-user-selection' subroutine.
-; ------------------------------------------------------------------------------------------------------------------- ;   
+;
+; ENTRY: 
+;
+; EXIT:  The 'get-data-from-user-selection' reports a number based on user input.
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report get-column-list
   let report-list []
-  set report-list lput (ifelse-value ( life.history = "gestatee" and biological.sex = "female" ) 
-    [ get-data-from-user-selection ] [ 0 ]) report-list 
-  set report-list lput (ifelse-value ( life.history = "gestatee" and biological.sex = "male" ) 
-    [ get-data-from-user-selection ] [ 0 ]) report-list
-  set report-list lput (ifelse-value ( life.history = "infant" and biological.sex = "female" ) 
-    [ get-data-from-user-selection ] [ 0 ]) report-list
-  set report-list lput (ifelse-value ( life.history = "infant" and biological.sex = "male" ) 
-    [ get-data-from-user-selection ] [ 0 ]) report-list
-  set report-list lput (ifelse-value ( life.history = "juvenile" and biological.sex = "female" ) 
-    [ get-data-from-user-selection ] [ 0 ]) report-list
-  set report-list lput (ifelse-value ( life.history = "juvenile" and biological.sex = "male" ) 
-    [ get-data-from-user-selection ] [ 0 ]) report-list
-  set report-list lput (ifelse-value ( fertility.status = "cycling" and biological.sex = "female" ) 
-    [ get-data-from-user-selection ] [ 0 ]) report-list
-  set report-list lput (ifelse-value ( fertility.status = "pregnant" and biological.sex = "female" ) 
-    [ get-data-from-user-selection ] [ 0 ]) report-list
-  set report-list lput (ifelse-value ( fertility.status = "lactating" and biological.sex = "female" ) 
-    [ get-data-from-user-selection ] [ 0 ]) report-list
-  set report-list lput (ifelse-value ( life.history = "adult" and biological.sex = "male" ) 
-    [ get-data-from-user-selection ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( life.history = "gestatee" and biological.sex = "female" ) [ get-data-from-user-selection ] [ 0 ]) report-list 
+  set report-list lput (ifelse-value ( life.history = "gestatee" and biological.sex = "male" ) [ get-data-from-user-selection ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( life.history = "infant" and biological.sex = "female" ) [ get-data-from-user-selection ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( life.history = "infant" and biological.sex = "male" ) [ get-data-from-user-selection ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( life.history = "juvenile" and biological.sex = "female" ) [ get-data-from-user-selection ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( life.history = "juvenile" and biological.sex = "male" ) [ get-data-from-user-selection ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( fertility.status = "cycling" and biological.sex = "female" ) [ get-data-from-user-selection ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( fertility.status = "pregnant" and biological.sex = "female" ) [ get-data-from-user-selection ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( fertility.status = "lactating" and biological.sex = "female" ) [ get-data-from-user-selection ] [ 0 ]) report-list
+  set report-list lput (ifelse-value ( life.history = "adult" and biological.sex = "male" ) [ get-data-from-user-selection ] [ 0 ]) report-list
   report report-list
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;        
+; --------------------------------------------------------------------------------------------------------- ;     
+;
 ; PLOT INDIVIDUALS ACCORDING TO THE SPECIFIED SETTINGS
 ;
 ; The order is: female gestatee, male gestatee, female infant, male infant, female juvenile, male juvenile, 
 ; cycling female, pregnant female, lactating female, adult male.
-; ------------------------------------------------------------------------------------------------------------------- ;   
+;
+; ENTRY
+;
+; EXIT
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report life-history-color-list 
   report [ 25 15 45 35 65 55 135 125 115 95 ]
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
-; RETURN AGENT STATE VARIABLE INFORMATION BASED ON SELECTED ITEM FROM USEFUL-COMMANDS MENU
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; HELPER FUNCTION THAT RETURNS INFORMATION
+;
+; ENTRY: The useful-commands menu has a selection.
+;
+; EXIT
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report get-data-from-user-selection
   report (ifelse-value
@@ -1473,20 +1135,54 @@ to-report get-data-from-user-selection
     ( useful-commands = "-- group-transfers" ) [ length group.transfers.history ]
     ( useful-commands = "-- travel-distance" ) [ distance.traveled ]
     ( useful-commands = "-- foraging-gains" ) [ foraging.gains ]
-    ( useful-commands = "-- energy-cost" ) [ total.energy.cost ]
-    ( useful-commands = "-- help-to" ) [ length help.from.history ]
-    ( useful-commands = "-- attacks-to" ) [ length attack.from.history ]
-    ( useful-commands = "-- help-from" ) [ length ( filter [ itm -> itm = my.identity ] ( 
-      reduce sentence [help.from.history] of anima1s )) ]
-    ( useful-commands = "-- attacks-from" ) [ length ( filter [ itm -> itm = my.identity ] ( 
-      reduce sentence [attack.from.history] of anima1s )) ] 
+    ( useful-commands = "-- total-energy-gains" ) [ total.energy.gains ]
+    ( useful-commands = "-- total-energy-cost" ) [ total.energy.cost ]
+    ( useful-commands = "-- help-history" ) [ length help.from.history ]
+    ( useful-commands = "-- attack-history" ) [ length attack.from.history ]
     
     [ 0 ])
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; PRINT SPECIFIED AGENT INFORMATION TO OUTPUT WINDOW
-; ------------------------------------------------------------------------------------------------------------------- ;   
+;
+; This subroutine...
+;
+; ENTRY
+;
+; EXIT
+;
+; --------------------------------------------------------------------------------------------------------- ;
+
+to output-window [ input blurb column-list row-list plot-list key-code bar-code print-code ]
+
+  output-header ( word "PLOT: " input " of " get-life-history-filter get-sex-filter plot-type )
+  output-print (word " x: " plot-type )
+  output-print (word " y: " input )
+  output-print ""
+  let column-header-string " "
+  foreach column-list [ c -> set column-header-string ( word column-header-string  c "   ") ]
+  output-print column-header-string
+  let index 0
+  foreach row-list [ r ->
+    output-print (word "   [" (index + 1) "]     " ( item index row-list ) "     " ( max item index plot-list  ))      
+    set index index + 1
+  ]
+  
+end
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; PRINT SPECIFIED AGENT INFORMATION TO OUTPUT WINDOW
+;
+; This subroutine...
+;
+; ENTRY
+;
+; EXIT
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report get-life-history-filter
   report (ifelse-value
@@ -1497,9 +1193,17 @@ to-report get-life-history-filter
     [ "" ])    
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; PRINT SPECIFIED AGENT INFORMATION TO OUTPUT WINDOW
-; ------------------------------------------------------------------------------------------------------------------- ;   
+;
+; This subroutine...
+;
+; ENTRY
+;
+; EXIT
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report get-sex-filter
   report (ifelse-value
@@ -1508,9 +1212,15 @@ to-report get-sex-filter
     [ "" ]) 
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;        
-; PLOT GROUPS ACCORDING TO THE SPECIFIED SETTINGS
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;     
+;     
+; GROUPS
+;
+; ENTRY
+;
+; EXIT
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to plot-groups-columns
   let sorted-groups get-sorted-groups
@@ -1518,27 +1228,11 @@ to plot-groups-columns
   let color-list []
   let row-list []
   let selected-individuals get-sorted-individuals
-  let user-choice get-selected-command
-  let body-list (list 
-    (list "" ) 
-    (list "" "" "per capita" ) 
-    (list "index" "" user-choice ) 
-    (list "(x axis)" "group ID" "(y axis)" ) 
-    (list "" ))
-  let group-index 0
-
   foreach sorted-groups [ g ->
-
     set row-list lput g row-list
-    let list-for-calculating-mean [ get-data-from-user-selection ] of anima1z with [ 
-      group.identity = g and member? self selected-individuals and take.measurements]
-    let mean-calculation ( ifelse-value ( length list-for-calculating-mean > 0 ) 
-      [ mean list-for-calculating-mean ] [ 0 ] )
-    set group-list lput mean-calculation group-list
-    set color-list lput ( wrap-color g ) color-list 
-    
-    set body-list lput (list (word "[" group-index "]") g ( precision mean-calculation 5) ) body-list
-    set group-index group-index + 1 ]
+    let list-for-calculating-median [ get-data-from-user-selection ] of anima1z with [ group.identity = g and member? self selected-individuals]
+    set group-list lput ( ifelse-value ( length list-for-calculating-median > 0 ) [ median list-for-calculating-median ] [ 0 ] ) group-list
+    set color-list lput ( wrap-color g ) color-list ]
   
   let plot-list []
   let i 0
@@ -1553,208 +1247,55 @@ to plot-groups-columns
     set i i + 1
     set j 0
   ]
-  plot-colored-histogram plot-list color-list
+  ; print plot-list
+  plot-colored-histogram 1 plot-list color-list 1
   
-  set output-header ( word "PLOT: per capita " user-choice " of groups" )
-  set output-index 0
-  set output-body body-list
-  update-output
+  ;output-window plot-type "" (list "column" "my.identity" plot-type ) row-list plot-list 0 0 0
 end
 
 to-report get-sorted-groups
-  report sort remove-duplicates [group.identity] of anima1s with [ is.alive and not solitary? and take.measurements]
+  report sort remove-duplicates [group.identity] of anima1s with [ is.alive and not solitary? ]
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;        
-; PLOT GENERATIONS ACCORDING TO THE SPECIFIED SETTINGS
-; ------------------------------------------------------------------------------------------------------------------- ;   
+; --------------------------------------------------------------------------------------------------------- ;     
+; 
+; EVOLUTION
+;
+; ENTRY
+;
+; EXIT
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
-to plot-generations-columns
+to plot-evolution-generations
   let selected-individuals get-sorted-individuals
-  let max-generation max [generation.number] of anima1s with [member? self selected-individuals and take.measurements]
+  let max-generation max [generation.number] of anima1s with [member? self selected-individuals ]
   let plot-list []
   let generation 0
-  let user-choice get-selected-command
-  let body-list (list 
-    (list "" ) 
-    (list "" "per capita" )
-    (list "generation" user-choice ) 
-    (list "(x axis)" "(y axis)" ) 
-    (list "" ))
-  
   repeat ( max-generation + 1 ) [
-    let evol-list [ get-data-from-user-selection ] of anima1s with [ 
-      generation.number = generation and member? self selected-individuals and take.measurements]
+    let evol-list [ get-data-from-user-selection ] of anima1s with [ generation.number = generation and member? self selected-individuals ]
     let agent-count ifelse-value ( length evol-list > 0 ) [ mean evol-list ] [ 0 ]
     set plot-list lput ( list agent-count ) plot-list
-    
-    set body-list lput (list generation ( precision agent-count 5) ) body-list
     set generation generation + 1
   ]
-  
-  plot-colored-histogram  plot-list [ black ]
-  
-  set output-header ( word "PLOT: per capita " user-choice " of generations" )
-  set output-index 0
-  set output-body body-list
-  update-output
+  plot-colored-histogram 1 plot-list [ black ] 1
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;        
-; PLOT POPULATION ACCORDING TO THE SPECIFIED SETTINGS
-; ------------------------------------------------------------------------------------------------------------------- ;   
-
-to plot-population-columns
-  let selected-individuals get-sorted-individuals
-  let plot-list []
-  let user-choice get-selected-command
-  let body-list (list 
-    (list "" ) 
-    (list "demographic" "per capita" )
-    (list "category" user-choice ) 
-    (list "(x axis)" "(y axis)" ) 
-    (list "" ))
-  
-  ; TOTAL POPULATION
-  let measurement [ get-data-from-user-selection ] of anima1s with [ member? self selected-individuals and take.measurements]
-  let agent-count ifelse-value ( length measurement > 0 ) [ mean measurement ] [ 0 ]
-  set plot-list lput ( list 0 0 0 0 0 0 0 0 0 0 0 agent-count ) plot-list
-  set body-list lput (list "Total population" ( precision agent-count 5) ) body-list
-  
-  ; ADULT FEMALE
-  let adult-females anima1s with [ 
-    member? self selected-individuals and 
-    life.history = "adult" and 
-    biological.sex = "female" and take.measurements]
-  set measurement [ get-data-from-user-selection ] of adult-females
-  let measurement-refined ifelse-value ( length measurement > 0 ) [ mean measurement ] [ 0 ]
-  set plot-list lput ( list 0 0 0 0 0 0 0 0 0 0 measurement-refined 0) plot-list
-  set body-list lput (list "Adult females" ( precision measurement-refined 5) ) body-list
-  
-  ; CYCLING FEMALE
-  let cycling-females anima1s with [ 
-    member? self selected-individuals and 
-    life.history = "adult" and 
-    biological.sex = "female" and 
-    fertility.status = "cycling" and take.measurements]
-  set measurement [ get-data-from-user-selection ] of cycling-females
-  set measurement-refined ifelse-value ( length measurement > 0 ) [ mean measurement ] [ 0 ]
-  set plot-list lput ( list 0 0 0 0 0 0 measurement-refined 0 0 0 0 0) plot-list
-  set body-list lput (list "Cycling females" ( precision measurement-refined 5) ) body-list
-  
-  ; PREGNANT FEMALE
-  let pregnant-females anima1s with [ 
-    member? self selected-individuals and 
-    life.history = "adult" and 
-    biological.sex = "female" and 
-    fertility.status = "pregnant" and take.measurements]
-  set measurement [ get-data-from-user-selection ] of pregnant-females
-  set measurement-refined ifelse-value ( length measurement > 0 ) [ mean measurement ] [ 0 ]
-  set plot-list lput ( list 0 0 0 0 0 0 0 measurement-refined 0 0 0 0) plot-list
-  set body-list lput (list "Pregnant females" ( precision measurement-refined 5) ) body-list
-  
-  ; LACTATING FEMALE
-  let lactating-females anima1s with [ 
-    member? self selected-individuals and 
-    life.history = "adult" and 
-    biological.sex = "female" and 
-    fertility.status = "lactating" and take.measurements]
-  set measurement [ get-data-from-user-selection ] of lactating-females
-  set measurement-refined ifelse-value ( length measurement > 0 ) [ mean measurement ] [ 0 ]
-  set plot-list lput ( list 0 0 0 0 0 0 0 0 measurement-refined 0 0 0) plot-list
-  set body-list lput (list "Lactating females" ( precision measurement-refined 5) ) body-list
-  
-  ; ADULT MALE
-  let adult-males anima1s with [ 
-    member? self selected-individuals and 
-    life.history = "adult" and 
-    biological.sex = "male" and take.measurements]
-  set measurement [ get-data-from-user-selection ] of adult-males
-  set measurement-refined ifelse-value ( length measurement > 0 ) [ mean measurement ] [ 0 ]
-  set plot-list lput ( list 0 0 0 0 0 0 0 0 0 measurement-refined 0 0) plot-list
-  set body-list lput (list "Adult males" ( precision measurement-refined 5) ) body-list
-  
-  ; JUVENILE FEMALE
-  let juvenile-females anima1s with [ 
-    member? self selected-individuals and 
-    life.history = "juvenile" and 
-    biological.sex = "female" and take.measurements]
-  set measurement [ get-data-from-user-selection ] of juvenile-females
-  set measurement-refined ifelse-value ( length measurement > 0 ) [ mean measurement ] [ 0 ]
-  set plot-list lput ( list 0 0 0 0 measurement-refined 0 0 0 0 0 0 0) plot-list
-  set body-list lput (list "Juvenile females" ( precision measurement-refined 5) ) body-list
-  
-  ; JUVENILE MALE
-  let juvenile-males anima1s with [ 
-    member? self selected-individuals and 
-    life.history = "juvenile" and 
-    biological.sex = "male" and take.measurements]
-  set measurement [ get-data-from-user-selection ] of juvenile-males
-  set measurement-refined ifelse-value ( length measurement > 0 ) [ mean measurement ] [ 0 ]
-  set plot-list lput ( list 0 0 0 0 0 measurement-refined 0 0 0 0 0 0) plot-list
-  set body-list lput (list "Juvenile males" ( precision measurement-refined 5) ) body-list
-  
-  ; INFANT FEMALE
-  let infant-females anima1s with [ 
-    member? self selected-individuals and 
-    life.history = "infant" and 
-    biological.sex = "female" and take.measurements]
-  set measurement [ get-data-from-user-selection ] of infant-females
-  set measurement-refined ifelse-value ( length measurement > 0 ) [ mean measurement ] [ 0 ]
-  set plot-list lput ( list 0 0 measurement-refined 0 0 0 0 0 0 0 0 0) plot-list
-  set body-list lput (list "Infant females" ( precision measurement-refined 5) ) body-list
-  
-  ; INFANT MALE
-  let infant-males anima1s with [ 
-    member? self selected-individuals and 
-    life.history = "infant" and 
-    biological.sex = "male" and take.measurements]
-  set measurement [ get-data-from-user-selection ] of infant-males
-  set measurement-refined ifelse-value ( length measurement > 0 ) [ mean measurement ] [ 0 ]
-  set plot-list lput ( list 0 0 0 measurement-refined 0 0 0 0 0 0 0 0) plot-list
-  set body-list lput (list "Infant males" ( precision measurement-refined 5) ) body-list
-  
-  ; GESTATEE FEMALE
-  let gestatee-females anima1s with [ 
-    member? self selected-individuals and 
-    life.history = "gestatee" and 
-    biological.sex = "female" and take.measurements]
-  set measurement [ get-data-from-user-selection ] of gestatee-females
-  set measurement-refined ifelse-value ( length measurement > 0 ) [ mean measurement ] [ 0 ]
-  set plot-list lput ( list measurement-refined 0 0 0 0 0 0 0 0 0 0) plot-list
-  set body-list lput (list "Gestatee females" ( precision measurement-refined 5) ) body-list
-  
-  ; GESTATEE MALE
-  let gestatee-males anima1s with [ 
-    member? self selected-individuals and 
-    life.history = "gestatee" and 
-    biological.sex = "male" and take.measurements]
-  set measurement [ get-data-from-user-selection ] of gestatee-males
-  set measurement-refined ifelse-value ( length measurement > 0 ) [ mean measurement ] [ 0 ]
-  set plot-list lput ( list 0 measurement-refined 0 0 0 0 0 0 0 0 0 0) plot-list
-  set body-list lput (list "Gestatee males" ( precision measurement-refined 5) ) body-list
-  
-  plot-colored-histogram plot-list ( lput black lput 5 life-history-color-list )         ; Update plot based on plot list
-  
-  set output-header ( word "PLOT: per capita " user-choice " of population" )
-  set output-index 0
-  set output-body body-list
-  update-output
-end
-
-; ------------------------------------------------------------------------------------------------------------------- ;        
-; HELPER HISTOGRAM PLOT SUBROUTINE
+; --------------------------------------------------------------------------------------------------------- ;     
+;   
+; HELPER HISTOGRAM PLOTTING
 ;
-; plot-list is a list of lists of the form: [[ 0 0 0 1 0 0 0 0 0 0 ][ 0 0 0 0 0 0 0 1 0 0 ][ 0 0 0 0 0 0 0 0 0 1 ]]
-; color-list is a list that looks like this: [ 25 15 45 35 65 55 135 125 115 95 ]
-; ------------------------------------------------------------------------------------------------------------------- ;    
+; ENTRY
+;
+; EXIT
+;
+; --------------------------------------------------------------------------------------------------------- ; 
 
-to plot-colored-histogram [ plot-list color-list ]
+to plot-colored-histogram [ column-interval plot-list color-list plot-type-1 ]
   clear-all-plots
   set-current-plot "plot"
   set-plot-pen-interval 0.01
   set-plot-pen-mode 1
-  let column-interval 1.0
   
   let index 0
   foreach plot-list [ column ->
@@ -1773,6 +1314,6 @@ to plot-colored-histogram [ plot-list color-list ]
     ]
     set index index + column-interval ]  
   
-  set-plot-pen-color pink                                          ; Reset "cycling female" label back to pink
+  set-plot-pen-color pink ; reset "cycling female" label back to pink
 end
 

@@ -1,4 +1,4 @@
-; =================================================================================================================== ;
+; ========================================================================================================= ;
 ;
 ;  .88888.   88888888b 888888ba   .88888.  d888888P dP    dP  888888ba   88888888b 
 ; d8'   `88  88        88    `8b d8'   `8b    88    Y8.  .8P  88    `8b  88        
@@ -6,25 +6,38 @@
 ; 88   YP88  88        88     88 88     88    88       88     88         88        
 ; Y8.   .88  88        88     88 Y8.   .8P    88       88     88         88        
 ;  `88888'   88888888P dP     dP  `8888P'     dP       dP     dP         88888888P 
-;   
-; 
+;                                                                                 
+;                                                                                
+; 888888ba   88888888b  .d888888  888888ba   88888888b  888888ba  
+;  88    `8b  88        d8'    88  88    `8b  88         88    `8b 
+; a88aaaa8P' a88aaaa    88aaaaa88a 88     88 a88aaaa    a88aaaa8P' 
+;  88   `8b.  88        88     88  88     88  88         88   `8b. 
+;  88     88  88        88     88  88    .8P  88         88     88 
+;  dP     dP  88888888P 88     88  8888888P   88888888P  dP     dP                                                            
+;
+;
+; This extension handles the conversion process of taking information about an individual's current
+; environment and genotype to create a set of decision vectors. There are currently two genotype
+; readers: sta2us and gat3s. Each genotype reader is associated with a different genotype organization.
+; Thus, this process only works if the genotype-reader setting and the file used to import the genotype 
+; information are of the same type.
+;
+; © 2021 K N Crouse  
+;
+; ========================================================================================================= ;
+
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ;            dP            d8888b.                   
 ;            88                `88                   
 ; .d8888b. d8888P .d8888b. .aaadP' dP    dP .d8888b. 
 ; Y8ooooo.   88   88'  `88 88'     88    88 Y8ooooo. 
 ;       88   88   88.  .88 88.     88.  .88       88 
 ; `88888P'   dP   `88888P8 Y88888P `88888P' `88888P' 
-;      
-;
-; This extension handles the conversion process of taking information about an individual's current
-; environment and genotype to create a set of decision vectors. There are currently two genotype
-; types: sta2us and gat3s. 
-;
-; © 2022 K N Crouse  
-;
-; =================================================================================================================== ;
+;                                                                  
+; --------------------------------------------------------------------------------------------------------- ;
 ; 
-; The sta2us genotype is the most straightforward type to use. However, it is also the most limited
+; The sta2us genotype reader is the most straightforward type to use. However, it is also the most limited
 ; in potential behavioral complexity. If you are new to using B3GET, you should start with the sta2us 
 ; genotype. Below is a list of codes, or codons, that combine to make up the alleles of this genotype.
 ;
@@ -120,14 +133,20 @@
 ; 2021-07-06   --> attack 
 ; 2021-07-06   --> mate-with 
 ; 
-; ------------------------------------------------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
 
-; ------------------------------------------------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; GENERATE A LIST OF DECISIONS VECTORS
 ;
 ; Reporter that returns a list of decision vectors generated from genotype and current environment of the
 ; caller. The environment is a list of turtles (both plants and anima1s) observed by the caller.
-; ------------------------------------------------------------------------------------------------------------------- ;
+;
+; ENTRY
+;
+; EXIT: A list of decision vectors representing the decisions of the caller.
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report sta2us-get-decisions [ my-environment ] 
   
@@ -195,11 +214,17 @@ to-report sta2us-get-decisions [ my-environment ]
   
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; REPORT UP TO DATE ACTION NAME
 ;
 ; This subroutine ensures that outdated action codons can still be linked to updated action names.
-; ------------------------------------------------------------------------------------------------------------------- ;
+;
+; ENTRY: action-code is the codon taken from a genotype.
+;
+; EXIT: Report the up-to-date name of the action.
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report sta2us-get-action [ action-code ]
 
@@ -349,35 +374,51 @@ to-report sta2us-get-action [ action-code ]
   
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
+;
 ; GENERATE A MUTATED VERSION OF THE INPUT CODON
 ;
 ; Returns a randomly selected codon to occasionally introduce novel mutations into a population.
-; ------------------------------------------------------------------------------------------------------------------- ;
+; 
+;
+;
+; ENTRY: original-codon
+; 
+;        type-of-mutation is either numbers, letters, both
+;
+; EXIT: 
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report sta2us-get-mutation [ original-codon type-of-mutation ] 
   
-  report ( ifelse-value                                        
-    ( is-number? original-codon and                            
-      ( type-of-mutation = "numbers" or                        
-        type-of-mutation = "both" ) )                          
-    [ ( one-of [ 1 -1 ] ) *                                    
-      get-updated-value original-codon ( one-of [ 1 -1 ] ) ]   
-    ( member? original-codon action-code-list and              
-      ( type-of-mutation = "letters" or                        
-        type-of-mutation = "both" ) )                          
-    [ one-of action-code-list ]                                
-    [ ifelse-value ( type-of-mutation = "letters" or           
-      type-of-mutation = "both" )                              
-      [ generate-status ]                                      
-      [ original-codon ]] )                                    
+  report ( ifelse-value                                        ;
+    ( is-number? original-codon and                            ;
+      ( type-of-mutation = "numbers" or                        ;
+        type-of-mutation = "both" ) )                          ;
+    [ ( one-of [ 1 -1 ] ) *                                    ;
+      get-updated-value original-codon ( one-of [ 1 -1 ] ) ]   ;
+    ( member? original-codon action-code-list and              ;
+      ( type-of-mutation = "letters" or                        ;
+        type-of-mutation = "both" ) )                          ;
+    [ one-of action-code-list ]                                ;
+    [ ifelse-value ( type-of-mutation = "letters" or           ;
+      type-of-mutation = "both" )                              ;
+      [ generate-status ]                                      ;
+      [ original-codon ]] )                                    ;
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;
-; DETERMINE THE CURRENT STATUS OF THE TARGET INDIVIDUAL
+; --------------------------------------------------------------------------------------------------------- ;
 ;
-; A complete list of letters and corresponding definitions are located above.
-; ------------------------------------------------------------------------------------------------------------------- ;
+; TITLE
+;
+; This subroutine... A complete list of letters and corresponding definitions are located above.
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report status-of [ target ]
   let status-report ""
@@ -411,9 +452,9 @@ to-report status-of [ target ]
       ( distance-to-target > 0.66 * maximum-visual-range * visual.range ) [ ">" ] [ "|" ] )
     let target-alone ifelse-value ( [ solitary? ] of target = false ) [ "∴" ] [ "⋅" ]
     
-    set status-report (word status-report                    ; Create a status from all 
-      target-kind                                            ; variables.
-      target-self                                            
+    set status-report (word status-report                    ; 
+      target-kind                                            ;
+      target-self                                            ;
       target-alive 
       target-sex 
       target-life-history
@@ -437,40 +478,56 @@ to-report status-of [ target ]
     ( plant-group = 0 or plant-group = group.identity ) [ "n" ] [ "u" ] 
     let target-pcolor (word "" round [pcolor] of target "")
     set status-report (word status-report 
-      word target-kind                                      ; Status for plants.
-      target-group                                          
-      target-pcolor )]                                      
+      word target-kind                                      ;
+      target-group                                          ;
+      target-pcolor )]                                      ;
   
   report status-report
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;
-; DETERMINE IF INPUT STRING TWO CONTAINS ALL OF THE ITEMS IN INTPUT STRING ONE 
-; ------------------------------------------------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report first-string-is-part-of-last? [ string1 string2 ]
   let first-is-part-of-last true
-  let index 0                                              
-  if ( is-string? string1 and is-string? string2 ) [       
-    let string1-length length string1                    
-    while [ first-is-part-of-last and                      
-      index < string1-length ] [                           
-      if ( not member? item index string1 string2 ) and    
-      ( item index string1 != " " )                         
-      [ set first-is-part-of-last false ]                  
-      set index index + 1 ]]                               
+  let index 0                                              ;
+  if ( is-string? string1 and is-string? string2 ) [       ;
+    let string1-length length string1                      ; saves on runtime
+    while [ first-is-part-of-last and                      ;
+      index < string1-length ] [                           ;
+      if ( not member? item index string1 string2 ) and    ;
+      ( item index string1 != " " )                        ; 
+      [ set first-is-part-of-last false ]                  ;
+      set index index + 1 ]]                               ;
   report first-is-part-of-last
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;
-; RETURNS LIST OF STA2US LETTERS
-; ------------------------------------------------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report status-code-list
-  report [                                                 
-    "a" "b" "c" "d" "e" "f" "g"                            
-    "h" "i" "j" "k" "l" "m" "n"                            
-    "o" "p" "q" "r" "s" "t" "u"                           
+  report [                                                 ;
+    "a" "b" "c" "d" "e" "f" "g"                            ; 
+    "h" "i" "j" "k" "l" "m" "n"                            ; 
+    "o" "p" "q" "r" "s" "t" "u"                            ;
     "v" "w" "x" "y" "z" "¥" "α" 
     "å" "β" "ß" "ɣ" "œ" "*" "-" 
     "#" "$" "~" "1" "2" "3" "4" 
@@ -478,9 +535,17 @@ to-report status-code-list
     "∴" "⋅" "<" ">" "|" ]
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;
-; RETURNS A LIST OF ACTIONS
-; ------------------------------------------------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report action-code-list
   report [ 
@@ -530,29 +595,45 @@ to-report action-code-list
     "do-nothing" ]
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;
-; DETERMINE IF THE INPUT CODON EXISTS AS A REAL CODON
-; ------------------------------------------------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report sta2us-codon-exists [ codon ]
   report
-  codon != "" and                                 ; Check that the input codon is not blank or
-  not is-number? codon and                        ; a number or
-  not is-boolean? codon and                       ; a boolean
-  ( member? codon action-code-list or             ; and is a member of the action list
-    first-string-is-part-of-last? codon           ; and codon contains sta2us items.
-    ( reduce word status-code-list ) )            ; Codon is either an action or part of the status codons list
+  codon != "" and                                 ;
+  not is-number? codon and                        ;
+  not is-boolean? codon and                       ;
+  ( member? codon action-code-list or             ;
+    first-string-is-part-of-last? codon           ;
+    ( reduce word status-code-list ) )            ; codon is either an action or part of the status codons list
 end
 
-; ------------------------------------------------------------------------------------------------------------------- ;
-; RETURNS A RANDOMLY GENERATED STATUS STRING
-; ------------------------------------------------------------------------------------------------------------------- ;
+; --------------------------------------------------------------------------------------------------------- ;
+;
+; TITLE
+;
+; This subroutine...
+;
+; ENTRY: entry 1...
+;
+; EXIT: exit 1...
+;
+; --------------------------------------------------------------------------------------------------------- ;
 
 to-report generate-status
-  let new-status one-of status-code-list          
-  repeat ( random 5 ) [                           ; Create a string of up to five randomly generated letters
-    set new-status ( word                         ; to create a status.
-      new-status one-of status-code-list ) ]      
+  let new-status one-of status-code-list          ;
+  repeat ( random 5 ) [                           ;
+    set new-status ( word                         ;
+      new-status one-of status-code-list ) ]      ;
   report new-status
 end
 
