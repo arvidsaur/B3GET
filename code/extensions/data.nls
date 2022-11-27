@@ -124,7 +124,7 @@ to update-metafile [ type-of-interaction name-of-file metafile-notes ]
 
 end
 
-to update-timings [ a1 b1 c1 d1 e1 f1 g1 h1 ]
+to update-timings [ total alive a1 b1 c1 d1 e1 f1 g1 h1 ]
 
   let filename "../results/timings.csv"                          ; Select the file.
 
@@ -132,6 +132,8 @@ to update-timings [ a1 b1 c1 d1 e1 f1 g1 h1 ]
   [                                                               ; it and write the heading lines.
     file-open filename
     csv:to-file filename (list (list
+      "total"
+      "alive"
       "a"
       "b"
       "c"
@@ -148,6 +150,8 @@ to update-timings [ a1 b1 c1 d1 e1 f1 g1 h1 ]
   ; Update METAFILE with a new row of FILE information
   file-print csv:to-string (list
     (list
+      total
+      alive
       a1
       b1
       c1

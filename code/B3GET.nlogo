@@ -745,7 +745,10 @@ to go
 
   tick                                                       ; Move forward one simulated hour.
 
-  update-timings to-go-entered global-update-done plants-update-done animals-update-done consider-environment-done make-decisions-done do-actions-done end-of-go
+  let number-alive count anima1s with [ is.alive ]
+  let number-total count anima1s
+
+  update-timings number-total number-alive to-go-entered global-update-done plants-update-done animals-update-done consider-environment-done make-decisions-done do-actions-done end-of-go
 
 end
 
