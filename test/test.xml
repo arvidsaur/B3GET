@@ -1,0 +1,10 @@
+<experiments>
+  <experiment name="random_seed_5" repetitions="1" runMetricsEveryStep="false">
+    <setup>protopan-setup</setup>
+    <go>go</go>
+    <final>protopan-final</final>
+    <enumeratedValueSet variable="random-seed">
+      <value value="5"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>

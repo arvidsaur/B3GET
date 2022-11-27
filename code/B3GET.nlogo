@@ -714,7 +714,8 @@ end
 ; --------------------------------------------------------------------------------------------------------- ;
 
 to go
-
+  let to-go-entered timer
+  output-print ( word "tick " ticks " to go entered " to-go-entered )
   if ( ticks = 0 ) [                                         ; Update metafile when a
     update-metafile                                          ; new simulation starts.
     "simulation"
@@ -724,18 +725,27 @@ to go
   if ( ticks = simulation-stop-at + 1 ) [ stop ]             ; Stop at the predetermined timestep.
 
   global-update                                              ; Update the current state of the
+  let global-update-done timer
   plants-update                                              ; plants and animals in the
+  let plants-update-done timer
   animals-update                                             ; simulated world.
+  let animals-update-done timer
 
   ask anima1s with [ is.alive ] [ consider-environment ]     ; Allow living animals to view their environment,
+  let consider-environment-done timer
   ask anima1s with [ is.alive ] [ make-decisions ]           ; make decisions according to their genotype, and
+  let make-decisions-done timer
   ask anima1s with [ is.alive ] [ do-actions ]               ; perform those actions if they have enough energy.
+  let do-actions-done timer
 
   if selection-on? [ artificial-selection ]                  ; Impose artificial selection on animals.
   if output-results? [ output-results ]                      ; Generate data from current simulation state.
   display-simulation-status                                  ; Display simulation status.
+  let end-of-go timer
 
   tick                                                       ; Move forward one simulated hour.
+
+  update-timings to-go-entered global-update-done plants-update-done animals-update-done consider-environment-done make-decisions-done do-actions-done end-of-go
 
 end
 

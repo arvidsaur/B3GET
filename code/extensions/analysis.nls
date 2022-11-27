@@ -53,7 +53,7 @@ to thesis-setup
 ;  set record-individuals true 
 ;  set verification-rate 1E-5
 ;  set record-world-ticks 1000
-;  set simulation-stop-at 1000
+;  set simulation-stop-at 100000
   
   if ( model-structure = 0 ) [ set model-structure [] ]
   
@@ -1611,7 +1611,7 @@ to protopan-setup
   set record-individuals true 
   set verification-rate 1E-5
   set record-world-ticks 1000000
-  set simulation-stop-at 1000000
+  set simulation-stop-at 100000
   
   set population "ProtoPan"
   set genotype "protopan"
@@ -1626,7 +1626,7 @@ to protopan-setup
 ;  set record-individuals true 
 ;  set verification-rate 1E-5
 ;  set record-world-ticks 1000
-;  set simulation-stop-at 1000
+;  set simulation-stop-at 100000
   
   if ( model-structure = 0 ) [ set model-structure [] ]
  
@@ -1695,6 +1695,12 @@ to protopan-setup
     behaviorspace-run-number " end setup at "
     date-and-time )
   
+end
+
+to dine-and-dash-setup
+  protopan-setup
+  set useful-commands "-- dine-and-dash"
+  visual-verification
 end
 
 to protopan-final

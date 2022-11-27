@@ -124,6 +124,46 @@ to update-metafile [ type-of-interaction name-of-file metafile-notes ]
 
 end
 
+to update-timings [ a1 b1 c1 d1 e1 f1 g1 h1 ]
+
+  let filename "../results/timings.csv"                          ; Select the file.
+
+  if ( not file-exists? filename )                                ; If filename does not exist, open
+  [                                                               ; it and write the heading lines.
+    file-open filename
+    csv:to-file filename (list (list
+      "a"
+      "b"
+      "c"
+      "d"
+      "e"
+      "f"
+      "g"
+      "h"
+    ))
+  ]
+
+  file-open filename                                              ; Make sure the file is open.
+
+  ; Update METAFILE with a new row of FILE information
+  file-print csv:to-string (list
+    (list
+      a1
+      b1
+      c1
+      d1
+      e1
+      f1
+      g1
+      h1
+  ))
+
+  file-close
+
+end
+
+
+
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
 ;                                      dP            dP   oo
