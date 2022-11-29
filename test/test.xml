@@ -3,8 +3,6 @@
     <setup>protopan-setup</setup>
     <go>go</go>
     <final>protopan-final</final>
-    <enumeratedValueSet variable="random-seed">
-      <value value="5"/>
-    </enumeratedValueSet>
+    <steppedValueSet variable="random-seed" first="5" step="1" last="8"/>
   </experiment>
 </experiments>

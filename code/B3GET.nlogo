@@ -715,7 +715,7 @@ end
 
 to go
   let to-go-entered timer
-  output-print ( word "tick " ticks " to go entered " to-go-entered )
+  ;output-print ( word "tick " ticks " to go entered " to-go-entered )
   if ( ticks = 0 ) [                                         ; Update metafile when a
     update-metafile                                          ; new simulation starts.
     "simulation"
@@ -748,7 +748,7 @@ to go
   let number-alive count anima1s with [ is.alive ]
   let number-total count anima1s
 
-  update-timings number-total number-alive to-go-entered global-update-done plants-update-done animals-update-done consider-environment-done make-decisions-done do-actions-done end-of-go
+  update-timings simulation-id number-total number-alive to-go-entered global-update-done plants-update-done animals-update-done consider-environment-done make-decisions-done do-actions-done end-of-go
 
 end
 

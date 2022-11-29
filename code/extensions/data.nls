@@ -124,9 +124,9 @@ to update-metafile [ type-of-interaction name-of-file metafile-notes ]
 
 end
 
-to update-timings [ total alive a1 b1 c1 d1 e1 f1 g1 h1 ]
+to update-timings [ ident total alive a1 b1 c1 d1 e1 f1 g1 h1 ]
 
-  let filename "../results/timings.csv"                          ; Select the file.
+  let filename (word "../results/timings-" ident ".csv" )                          ; Select the file.
 
   if ( not file-exists? filename )                                ; If filename does not exist, open
   [                                                               ; it and write the heading lines.
