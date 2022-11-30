@@ -362,6 +362,7 @@ globals [
   model-version                    ; Current version of B3GET
   model-structure                  ; User setting for including specialized subroutines
   genotype-reader
+  genotype-get-decisions
   simulation-id                    ; Randomly generated simulation identity
   simulation-stop-at               ; User setting to define when to end the simulation
 
@@ -552,6 +553,13 @@ to setup-parameters
   [ set output-results? false ]
 
   set genotype-reader "sta2us"
+  set genotype-get-decisions ( ifelse-value                          ; Get decisions from selected genotype reader.
+    ( genotype-reader = "sta2us" )                                   ; If genotype reader is sta2us,
+    [ [ -> set decision.vectors sta2us-get-decisions my.environment ] ] ; get decisions based on a sta2us genotype.
+    ( genotype-reader = "gat3s" )                                    ; If gentoype reader is gat3s,
+    [ [ -> set decision.vectors gat3s-get-decisions my.environment ] ]                           ; get decisions based on a gat3s genotype.
+    [ [ -> set decision.vectors sta2us-get-decisions my.environment ] ] ) ; If not specified, assume current genotype
+                                                                     ; reader is sta2us.
 
   reset-timer                                                  ; Start the simulation timer
 end
@@ -1549,14 +1557,7 @@ end
 to make-decisions
 
   carefully [
-
-    set decision.vectors ( ifelse-value                          ; Get decisions from selected genotype reader.
-      ( genotype-reader = "sta2us" )                             ; If genotype reader is sta2us,
-      [ sta2us-get-decisions my.environment ]                    ; get decisions based on a sta2us genotype.
-      ( genotype-reader = "gat3s" )                              ; If gentoype reader is gat3s,
-      [ gat3s-get-decisions my.environment ]                     ; get decisions based on a gat3s genotype.
-      [ sta2us-get-decisions my.environment ] )                  ; If not specified, assume current genotype
-                                                                 ; reader is sta2us.
+    run genotype-get-decisions                                   ; Get decisions from selected genotype reader.
     foreach decision.vectors [ d ->                              ; Add this individual's decision to the global
 
       set decisions-made-this-timestep lput d decisions-made-this-timestep ]        ; pool of decisions.
