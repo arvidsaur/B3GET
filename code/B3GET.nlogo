@@ -721,6 +721,11 @@ end
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
+to profiler-setup
+  protopan-setup
+  profiler:start
+end
+
 to go
   let to-go-entered timer
   ;output-print ( word "tick " ticks " to go entered " to-go-entered )
@@ -730,7 +735,14 @@ to go
     simulation-id
     "SIMULATION STARTED" ]
 
-  if ( ticks = simulation-stop-at + 1 ) [ stop ]             ; Stop at the predetermined timestep.
+  if ( ticks = simulation-stop-at + 1 ) [             ; Stop at the predetermined timestep. 
+  let _fname "profiler.txt"
+  carefully [file-delete _fname] []
+  file-open _fname
+  file-print profiler:report
+  file-close
+  stop
+  ]
 
   global-update                                              ; Update the current state of the
   let global-update-done timer
@@ -739,11 +751,13 @@ to go
   animals-update                                             ; simulated world.
   let animals-update-done timer
 
-  ask anima1s with [ is.alive ] [ consider-environment ]     ; Allow living animals to view their environment,
+  let anima1s-alive anima1s with [ is.alive ]
+
+  ask anima1s-alive [ consider-environment ]     ; Allow living animals to view their environment,
   let consider-environment-done timer
-  ask anima1s with [ is.alive ] [ make-decisions ]           ; make decisions according to their genotype, and
+  ask anima1s-alive [ make-decisions ]           ; make decisions according to their genotype, and
   let make-decisions-done timer
-  ask anima1s with [ is.alive ] [ do-actions ]               ; perform those actions if they have enough energy.
+  ask anima1s-alive [ do-actions ]               ; perform those actions if they have enough energy.
   let do-actions-done timer
 
   if selection-on? [ artificial-selection ]                  ; Impose artificial selection on animals.
@@ -753,11 +767,10 @@ to go
 
   tick                                                       ; Move forward one simulated hour.
 
-  let number-alive count anima1s with [ is.alive ]
+  let number-alive count anima1s-alive
   let number-total count anima1s
 
   update-timings simulation-id number-total number-alive to-go-entered global-update-done plants-update-done animals-update-done consider-environment-done make-decisions-done do-actions-done end-of-go
-
 end
 
 ; --------------------------------------------------------------------------------------------------------- ;

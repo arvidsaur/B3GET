@@ -65,16 +65,6 @@ to output-results
     ; VERIFICATION : collect information on outcomes of periodic code verification checks
     ;-------------------------------------------------------------------------------------------------------   
     
-    if ( verification-rate > 0 and                              ; If user wants to collect verification data
-      ( random-float 1.0 < verification-rate ) ) [              ; and dice-roll wins and start a new profiler
-      profiler:start ]                                          ; recording.    
-
-    if ( profiler:calls "go" >= 1 ) [                           ; If profiler is running
-      record-verification                                       ; Record dynamic verification data
-      profiler:stop                                             ; and stop the profiler
-      profiler:reset                                            ; reset the profiler data
-    ]                  
-    
     ;-------------------------------------------------------------------------------------------------------       
     ; SUMMARY : collect summary information of simulations or individuals
     ;-------------------------------------------------------------------------------------------------------   

@@ -1,3 +1,4 @@
+*.swp
 .DS_Store
 codemeta.json
 /code/.B3GET.tmp.nlogo
