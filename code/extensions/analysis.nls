@@ -1607,7 +1607,7 @@ to protopan-setup
   set individual-scan-ticks 0 
   set view-scan-ticks 100000 
   set genotype-scan-ticks 10000
-  set focal-follow-rate 1E-4
+  set focal-follow-rate 0
   set record-individuals true 
   set verification-rate 1E-5
   set record-world-ticks 1000000
