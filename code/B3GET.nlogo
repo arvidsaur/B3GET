@@ -488,6 +488,11 @@ to setup-parameters
   if ( path-to-experiment = "" )                               ; By default, the path-to-experiment is
   [ set path-to-experiment "../results/" ]                     ; set to point to the results folder.
 
+  if ( starting-seed = 0 )                                      ; By default, use new-seed to generate a
+  [ set starting-seed new-seed ]                                ; random-seed if one is not provided.
+  random-seed starting-seed                                     ; Then set random-seed to this seed.
+  record-starting-seed
+
   if ( timestep-interval = 0)
   [ set timestep-interval 100 ]                                ; Default period between records.
 
@@ -4727,6 +4732,17 @@ NIL
 NIL
 NIL
 1
+
+INPUTBOX
+1785
+244
+1940
+304
+starting-seed
+0.0
+1
+0
+Number
 
 @#$#@#$#@
 # B3GET 1.2.0 INFORMATION
