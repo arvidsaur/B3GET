@@ -462,6 +462,7 @@ to default-settings
   set plant-maximum-neighbors 8
   set population "population"
   set genotype "genotype"
+  set starting-seed 0
   clear-plot
   clear-output
 
