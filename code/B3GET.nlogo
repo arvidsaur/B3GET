@@ -66,7 +66,7 @@
 ;
 ; --------------------------------------------------------------------------------------------------------- ;
 
-extensions [ csv profiler table time ]
+extensions [ csv profiler table time unittest ]
 
 __includes [ ; For more information on local extensions, see the corresponding files.
 
@@ -721,6 +721,19 @@ end
 to profiler-setup
   protopan-setup
   profiler:start
+end
+
+to unit-test-setup
+  protopan-setup
+end
+
+to unit-test-go
+  unittest:add "" [] [5] 5
+  stop
+end
+
+to unit-test-final
+  unittest:clear
 end
 
 to go

@@ -1,0 +1,10 @@
+<experiments>
+  <experiment name="unit_test" repetitions="1" runMetricsEveryStep="false">
+    <setup>unit-test-setup</setup>
+    <go>unit-test-go</go>
+    <final>unit-test-final</final>
+    <enumeratedValueSet variable="starting-seed">
+      <value value="5"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>
