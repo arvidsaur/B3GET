@@ -2664,6 +2664,18 @@ to scan-group [ group-id ]
   
 end
 
+to record-starting-seed
+  
+  let file-path ( word path-to-experiment simulation-id "-starting-seed.txt" )
+  
+  if ( not file-exists? file-path and simulation-id != 0 )
+  
+  [ file-open file-path
+    file-print starting-seed
+    file-close ]
+  
+end
+
 ; --------------------------------------------------------------------------------------------------------- ;
 ;
 ; WRITE INFORMATION ON THE CURRENT STATE OF THE SIMULATION TO AN EXTERNAL FILE

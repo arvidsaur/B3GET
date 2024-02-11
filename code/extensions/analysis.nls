@@ -1693,7 +1693,8 @@ to protopan-setup
   output-print (word                                           ; Once setup is complete, display the current
     " Simulation " simulation-id " "                           ; state of the new simulation.
     behaviorspace-run-number " end setup at "
-    date-and-time )
+    date-and-time " with starting-seed "
+    starting-seed )
   
 end
 
