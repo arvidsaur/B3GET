@@ -3,8 +3,8 @@
 import pandas as pd
 import sys
 
-df1 = pd.read_csv('results1/ProtoPan/individuals-r-ProtoPan.csv')
-df2 = pd.read_csv('results2/ProtoPan/individuals-r-ProtoPan.csv')
+df1 = pd.read_csv('results1/ProtoPan/individuals-s-ProtoPan.csv')
+df2 = pd.read_csv('results2/ProtoPan/individuals-s-ProtoPan.csv')
 del df1['date-and-time']
 del df2['date-and-time']
 del df1['simulation-id']

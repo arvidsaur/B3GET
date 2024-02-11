@@ -3,6 +3,8 @@
     <setup>profiler-setup</setup>
     <go>go</go>
     <final>protopan-final</final>
-    <steppedValueSet variable="starting-seed" first="5" step="1" last="5"/>
+    <enumeratedValueSet variable="starting-seed">
+      <value value="5"/>
+    </enumeratedValueSet>
   </experiment>
 </experiments>
