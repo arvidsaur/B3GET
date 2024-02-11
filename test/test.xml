@@ -1,8 +1,8 @@
 <experiments>
-  <experiment name="random_seed_5" repetitions="1" runMetricsEveryStep="false">
+  <experiment name="starting_seed_5" repetitions="1" runMetricsEveryStep="false">
     <setup>profiler-setup</setup>
     <go>go</go>
     <final>protopan-final</final>
-    <steppedValueSet variable="random-seed" first="5" step="1" last="5"/>
+    <steppedValueSet variable="starting-seed" first="5" step="1" last="5"/>
   </experiment>
 </experiments>
