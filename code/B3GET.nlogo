@@ -728,7 +728,26 @@ to unit-test-setup
 end
 
 to unit-test-go
-  unittest:add "" [] [5] 5
+  ; can test
+  unittest:add "test 5 equals 5" [] [5] 5
+  unittest:run
+  output-print unittest:summary
+  ; can clear, results and tests
+  unittest:clear
+  output-print unittest:summary
+  unittest:run
+  output-print unittest:summary
+  ; can fail
+  unittest:add "test 5 not equal to 6" [] [5] 6
+  unittest:run
+  output-print unittest:summary
+  unittest:clear
+  ; can setup?
+  unittest:setup [ ca crt 5 ]
+  unittest:add "make more turts and count" [ crt 7 ] [ count turtles ] 12
+  unittest:add "count the turts" [ ] [ count turtles ] 5
+  unittest:run
+  output-print unittest:summary
   stop
 end
 
