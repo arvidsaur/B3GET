@@ -1753,7 +1753,9 @@ to-report check-energy [ vector ]
     let vector-index position vector decision.vectors          ; decision.vectors to be marked as
     if ( is-number? vector-index ) [                           ; having been acted upon.
       set decision.vectors                                     ; This ensures that the same decision
-      remove-item vector-index decision.vectors                ; will not be acted upon twice.
+      sentence                                                 ; will not be acted upon twice.
+      ( sublist decision.vectors 0 vector-index )              ; (The same list as remove-item gives,
+      ( sublist decision.vectors ( vector-index + 1 ) length decision.vectors ) ; without copying all of it.)
       set decision.vectors
       lput new-vector decision.vectors ]]
   report passes-energy-check                                   ; Report whether the energy check passed,
