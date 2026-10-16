@@ -3216,6 +3216,8 @@ end
 ; ------------------------------------------------------------------------------------------------------------------- ;
 
 to-report relatedness-with [ target ]
+  let their-identity-I [identity.I] of target                  ; Identify the target's identity chromosomes
+  let their-identity-II [identity.II] of target                ; once, rather than at every locus.
   let matching 0                                               ; Set up variables to track the number
   let not-matching 0                                           ; of matching and non-matching alleles
   let i 0                                                      ;
@@ -3223,8 +3225,8 @@ to-report relatedness-with [ target ]
                                                                ; of caller and target, considering each
     let allele-here-I item i identity.I                        ; allele at the same locus for both.
     let allele-here-II item i identity.II                      ;
-    let target-allele-I item i [identity.I] of target          ; Identify the alleles from both loci for
-    let target-allele-II item i [identity.II] of target        ; both individuals.
+    let target-allele-I item i their-identity-I                ; Identify the alleles from both loci for
+    let target-allele-II item i their-identity-II              ; both individuals.
 
     ifelse (( allele-here-I = target-allele-I ) or             ; Check if either allele from the target
       ( allele-here-I = target-allele-II ))                    ; matches the caller's allele from its
