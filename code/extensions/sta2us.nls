@@ -172,14 +172,13 @@ to-report sta2us-get-decisions [ my-environment ]
       is-string? item 3 g and 
       is-number? item 4 g ) [                                  
       
-      let gene-ego item 1 g                                    ; Identify each component of the
-      let gene-other item 2 g                                  ; current allele.
-      let gene-action item 3 g                                 
-      let gene-weight item 4 g                                 
-      
-      if first-string-is-part-of-last?                         ; If the caller's status matches  
-      ( gene-ego ) ( ego-status ) [                            ; the first codon...
-        
+      if first-string-is-part-of-last?                         ; If the caller's status matches
+      ( item 1 g ) ( ego-status ) [                            ; the first codon...
+
+        let gene-other item 2 g                                ; Identify the other components of the
+        let gene-action item 3 g                               ; current allele (only needed once the
+        let gene-weight item 4 g                               ; first codon matches).
+
         if ( not objects-prepared? ) [
           let object-statuses map [ other-guy ->               ; Identify the status of each object
             table:get status-table ifelse-value                ; in the environment.
