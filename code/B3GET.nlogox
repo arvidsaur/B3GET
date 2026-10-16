@@ -1787,8 +1787,12 @@ end
 
 to-report get-action-cost-of [ target action-name ]
 
+  ; The caller is a living turtle, so a decision targeting a patch never targets
+  ; the caller. Checking is-turtle? first gives the same result as = alone, and
+  ; is much cheaper than comparing a patch with the caller.
   let not-done-decisions filter [ vector ->                    ; Identify any decisions that the target
-    item 1 vector = self and                                   ; has that is targeting the caller,
+    is-turtle? item 1 vector and                               ; has that is targeting the caller,
+    item 1 vector = self and                                   ;
     item 2 vector = action-name and                            ; same name as the input value,
     item 4 vector = false ]                                    ; and is unfinished.
   [decision.vectors] of target
@@ -1804,7 +1808,8 @@ to-report get-action-cost-of [ target action-name ]
   let action-cost sum
   map [ vector -> item 3 vector ]                              ; Get total cost from target for all
   filter [ vector ->                                           ; of its completed actions that
-    item 1 vector = self and                                   ; both target the caller
+    is-turtle? item 1 vector and                               ; both target the caller
+    item 1 vector = self and                                   ;
     item 2 vector = action-name ]                              ; and share the same name as the input value.
   [ actions.completed ] of target
 
