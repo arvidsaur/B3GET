@@ -53,7 +53,11 @@ public final class NlPerf {
   public static void main(String[] args) {
     int code;
     try {
-      if (args.length < 3) throw new UsageError("usage: NlPerf <record|verify|bench|profile> <scenario> <golden-dir> ...");
+      if (args.length == 3 && args[0].equals("compare-traces")) {
+        System.out.flush();
+        System.exit(compareTraces(Paths.get(args[1]), Paths.get(args[2])));
+      }
+      if (args.length < 3) throw new UsageError("usage: NlPerf <record|verify|bench|profile|trace> <scenario> <golden-dir> ...");
       Scenario sc = Scenario.load(Paths.get(args[1]));
       Path golden = Paths.get(args[2]);
       code = switch (args[0]) {
@@ -61,6 +65,8 @@ public final class NlPerf {
         case "verify" -> verify(sc, golden, Paths.get(arg(args, 3)));
         case "bench" -> bench(sc, golden, Paths.get(arg(args, 3)), args.length > 4 ? args[4] : "");
         case "profile" -> profile(sc, golden, Paths.get(arg(args, 3)), Paths.get(arg(args, 4)));
+        // NlPerf trace <scenario> <out.tsv>
+        case "trace" -> trace(sc, golden);
         // Re-analyze an existing recording: NlPerf procedures <scenario> <file.jfr>
         case "procedures" -> { printProcedureProfile(sc.model, Paths.get(args[2])); yield OK; }
         default -> throw new UsageError("unknown mode " + args[0]);
@@ -664,6 +670,115 @@ public final class NlPerf {
       System.out.println("warning: CPU count or JVM options differ from that run, so the timings are not directly comparable");
     if (!base[5].equals(row[5]))
       System.out.println("warning: step counts differ (" + base[5] + " vs " + row[5] + "), so the runs did different work");
+  }
+
+  /**
+   * One long run of bench.seed. At every checkpoint it writes a row with the time
+   * the interval took (excluding snapshots), a world hash and the reporters, and
+   * prints progress, so a run that takes hours can be watched and stopped at any
+   * point. Two traces of the same scenario compare with compare-traces.
+   */
+  static int trace(Scenario sc, Path out) throws Exception {
+    Files.createDirectories(out.getParent());
+    List<String> cols = new ArrayList<>(List.of("step", "event", "world", "interval_ms", "ms_per_step", "go_ms"));
+    sc.reporters.forEach(r -> cols.add(clean(r)));
+    Files.write(out, List.of(
+      "# nlperf trace",
+      "# scenario: " + sc.name + ", seed " + sc.benchSeed,
+      "# model: " + gitIdentity(),
+      "# started: " + now() + ", Java " + System.getProperty("java.version") + ", JVM " + jvmOptions()
+        + ", " + Runtime.getRuntime().availableProcessors() + " CPUs",
+      String.join("\t", cols)));
+    System.out.printf("tracing %s: seed %d, up to %d steps, a row every %d -> %s%n",
+      sc.name, sc.benchSeed, sc.steps, sc.checkpointEvery, out);
+    try (Run run = new Run(sc, sc.benchSeed)) {
+      long goNanos = 0, start = System.nanoTime();
+      Snapshot s;
+      try {
+        run.exec(run.preSetup);
+        run.exec(run.setup);
+        long setup = System.nanoTime() - start;
+        s = run.snapshot("setup");
+        traceRow(out, s.row(), setup, 0, 0);
+        long intervalStart = System.nanoTime();
+        int lastStep = 0;
+        while (run.steps < sc.steps) {
+          if (run.exec(run.go)) { run.stopped = true; break; }
+          run.steps++;
+          if (run.steps % sc.checkpointEvery == 0 || run.steps == sc.steps) {
+            long interval = System.nanoTime() - intervalStart;
+            goNanos += interval;
+            s = run.snapshot(run.steps == sc.steps ? "limit" : "checkpoint");
+            traceRow(out, s.row(), interval, run.steps - lastStep, goNanos);
+            lastStep = run.steps;
+            intervalStart = System.nanoTime();
+          }
+        }
+        if (run.stopped) {
+          long interval = System.nanoTime() - intervalStart;
+          goNanos += interval;
+          traceRow(out, run.snapshot("stop").row(), interval, run.steps - lastStep, goNanos);
+        }
+      } catch (ModelError e) {
+        traceRow(out, new Row(run.seed, run.steps, "error", "-", List.of(clean(e.getMessage()))), 0, 0, goNanos);
+        System.out.println("  runtime error at step " + run.steps + ": " + e.getMessage());
+      }
+    }
+    return OK;
+  }
+
+  static void traceRow(Path out, Row r, long intervalNanos, int steps, long goNanos) throws IOException {
+    double ms = intervalNanos / 1e6;
+    String perStep = steps > 0 ? String.format("%.1f", ms / steps) : "-";
+    Files.writeString(out, r.step() + "\t" + r.event() + "\t" + r.world() + "\t" + fmt(ms) + "\t" + perStep + "\t"
+      + fmt(goNanos / 1e6) + r.values().stream().map(v -> "\t" + v).collect(Collectors.joining()) + "\n",
+      StandardOpenOption.APPEND);
+    System.out.printf("  %s step %d: %s ms/step, %.0f s of go so far, %s%n", now(), r.step(), perStep, goNanos / 1e9,
+      String.join(", ", r.values()));
+  }
+
+  /** Lines a trace's rows up with another's: speed per interval, and whether the worlds stayed identical. */
+  static int compareTraces(Path a, Path b) throws IOException {
+    List<String[]> ra = traceRows(a), rb = traceRows(b);
+    List<String> header = Files.readAllLines(a).stream().filter(l -> !l.startsWith("#")).limit(1).toList();
+    List<String> cols = header.isEmpty() ? List.of() : List.of(header.get(0).split("\t", -1));
+    System.out.println("A: " + a + "\n   " + traceMeta(a) + "\nB: " + b + "\n   " + traceMeta(b) + "\n");
+    String rep = cols.size() > 6 ? cols.get(6) : "";
+    System.out.printf("%8s  %10s  %10s  %8s  %-9s  %s%n", "step", "A ms/step", "B ms/step", "B vs A", "world", rep);
+    double ta = 0, tb = 0;
+    int n = Math.min(ra.size(), rb.size()), firstDiff = -1;
+    for (int i = 0; i < n; i++) {
+      String[] x = ra.get(i), y = rb.get(i);
+      boolean same = x[0].equals(y[0]) && x[2].equals(y[2]);
+      if (!same && firstDiff < 0) firstDiff = i;
+      String change = "-";
+      if (!x[4].equals("-") && !y[4].equals("-")) {
+        double pa = Double.parseDouble(x[4]), pb = Double.parseDouble(y[4]);
+        change = String.format("%+.1f%%", 100 * (pb - pa) / pa);
+        ta += Double.parseDouble(x[3]);
+        tb += Double.parseDouble(y[3]);
+      }
+      System.out.printf("%8s  %10s  %10s  %8s  %-9s  %s%n", x[0], x[4], y[4], change,
+        same ? "identical" : "DIFFERENT", x.length > 6 ? x[6] : "");
+    }
+    if (ta > 0)
+      System.out.printf("%nover the %d steps both traces cover: A %.1f min, B %.1f min of go, B %+.1f%%%n",
+        Integer.parseInt(ra.get(n - 1)[0]), ta / 60000, tb / 60000, 100 * (tb - ta) / ta);
+    System.out.println(firstDiff < 0
+      ? "worlds identical at all " + n + " shared checkpoints"
+      : "worlds DIFFER from step " + ra.get(firstDiff)[0] + " on");
+    if (ra.size() != rb.size()) System.out.println("(the traces have " + ra.size() + " and " + rb.size() + " rows; compared the first " + n + ")");
+    return firstDiff < 0 ? OK : DIFFERENT;
+  }
+
+  static List<String[]> traceRows(Path p) throws IOException {
+    List<String> lines = Files.readAllLines(p).stream().filter(l -> !l.startsWith("#")).toList();
+    return lines.stream().skip(1).filter(l -> !l.isBlank()).map(l -> l.split("\t", -1)).toList();
+  }
+
+  static String traceMeta(Path p) throws IOException {
+    return Files.readAllLines(p).stream().filter(l -> l.startsWith("# model: ") || l.startsWith("# started: "))
+      .map(l -> l.substring(2)).collect(Collectors.joining("; "));
   }
 
   static int profile(Scenario sc, Path golden, Path results, Path jfrFile) throws Exception {

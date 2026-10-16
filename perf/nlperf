@@ -41,6 +41,8 @@ usage: perf/nlperf <command> [args]
   verify  <scenario>            re-run and compare against the recorded fingerprint
   bench   <scenario> [label]    time the scenario; also checks the final state against the fingerprint
   profile <scenario>            JFR-profile measured runs: time per NetLogo procedure, then hot JVM methods
+  trace   <scenario> [label]    one long run, logging time per interval, population and a world hash
+  compare-traces <a> <b>        line two traces up: speed per interval, and whether the worlds match
   history <scenario>            show all bench results for a scenario
   shell                         interactive shell in the container
 
@@ -183,6 +185,19 @@ case "$cmd" in
     [[ -f "$jfr_file" ]] || die "profile run did not produce a recording"
     in_container jfr view --width 160 hot-methods "$jfr_file"
     echo "nlperf: full recording in $jfr_file (open with JDK Mission Control for flame graphs)" >&2
+    ;;
+  trace)
+    scenario="$(resolve_scenario "${1:-}")"; name="$(scenario_name "$scenario")"
+    label="$(tr -c 'A-Za-z0-9._\n-' '-' <<<"${2:-}")"
+    git_identity
+    harness "$scenario" trace "$scenario" "$PERF_DIR/results/$name/trace-$(date +%Y%m%d-%H%M%S)${label:+-$label}.tsv"
+    ;;
+  compare-traces)
+    [[ $# -eq 2 ]] || die "usage: perf/nlperf compare-traces <a.tsv> <b.tsv>"
+    a="$(realpath "$1")"; b="$(realpath "$2")"
+    [[ "$a" == "$REPO"/* && "$b" == "$REPO"/* ]] || die "both traces must be inside the repo ($REPO)"
+    build_harness
+    in_container "$NETLOGO_JAVA" -cp "$HARNESS_OUT:$NETLOGO_JAR" NlPerf compare-traces "$a" "$b"
     ;;
   history)
     scenario="$(resolve_scenario "${1:-}")"; name="$(scenario_name "$scenario")"

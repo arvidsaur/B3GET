@@ -138,6 +138,29 @@ Baseline profile, first 300 ticks (self / total):
     1.7%   46.8%  sta2us-get-decisions
 ```
 
+## Long runs
+
+The 300-tick scenario starts from about 100 animals, but real runs last weeks
+and slow down as the population grows. `trace` covers that case: one long run
+that writes a row every `checkpoint-every` ticks with the time per tick for
+that interval, a world hash, and the reporters (population, environment size,
+decisions per tick):
+
+```sh
+perf/nlperf trace b3get-long my-label        # up to 20,000 ticks; stop it any time
+perf/nlperf compare-traces A.tsv B.tsv       # speed per interval, and whether the worlds match
+```
+
+To compare two versions of the model, run each from its own git worktree, so
+they don't share `results/metafile.csv`, pinned to separate cores:
+
+```sh
+git worktree add --detach ../B3GET-original 6ac8750
+git -C ../B3GET-original checkout performance -- perf
+NLPERF_CPUSET=2-5 ../B3GET-original/perf/nlperf trace b3get-long original
+NLPERF_CPUSET=8-11 perf/nlperf trace b3get-long optimized
+```
+
 ## Scenario files
 
 `perf/scenarios/<name>.properties`:
