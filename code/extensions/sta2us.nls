@@ -472,17 +472,14 @@ end
 ; ------------------------------------------------------------------------------------------------------------------- ;
 
 to-report first-string-is-part-of-last? [ string1 string2 ]
-  let first-is-part-of-last true
-  let index 0                                              
-  if ( is-string? string1 and is-string? string2 ) [       
-    let string1-length length string1                    
-    while [ first-is-part-of-last and                      
-      index < string1-length ] [                           
-      if ( not member? item index string1 string2 ) and    
-      ( item index string1 != " " )                         
-      [ set first-is-part-of-last false ]                  
-      set index index + 1 ]]                               
-  report first-is-part-of-last
+  if ( is-string? string1 and is-string? string2 ) [
+    let index 0
+    repeat length string1 [                                ; Report false at the first character
+      if ( not member? item index string1 string2 ) and    ; of STRING1, other than a space, that
+      ( item index string1 != " " )                        ; STRING2 does not contain.
+      [ report false ]
+      set index index + 1 ]]
+  report true
 end
 
 ; ------------------------------------------------------------------------------------------------------------------- ;
