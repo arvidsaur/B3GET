@@ -1,0 +1,202 @@
+#!/usr/bin/env bash
+#
+# nlperf: run B3GET headless on NetLogo 7.0.4 in a pinned Docker environment,
+# record its behavioral fingerprint, and benchmark model changes against it.
+# See perf/README.md.
+
+set -euo pipefail
+
+PERF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO="$(dirname "$PERF_DIR")"
+STATE_DIR="$PERF_DIR/.state"
+HARNESS_SRC="$PERF_DIR/harness/NlPerf.java"
+HARNESS_OUT="$STATE_DIR/harness"
+HOST_UID="$(id -u)"
+HOST_GID="$(id -g)"
+# The tag follows the Dockerfile's content, so editing it rebuilds the image.
+IMAGE="nlperf-b3get:$(sha1sum "$PERF_DIR/Dockerfile" | cut -c1-12)-u$HOST_UID"
+
+NETLOGO=/opt/netlogo
+NETLOGO_JAR="$NETLOGO/lib/app/netlogo-7.0.4.jar"
+# Models run on the Java runtime NetLogo bundles, with the options its launcher uses.
+NETLOGO_JAVA="$NETLOGO/lib/runtime/bin/java"
+NETLOGO_JVM_OPTS=(
+  -Dfile.encoding=UTF-8 -Dorg.nlogo.release=true
+  --add-exports=java.base/java.lang=ALL-UNNAMED
+  --add-exports=java.desktop/sun.awt=ALL-UNNAMED
+  --add-exports=java.desktop/sun.java2d=ALL-UNNAMED
+  -Dnetlogo.extensions.dir="$NETLOGO/extensions"
+  -Djava.awt.headless=true
+)
+DEFAULT_JVM_OPTS="-Xms2g -Xmx2g"
+
+# The model sources: what a fingerprint or bench result is tied to.
+MODEL_PATHS=(code data)
+
+usage() {
+  cat <<'EOF'
+usage: perf/nlperf <command> [args]
+
+  record  <scenario> [--force]  record the scenario's behavioral fingerprint (the baseline)
+  verify  <scenario>            re-run and compare against the recorded fingerprint
+  bench   <scenario> [label]    time the scenario; also checks the final state against the fingerprint
+  profile <scenario>            JFR-profile measured runs: time per NetLogo procedure, then hot JVM methods
+  history <scenario>            show all bench results for a scenario
+  shell                         interactive shell in the container
+
+<scenario> is a name under perf/scenarios/ (without .properties) or a path to a .properties file.
+
+environment:
+  NLPERF_CPUSET    pin the container to these CPUs (docker --cpuset-cpus), e.g. "2-5"
+  NLPERF_JVM_OPTS  JVM options for model runs, overriding the scenario's `jvm` key
+EOF
+}
+
+die() { echo "nlperf: $*" >&2; exit 1; }
+
+ensure_image() {
+  if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
+    echo "nlperf: building image $IMAGE (downloads NetLogo 7.0.4 the first time)" >&2
+    docker build -q -t "$IMAGE" --build-arg UID="$HOST_UID" --build-arg GID="$HOST_GID" - \
+      < "$PERF_DIR/Dockerfile" >/dev/null
+  fi
+}
+
+# usage: in_container [--tty] cmd...
+# No network: nothing a model run does can depend on it.
+in_container() {
+  local tty=() cpus=()
+  if [[ "${1:-}" == --tty ]]; then tty=(-t); shift; fi
+  [[ -n "${NLPERF_CPUSET:-}" ]] && cpus=(--cpuset-cpus "$NLPERF_CPUSET")
+  ensure_image
+  docker run --rm -i "${tty[@]}" --network none "${cpus[@]}" \
+    -v "$REPO:$REPO" -w "$REPO" \
+    -e NLPERF_GIT_COMMIT -e NLPERF_GIT_TREE -e NLPERF_CPUSET \
+    "$IMAGE" "$@"
+}
+
+build_harness() {
+  # Recompile when the harness or the image (and so the NetLogo jars) changes.
+  if [[ ! -d "$HARNESS_OUT" || "$HARNESS_SRC" -nt "$HARNESS_OUT" || "$(cat "$HARNESS_OUT.image" 2>/dev/null)" != "$IMAGE" ]]; then
+    mkdir -p "$STATE_DIR"
+    rm -rf "$HARNESS_OUT" "$HARNESS_OUT.tmp"
+    in_container javac -nowarn --release 17 -d "$HARNESS_OUT.tmp" -cp "$NETLOGO_JAR" "$HARNESS_SRC" \
+      || die "harness failed to compile"
+    mv "$HARNESS_OUT.tmp" "$HARNESS_OUT"
+    echo "$IMAGE" > "$HARNESS_OUT.image"
+  fi
+}
+
+# Identify the model a result came from: commit plus a hash of uncommitted
+# changes to the model sources (perf/ itself is not included).
+git_identity() {
+  NLPERF_GIT_COMMIT="$(git -C "$REPO" rev-parse --short=12 HEAD)"
+  if [[ -z "$(git -C "$REPO" status --porcelain -- "${MODEL_PATHS[@]}")" ]]; then
+    NLPERF_GIT_TREE="clean"
+  else
+    NLPERF_GIT_TREE="dirty-$({ git -C "$REPO" diff HEAD -- "${MODEL_PATHS[@]}"
+                              git -C "$REPO" ls-files -z -o --exclude-standard -- "${MODEL_PATHS[@]}" \
+                                | (cd "$REPO" && xargs -0 -r cat)
+                            } | sha1sum | cut -c1-8)"
+  fi
+  export NLPERF_GIT_COMMIT NLPERF_GIT_TREE
+}
+
+resolve_scenario() {
+  local s="${1:-}"
+  [[ -n "$s" ]] || die "missing <scenario>"
+  if [[ -f "$s" ]]; then
+    s="$(realpath "$s")"
+    # Only the repo is mounted into the container.
+    [[ "$s" == "$REPO"/* ]] || die "scenario files must be inside the repo ($REPO)"
+    echo "$s"
+  elif [[ -f "$PERF_DIR/scenarios/$s.properties" ]]; then
+    echo "$PERF_DIR/scenarios/$s.properties"
+  else
+    die "no scenario '$s' (looked for $s and perf/scenarios/$s.properties)"
+  fi
+}
+
+scenario_name() { basename "$1" .properties; }
+
+scenario_jvm_opts() {
+  if [[ -n "${NLPERF_JVM_OPTS:-}" ]]; then echo "$NLPERF_JVM_OPTS"; return; fi
+  local line
+  line="$(grep -E '^[[:space:]]*jvm[[:space:]]*[=:]' "$1" | tail -1 || true)"
+  if [[ -n "$line" ]]; then sed -E 's/^[[:space:]]*jvm[[:space:]]*[=:][[:space:]]*//' <<<"$line"
+  else echo "$DEFAULT_JVM_OPTS"; fi
+}
+
+# usage: harness <scenario-file> [--jvm-extra opt] <mode> args...
+harness() {
+  local scenario="$1"; shift
+  local jvm_opts extra=()
+  if [[ "$1" == --jvm-extra ]]; then extra=("$2"); shift 2; fi
+  read -r -a jvm_opts <<<"$(scenario_jvm_opts "$scenario")"
+  build_harness
+  # B3GET writes ../results/metafile.csv relative to code/.
+  mkdir -p "$REPO/results"
+  in_container "$NETLOGO_JAVA" "${jvm_opts[@]}" "${extra[@]}" "${NETLOGO_JVM_OPTS[@]}" \
+    -cp "$HARNESS_OUT:$NETLOGO_JAR" NlPerf "$@"
+}
+
+cmd="${1:-}"
+[[ $# -gt 0 ]] && shift
+case "$cmd" in
+  record)
+    scenario="$(resolve_scenario "${1:-}")"; name="$(scenario_name "$scenario")"
+    force="${2:-}"
+    golden="$PERF_DIR/golden/$name"
+    if [[ -e "$golden" && "$force" != "--force" ]]; then
+      die "a fingerprint for '$name' already exists at perf/golden/$name (pass --force to replace it)"
+    fi
+    git_identity
+    rm -rf "$golden.new"
+    harness "$scenario" record "$scenario" "$golden.new"
+    echo "nlperf: re-running in a fresh JVM to confirm the model reproduces itself" >&2
+    if ! harness "$scenario" verify "$scenario" "$golden.new" "$PERF_DIR/results/$name"; then
+      rm -rf "$golden.rejected"; mv "$golden.new" "$golden.rejected"
+      die "the scenario did not reproduce itself, so it can't serve as a baseline.
+  Common causes: timer, date-and-time, new-seed, files the model both writes and reads.
+  The rejected recording is in perf/golden/$name.rejected"
+    fi
+    rm -rf "$golden"; mv "$golden.new" "$golden"
+    echo "nlperf: fingerprint recorded in perf/golden/$name" >&2
+    ;;
+  verify)
+    scenario="$(resolve_scenario "${1:-}")"; name="$(scenario_name "$scenario")"
+    git_identity
+    harness "$scenario" verify "$scenario" "$PERF_DIR/golden/$name" "$PERF_DIR/results/$name"
+    ;;
+  bench)
+    scenario="$(resolve_scenario "${1:-}")"; name="$(scenario_name "$scenario")"
+    git_identity
+    harness "$scenario" bench "$scenario" "$PERF_DIR/golden/$name" "$PERF_DIR/results/$name" "${2:-}"
+    ;;
+  profile)
+    scenario="$(resolve_scenario "${1:-}")"; name="$(scenario_name "$scenario")"
+    git_identity
+    jfr_file="$PERF_DIR/results/$name/profile-$(date +%Y%m%d-%H%M%S).jfr"
+    # Deep stacks, so time is attributed to every procedure on the stack.
+    harness "$scenario" --jvm-extra "-XX:FlightRecorderOptions:stackdepth=512" \
+      profile "$scenario" "$PERF_DIR/golden/$name" "$PERF_DIR/results/$name" "$jfr_file"
+    [[ -f "$jfr_file" ]] || die "profile run did not produce a recording"
+    in_container jfr view --width 160 hot-methods "$jfr_file"
+    echo "nlperf: full recording in $jfr_file (open with JDK Mission Control for flame graphs)" >&2
+    ;;
+  history)
+    scenario="$(resolve_scenario "${1:-}")"; name="$(scenario_name "$scenario")"
+    results="$PERF_DIR/results/$name/bench.tsv"
+    [[ -f "$results" ]] || die "no bench results for '$name' yet"
+    cut -f1-12 "$results" | column -t -s $'\t'
+    ;;
+  shell)
+    in_container --tty bash
+    ;;
+  ""|-h|--help|help)
+    usage
+    ;;
+  *)
+    usage >&2; exit 1
+    ;;
+esac

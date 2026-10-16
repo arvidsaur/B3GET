@@ -1,0 +1,10 @@
+# compiled harness
+/.state/
+# bench history, JFR profiles, mismatch dumps
+/results/
+# full world exports behind each fingerprint: large, and re-creatable by
+# re-recording on the baseline commit (fingerprint.tsv itself is committed)
+/golden/*/worlds/
+# recordings that failed the determinism check, and in-progress recordings
+/golden/*.rejected/
+/golden/*.new/
