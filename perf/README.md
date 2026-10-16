@@ -184,6 +184,7 @@ NLPERF_CPUSET=8-11 perf/nlperf trace b3get-long optimized
 | `ignore-globals` | none | globals left out of the fingerprint |
 | `ignore-sections` | none | world-export sections left out of the fingerprint |
 | `unordered-extensions` | none | extensions whose exported objects are sorted before hashing |
+| `ignore-variables` | none | agent variables removed from the export before hashing, for derived data such as an index (names the baseline lacks are fine) |
 | `bench.warmup`, `bench.runs` | `3`, `10` | warmup and measured runs for `bench` |
 | `bench.seed` | first seed | seed used for timing and profiling |
 | `profile.runs` | `3` | runs recorded by `profile` |

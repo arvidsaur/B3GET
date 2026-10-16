@@ -98,7 +98,7 @@ public final class NlPerf {
   static final class Scenario {
     static final Set<String> KEYS = Set.of(
       "model", "pre-setup", "setup", "go", "steps", "seeds", "checkpoint-every",
-      "ignore-globals", "ignore-sections", "unordered-extensions",
+      "ignore-globals", "ignore-sections", "unordered-extensions", "ignore-variables",
       "bench.warmup", "bench.runs", "bench.seed", "profile.runs", "jvm");
 
     String name;
@@ -108,7 +108,7 @@ public final class NlPerf {
     int steps, checkpointEvery;
     int[] seeds;
     List<String> reporters = new ArrayList<>();
-    List<String> ignoreGlobals, ignoreSections, unorderedExtensions;
+    List<String> ignoreGlobals, ignoreSections, unorderedExtensions, ignoreVariables;
     int benchWarmup, benchRuns, benchSeed, profileRuns;
 
     static Scenario load(Path file) throws IOException {
@@ -139,6 +139,8 @@ public final class NlPerf {
         .filter(s -> !s.isEmpty()).map(String::toUpperCase).toList();
       sc.unorderedExtensions = Arrays.stream(p.getProperty("unordered-extensions", "").trim().split("[\\s,]+"))
         .filter(s -> !s.isEmpty()).map(String::toLowerCase).toList();
+      sc.ignoreVariables = Arrays.stream(p.getProperty("ignore-variables", "").trim().split("[\\s,]+"))
+        .filter(s -> !s.isEmpty()).map(String::toLowerCase).toList();
       p.stringPropertyNames().stream()
         .filter(k -> k.startsWith("reporter."))
         .sorted(Comparator.comparingInt(k -> Integer.parseInt(k.substring("reporter.".length()))))
@@ -157,6 +159,7 @@ public final class NlPerf {
       if (!ignoreGlobals.isEmpty()) config += "\u0000ignore-globals " + String.join(" ", ignoreGlobals);
       if (!ignoreSections.isEmpty()) config += "\u0000ignore-sections " + String.join(" ", ignoreSections);
       if (!unorderedExtensions.isEmpty()) config += "\u0000unordered-extensions " + String.join(" ", unorderedExtensions);
+      if (!ignoreVariables.isEmpty()) config += "\u0000ignore-variables " + String.join(" ", ignoreVariables);
       return sha256(config.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -232,7 +235,7 @@ public final class NlPerf {
     // a sum's last digits depend on that order.
     final MersenneTwisterFast probeRng = new MersenneTwisterFast();
     final SimpleJobOwner probeOwner;
-    final List<String> ignoreSections, unorderedExtensions;
+    final List<String> ignoreSections, unorderedExtensions, ignoreVariables;
     int steps = 0;
     boolean stopped = false;
     long setupNanos, goNanos;
@@ -253,6 +256,7 @@ public final class NlPerf {
       probeOwner = new SimpleJobOwner("nlperf-probe", probeRng, AgentKindJ.Observer());
       ignoreSections = sc.ignoreSections;
       unorderedExtensions = sc.unorderedExtensions;
+      ignoreVariables = sc.ignoreVariables;
     }
 
     /** Returns true if the code called `stop`. */
@@ -274,8 +278,8 @@ public final class NlPerf {
       // Some extensions export objects they hold weakly (the table extension exports
       // every table not yet collected), so collect garbage first.
       System.gc();
-      String world = sortExtensionObjects(
-        maskSections(maskGlobals(Checksummer.exportWorld(ws), ignoreGlobals), ignoreSections), unorderedExtensions);
+      String world = sortExtensionObjects(maskSections(maskGlobals(
+        dropVariables(Checksummer.exportWorld(ws), ignoreVariables), ignoreGlobals), ignoreSections), unorderedExtensions);
       List<String> values = new ArrayList<>();
       probeRng.setSeed(0);
       for (Procedure r : reporters) {
@@ -520,6 +524,63 @@ public final class NlPerf {
       i = end;
     }
     return String.join("\n", lines);
+  }
+
+  /**
+   * Removes the named agent variables (columns of the TURTLES, PATCHES and LINKS
+   * sections) from a world export, for variables that hold derived data, such as
+   * an index, that the baseline model doesn't have. Names absent from the export
+   * are ignored, so the baseline's exports hash as before. Fields are written
+   * back exactly as NetLogo wrote them (quoted or not).
+   */
+  static String dropVariables(String world, List<String> names) {
+    if (names.isEmpty()) return world;
+    String[] lines = world.split("\n", -1);
+    List<String> out = new ArrayList<>(lines.length);
+    boolean[] drop = null;
+    for (int i = 0; i < lines.length; i++) {
+      String line = lines[i];
+      if (line.matches(SECTION_HEADER)) {
+        drop = null;
+        if (List.of("\"TURTLES\"", "\"PATCHES\"", "\"LINKS\"").contains(line) && i + 1 < lines.length) {
+          List<String[]> header = csvFields(lines[i + 1]);
+          drop = new boolean[header.size()];
+          boolean any = false;
+          for (int c = 0; c < header.size(); c++)
+            if (names.contains(header.get(c)[0].toLowerCase(Locale.ROOT))) any = drop[c] = true;
+          if (!any) drop = null;
+        }
+        out.add(line);
+      } else if (drop != null && !line.isEmpty()) {
+        List<String[]> fields = csvFields(line);
+        List<String> kept = new ArrayList<>();
+        for (int c = 0; c < fields.size(); c++)
+          if (c >= drop.length || !drop[c]) kept.add(fields.get(c)[1]);
+        out.add(String.join(",", kept));
+      } else {
+        out.add(line);
+      }
+    }
+    return String.join("\n", out);
+  }
+
+  /** Splits a CSV line into {value, raw text} pairs; the raw text keeps the field's quoting. */
+  static List<String[]> csvFields(String line) {
+    List<String[]> out = new ArrayList<>();
+    int start = 0;
+    boolean quoted = false;
+    for (int i = 0; i <= line.length(); i++) {
+      char c = i < line.length() ? line.charAt(i) : ',';
+      if (c == '"') quoted = !quoted;
+      else if (c == ',' && !quoted) {
+        String raw = line.substring(start, i);
+        String value = raw.startsWith("\"") && raw.endsWith("\"") && raw.length() >= 2
+          ? raw.substring(1, raw.length() - 1).replace("\"\"", "\"") : raw;
+        out.add(new String[] { value, raw });
+        start = i + 1;
+      }
+    }
+    return out;
   }
 
   /** A section header line in a world export, such as "TURTLES" or "OUTPUT". */
