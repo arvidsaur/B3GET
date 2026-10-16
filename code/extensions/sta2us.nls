@@ -152,6 +152,17 @@ to-report sta2us-get-decisions [ my-environment ]
       ( [my.identity] of obj ) 
       ( status-of obj ) ] ]
   
+  ; What follows about each object is the same for every allele, so it is worked
+  ; out once, the first time an allele's first codon matches, rather than once per
+  ; allele. The status of an object is still looked up in STATUS-TABLE by its
+  ; identity, as before: identities can coincide, and then the table holds the
+  ; status put last.
+  let spatial? not member? "aspatial" model-structure          ; Constant during this call.
+  let objects-prepared? false
+  let distinct-statuses []                                     ; Each status in the environment, once.
+  let status-indices []                                        ; Position of each object's status in DISTINCT-STATUSES.
+  let distances-squared []                                     ; Squared distance used in each object's cost.
+
   foreach (sentence chromosome.I chromosome.II) [ g ->         ; Proceed through each allele in the 
                                                                ; caller's genotype.
     
@@ -169,32 +180,38 @@ to-report sta2us-get-decisions [ my-environment ]
       if first-string-is-part-of-last?                         ; If the caller's status matches  
       ( gene-ego ) ( ego-status ) [                            ; the first codon...
         
-        foreach my-environment [ other-guy ->                  ; Proceed through each object                
-          let other-status table:get                           ; in the environment and 
-          status-table ifelse-value                            ; identify its status.
-          ( is-patch? other-guy ) 
-          [ [pmy.identity] of other-guy ] 
-          [ [my.identity] of other-guy ]
-
-          if first-string-is-part-of-last?                     ; If the object's status matches the second  
-          ( gene-other ) ( other-status ) [                    ; codon then object becomes target.
-                                                               
+        if ( not objects-prepared? ) [
+          let object-statuses map [ other-guy ->               ; Identify the status of each object
+            table:get status-table ifelse-value                ; in the environment.
+            ( is-patch? other-guy )
+            [ [pmy.identity] of other-guy ]
+            [ [my.identity] of other-guy ] ] my-environment
+          set distinct-statuses remove-duplicates object-statuses
+          set status-indices map [ s -> position s distinct-statuses ] object-statuses
+          foreach my-environment [ other-guy ->
             let distance-to-target distance other-guy          ; Calculate the distance between caller 
             set distance-to-target ifelse-value                ; and target, which is one if the caller
-            ( distance-to-target > 1 and                       ; and target are closer than one unit apart.
-              not member? "aspatial" model-structure )         ; or model-structure includes "aspatial"
-            [ distance-to-target ] [ 1 ]
+            ( distance-to-target > 1 and spatial? )            ; and target are closer than one unit apart.
+            [ distance-to-target ] [ 1 ]                       ; or model-structure includes "aspatial"
+            set distances-squared lput ( distance-to-target ^ 2 ) distances-squared ]
+          set objects-prepared? true ]
             
+        let action-name sta2us-get-action gene-action          ; Which action to take.
+        let status-matches map [ s ->                          ; Whether each distinct status matches
+          first-string-is-part-of-last? gene-other s           ; the second codon.
+        ] distinct-statuses
+
+        ( foreach my-environment status-indices distances-squared [ [ other-guy status-index distance-squared ] ->
+          if ( item status-index status-matches ) [            ; If the object's status matches the second
+                                                               ; codon then object becomes target.
             set decision-vectors lput (list                    ; Create a new decision vector
               self                                             ; that identifies caller,
               other-guy                                        ; target,
-              ( sta2us-get-action gene-action )                ; which action to take,
-              precision ( gene-weight /                        ; how much it costs,
-                ( distance-to-target ^ 2 )) 10                 ; and that this action 
-              false ) decision-vectors                         ; has not yet been performed.
-
+              action-name                                      ; which action to take,
+              precision ( gene-weight / distance-squared ) 10  ; how much it costs,
+              false ) decision-vectors                         ; and that this action has not yet been performed.
           ]
-        ]
+        ] )
       ]
     ]
   ]
