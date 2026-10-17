@@ -34,6 +34,7 @@ public class B3getExtension extends DefaultClassManager {
     primitiveManager.addPrimitive("with-item", new WithItem());
     primitiveManager.addPrimitive("sum-item", new SumItem());
     primitiveManager.addPrimitive("matching-alleles", new MatchingAlleles());
+    primitiveManager.addPrimitive("precision", new Precision());
   }
 
   /**
@@ -125,7 +126,7 @@ public class B3getExtension extends DefaultClassManager {
     /** precision ( weight / distance-squared ) 10, with the checks / and precision make. */
     private static Double precision10(double weight, double distanceSquared) throws ExtensionException {
       if (distanceSquared == 0) throw new ExtensionException("Division by zero.");
-      double cost = Approximate.approximate(weight / distanceSquared, 10);
+      double cost = precision(weight / distanceSquared, 10);
       if (Double.isInfinite(cost) || Double.isNaN(cost))
         throw new ExtensionException("math operation produced a number too large for NetLogo");
       return cost;
@@ -146,6 +147,42 @@ public class B3getExtension extends DefaultClassManager {
       if (x instanceof Double) return (Double) x;
       throw new ExtensionException("expected a number but got " + x);
     }
+  }
+
+  private static final double[] POWERS_OF_TEN = {
+    1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14, 1e15 };
+
+  /**
+   * NetLogo's precision: Approximate.approximate(n, places), without its slow part
+   * in almost all cases.
+   *
+   * approximate rounds the decimal digits of Double.toString(n) to PLACES places
+   * (half up, or half down below zero) and converts the result back. Those digits
+   * are some decimal number within half a unit in the last place of n, so when all
+   * numbers that close to n round to the same K / 10^places, that is the result,
+   * whatever the digits are. Converting K / 10^places back to a double, as
+   * BigDecimal.doubleValue does, gives the double nearest to it, which is what
+   * dividing K by 10^places gives (both are exact doubles, and division rounds to
+   * the nearest). Otherwise, near a tie, this calls approximate.
+   * PrecisionTest (code/b3get/test) checks this against approximate itself.
+   */
+  static double precision(double n, int places) {
+    if (!(Math.abs(n) < 0x1p40) || places < 0 || places >= POWERS_OF_TEN.length)
+      return Approximate.approximate(n, places);
+    double scale = POWERS_OF_TEN[places];
+    double magnitude = Math.abs(n);
+    double y = magnitude * scale;  // within half an ulp of magnitude * 10^places
+    if (!(y < 0x1p50)) return Approximate.approximate(n, places);
+    double whole = Math.floor(y);
+    double fraction = y - whole;  // exact
+    // The digits are within half an ulp of n, so after scaling within
+    // ulp(n) * scale / 2 of y, plus y's own rounding error: allow twice both.
+    double margin = Math.ulp(magnitude) * scale + 2 * Math.ulp(y);
+    if (Math.abs(fraction - 0.5) <= margin) return Approximate.approximate(n, places);
+    long k = (long) whole + (fraction > 0.5 ? 1 : 0);
+    double result = k / scale;
+    // BigDecimal has no negative zero.
+    return n < 0 && k != 0 ? -result : result;
   }
 
   /** first-string-is-part-of-last? in sta2us.nls. */
@@ -338,6 +375,22 @@ public class B3getExtension extends DefaultClassManager {
         return s.substring(i, i + 1);
       }
       return item(chromosome, i);
+    }
+  }
+
+  /** b3get:precision number places: the same as precision number places, faster (see precision). */
+  static class Precision implements Reporter {
+    @Override
+    public Syntax getSyntax() {
+      return SyntaxJ.reporterSyntax(new int[] { Syntax.NumberType(), Syntax.NumberType() }, Syntax.NumberType());
+    }
+
+    @Override
+    public Object report(Argument[] args, Context context) throws ExtensionException {
+      double result = precision(args[0].getDoubleValue(), args[1].getIntValue());
+      if (Double.isInfinite(result) || Double.isNaN(result))
+        throw new ExtensionException("math operation produced a number too large for NetLogo");
+      return result;
     }
   }
 

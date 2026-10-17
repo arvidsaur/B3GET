@@ -13,11 +13,25 @@ after changing `src/`.
 | `b3get:with-item` | `filter [ x -> item i x = value ] list` | `get-action-cost-of`, `decisions-targeting` |
 | `b3get:sum-item` | `sum map [ x -> item i x ] list` | `get-action-cost-of` |
 | `b3get:matching-alleles` | the loop over identity loci in `relatedness-with` | `relatedness-with` |
+| `b3get:precision` | `precision`, without its slow decimal conversion except next to a rounding tie | `complete-action`; also in `b3get:sta2us-decisions` |
 
 Each primitive reports exactly what the NetLogo code it replaces reported. It uses
-NetLogo's own equality (`Equality.equals`) and rounding (`Approximate.approximate`,
-which is `precision`), and it runs `sta2us-get-action` from the model to name
-actions. `perf/nlperf verify` confirms the model's behavior is unchanged.
+NetLogo's own equality (`Equality.equals`), and it runs `sta2us-get-action` from the
+model to name actions. `perf/nlperf verify` confirms the model's behavior is
+unchanged.
+
+NetLogo's `precision` (`Approximate.approximate`) converts the number to decimal
+text with `Double.toString` and rounds that, which is slow. `b3get:precision` gets
+the same result by arithmetic whenever the number is not next to a rounding tie,
+and calls `Approximate.approximate` otherwise (the comment on `precision` in
+`B3getExtension.java` explains why that is exact). `test/PrecisionTest.java`
+compares the two, bit for bit, on tens of millions of numbers, including numbers
+next to ties; run it with the Java that runs NetLogo:
+
+```sh
+javac --release 17 -cp "code/b3get/b3get.jar:<NetLogo>/lib/app/*" -d /tmp/test code/b3get/test/PrecisionTest.java
+java -cp "code/b3get/b3get.jar:<NetLogo>/lib/app/*:/tmp/test" PrecisionTest
+```
 
 ## Building
 

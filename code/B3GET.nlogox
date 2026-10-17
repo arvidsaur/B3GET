@@ -1917,7 +1917,7 @@ to complete-action [ target action cost ]
     self                                                       ; includes the caller,
     target                                                     ; the target of the caller,
     action                                                     ; the action performed by the caller,
-    precision cost 10 )                                        ; and the energy cost of that action.
+    b3get:precision cost 10 )                                  ; and the energy cost of that action.
 
   set actions.completed                                        ; Record this action item
   lput completed-action                                        ; in caller's list of recently completed
