@@ -65,6 +65,8 @@ public final class NlPerf {
         case "verify" -> verify(sc, golden, Paths.get(arg(args, 3)));
         case "bench" -> bench(sc, golden, Paths.get(arg(args, 3)), args.length > 4 ? args[4] : "");
         case "profile" -> profile(sc, golden, Paths.get(arg(args, 3)), Paths.get(arg(args, 4)));
+        // NlPerf ab <scenario> <golden> <results> <reference-model> [label]
+        case "ab" -> ab(sc, golden, Paths.get(arg(args, 3)), Paths.get(arg(args, 4)), args.length > 5 ? args[5] : "");
         // NlPerf trace <scenario> <out.tsv>
         case "trace" -> trace(sc, golden);
         // Re-analyze an existing recording: NlPerf procedures <scenario> <file.jfr>
@@ -100,7 +102,7 @@ public final class NlPerf {
       "bench.warmup", "bench.runs", "bench.seed", "profile.runs", "jvm");
 
     String name;
-    Path model;
+    Path file, model;
     String modelSha;
     String preSetup, setup, go;
     int steps, checkpointEvery;
@@ -117,6 +119,7 @@ public final class NlPerf {
           throw new UsageError(file + ": unknown key '" + k + "'");
 
       Scenario sc = new Scenario();
+      sc.file = file;
       sc.name = file.getFileName().toString().replaceFirst("\\.properties$", "");
       String model = p.getProperty("model", "").trim();
       if (model.isEmpty()) throw new UsageError(file + ": 'model' is required");
@@ -646,6 +649,62 @@ public final class NlPerf {
     compareWithBaseline(history, row);
     System.out.println("appended to " + tsv);
     return behavior.equals("CHANGED") ? DIFFERENT : OK;
+  }
+
+  /**
+   * A/B timing: runs a reference model (A) and the scenario's model (B) alternately
+   * in one JVM, in pairs ordered AB, BA, AB, ..., so drift in the machine's speed
+   * affects both alike. Reports each pair's B/A ratio and their median, and checks
+   * both versions' final states against the fingerprint.
+   */
+  static int ab(Scenario b, Path golden, Path results, Path referenceModel, String label) throws Exception {
+    Scenario a = Scenario.load(b.file);
+    a.model = referenceModel.toAbsolutePath();
+    a.modelSha = sha256(Files.readAllBytes(a.model));
+    Fingerprint fp = Fingerprint.load(golden);
+    Row expected = fp == null || fp.incompatibility(b) != null ? null : fp.finalRow(b.benchSeed);
+    if (expected == null) System.out.println("warning: no compatible fingerprint, so behavior is unverified");
+    String reference = a.model.getParent().getParent().getFileName().toString();
+    System.out.printf("A/B %s: A = %s, B = %s; seed %d, %d warmup + %d measured pairs%n",
+      b.name, reference, gitIdentity(), b.benchSeed, b.benchWarmup, b.benchRuns);
+    List<double[]> pairs = new ArrayList<>();
+    boolean same = true;
+    for (int i = 0; i < b.benchWarmup + b.benchRuns; i++) {
+      double[] ms = new double[2];
+      for (int k = 0; k < 2; k++) {
+        int which = (i % 2 == 0) ? k : 1 - k; // 0 = A, 1 = B
+        Scenario sc = which == 0 ? a : b;
+        System.gc();
+        Run run = new Run(sc, sc.benchSeed);
+        Snapshot last;
+        try (run) { last = drive(sc, run, 0, null); }
+        if (expected != null && !last.row().equals(expected)) {
+          same = false;
+          System.out.println("  " + (which == 0 ? "A" : "B") + ": final state differs from the fingerprint");
+        }
+        ms[which] = run.goNanos / 1e6;
+      }
+      boolean warmup = i < b.benchWarmup;
+      System.out.printf("  %s %d: A %.0f ms, B %.0f ms, B/A %+.1f%%%n", warmup ? "warmup" : "pair",
+        warmup ? i + 1 : i - b.benchWarmup + 1, ms[0], ms[1], 100 * (ms[1] / ms[0] - 1));
+      if (!warmup) pairs.add(ms);
+    }
+    double[] ratios = pairs.stream().mapToDouble(p -> p[1] / p[0]).sorted().toArray();
+    double medianA = new Stats(pairs.stream().mapToDouble(p -> p[0]).sorted().toArray()).median();
+    double medianB = new Stats(pairs.stream().mapToDouble(p -> p[1]).sorted().toArray()).median();
+    double median = new Stats(ratios).median();
+    System.out.printf("B vs A: median %+.1f%% (pairs from %+.1f%% to %+.1f%%); median A %.0f ms, B %.0f ms%n",
+      100 * (median - 1), 100 * (ratios[0] - 1), 100 * (ratios[ratios.length - 1] - 1), medianA, medianB);
+    System.out.println("behavior: " + (expected == null ? "unverified" : same ? "both identical to the fingerprint" : "DIFFERENT"));
+    Files.createDirectories(results);
+    Path tsv = results.resolve("ab.tsv");
+    if (!Files.isRegularFile(tsv))
+      Files.writeString(tsv, "timestamp\tlabel\tA\tB\tpairs\tB_vs_A_median\tB_vs_A_min\tB_vs_A_max\tmedian_A_ms\tmedian_B_ms\n");
+    Files.writeString(tsv, String.join("\t", now(), label.isBlank() ? "-" : clean(label.trim()), reference, gitIdentity(),
+      String.valueOf(pairs.size()), String.format("%+.2f%%", 100 * (median - 1)), String.format("%+.2f%%", 100 * (ratios[0] - 1)),
+      String.format("%+.2f%%", 100 * (ratios[ratios.length - 1] - 1)), fmt(medianA), fmt(medianB)) + "\n", StandardOpenOption.APPEND);
+    System.out.println("appended to " + tsv);
+    return same ? OK : DIFFERENT;
   }
 
   /** Compares with the most recent run labeled "baseline", or else the first recorded run. */

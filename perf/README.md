@@ -105,6 +105,13 @@ at its first mismatch.
   baseline right next to a candidate before trusting a small win.
 - Each bench row records the commit and a hash of uncommitted changes to
   `code/` and `data/`, so results stay tied to the model they measured.
+- For small differences, use `perf/nlperf ab <scenario> <git-revision>`. It runs
+  that revision (A) and the working tree (B) alternately in one JVM, in pairs
+  ordered AB, BA, AB, ..., and reports each pair's B/A ratio and their median.
+  Separate `bench` invocations of identical code differed by up to 4%, which
+  hides changes of a few percent; alternating cancels that drift. Both versions'
+  final states are checked against the fingerprint. The revision's `code/` and
+  `data/` are exported once into `perf/.state/ab/<commit>/`.
 - Timings cover setup and the go loop. They exclude opening and compiling the
   model and taking snapshots.
 

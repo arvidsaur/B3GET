@@ -40,6 +40,7 @@ usage: perf/nlperf <command> [args]
   record  <scenario> [--force]  record the scenario's behavioral fingerprint (the baseline)
   verify  <scenario>            re-run and compare against the recorded fingerprint
   bench   <scenario> [label]    time the scenario; also checks the final state against the fingerprint
+  ab      <scenario> <rev> [label]  time the working tree (B) against a git revision (A), alternating in one JVM
   profile <scenario>            JFR-profile measured runs: time per NetLogo procedure, then hot JVM methods
   trace   <scenario> [label]    one long run, logging time per interval, population and a world hash
   compare-traces <a> <b>        line two traces up: speed per interval, and whether the worlds match
@@ -174,6 +175,26 @@ case "$cmd" in
     scenario="$(resolve_scenario "${1:-}")"; name="$(scenario_name "$scenario")"
     git_identity
     harness "$scenario" bench "$scenario" "$PERF_DIR/golden/$name" "$PERF_DIR/results/$name" "${2:-}"
+    ;;
+  ab)
+    scenario="$(resolve_scenario "${1:-}")"; name="$(scenario_name "$scenario")"
+    rev="${2:-}"
+    [[ -n "$rev" ]] || die "usage: perf/nlperf ab <scenario> <git-revision> [label]"
+    commit="$(git -C "$REPO" rev-parse --short=12 "$rev^{commit}")" || die "no such revision: $rev"
+    # The reference model, exported once per commit. perf/ is linked in so that paths the
+    # scenario gives relative to the model (populations) resolve as they do in the repo,
+    # and results/ keeps its metafile apart from the working tree's.
+    ref_dir="$STATE_DIR/ab/$commit"
+    if [[ ! -d "$ref_dir/code" ]]; then
+      mkdir -p "$ref_dir"
+      git -C "$REPO" archive "$commit" code data | tar -x -C "$ref_dir"
+      ln -s "$PERF_DIR" "$ref_dir/perf"
+    fi
+    mkdir -p "$ref_dir/results"
+    model="$(grep -E '^[[:space:]]*model[[:space:]]*[=:]' "$scenario" | tail -1 | sed -E 's/^[[:space:]]*model[[:space:]]*[=:][[:space:]]*//')"
+    [[ -f "$ref_dir/$model" ]] || die "$commit has no $model"
+    git_identity
+    harness "$scenario" ab "$scenario" "$PERF_DIR/golden/$name" "$PERF_DIR/results/$name" "$ref_dir/$model" "${3:-}"
     ;;
   profile)
     scenario="$(resolve_scenario "${1:-}")"; name="$(scenario_name "$scenario")"
