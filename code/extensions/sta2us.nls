@@ -157,16 +157,32 @@ to-report sta2us-get-decisions [ my-environment ]
   ; allele. The status of an object is still looked up in STATUS-TABLE by its
   ; identity, as before: identities can coincide, and then the table holds the
   ; status put last.
+  ; Only a few objects match each allele, so the objects are grouped by status and an
+  ; allele visits just the groups whose status matches, in MY-ENVIRONMENT order.
   let spatial? not member? "aspatial" model-structure          ; Constant during this call.
   let objects-prepared? false
   let distinct-statuses []                                     ; Each status in the environment, once.
-  let status-indices []                                        ; Position of each object's status in DISTINCT-STATUSES.
+  let status-positions []                                      ; 0, 1, ... for DISTINCT-STATUSES.
+  let objects-by-status []                                     ; For each distinct status, the positions in
+                                                               ; MY-ENVIRONMENT of the objects that have it.
   let distances-squared []                                     ; Squared distance used in each object's cost.
+
+  ; An allele makes the same decision vectors wherever it is. So where chromosome.II
+  ; has the same allele as chromosome.I at that position (a homozygous locus), the
+  ; vectors that chromosome.I's copy made are used again.
+  let alleles-I length chromosome.I
+  let vectors-by-allele-I []                                   ; The vectors each allele of chromosome.I made.
+  let allele-index 0                                           ; Position of G in both chromosomes together.
 
   foreach (sentence chromosome.I chromosome.II) [ g ->         ; Proceed through each allele in the 
                                                                ; caller's genotype.
-    
-    if ( length g = 5 and                                      ; Check that the allele structure
+    let allele-vectors []                                      ; The decision vectors G makes.
+    let twin allele-index - alleles-I                          ; G's position on chromosome.II.
+    let same-as-I? ( twin >= 0 and twin < alleles-I and g = item twin chromosome.I )
+    if ( same-as-I? ) [ set allele-vectors item twin vectors-by-allele-I ]
+
+    if ( not same-as-I? and
+      length g = 5 and                                         ; Check that the allele structure
       is-string? item 1 g and                                  ; matches what is expected from the
       is-string? item 2 g and                                  ; sta2us genotype reader.
       is-string? item 3 g and 
@@ -186,7 +202,12 @@ to-report sta2us-get-decisions [ my-environment ]
             [ [pmy.identity] of other-guy ]
             [ [my.identity] of other-guy ] ] my-environment
           set distinct-statuses remove-duplicates object-statuses
-          set status-indices map [ s -> position s distinct-statuses ] object-statuses
+          set status-positions range length distinct-statuses
+          set objects-by-status map [ s -> [] ] distinct-statuses
+          ( foreach object-statuses range length object-statuses [ [ s i ] ->
+            let status-position position s distinct-statuses
+            set objects-by-status replace-item status-position objects-by-status
+            lput i item status-position objects-by-status ] )
           foreach my-environment [ other-guy ->
             let distance-to-target distance other-guy          ; Calculate the distance between caller 
             set distance-to-target ifelse-value                ; and target, which is one if the caller
@@ -196,23 +217,29 @@ to-report sta2us-get-decisions [ my-environment ]
           set objects-prepared? true ]
             
         let action-name sta2us-get-action gene-action          ; Which action to take.
-        let status-matches map [ s ->                          ; Whether each distinct status matches
-          first-string-is-part-of-last? gene-other s           ; the second codon.
-        ] distinct-statuses
+        let matching-statuses filter [ status-position ->      ; The distinct statuses that match
+          first-string-is-part-of-last? gene-other             ; the second codon.
+          item status-position distinct-statuses
+        ] status-positions
+        let targets []                                         ; The objects with those statuses
+        foreach matching-statuses [ status-position ->         ; become targets, in MY-ENVIRONMENT order.
+          set targets sentence targets item status-position objects-by-status ]
+        if ( length matching-statuses > 1 ) [ set targets sort targets ]
 
-        ( foreach my-environment status-indices distances-squared [ [ other-guy status-index distance-squared ] ->
-          if ( item status-index status-matches ) [            ; If the object's status matches the second
-                                                               ; codon then object becomes target.
-            set decision-vectors lput (list                    ; Create a new decision vector
-              self                                             ; that identifies caller,
-              other-guy                                        ; target,
-              action-name                                      ; which action to take,
-              precision ( gene-weight / distance-squared ) 10  ; how much it costs,
-              false ) decision-vectors                         ; and that this action has not yet been performed.
-          ]
-        ] )
+        foreach targets [ i ->
+          set allele-vectors lput (list                        ; Create a new decision vector
+            self                                               ; that identifies caller,
+            item i my-environment                              ; target,
+            action-name                                        ; which action to take,
+            precision ( gene-weight / item i distances-squared ) 10 ; how much it costs,
+            false ) allele-vectors                             ; and that this action has not yet been performed.
+        ]
       ]
     ]
+
+    if ( allele-index < alleles-I ) [ set vectors-by-allele-I lput allele-vectors vectors-by-allele-I ]
+    set decision-vectors sentence decision-vectors allele-vectors
+    set allele-index allele-index + 1
   ]
   report decision-vectors                                      ; Report the final list of decision vectors.
   
