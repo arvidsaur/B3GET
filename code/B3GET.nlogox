@@ -106,7 +106,10 @@ __includes [ ; For more information on local extensions, see the corresponding f
 breed [ anima1s anima1 ]
 breed [ helpers helper ]
 
-anima1s-own [
+; These are the variables of anima1s, declared for all turtles. NetLogo finds a
+; breed's own variables by name on every use, which is slow, and a turtle variable
+; by its position. Only anima1s use them; helpers just carry them unused.
+turtles-own [
 
   my.identity                      ; Unique identification number for each individual
 
