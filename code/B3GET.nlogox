@@ -3300,29 +3300,12 @@ end
 ; ------------------------------------------------------------------------------------------------------------------- ;
 
 to-report relatedness-with [ target ]
-  let their-identity-I [identity.I] of target                  ; Identify the target's identity chromosomes
-  let their-identity-II [identity.II] of target                ; once, rather than at every locus.
-  let matching 0                                               ; Set up variables to track the number
-  let not-matching 0                                           ; of matching and non-matching alleles
-  let i 0                                                      ;
-  while [i < 10] [                                             ; Iterate through the identity chromosomes
-                                                               ; of caller and target, considering each
-                                                               ; allele at the same locus for both (read
-                                                               ; directly: a local variable per allele
-                                                               ; would cost more than reading it again).
-
-    ifelse (( item i identity.I = item i their-identity-I ) or ; Check if either allele from the target
-      ( item i identity.I = item i their-identity-II ))        ; matches the caller's allele from its
-    [ set matching matching + 1 ]                              ; first identity chromosome.
-    [ set not-matching not-matching + 1 ]                      ; Record if they match or do not match.
-
-    ifelse (( item i identity.II = item i their-identity-I ) or ; Check if either allele from the target
-      ( item i identity.II = item i their-identity-II ))       ; matches the caller's allele from its
-    [ set matching matching + 1 ]                              ; second identity chromosome.
-    [ set not-matching not-matching + 1 ]                      ; Record if they match or do not match.
-
-    set i i + 1 ]                                              ; Progress through the loop.
-
+  let matching b3get:matching-alleles                          ; Iterate through the identity chromosomes
+  identity.I identity.II                                       ; of caller and target, considering each
+  [identity.I] of target [identity.II] of target               ; allele at the same locus for both, and
+  10                                                           ; count the caller's alleles that match either
+                                                               ; allele of the target (see code/b3get).
+  let not-matching 20 - matching                               ; Two alleles at each of 10 loci.
   report matching / ( matching + not-matching )                ; Return the percent of matching alleles.
 end
 

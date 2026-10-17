@@ -33,6 +33,7 @@ public class B3getExtension extends DefaultClassManager {
     primitiveManager.addPrimitive("position", new Position());
     primitiveManager.addPrimitive("with-item", new WithItem());
     primitiveManager.addPrimitive("sum-item", new SumItem());
+    primitiveManager.addPrimitive("matching-alleles", new MatchingAlleles());
   }
 
   /**
@@ -279,6 +280,64 @@ public class B3getExtension extends DefaultClassManager {
       if (Double.isInfinite(sum) || Double.isNaN(sum))
         throw new ExtensionException("math operation produced a number too large for NetLogo");
       return sum;
+    }
+  }
+
+  /**
+   * b3get:matching-alleles mine-I mine-II theirs-I theirs-II loci
+   *
+   * How many of the alleles of MINE-I and MINE-II at the first LOCI loci equal the
+   * allele of THEIRS-I or THEIRS-II at the same locus: the number of times
+   *   item i mine = item i theirs-I or item i mine = item i theirs-II
+   * holds for i from 0 to LOCI - 1 and mine being MINE-I, then MINE-II. The
+   * chromosomes are strings or lists.
+   */
+  static class MatchingAlleles implements Reporter {
+    @Override
+    public Syntax getSyntax() {
+      return SyntaxJ.reporterSyntax(
+        new int[] { Syntax.StringType() | Syntax.ListType(), Syntax.StringType() | Syntax.ListType(),
+                    Syntax.StringType() | Syntax.ListType(), Syntax.StringType() | Syntax.ListType(),
+                    Syntax.NumberType() },
+        Syntax.NumberType());
+    }
+
+    @Override
+    public Object report(Argument[] args, Context context) throws ExtensionException {
+      Object mineI = args[0].get(), mineII = args[1].get(), theirsI = args[2].get(), theirsII = args[3].get();
+      int loci = args[4].getIntValue();
+      int matching = 0;
+      if (mineI instanceof String && mineII instanceof String && theirsI instanceof String && theirsII instanceof String
+          && loci >= 0 && loci <= Math.min(Math.min(((String) mineI).length(), ((String) mineII).length()),
+                                           Math.min(((String) theirsI).length(), ((String) theirsII).length()))) {
+        // Alleles are one-character strings, equal when their characters are.
+        String mI = (String) mineI, mII = (String) mineII, tI = (String) theirsI, tII = (String) theirsII;
+        for (int i = 0; i < loci; i++) {
+          char a = mI.charAt(i), b = mII.charAt(i), x = tI.charAt(i), y = tII.charAt(i);
+          if (a == x || a == y) matching++;
+          if (b == x || b == y) matching++;
+        }
+        return Double.valueOf(matching);
+      }
+      for (int i = 0; i < loci; i++) {
+        Object theirI = allele(theirsI, i), theirII = allele(theirsII, i);
+        Object a = allele(mineI, i);
+        if (Equality.equals(a, theirI) || Equality.equals(a, theirII)) matching++;
+        Object b = allele(mineII, i);
+        if (Equality.equals(b, theirI) || Equality.equals(b, theirII)) matching++;
+      }
+      return Double.valueOf(matching);
+    }
+
+    /** item i of a string or list. */
+    private static Object allele(Object chromosome, int i) throws ExtensionException {
+      if (chromosome instanceof String) {
+        String s = (String) chromosome;
+        if (i < 0 || i >= s.length())
+          throw new ExtensionException("can't find element " + i + " of a string of length " + s.length());
+        return s.substring(i, i + 1);
+      }
+      return item(chromosome, i);
     }
   }
 
