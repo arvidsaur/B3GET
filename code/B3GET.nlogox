@@ -1625,58 +1625,58 @@ to do-actions
         let action item 2 vector                                 ; Identify which action the caller has decided
         let cost item 3 vector                                   ; to take. Identify how much the action will cost.
 
-        if ( is.resting = false )                                ; These actions can only be performed if the caller
-                                                                 ; is not resting.
-
-        [ ( ifelse                                               ; Call the subroutine that corresponds with
-                                                                 ; the action name.
-          action = "move-toward" [ move-toward target cost ]
-          action = "move-away-from" [ move-toward target ( - cost ) ]
-          action = "turn-right" [ turn-right cost ]
-          action = "turn-left" [ turn-right ( - cost ) ]
-          action = "go-forward" [ go-forward cost ]
-          action = "set-heading" [ set-heading cost ]
-          action = "set-heading-random" [ set-heading-random cost ]
-          action = "eat" [ if ( check-distance target ) [ eat target cost ] ]
-          action = "join" [ join target cost ]
-          action = "leave" [ leave target cost ]
-          action = "recruit" [ recruit target cost ]
-          action = "expel" [ expel target cost ]
-          action = "pick-up" [ if ( check-distance target ) [ pick-up target cost ] ]
-          action = "put-down" [ if ( check-distance target ) [ put-down target cost  ] ]
-          action = "cling-to" [ if ( check-distance target ) [ cling-to target cost ] ]
-          action = "squirm-from" [ if ( check-distance target ) [ squirm-from target cost ] ]
-          action = "help" [ if ( check-distance target ) [ help target cost ] ]
-          action = "attack" [ if ( check-distance target ) [ attack target cost ] ]
-          action = "mate-with" [ if ( check-distance target ) [ mate-with target cost ] ]
-          [])]
-
-        ( ifelse                                                 ; These actions can be performed resting
+        ; Call the subroutine that corresponds with the action name. Each name belongs to
+        ; one group, so only that group's names are compared, and the names that occur
+        ; most often come first.
+        ( ifelse
+          member? action [ "move-toward" "eat" "help" "attack" "mate-with" "go-forward" "set-heading-random" "leave" "move-away-from" "turn-right" "turn-left" "set-heading" "join" "recruit" "expel" "pick-up" "put-down" "cling-to" "squirm-from" ]
+          [ if ( is.resting = false ) [                          ; These actions can only be performed if the caller
+            ( ifelse                                             ; is not resting.
+              action = "move-toward" [ move-toward target cost ]
+              action = "eat" [ if ( check-distance target ) [ eat target cost ] ]
+              action = "help" [ if ( check-distance target ) [ help target cost ] ]
+              action = "attack" [ if ( check-distance target ) [ attack target cost ] ]
+              action = "mate-with" [ if ( check-distance target ) [ mate-with target cost ] ]
+              action = "go-forward" [ go-forward cost ]
+              action = "set-heading-random" [ set-heading-random cost ]
+              action = "leave" [ leave target cost ]
+              action = "move-away-from" [ move-toward target ( - cost ) ]
+              action = "turn-right" [ turn-right cost ]
+              action = "turn-left" [ turn-right ( - cost ) ]
+              action = "set-heading" [ set-heading cost ]
+              action = "join" [ join target cost ]
+              action = "recruit" [ recruit target cost ]
+              action = "expel" [ expel target cost ]
+              action = "pick-up" [ if ( check-distance target ) [ pick-up target cost ] ]
+              action = "put-down" [ if ( check-distance target ) [ put-down target cost  ] ]
+              action = "cling-to" [ if ( check-distance target ) [ cling-to target cost ] ]
+              action = "squirm-from" [ if ( check-distance target ) [ squirm-from target cost ] ]
+              [] ) ] ]
+                                                                 ; These actions can be performed resting
                                                                  ; or not resting.
-
-          action = "hide" [ hide cost ]
-          action = "rest" [ rest cost ]
           action = "survival-chance" [ survival-chance cost ]
-          action = "body-size" [ body-size cost ]
+          action = "rest" [ rest cost ]
           action = "body-shade" [ body-shade cost ]
+          action = "body-size" [ body-size cost ]
+          action = "conception-chance" [ conception-chance cost ]
+          action = "check-adulthood" [ check-adulthood cost ]
           action = "visual-range" [ visual-range cost ]
           action = "visual-angle" [ visual-angle cost ]
           action = "day-perception" [ day-perception cost ]
-          action = "night-perception" [ night-perception cost ]
-          action = "conception-chance" [ conception-chance cost ]
+          action = "check-juvenility" [ check-juvenility cost ]
+          action = "check-birth" [ check-birth cost ]
+          action = "supply-to" [ if ( check-distance target ) [ supply-to target cost ]]
+          action = "check-weaning" [ check-weaning cost ]
+          action = "check-infancy" [ check-infancy cost ]
           action = "bite-capacity" [ bite-capacity cost ]
+          action = "hide" [ hide cost ]
+          action = "night-perception" [ night-perception cost ]
           action = "mutation-chance" [ mutation-chance cost ]
           action = "sex-ratio" [ sex-ratio cost ]
           action = "litter-size" [ litter-size cost ]
           action = "yellow-signal" [ yellow-signal cost ]
           action = "red-signal" [ red-signal cost ]
           action = "blue-signal" [ blue-signal cost ]
-          action = "check-infancy" [ check-infancy cost ]
-          action = "check-birth" [ check-birth cost ]
-          action = "check-juvenility" [ check-juvenility cost ]
-          action = "check-weaning" [ check-weaning cost ]
-          action = "check-adulthood" [ check-adulthood cost ]
-          action = "supply-to" [ if ( check-distance target ) [ supply-to target cost ]]
           action = "demand-from" [ if ( check-distance target ) [ demand-from target cost ]]
           [])
       ]
