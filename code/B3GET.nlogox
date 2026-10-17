@@ -1801,10 +1801,10 @@ to-report get-action-cost-of [ target action-name ]
   ; The target's decisions aimed at the caller come from its index by target
   ; (see decisions-targeting): the same vectors, in the same order, as checking
   ; item 1 of each decision against the caller.
-  let not-done-decisions filter [ vector ->                    ; Identify any decisions that the target
-    item 2 vector = action-name and                            ; has that is targeting the caller,
-    item 4 vector = false ]                                    ; same name as the input value,
-  [ decisions-targeting myself ] of target                     ; and is unfinished.
+  let not-done-decisions b3get:with-item b3get:with-item      ; Identify any decisions that the target
+  [ decisions-targeting myself ] of target                     ; has that is targeting the caller,
+  2 action-name                                                ; same name as the input value,
+  4 false                                                      ; and is unfinished.
 
   ask target [                                                 ; The target updates these decisions to
     foreach not-done-decisions [ vector ->                     ; completed actions if they have sufficient
@@ -1814,13 +1814,12 @@ to-report get-action-cost-of [ target action-name ]
         ( item 2 vector )
         ( item 3 vector ) ]]]
 
-  let action-cost sum
-  map [ vector -> item 3 vector ]                              ; Get total cost from target for all
-  filter [ vector ->                                           ; of its completed actions that
-    is-turtle? item 1 vector and                               ; both target the caller (the caller is a
-    item 1 vector = self and                                   ; living turtle, so this is the same as =
-    item 2 vector = action-name ]                              ; alone) and share the same name as the input value.
+  let action-cost b3get:sum-item                               ; Get total cost from target for all
+  b3get:with-item b3get:with-item                              ; of its completed actions that
   [ actions.completed ] of target
+  1 self                                                       ; both target the caller
+  2 action-name                                                ; and share the same name as the input value.
+  3
 
   report action-cost                                           ; Report this cost.
 end
@@ -1850,12 +1849,11 @@ end
 ; ------------------------------------------------------------------------------------------------------------------- ;
 
 to-report decisions-targeting [ caller ]
-  if ( caller = self ) [ report filter [ vector -> item 1 vector = self ] decision.vectors ]
+  if ( caller = self ) [ report b3get:with-item decision.vectors 1 self ]
   if ( not is-list? decision.vectors.index ) [                 ; Building an index costs a few scans, so the
     set decision.vectors.index decision.vectors.index + 1      ; first few times an individual is asked in a
     if ( decision.vectors.index < 4 ) [                        ; timestep, scan; until then the variable
-      report filter [ vector ->                                ; counts the times asked.
-        is-turtle? item 1 vector and item 1 vector = caller ] decision.vectors ] ]
+      report b3get:with-item decision.vectors 1 caller ] ]   ; counts the times asked. (CALLER is a living turtle.)
   if ( not ( is-list? decision.vectors.index and ( first decision.vectors.index ) = decision.vectors ) )
   [ set decision.vectors.index list decision.vectors indexed-by-target decision.vectors ]
   report table:get-or-default ( last decision.vectors.index ) [who] of caller []

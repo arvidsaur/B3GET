@@ -140,34 +140,23 @@ to-report sta2us-get-decisions [ my-environment ]
   
   let ego-status status-of self                                ; Keep a record of caller's status.
 
-  let status-table table:make                                  ; Create a table to temporarily store
-  foreach my-environment [ obj ->                              ; the status code of each object
-    if ( is-patch? obj ) [                                     ; in the caller's current environment.
-      table:put status-table                                   
-      ( [pmy.identity] of obj ) 
-      ( status-of obj ) ]
-    if ( is-anima1? obj ) [ 
-      table:put status-table 
-      ( [my.identity] of obj ) 
-      ( status-of obj ) ] ]
-  
   ; The loops over the caller's alleles and the objects in its environment are in the
   ; b3get extension (code/b3get). It reports the same decision vectors as the NetLogo
   ; loops did: for each valid allele, in order, whose first codon matches the caller's
   ; status, and each object, in order, whose status matches the allele's second codon,
   ;   (list self object (sta2us-get-action item 3 allele) precision (item 4 allele / distance-squared) 10 false)
-  ; An object's status is looked up in STATUS-TABLE by its identity: identities can
-  ; coincide, and then the table holds the status put last.
+  ; An object's status is the one given last for its identity (identities can
+  ; coincide), as when the statuses were put in a table by identity and looked up.
+  ; The environment holds only patches and anima1s.
   let spatial? not member? "aspatial" model-structure
   report b3get:sta2us-decisions
     ego-status
     ( sentence chromosome.I chromosome.II )                    ; Each allele in the caller's genotype.
     my-environment
-    map [ other-guy ->                                         ; The status of each object
-      table:get status-table ifelse-value                      ; in the environment.
-      ( is-patch? other-guy )
-      [ [pmy.identity] of other-guy ]
-      [ [my.identity] of other-guy ] ] my-environment
+    map [ obj -> ifelse-value ( is-patch? obj )                ; The identity of each object
+      [ [pmy.identity] of obj ] [ [my.identity] of obj ] ]     ; in the caller's current environment,
+    my-environment
+    map [ obj -> status-of obj ] my-environment                ; and its status code.
     map [ d ->                                                 ; The squared distance between the caller and
       ( ifelse-value ( d > 1 and spatial? ) [ d ] [ 1 ] ) ^ 2  ; each object, where the distance is one if they
     ] map [ other-guy -> distance other-guy ] my-environment   ; are closer than one unit apart or model-structure

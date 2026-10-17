@@ -8,8 +8,10 @@ after changing `src/`.
 
 | Primitive | Replaces | Used in |
 |---|---|---|
-| `b3get:sta2us-decisions` | the loops over alleles and objects in `sta2us-get-decisions` | `sta2us.nls` |
+| `b3get:sta2us-decisions` | the loops over alleles and objects in `sta2us-get-decisions`, and its table of statuses by identity | `sta2us.nls` |
 | `b3get:position` | `position` of an item in a list, with a quick test that skips most unequal lists | `check-energy`, `index-updated` |
+| `b3get:with-item` | `filter [ x -> item i x = value ] list` | `get-action-cost-of`, `decisions-targeting` |
+| `b3get:sum-item` | `sum map [ x -> item i x ] list` | `get-action-cost-of` |
 
 Each primitive reports exactly what the NetLogo code it replaces reported. It uses
 NetLogo's own equality (`Equality.equals`) and rounding (`Approximate.approximate`,

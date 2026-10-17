@@ -31,23 +31,27 @@ public class B3getExtension extends DefaultClassManager {
   public void load(PrimitiveManager primitiveManager) {
     primitiveManager.addPrimitive("sta2us-decisions", new Sta2usDecisions());
     primitiveManager.addPrimitive("position", new Position());
+    primitiveManager.addPrimitive("with-item", new WithItem());
+    primitiveManager.addPrimitive("sum-item", new SumItem());
   }
 
   /**
-   * b3get:sta2us-decisions ego-status alleles objects object-statuses distances-squared action-of
+   * b3get:sta2us-decisions ego-status alleles objects identities statuses distances-squared action-of
    *
    * The decision vectors of sta2us-get-decisions: for each valid allele whose first
    * codon matches EGO-STATUS, in order, and each object whose status matches its
    * second codon, in order,
    *   (list self object (action-of item 3 allele) precision (item 4 allele / distance-squared) 10 false)
-   * ACTION-OF must be pure, since it is run once per distinct action codon.
+   * An object's status is the last of STATUSES given for its identity, as when they
+   * are put in a table by identity in order and looked up again. ACTION-OF must be
+   * pure, since it is run once per distinct action codon.
    */
   static class Sta2usDecisions implements Reporter {
     @Override
     public Syntax getSyntax() {
       return SyntaxJ.reporterSyntax(
         new int[] { Syntax.WildcardType(), Syntax.ListType(), Syntax.ListType(), Syntax.ListType(),
-                    Syntax.ListType(), Syntax.ReporterType() },
+                    Syntax.ListType(), Syntax.ListType(), Syntax.ReporterType() },
         Syntax.ListType(), "-T--");
     }
 
@@ -56,20 +60,23 @@ public class B3getExtension extends DefaultClassManager {
       Object egoStatus = args[0].get();
       LogoList alleles = args[1].getList();
       LogoList objects = args[2].getList();
-      LogoList objectStatuses = args[3].getList();
-      LogoList distancesSquared = args[4].getList();
-      AnonymousReporter actionOf = args[5].getReporter();
+      LogoList identities = args[3].getList();
+      LogoList statuses = args[4].getList();
+      LogoList distancesSquared = args[5].getList();
+      AnonymousReporter actionOf = args[6].getReporter();
       Object self = context.getAgent();
 
       int n = objects.size();
-      if (objectStatuses.size() != n || distancesSquared.size() != n)
-        throw new ExtensionException("objects, statuses and distances must be lists of the same length");
+      if (identities.size() != n || statuses.size() != n || distancesSquared.size() != n)
+        throw new ExtensionException("objects, identities, statuses and distances must be lists of the same length");
+      Map<Object, Object> statusOfIdentity = new HashMap<>();
+      for (int i = 0; i < n; i++) statusOfIdentity.put(identities.get(i), statuses.get(i));
       Object[] object = new Object[n];
       Object[] status = new Object[n];
       double[] distanceSquared = new double[n];
       for (int i = 0; i < n; i++) {
         object[i] = objects.get(i);
-        status[i] = objectStatuses.get(i);
+        status[i] = statusOfIdentity.get(identities.get(i));
         distanceSquared[i] = number(distancesSquared.get(i));
       }
 
@@ -207,15 +214,80 @@ public class B3getExtension extends DefaultClassManager {
       LogoList l1 = (LogoList) a, l2 = (LogoList) b;
       int n = l1.size();
       if (l2.size() != n) return false;
-      for (int k = 0; k < n; k++) {
+      // From the end: in a decision vector the cost (item 3) differs most often.
+      for (int k = n - 1; k >= 0; k--) {
         Object x = l1.get(k), y = l2.get(k);
         if (x instanceof Double && y instanceof Double) {
           if (((Double) x).doubleValue() != ((Double) y).doubleValue()) return false;
-        } else if (x instanceof String && y instanceof String) {
+        } else if ((x instanceof String && y instanceof String) || (x instanceof Boolean && y instanceof Boolean)) {
           if (!x.equals(y)) return false;
         }
       }
       return true;
     }
+  }
+
+  /**
+   * b3get:with-item list index value
+   *
+   * Same as filter [ x -> item index x = value ] list, for a list of lists.
+   */
+  static class WithItem implements Reporter {
+    @Override
+    public Syntax getSyntax() {
+      return SyntaxJ.reporterSyntax(
+        new int[] { Syntax.ListType(), Syntax.NumberType(), Syntax.WildcardType() },
+        Syntax.ListType());
+    }
+
+    @Override
+    public Object report(Argument[] args, Context context) throws ExtensionException {
+      LogoList list = args[0].getList();
+      int index = args[1].getIntValue();
+      Object value = args[2].get();
+      LogoListBuilder selected = new LogoListBuilder();
+      for (Object element : list.toJava()) {
+        if (Equality.equals(item(element, index), value)) selected.add(element);
+      }
+      return selected.toLogoList();
+    }
+  }
+
+  /**
+   * b3get:sum-item list index
+   *
+   * Same as sum map [ x -> item index x ] list, for a list of lists: the numbers
+   * added in order, other values ignored.
+   */
+  static class SumItem implements Reporter {
+    @Override
+    public Syntax getSyntax() {
+      return SyntaxJ.reporterSyntax(
+        new int[] { Syntax.ListType(), Syntax.NumberType() },
+        Syntax.NumberType());
+    }
+
+    @Override
+    public Object report(Argument[] args, Context context) throws ExtensionException {
+      LogoList list = args[0].getList();
+      int index = args[1].getIntValue();
+      double sum = 0d;
+      for (Object element : list.toJava()) {
+        Object x = item(element, index);
+        if (x instanceof Double) sum += (Double) x;
+      }
+      if (Double.isInfinite(sum) || Double.isNaN(sum))
+        throw new ExtensionException("math operation produced a number too large for NetLogo");
+      return sum;
+    }
+  }
+
+  /** item index x, for a list x. */
+  static Object item(Object x, int index) throws ExtensionException {
+    if (!(x instanceof LogoList)) throw new ExtensionException("expected a list but got " + x);
+    LogoList list = (LogoList) x;
+    if (index < 0 || index >= list.size())
+      throw new ExtensionException("can't find element " + index + " of a list of length " + list.size());
+    return list.get(index);
   }
 }
