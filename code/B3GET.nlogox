@@ -75,7 +75,7 @@
 ;
 ; ------------------------------------------------------------------------------------------------------------------- ;
 
-extensions [ csv profiler table time ]
+extensions [ csv profiler table time b3get ]                 ; b3get: code/b3get, B3GET's own primitives
 
 __includes [ ; For more information on local extensions, see the corresponding files.
 
@@ -1757,7 +1757,7 @@ to-report check-energy [ vector ]
   if ( passes-energy-check ) [                                 ; If the energy is sufficient,
     update-energy ( - abs-cost )                               ; reduce the caller's energy supply by the cost.
     let new-vector lput true but-last vector                   ; Update this decision in the caller's
-    let vector-index position vector decision.vectors          ; decision.vectors to be marked as
+    let vector-index b3get:position vector decision.vectors    ; decision.vectors to be marked as
     if ( is-number? vector-index ) [                           ; having been acted upon.
       let index-in-step? ( is-list? decision.vectors.index and ; (See decisions-targeting.)
         ( first decision.vectors.index ) = decision.vectors )
@@ -1889,7 +1889,7 @@ to-report index-updated [ index new-list removed added ]
     let key [who] of target
     let entry table:get-or-default ( last index ) key []
     if ( is-list? removed ) [
-      let i position removed entry
+      let i b3get:position removed entry
       if ( is-number? i ) [ set entry sentence ( sublist entry 0 i ) ( sublist entry ( i + 1 ) length entry ) ] ]
     table:put ( last index ) key lput added entry ]
   report list new-list ( last index )

@@ -1,0 +1,3 @@
+Extension-Name: b3get
+Class-Manager: b3get.B3getExtension
+NetLogo-Extension-API-Version: 7.0

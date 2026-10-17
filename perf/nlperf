@@ -90,9 +90,25 @@ build_harness() {
   fi
 }
 
+# NetLogo extensions whose sources are in the repo (code/<name>/src, built by
+# code/<name>/build.sh) are rebuilt when a source is newer than the jar, so runs
+# always use the current code. The build is reproducible: same sources, same jar.
+build_model_extensions() {
+  local dir name
+  for dir in "$REPO"/code/*/; do
+    dir="${dir%/}"; name="$(basename "$dir")"
+    [[ -x "$dir/build.sh" && -d "$dir/src" ]] || continue
+    if [[ ! -f "$dir/$name.jar" || -n "$(find "$dir/src" "$dir/build.sh" "$dir/manifest.txt" -newer "$dir/$name.jar" -print -quit)" ]]; then
+      echo "nlperf: building code/$name/$name.jar" >&2
+      in_container "$dir/build.sh" "$NETLOGO/lib/app" || die "building code/$name/$name.jar failed"
+    fi
+  done
+}
+
 # Identify the model a result came from: commit plus a hash of uncommitted
 # changes to the model sources (perf/ itself is not included).
 git_identity() {
+  build_model_extensions  # first, so the identity covers the jar that will run
   NLPERF_GIT_COMMIT="$(git -C "$REPO" rev-parse --short=12 HEAD)"
   if [[ -z "$(git -C "$REPO" status --porcelain -- "${MODEL_PATHS[@]}")" ]]; then
     NLPERF_GIT_TREE="clean"
@@ -137,6 +153,7 @@ harness() {
   if [[ "$1" == --jvm-extra ]]; then extra=("$2"); shift 2; fi
   read -r -a jvm_opts <<<"$(scenario_jvm_opts "$scenario")"
   build_harness
+  build_model_extensions
   # B3GET writes ../results/metafile.csv relative to code/.
   mkdir -p "$REPO/results"
   in_container "$NETLOGO_JAVA" "${jvm_opts[@]}" "${extra[@]}" "${NETLOGO_JVM_OPTS[@]}" \
