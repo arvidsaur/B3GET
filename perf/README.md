@@ -158,6 +158,9 @@ perf/nlperf trace b3get-long my-label        # up to 20,000 ticks; stop it any t
 perf/nlperf compare-traces A.tsv B.tsv       # speed per interval, and whether the worlds match
 ```
 
+`b3get-460-long` does the same from the 460-animal population, which stays at
+400-490 animals alive for at least 5,000 ticks.
+
 To compare two versions of the model, run each from its own git worktree, so
 they don't share `results/metafile.csv`, pinned to separate cores:
 
