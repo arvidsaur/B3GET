@@ -1613,12 +1613,11 @@ to do-actions
 
   carefully [
 
-    foreach decision.vectors [ v ->
-      let vector v                                               ; For each decision vector
-      let done item 4 vector                                     ; first determine if this decision has already
+    foreach decision.vectors [ vector ->                         ; For each decision vector
+                                                                 ; first determine if this decision has already
                                                                  ; been acted upon.
 
-      if ( not done and                                          ; If the decision has not already been acted upon
+      if ( ( not item 4 vector ) and                             ; If the decision has not already been acted upon
         check-energy vector ) [                                  ; and the caller has sufficient energy to perform
                                                                  ; the action, then the action can be performed.
 
@@ -3310,18 +3309,17 @@ to-report relatedness-with [ target ]
   let i 0                                                      ;
   while [i < 10] [                                             ; Iterate through the identity chromosomes
                                                                ; of caller and target, considering each
-    let allele-here-I item i identity.I                        ; allele at the same locus for both.
-    let allele-here-II item i identity.II                      ;
-    let target-allele-I item i their-identity-I                ; Identify the alleles from both loci for
-    let target-allele-II item i their-identity-II              ; both individuals.
+                                                               ; allele at the same locus for both (read
+                                                               ; directly: a local variable per allele
+                                                               ; would cost more than reading it again).
 
-    ifelse (( allele-here-I = target-allele-I ) or             ; Check if either allele from the target
-      ( allele-here-I = target-allele-II ))                    ; matches the caller's allele from its
+    ifelse (( item i identity.I = item i their-identity-I ) or ; Check if either allele from the target
+      ( item i identity.I = item i their-identity-II ))        ; matches the caller's allele from its
     [ set matching matching + 1 ]                              ; first identity chromosome.
     [ set not-matching not-matching + 1 ]                      ; Record if they match or do not match.
 
-    ifelse (( allele-here-II = target-allele-I ) or            ; Check if either allele from the target
-      ( allele-here-II = target-allele-II ))                   ; matches the caller's allele from its
+    ifelse (( item i identity.II = item i their-identity-I ) or ; Check if either allele from the target
+      ( item i identity.II = item i their-identity-II ))       ; matches the caller's allele from its
     [ set matching matching + 1 ]                              ; second identity chromosome.
     [ set not-matching not-matching + 1 ]                      ; Record if they match or do not match.
 
