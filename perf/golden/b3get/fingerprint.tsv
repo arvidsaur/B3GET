@@ -2,8 +2,8 @@
 # scenario: b3get
 # model: code/B3GET.nlogox
 # model-sha256: bb5aacc02c97aa49505c73db6b86b1e6659bd2f32f5fc74eb88b63ebe0384658
-# config-sha256: ea839969e4e2abeb4d4df9acfeeef6d1937a0afc4a1143acebf6d711a57782b8
-# recorded: 2026-10-16T18:53:36Z from 6ac8750a03b0 (clean)
+# config-sha256: d4b761d745d9414baaba784019a42a94c9b4ab0b9b3c4e895e49f4bb906c35bb
+# recorded: 2026-10-17T03:27:18Z from 6ac8750a03b0 (clean)
 # settings: steps=300 checkpoint-every=50 seeds=[1, 2, 3]
 seed	step	event	world	count anima1s with [ is.alive ]	count anima1s	sum [ penergy.supply ] of patches
 1	0	setup	c309083e4fc81505	115	115	25019.235132872465
