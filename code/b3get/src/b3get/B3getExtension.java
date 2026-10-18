@@ -2,10 +2,12 @@ package b3get;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.nlogo.api.Agent;
 import org.nlogo.api.AnonymousReporter;
 import org.nlogo.api.Approximate;
 import org.nlogo.api.Argument;
@@ -16,6 +18,8 @@ import org.nlogo.api.ExtensionException;
 import org.nlogo.api.LogoListBuilder;
 import org.nlogo.api.PrimitiveManager;
 import org.nlogo.api.Reporter;
+import org.nlogo.api.Turtle;
+import org.nlogo.core.ExtensionObject;
 import org.nlogo.core.LogoList;
 import org.nlogo.core.Syntax;
 import org.nlogo.core.SyntaxJ;
@@ -35,6 +39,137 @@ public class B3getExtension extends DefaultClassManager {
     primitiveManager.addPrimitive("sum-item", new SumItem());
     primitiveManager.addPrimitive("matching-alleles", new MatchingAlleles());
     primitiveManager.addPrimitive("precision", new Precision());
+    primitiveManager.addPrimitive("lput-completed", new LputCompleted());
+    primitiveManager.addPrimitive("completed-cost", new CompletedCost());
+  }
+
+  /** Each agent's index of its completed actions, for b3get:completed-cost. */
+  private final Map<Agent, CompletedIndex> completedIndexes = new IdentityHashMap<>();
+
+  @Override
+  public void clearAll() {
+    completedIndexes.clear();
+  }
+
+  /**
+   * For one list of completed actions, (list self target action cost) each: the costs
+   * by target and action name, added in list order as b3get:sum-item adds them. It
+   * describes LIST and no other list; NetLogo lists never change.
+   */
+  private static final class CompletedIndex {
+    LogoList list;
+    boolean usable = true;  // false when an item is not as complete-action makes them
+    final Map<Agent, Map<String, double[]>> costs = new IdentityHashMap<>();
+
+    CompletedIndex(LogoList list) {
+      this.list = list;
+      for (Object action : list.toJava()) if (!add(action)) { usable = false; break; }
+    }
+
+    /**
+     * Adds ACTION's cost under its target and name, or reports false when ACTION is
+     * not a list of at least 4 items, or its target or name is an extension object.
+     * A target that is not a turtle never equals a living turtle, and a name that is
+     * not a string never equals a string, so those actions are left out.
+     */
+    boolean add(Object action) {
+      if (!(action instanceof LogoList) || ((LogoList) action).size() < 4) return false;
+      LogoList a = (LogoList) action;
+      Object target = a.get(1), name = a.get(2), cost = a.get(3);
+      if (target instanceof ExtensionObject || name instanceof ExtensionObject) return false;
+      if (!(target instanceof Turtle && name instanceof String)) return true;
+      double[] sum = costs.computeIfAbsent((Agent) target, t -> new HashMap<>())
+                          .computeIfAbsent((String) name, n -> new double[1]);
+      if (cost instanceof Double) sum[0] += (Double) cost;
+      return true;
+    }
+
+    double cost(Turtle target, String name) {
+      Map<String, double[]> byName = costs.get(target);
+      double[] sum = byName == null ? null : byName.get(name);
+      return sum == null ? 0d : sum[0];
+    }
+  }
+
+  /**
+   * b3get:lput-completed action list
+   *
+   * Same as lput action list. LIST is the calling agent's list of completed actions:
+   * when the agent's index (see b3get:completed-cost) describes LIST, it is brought
+   * up to date to describe the new list instead.
+   */
+  class LputCompleted implements Reporter {
+    @Override
+    public Syntax getSyntax() {
+      return SyntaxJ.reporterSyntax(new int[] { Syntax.WildcardType(), Syntax.ListType() }, Syntax.ListType());
+    }
+
+    @Override
+    public Object report(Argument[] args, Context context) throws ExtensionException {
+      Object action = args[0].get();
+      LogoList list = args[1].getList();
+      LogoList result = list.lput(action);
+      CompletedIndex index = completedIndexes.get(context.getAgent());
+      if (index != null && index.list == list) {
+        if (index.usable && !index.add(action)) index.usable = false;
+        index.list = result;
+      }
+      return result;
+    }
+  }
+
+  /**
+   * b3get:completed-cost list target name
+   *
+   * Same as b3get:sum-item b3get:with-item b3get:with-item list 1 target 2 name 3:
+   * the costs of the completed actions in LIST aimed at TARGET and named NAME, added
+   * in list order. LIST is the calling agent's list of completed actions. Instead of
+   * scanning it, this looks the sum up in the agent's index of LIST, which it builds
+   * when the agent has none for that very list; b3get:lput-completed keeps the index
+   * up to date as the agent adds actions. When TARGET is not a living turtle or NAME
+   * not a string, or LIST holds other items, it scans LIST as the NetLogo code would.
+   */
+  class CompletedCost implements Reporter {
+    @Override
+    public Syntax getSyntax() {
+      return SyntaxJ.reporterSyntax(
+        new int[] { Syntax.ListType(), Syntax.WildcardType(), Syntax.WildcardType() }, Syntax.NumberType());
+    }
+
+    @Override
+    public Object report(Argument[] args, Context context) throws ExtensionException {
+      LogoList list = args[0].getList();
+      Object target = args[1].get(), name = args[2].get();
+      double sum;
+      // A living turtle equals only itself (Equality.equals compares turtles by id).
+      if (target instanceof Turtle && ((Turtle) target).id() >= 0 && name instanceof String) {
+        CompletedIndex index = completedIndexes.get(context.getAgent());
+        if (index == null || index.list != list) {
+          index = new CompletedIndex(list);
+          completedIndexes.put(context.getAgent(), index);
+        }
+        sum = index.usable ? index.cost((Turtle) target, (String) name) : scan(list, target, name);
+      } else {
+        sum = scan(list, target, name);
+      }
+      if (Double.isInfinite(sum) || Double.isNaN(sum))
+        throw new ExtensionException("math operation produced a number too large for NetLogo");
+      return sum;
+    }
+
+    /** The NetLogo code's way: the two filters, then the sum. */
+    private double scan(LogoList list, Object target, Object name) throws ExtensionException {
+      List<Object> aimed = new ArrayList<>();
+      for (Object action : list.toJava()) if (Equality.equals(item(action, 1), target)) aimed.add(action);
+      List<Object> named = new ArrayList<>();
+      for (Object action : aimed) if (Equality.equals(item(action, 2), name)) named.add(action);
+      double sum = 0d;
+      for (Object action : named) {
+        Object x = item(action, 3);
+        if (x instanceof Double) sum += (Double) x;
+      }
+      return sum;
+    }
   }
 
   /**

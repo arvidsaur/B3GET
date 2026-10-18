@@ -1807,12 +1807,12 @@ to-report get-action-cost-of [ target action-name ]
         ( item 2 vector )
         ( item 3 vector ) ]]]
 
-  let action-cost b3get:sum-item                               ; Get total cost from target for all
-  b3get:with-item b3get:with-item                              ; of its completed actions that
-  [ actions.completed ] of target
-  1 self                                                       ; both target the caller
-  2 action-name                                                ; and share the same name as the input value.
-  3
+  let action-cost [ b3get:completed-cost                       ; Get total cost from target for all
+    actions.completed                                          ; of its completed actions that
+    myself                                                     ; both target the caller
+    action-name ] of target                                    ; and share the same name as the input value.
+                                                               ; (The target keeps these costs indexed by
+                                                               ; target and name, see code/b3get.)
 
   report action-cost                                           ; Report this cost.
 end
@@ -1913,8 +1913,9 @@ to complete-action [ target action cost ]
     b3get:precision cost 10 )                                  ; and the energy cost of that action.
 
   set actions.completed                                        ; Record this action item
-  lput completed-action                                        ; in caller's list of recently completed
-  actions.completed                                            ; actions.
+  b3get:lput-completed completed-action                        ; in caller's list of recently completed
+  actions.completed                                            ; actions. (lput, also updating the caller's
+                                                               ; index of the costs, see get-action-cost-of.)
 
   set actions-completed-this-timestep                          ; Globally record this action item.
   lput completed-action

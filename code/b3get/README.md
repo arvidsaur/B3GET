@@ -14,11 +14,20 @@ after changing `src/`.
 | `b3get:sum-item` | `sum map [ x -> item i x ] list` | `get-action-cost-of` |
 | `b3get:matching-alleles` | the loop over identity loci in `relatedness-with` | `relatedness-with` |
 | `b3get:precision` | `precision`, without its slow decimal conversion except next to a rounding tie | `complete-action`; also in `b3get:sta2us-decisions` |
+| `b3get:lput-completed` | `lput` of a completed action, also updating the caller's index of completed-action costs | `complete-action` |
+| `b3get:completed-cost` | `sum-item` of the completed actions with a given target and name, looked up in that index | `get-action-cost-of` |
 
 Each primitive reports exactly what the NetLogo code it replaces reported. It uses
 NetLogo's own equality (`Equality.equals`), and it runs `sta2us-get-action` from the
 model to name actions. `perf/nlperf verify` confirms the model's behavior is
 unchanged.
+
+`get-action-cost-of` runs for every interaction and used to scan all of the
+target's completed actions each time. Each individual now keeps an index of its
+list of completed actions: the costs summed by target and action name, in list
+order, so each sum is the same number the scan gave. An index is used only for the
+exact list it was built from (NetLogo lists never change), so a list changed in any
+other way than by `b3get:lput-completed` just gets a new index.
 
 NetLogo's `precision` (`Approximate.approximate`) converts the number to decimal
 text with `Double.toString` and rounds that, which is slow. `b3get:precision` gets
