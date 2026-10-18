@@ -1625,35 +1625,29 @@ to do-actions
         let action item 2 vector                                 ; Identify which action the caller has decided
         let cost item 3 vector                                   ; to take. Identify how much the action will cost.
 
-        ; Call the subroutine that corresponds with the action name. Each name belongs to
-        ; one group, so only that group's names are compared, and the names that occur
-        ; most often come first.
+        ; Call the subroutine that corresponds with the action name. The names that occur
+        ; most often come first. The actions before "survival-chance" can only be performed
+        ; if the caller is not resting.
         ( ifelse
-          member? action [ "move-toward" "eat" "help" "attack" "mate-with" "go-forward" "set-heading-random" "leave" "move-away-from" "turn-right" "turn-left" "set-heading" "join" "recruit" "expel" "pick-up" "put-down" "cling-to" "squirm-from" ]
-          [ if ( is.resting = false ) [                          ; These actions can only be performed if the caller
-            ( ifelse                                             ; is not resting.
-              action = "move-toward" [ move-toward target cost ]
-              action = "eat" [ if ( check-distance target ) [ eat target cost ] ]
-              action = "help" [ if ( check-distance target ) [ help target cost ] ]
-              action = "attack" [ if ( check-distance target ) [ attack target cost ] ]
-              action = "mate-with" [ if ( check-distance target ) [ mate-with target cost ] ]
-              action = "go-forward" [ go-forward cost ]
-              action = "set-heading-random" [ set-heading-random cost ]
-              action = "leave" [ leave target cost ]
-              action = "move-away-from" [ move-toward target ( - cost ) ]
-              action = "turn-right" [ turn-right cost ]
-              action = "turn-left" [ turn-right ( - cost ) ]
-              action = "set-heading" [ set-heading cost ]
-              action = "join" [ join target cost ]
-              action = "recruit" [ recruit target cost ]
-              action = "expel" [ expel target cost ]
-              action = "pick-up" [ if ( check-distance target ) [ pick-up target cost ] ]
-              action = "put-down" [ if ( check-distance target ) [ put-down target cost  ] ]
-              action = "cling-to" [ if ( check-distance target ) [ cling-to target cost ] ]
-              action = "squirm-from" [ if ( check-distance target ) [ squirm-from target cost ] ]
-              [] ) ] ]
-                                                                 ; These actions can be performed resting
-                                                                 ; or not resting.
+          action = "move-toward" [ if ( is.resting = false ) [ move-toward target cost ] ]
+          action = "eat" [ if ( is.resting = false ) [ if ( check-distance target ) [ eat target cost ] ] ]
+          action = "help" [ if ( is.resting = false ) [ if ( check-distance target ) [ help target cost ] ] ]
+          action = "attack" [ if ( is.resting = false ) [ if ( check-distance target ) [ attack target cost ] ] ]
+          action = "mate-with" [ if ( is.resting = false ) [ if ( check-distance target ) [ mate-with target cost ] ] ]
+          action = "go-forward" [ if ( is.resting = false ) [ go-forward cost ] ]
+          action = "set-heading-random" [ if ( is.resting = false ) [ set-heading-random cost ] ]
+          action = "leave" [ if ( is.resting = false ) [ leave target cost ] ]
+          action = "move-away-from" [ if ( is.resting = false ) [ move-toward target ( - cost ) ] ]
+          action = "turn-right" [ if ( is.resting = false ) [ turn-right cost ] ]
+          action = "turn-left" [ if ( is.resting = false ) [ turn-right ( - cost ) ] ]
+          action = "set-heading" [ if ( is.resting = false ) [ set-heading cost ] ]
+          action = "join" [ if ( is.resting = false ) [ join target cost ] ]
+          action = "recruit" [ if ( is.resting = false ) [ recruit target cost ] ]
+          action = "expel" [ if ( is.resting = false ) [ expel target cost ] ]
+          action = "pick-up" [ if ( is.resting = false ) [ if ( check-distance target ) [ pick-up target cost ] ] ]
+          action = "put-down" [ if ( is.resting = false ) [ if ( check-distance target ) [ put-down target cost  ] ] ]
+          action = "cling-to" [ if ( is.resting = false ) [ if ( check-distance target ) [ cling-to target cost ] ] ]
+          action = "squirm-from" [ if ( is.resting = false ) [ if ( check-distance target ) [ squirm-from target cost ] ] ]
           action = "survival-chance" [ survival-chance cost ]
           action = "rest" [ rest cost ]
           action = "body-shade" [ body-shade cost ]
@@ -1748,12 +1742,11 @@ end
 to-report check-energy [ vector ]
   let cost item 3 vector                                       ; Identify the cost of the decision.
   let abs-cost abs cost
-  let passes-energy-check ifelse-value                         ; Confirm if caller's energy is sufficient.
-  ( member? "free-lunch" model-structure )                     ; If B3GET is set to "free lunch"
-  [ true ]                                                     ; then any amount of energy is sufficient.
-  [ energy.supply > abs-cost and abs-cost > 0 ]                ; Otherwise, the energy is sufficient if
-                                                               ; it is greater than the cost, and the cost
-                                                               ; is greater than 0.
+  let passes-energy-check                                       ; Confirm if caller's energy is sufficient:
+  ( energy.supply > abs-cost and abs-cost > 0 )                ; it is if it is greater than the cost, and
+  or member? "free-lunch" model-structure                      ; the cost is greater than 0, or if B3GET is
+                                                               ; set to "free lunch", when any amount of
+                                                               ; energy is sufficient.
   if ( passes-energy-check ) [                                 ; If the energy is sufficient,
     update-energy ( - abs-cost )                               ; reduce the caller's energy supply by the cost.
     let new-vector lput true but-last vector                   ; Update this decision in the caller's
