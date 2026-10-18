@@ -3074,61 +3074,69 @@ to aid [ target cost ]
     [ set not.related.help.cost
       not.related.help.cost + cost ]
 
-    if ( life.history = "adult" and [life.history] of target = "adult" and biological.sex = "male" and group.identity = [group.identity] of target ) [
-      ask target [
-        set from.ingroup.male.help.count from.ingroup.male.help.count + 1
-        set from.ingroup.male.help.energy.spent from.ingroup.male.help.energy.spent + cost ]]
-    if ( life.history = "adult" and [life.history] of target = "adult" and biological.sex = "male" and group.identity != [group.identity] of target ) [
-      ask target [
-        set from.nongroup.male.help.count from.nongroup.male.help.count + 1
-        set from.nongroup.male.help.energy.spent from.nongroup.male.help.energy.spent + cost ]]
-    if ( life.history = "adult" and [life.history] of target = "adult" and biological.sex = "female" and group.identity = [group.identity] of target ) [
-      ask target [
-        set from.ingroup.female.help.count from.ingroup.female.help.count + 1
-        set from.ingroup.female.help.energy.spent from.ingroup.female.help.energy.spent + cost ]]
-    if ( life.history = "adult" and [life.history] of target = "adult" and biological.sex = "female" and group.identity != [group.identity] of target ) [
-      ask target [
-        set from.nongroup.female.help.count from.nongroup.female.help.count + 1
-        set from.nongroup.female.help.energy.spent from.nongroup.female.help.energy.spent + cost ]]
-
-    if ( life.history = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "male" and group.identity = [group.identity] of target ) [
-      set to.ingroup.male.help.count to.ingroup.male.help.count + 1
-      set to.ingroup.male.help.energy.spent to.ingroup.male.help.energy.spent + cost ]
-    if ( life.history = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "male" and group.identity != [group.identity] of target ) [
-      set to.nongroup.male.help.count to.nongroup.male.help.count + 1
-      set to.nongroup.male.help.energy.spent to.nongroup.male.help.energy.spent + cost ]
-    if ( life.history = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "female" and group.identity = [group.identity] of target ) [
-      set to.ingroup.female.help.count to.ingroup.female.help.count + 1
-      set to.ingroup.female.help.energy.spent to.ingroup.female.help.energy.spent + cost ]
-    if ( life.history = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "female" and group.identity != [group.identity] of target ) [
-      set to.nongroup.female.help.count to.nongroup.female.help.count + 1
-      set to.nongroup.female.help.energy.spent to.nongroup.female.help.energy.spent + cost ]
-
-    if ( life.history = "adult" and [life.history] of target = "juvenile" and [biological.sex] of target = "male" and group.identity = [group.identity] of target ) [
-        set to.ingroup.male.juvenile.help.count to.ingroup.male.juvenile.help.count + 1
-        set to.ingroup.male.juvenile.help.energy.spent to.ingroup.male.juvenile.help.energy.spent + cost ]
-    if ( life.history = "adult" and [life.history] of target = "juvenile" and [biological.sex] of target = "male" and group.identity != [group.identity] of target ) [
-      set to.nongroup.male.juvenile.help.count to.nongroup.male.juvenile.help.count + 1
-      set to.nongroup.male.juvenile.help.energy.spent to.nongroup.male.juvenile.help.energy.spent + cost ]
-    if ( life.history = "adult" and [life.history] of target = "juvenile" and [biological.sex] of target = "female" and group.identity = [group.identity] of target ) [
-      set to.ingroup.female.juvenile.help.count to.ingroup.female.juvenile.help.count + 1
-      set to.ingroup.female.juvenile.help.energy.spent to.ingroup.female.juvenile.help.energy.spent + cost ]
-    if ( life.history = "adult" and [life.history] of target = "juvenile" and [biological.sex] of target = "female" and group.identity != [group.identity] of target ) [
-      set to.nongroup.female.juvenile.help.count to.nongroup.female.juvenile.help.count + 1
-      set to.nongroup.female.juvenile.help.energy.spent to.nongroup.female.juvenile.help.energy.spent + cost ]
-
-    if ( life.history = "adult" and [life.history] of target = "infant" and [biological.sex] of target = "male" and group.identity = [group.identity] of target ) [
-      set to.ingroup.male.infant.help.count to.ingroup.male.infant.help.count + 1
-      set to.ingroup.male.infant.help.energy.spent to.ingroup.male.infant.help.energy.spent + cost ]
-    if ( life.history = "adult" and [life.history] of target = "infant" and [biological.sex] of target = "male" and group.identity != [group.identity] of target ) [
-      set to.nongroup.male.infant.help.count to.nongroup.male.infant.help.count + 1
-      set to.nongroup.male.infant.help.energy.spent to.nongroup.male.infant.help.energy.spent + cost ]
-    if ( life.history = "adult" and [life.history] of target = "infant" and [biological.sex] of target = "female" and group.identity = [group.identity] of target ) [
-      set to.ingroup.female.infant.help.count to.ingroup.female.infant.help.count + 1
-      set to.ingroup.female.infant.help.energy.spent to.ingroup.female.infant.help.energy.spent + cost ]
-    if ( life.history = "adult" and [life.history] of target = "infant" and [biological.sex] of target = "female" and group.identity != [group.identity] of target ) [
-      set to.nongroup.female.infant.help.count to.nongroup.female.infant.help.count + 1
-      set to.nongroup.female.infant.help.energy.spent to.nongroup.female.infant.help.energy.spent + cost ]
+    if ( life.history = "adult" ) [                            ; Record the help given by adult callers,
+      let target-life-history [life.history] of target         ; by the life history and sex of caller
+      let target-sex [biological.sex] of target                ; and target, and by whether they are in
+      let same-group group.identity = [group.identity] of target ; the same group.
+      if ( target-life-history = "adult" ) [
+        ( ifelse
+          biological.sex = "male" and same-group [ ask target [
+            set from.ingroup.male.help.count from.ingroup.male.help.count + 1
+            set from.ingroup.male.help.energy.spent from.ingroup.male.help.energy.spent + cost ] ]
+          biological.sex = "male" [ ask target [
+            set from.nongroup.male.help.count from.nongroup.male.help.count + 1
+            set from.nongroup.male.help.energy.spent from.nongroup.male.help.energy.spent + cost ] ]
+          biological.sex = "female" and same-group [ ask target [
+            set from.ingroup.female.help.count from.ingroup.female.help.count + 1
+            set from.ingroup.female.help.energy.spent from.ingroup.female.help.energy.spent + cost ] ]
+          biological.sex = "female" [ ask target [
+            set from.nongroup.female.help.count from.nongroup.female.help.count + 1
+            set from.nongroup.female.help.energy.spent from.nongroup.female.help.energy.spent + cost ] ]
+          [] )
+        ( ifelse
+          target-sex = "male" and same-group [
+            set to.ingroup.male.help.count to.ingroup.male.help.count + 1
+            set to.ingroup.male.help.energy.spent to.ingroup.male.help.energy.spent + cost ]
+          target-sex = "male" [
+            set to.nongroup.male.help.count to.nongroup.male.help.count + 1
+            set to.nongroup.male.help.energy.spent to.nongroup.male.help.energy.spent + cost ]
+          target-sex = "female" and same-group [
+            set to.ingroup.female.help.count to.ingroup.female.help.count + 1
+            set to.ingroup.female.help.energy.spent to.ingroup.female.help.energy.spent + cost ]
+          target-sex = "female" [
+            set to.nongroup.female.help.count to.nongroup.female.help.count + 1
+            set to.nongroup.female.help.energy.spent to.nongroup.female.help.energy.spent + cost ]
+          [] ) ]
+      if ( target-life-history = "juvenile" ) [
+        ( ifelse
+          target-sex = "male" and same-group [
+            set to.ingroup.male.juvenile.help.count to.ingroup.male.juvenile.help.count + 1
+            set to.ingroup.male.juvenile.help.energy.spent to.ingroup.male.juvenile.help.energy.spent + cost ]
+          target-sex = "male" [
+            set to.nongroup.male.juvenile.help.count to.nongroup.male.juvenile.help.count + 1
+            set to.nongroup.male.juvenile.help.energy.spent to.nongroup.male.juvenile.help.energy.spent + cost ]
+          target-sex = "female" and same-group [
+            set to.ingroup.female.juvenile.help.count to.ingroup.female.juvenile.help.count + 1
+            set to.ingroup.female.juvenile.help.energy.spent to.ingroup.female.juvenile.help.energy.spent + cost ]
+          target-sex = "female" [
+            set to.nongroup.female.juvenile.help.count to.nongroup.female.juvenile.help.count + 1
+            set to.nongroup.female.juvenile.help.energy.spent to.nongroup.female.juvenile.help.energy.spent + cost ]
+          [] ) ]
+      if ( target-life-history = "infant" ) [
+        ( ifelse
+          target-sex = "male" and same-group [
+            set to.ingroup.male.infant.help.count to.ingroup.male.infant.help.count + 1
+            set to.ingroup.male.infant.help.energy.spent to.ingroup.male.infant.help.energy.spent + cost ]
+          target-sex = "male" [
+            set to.nongroup.male.infant.help.count to.nongroup.male.infant.help.count + 1
+            set to.nongroup.male.infant.help.energy.spent to.nongroup.male.infant.help.energy.spent + cost ]
+          target-sex = "female" and same-group [
+            set to.ingroup.female.infant.help.count to.ingroup.female.infant.help.count + 1
+            set to.ingroup.female.infant.help.energy.spent to.ingroup.female.infant.help.energy.spent + cost ]
+          target-sex = "female" [
+            set to.nongroup.female.infant.help.count to.nongroup.female.infant.help.count + 1
+            set to.nongroup.female.infant.help.energy.spent to.nongroup.female.infant.help.energy.spent + cost ]
+          [] ) ] ]
 
     complete-action target "aid-complete" 0   ]                ; Record that this action has been completed.
 end
@@ -3198,61 +3206,69 @@ to harm [ target cost ]
     [ set not.related.attack.cost
       not.related.attack.cost + cost ]
 
-    if ( life.history = "adult" and [life.history] of target = "adult" and biological.sex = "male" and group.identity = [group.identity] of target ) [
-      ask target [
-        set from.ingroup.male.attack.count from.ingroup.male.attack.count + 1
-        set from.ingroup.male.attack.energy.spent from.ingroup.male.attack.energy.spent + cost ]]
-    if ( life.history = "adult" and [life.history] of target = "adult" and biological.sex = "male" and group.identity != [group.identity] of target ) [
-      ask target [
-        set from.nongroup.male.attack.count from.nongroup.male.attack.count + 1
-        set from.nongroup.male.attack.energy.spent from.nongroup.male.attack.energy.spent + cost ]]
-    if ( life.history = "adult" and [life.history] of target = "adult" and biological.sex = "female" and group.identity = [group.identity] of target ) [
-      ask target [
-        set from.ingroup.female.attack.count from.ingroup.female.attack.count + 1
-        set from.ingroup.female.attack.energy.spent from.ingroup.female.attack.energy.spent + cost ]]
-    if ( life.history = "adult" and [life.history] of target = "adult" and biological.sex = "female" and group.identity != [group.identity] of target ) [
-      ask target [
-        set from.nongroup.female.attack.count from.nongroup.female.attack.count + 1
-        set from.nongroup.female.attack.energy.spent from.nongroup.female.attack.energy.spent + cost ]]
-
-    if ( life.history = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "male" and group.identity = [group.identity] of target ) [
-        set to.ingroup.male.attack.count to.ingroup.male.attack.count + 1
-        set to.ingroup.male.attack.energy.spent to.ingroup.male.attack.energy.spent + cost ]
-    if ( life.history = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "male" and group.identity != [group.identity] of target ) [
-      set to.nongroup.male.attack.count to.nongroup.male.attack.count + 1
-      set to.nongroup.male.attack.energy.spent to.nongroup.male.attack.energy.spent + cost ]
-    if ( life.history = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "female" and group.identity = [group.identity] of target ) [
-      set to.ingroup.female.attack.count to.ingroup.female.attack.count + 1
-      set to.ingroup.female.attack.energy.spent to.ingroup.female.attack.energy.spent + cost ]
-    if ( life.history = "adult" and [life.history] of target = "adult" and [biological.sex] of target = "female" and group.identity != [group.identity] of target ) [
-      set to.nongroup.female.attack.count to.nongroup.female.attack.count + 1
-      set to.nongroup.female.attack.energy.spent to.nongroup.female.attack.energy.spent + cost ]
-
-    if ( life.history = "adult" and [life.history] of target = "juvenile" and [biological.sex] of target = "male" and group.identity = [group.identity] of target ) [
-        set to.ingroup.male.juvenile.attack.count to.ingroup.male.juvenile.attack.count + 1
-        set to.ingroup.male.juvenile.attack.energy.spent to.ingroup.male.juvenile.attack.energy.spent + cost ]
-    if ( life.history = "adult" and [life.history] of target = "juvenile" and [biological.sex] of target = "male" and group.identity != [group.identity] of target ) [
-      set to.nongroup.male.juvenile.attack.count to.nongroup.male.juvenile.attack.count + 1
-      set to.nongroup.male.juvenile.attack.energy.spent to.nongroup.male.juvenile.attack.energy.spent + cost ]
-    if ( life.history = "adult" and [life.history] of target = "juvenile" and [biological.sex] of target = "female" and group.identity = [group.identity] of target ) [
-      set to.ingroup.female.juvenile.attack.count to.ingroup.female.juvenile.attack.count + 1
-      set to.ingroup.female.juvenile.attack.energy.spent to.ingroup.female.juvenile.attack.energy.spent + cost ]
-    if ( life.history = "adult" and [life.history] of target = "juvenile" and [biological.sex] of target = "female" and group.identity != [group.identity] of target ) [
-      set to.nongroup.female.juvenile.attack.count to.nongroup.female.juvenile.attack.count + 1
-      set to.nongroup.female.juvenile.attack.energy.spent to.nongroup.female.juvenile.attack.energy.spent + cost ]
-
-    if ( life.history = "adult" and [life.history] of target = "infant" and [biological.sex] of target = "male" and group.identity = [group.identity] of target ) [
-      set to.ingroup.male.infant.attack.count to.ingroup.male.infant.attack.count + 1
-      set to.ingroup.male.infant.attack.energy.spent to.ingroup.male.infant.attack.energy.spent + cost ]
-    if ( life.history = "adult" and [life.history] of target = "infant" and [biological.sex] of target = "male" and group.identity != [group.identity] of target ) [
-      set to.nongroup.male.infant.attack.count to.nongroup.male.infant.attack.count + 1
-      set to.nongroup.male.infant.attack.energy.spent to.nongroup.male.infant.attack.energy.spent + cost ]
-    if ( life.history = "adult" and [life.history] of target = "infant" and [biological.sex] of target = "female" and group.identity = [group.identity] of target ) [
-      set to.ingroup.female.infant.attack.count to.ingroup.female.infant.attack.count + 1
-      set to.ingroup.female.infant.attack.energy.spent to.ingroup.female.infant.attack.energy.spent + cost ]
-    if ( life.history = "adult" and [life.history] of target = "infant" and [biological.sex] of target = "female" and group.identity != [group.identity] of target ) [
-      set to.nongroup.female.infant.attack.count to.nongroup.female.infant.attack.count + 1
-      set to.nongroup.female.infant.attack.energy.spent to.nongroup.female.infant.attack.energy.spent + cost ]
+    if ( life.history = "adult" ) [                            ; Record the attacks made by adult callers,
+      let target-life-history [life.history] of target         ; by the life history and sex of caller
+      let target-sex [biological.sex] of target                ; and target, and by whether they are in
+      let same-group group.identity = [group.identity] of target ; the same group.
+      if ( target-life-history = "adult" ) [
+        ( ifelse
+          biological.sex = "male" and same-group [ ask target [
+            set from.ingroup.male.attack.count from.ingroup.male.attack.count + 1
+            set from.ingroup.male.attack.energy.spent from.ingroup.male.attack.energy.spent + cost ] ]
+          biological.sex = "male" [ ask target [
+            set from.nongroup.male.attack.count from.nongroup.male.attack.count + 1
+            set from.nongroup.male.attack.energy.spent from.nongroup.male.attack.energy.spent + cost ] ]
+          biological.sex = "female" and same-group [ ask target [
+            set from.ingroup.female.attack.count from.ingroup.female.attack.count + 1
+            set from.ingroup.female.attack.energy.spent from.ingroup.female.attack.energy.spent + cost ] ]
+          biological.sex = "female" [ ask target [
+            set from.nongroup.female.attack.count from.nongroup.female.attack.count + 1
+            set from.nongroup.female.attack.energy.spent from.nongroup.female.attack.energy.spent + cost ] ]
+          [] )
+        ( ifelse
+          target-sex = "male" and same-group [
+            set to.ingroup.male.attack.count to.ingroup.male.attack.count + 1
+            set to.ingroup.male.attack.energy.spent to.ingroup.male.attack.energy.spent + cost ]
+          target-sex = "male" [
+            set to.nongroup.male.attack.count to.nongroup.male.attack.count + 1
+            set to.nongroup.male.attack.energy.spent to.nongroup.male.attack.energy.spent + cost ]
+          target-sex = "female" and same-group [
+            set to.ingroup.female.attack.count to.ingroup.female.attack.count + 1
+            set to.ingroup.female.attack.energy.spent to.ingroup.female.attack.energy.spent + cost ]
+          target-sex = "female" [
+            set to.nongroup.female.attack.count to.nongroup.female.attack.count + 1
+            set to.nongroup.female.attack.energy.spent to.nongroup.female.attack.energy.spent + cost ]
+          [] ) ]
+      if ( target-life-history = "juvenile" ) [
+        ( ifelse
+          target-sex = "male" and same-group [
+            set to.ingroup.male.juvenile.attack.count to.ingroup.male.juvenile.attack.count + 1
+            set to.ingroup.male.juvenile.attack.energy.spent to.ingroup.male.juvenile.attack.energy.spent + cost ]
+          target-sex = "male" [
+            set to.nongroup.male.juvenile.attack.count to.nongroup.male.juvenile.attack.count + 1
+            set to.nongroup.male.juvenile.attack.energy.spent to.nongroup.male.juvenile.attack.energy.spent + cost ]
+          target-sex = "female" and same-group [
+            set to.ingroup.female.juvenile.attack.count to.ingroup.female.juvenile.attack.count + 1
+            set to.ingroup.female.juvenile.attack.energy.spent to.ingroup.female.juvenile.attack.energy.spent + cost ]
+          target-sex = "female" [
+            set to.nongroup.female.juvenile.attack.count to.nongroup.female.juvenile.attack.count + 1
+            set to.nongroup.female.juvenile.attack.energy.spent to.nongroup.female.juvenile.attack.energy.spent + cost ]
+          [] ) ]
+      if ( target-life-history = "infant" ) [
+        ( ifelse
+          target-sex = "male" and same-group [
+            set to.ingroup.male.infant.attack.count to.ingroup.male.infant.attack.count + 1
+            set to.ingroup.male.infant.attack.energy.spent to.ingroup.male.infant.attack.energy.spent + cost ]
+          target-sex = "male" [
+            set to.nongroup.male.infant.attack.count to.nongroup.male.infant.attack.count + 1
+            set to.nongroup.male.infant.attack.energy.spent to.nongroup.male.infant.attack.energy.spent + cost ]
+          target-sex = "female" and same-group [
+            set to.ingroup.female.infant.attack.count to.ingroup.female.infant.attack.count + 1
+            set to.ingroup.female.infant.attack.energy.spent to.ingroup.female.infant.attack.energy.spent + cost ]
+          target-sex = "female" [
+            set to.nongroup.female.infant.attack.count to.nongroup.female.infant.attack.count + 1
+            set to.nongroup.female.infant.attack.energy.spent to.nongroup.female.infant.attack.energy.spent + cost ]
+          [] ) ] ]
 
     if ( [ life.history ] of target = "infant" and             ; If target is an infant and the caller
       target != self and                                       ; has not previously harmed the target,
